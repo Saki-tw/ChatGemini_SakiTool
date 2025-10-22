@@ -1,0 +1,102 @@
+{
+  "$schema": "https://modelcontextprotocol.io/schema/mcp-config.schema.json",
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/YOUR_USERNAME/Saki_Studio",
+        "/Users/YOUR_USERNAME/Documents"
+      ],
+      "description": "檔案系統存取 - 允許讀取與搜尋指定目錄"
+    },
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "GitHub 整合 - 存取儲存庫、Issues、Pull Requests"
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git"
+      ],
+      "description": "Git 操作 - 提供 Git 指令與儲存庫管理"
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-brave-search"
+      ],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      },
+      "description": "Brave 搜尋 - 網路搜尋功能"
+    },
+    "postgres": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-postgres",
+        "postgresql://localhost/YOUR_DATABASE"
+      ],
+      "description": "PostgreSQL 資料庫存取（需要時啟用）",
+      "disabled": true
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "description": "網頁自動化與爬蟲",
+      "disabled": true
+    },
+    "slack": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-slack"
+      ],
+      "env": {
+        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
+        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+      },
+      "description": "Slack 整合（需要時啟用）",
+      "disabled": true
+    },
+    "google-drive": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-gdrive"
+      ],
+      "env": {
+        "GDRIVE_CLIENT_ID": "${GDRIVE_CLIENT_ID}",
+        "GDRIVE_CLIENT_SECRET": "${GDRIVE_CLIENT_SECRET}",
+        "GDRIVE_REDIRECT_URI": "http://localhost:3000/oauth2callback"
+      },
+      "description": "Google Drive 整合（需要時啟用）",
+      "disabled": true
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "description": "順序思考工具 - 協助複雜問題分析",
+      "disabled": false
+    }
+  },
+  "globalShortcut": "CommandOrControl+Shift+G",
+  "autoUpdate": true
+}
