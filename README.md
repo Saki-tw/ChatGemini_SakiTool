@@ -1,6 +1,6 @@
 # ChatGemini_SakiTool  
-完整 Gemini AI 工具套件
-English page:
+完整 Gemini AI 工具套件  
+English page:  
 https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_EN.md  
 
 **ChatGemini_SakiTool:** Robust Gemini toolkit for text, image & *video* (Veo 3.1 gen, Flow Engine editing). Smart caching saves 50-95% tokens. Started as a personal script.
