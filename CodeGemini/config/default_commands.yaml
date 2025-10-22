@@ -1,0 +1,265 @@
+# CodeGemini 預設命令配置
+# 這些是使用者可自訂的範例命令
+
+commands:
+  # React 元件腳手架
+  - name: "scaffold-react-component"
+    description: "快速搭建 React 元件（含 TypeScript 和 Storybook）"
+    type: "template"
+    template: |
+      請生成一個 React 元件：
+
+      元件名稱：{component_name}
+      功能描述：{description}
+
+      {% if props %}
+      Props：
+      {% for prop in props %}  - {prop}
+      {% endfor %}
+      {% endif %}
+
+      請生成以下檔案：
+      1. components/{component_name}.tsx - 主元件
+      2. components/{component_name}.test.tsx - 單元測試
+      3. components/{component_name}.stories.tsx - Storybook 故事
+      {% if include_styles %}4. components/{component_name}.module.css - 樣式{% endif %}
+
+      請使用：
+      - TypeScript
+      - React Hooks
+      - Functional Component
+      {% if use_styled_components %}- Styled Components{% endif %}
+    parameters:
+      - component_name
+      - description
+    examples:
+      - 'scaffold-react-component component_name="Button" description="可重用的按鈕元件"'
+      - 'scaffold-react-component component_name="Card" description="卡片元件" props=["title", "content"]'
+    tags:
+      - react
+      - scaffolding
+      - frontend
+    author: "CodeGemini Team"
+    version: "1.0.0"
+
+  # Python 類別生成
+  - name: "generate-python-class"
+    description: "生成完整的 Python 類別（含文檔和測試）"
+    type: "template"
+    template: |
+      請生成一個 Python 類別：
+
+      類別名稱：{class_name}
+      功能描述：{description}
+      {% if base_class %}繼承自：{base_class}{% endif %}
+
+      {% if methods %}
+      方法：
+      {% for method in methods %}  - {method}
+      {% endfor %}
+      {% endif %}
+
+      {% if attributes %}
+      屬性：
+      {% for attr in attributes %}  - {attr}
+      {% endfor %}
+      {% endif %}
+
+      請確保：
+      1. 完整的 docstring（Google Style）
+      2. 類型提示
+      3. 適當的異常處理
+      {% if include_dataclass %}4. 使用 @dataclass 裝飾器（如適用）{% endif %}
+      {% if include_tests %}5. 完整的單元測試{% endif %}
+    parameters:
+      - class_name
+      - description
+    examples:
+      - 'generate-python-class class_name="UserService" description="使用者服務類別"'
+      - 'generate-python-class class_name="Product" description="產品資料模型" include_dataclass=true'
+    tags:
+      - python
+      - class
+      - backend
+    author: "CodeGemini Team"
+    version: "1.0.0"
+
+  # API 端點生成
+  - name: "generate-api-endpoint"
+    description: "生成 RESTful API 端點"
+    type: "template"
+    template: |
+      請生成一個 API 端點：
+
+      端點路徑：{endpoint_path}
+      HTTP 方法：{http_method|default:"GET"}
+      功能描述：{description}
+
+      {% if request_body %}
+      請求 Body 結構：
+      {request_body}
+      {% endif %}
+
+      {% if response_body %}
+      回應 Body 結構：
+      {response_body}
+      {% endif %}
+
+      {% if framework %}框架：{framework}{% endif %}
+
+      請包含：
+      1. 路由定義
+      2. 請求驗證
+      3. 錯誤處理
+      4. 回應格式化
+      {% if include_auth %}5. 認證/授權檢查{% endif %}
+      {% if include_docs %}6. OpenAPI/Swagger 文檔{% endif %}
+      {% if include_tests %}7. API 測試{% endif %}
+    parameters:
+      - endpoint_path
+      - description
+    examples:
+      - 'generate-api-endpoint endpoint_path="/api/users" http_method="POST" description="建立新使用者"'
+      - 'generate-api-endpoint endpoint_path="/api/products/{id}" http_method="GET" description="取得產品詳情"'
+    tags:
+      - api
+      - backend
+      - rest
+    author: "CodeGemini Team"
+    version: "1.0.0"
+
+  # SQL 查詢優化
+  - name: "optimize-sql-query"
+    description: "分析並優化 SQL 查詢"
+    type: "template"
+    template: |
+      請分析並優化以下 SQL 查詢：
+
+      查詢：
+      {query}
+
+      {% if database %}資料庫：{database}{% endif %}
+      {% if table_schema %}資料表結構：{table_schema}{% endif %}
+
+      請提供：
+      1. 查詢執行計畫分析
+      2. 效能瓶頸識別
+      3. 索引建議
+      4. 優化後的查詢
+      5. 預期效能提升
+
+      {% if explain_plan %}請包含 EXPLAIN 結果解讀{% endif %}
+    parameters:
+      - query
+    examples:
+      - 'optimize-sql-query query="SELECT * FROM users WHERE email LIKE ''%@gmail.com''"'
+    tags:
+      - sql
+      - database
+      - optimization
+    author: "CodeGemini Team"
+    version: "1.0.0"
+
+  # Git Commit 訊息生成
+  - name: "generate-commit-message"
+    description: "根據程式碼變更生成規範的 Git commit 訊息"
+    type: "template"
+    template: |
+      請根據以下變更生成 Git commit 訊息：
+
+      變更摘要：{changes_summary}
+
+      {% if affected_files %}
+      受影響檔案：
+      {% for file in affected_files %}  - {file}
+      {% endfor %}
+      {% endif %}
+
+      請使用 Conventional Commits 格式：
+      - feat: 新功能
+      - fix: 錯誤修復
+      - docs: 文檔更新
+      - style: 程式碼格式
+      - refactor: 重構
+      - test: 測試
+      - chore: 雜項
+
+      格式：
+      <type>(<scope>): <subject>
+
+      <body>
+
+      <footer>
+    parameters:
+      - changes_summary
+    examples:
+      - 'generate-commit-message changes_summary="新增使用者登入功能"'
+    tags:
+      - git
+      - commit
+      - version-control
+    author: "CodeGemini Team"
+    version: "1.0.0"
+
+  # 單元測試生成（快速版）
+  - name: "quick-test"
+    description: "快速生成單元測試（簡化版）"
+    type: "template"
+    template: |
+      請為以下函數生成單元測試：
+
+      {code}
+
+      測試框架：{framework|default:"pytest"}
+
+      請包含：
+      - 正常情況測試
+      - 邊界條件測試
+      - 異常情況測試
+    parameters:
+      - code
+    examples:
+      - 'quick-test code="def add(a, b): return a + b"'
+    tags:
+      - testing
+      - quick
+    author: "CodeGemini Team"
+    version: "1.0.0"
+
+  # README 生成
+  - name: "generate-readme"
+    description: "為專案生成 README.md"
+    type: "template"
+    template: |
+      請為以下專案生成 README.md：
+
+      專案名稱：{project_name}
+      專案描述：{description}
+      {% if language %}主要語言：{language}{% endif %}
+      {% if framework %}框架：{framework}{% endif %}
+
+      請包含：
+      1. 專案標題與徽章
+      2. 專案描述
+      3. 功能列表
+      {% if include_installation %}4. 安裝指南{% endif %}
+      {% if include_usage %}5. 使用範例{% endif %}
+      {% if include_api %}6. API 文檔{% endif %}
+      {% if include_contributing %}7. 貢獻指南{% endif %}
+      {% if include_license %}8. 授權資訊{% endif %}
+
+      {% if features %}
+      主要功能：
+      {% for feature in features %}  - {feature}
+      {% endfor %}
+      {% endif %}
+    parameters:
+      - project_name
+      - description
+    examples:
+      - 'generate-readme project_name="CodeGemini" description="AI 程式碼助手" include_installation=true'
+    tags:
+      - documentation
+      - readme
+    author: "CodeGemini Team"
+    version: "1.0.0"
