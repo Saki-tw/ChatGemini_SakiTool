@@ -1,0 +1,28 @@
+#!/bin/bash
+# Gemini Chat 啟動腳本
+# 使用 Saki_Studio/Claude 目錄下的虛擬環境
+
+# 固定使用 Saki_Studio/Claude 目錄
+PROJECT_DIR="/Users/hc1034/Saki_Studio/Claude"
+
+# 進入專案目錄
+cd "$PROJECT_DIR" || {
+    echo "錯誤：無法進入專案目錄 $PROJECT_DIR"
+    exit 1
+}
+
+# 檢查虛擬環境是否存在
+if [ ! -d "venv" ]; then
+    echo "錯誤：找不到虛擬環境"
+    echo "位置: $PROJECT_DIR/venv"
+    echo ""
+    echo "請先執行以下指令建立虛擬環境："
+    echo "  cd $PROJECT_DIR"
+    echo "  python3 -m venv venv"
+    echo "  source venv/bin/activate"
+    echo "  pip install google-genai python-dotenv rich"
+    exit 1
+fi
+
+# 啟用虛擬環境並執行
+source "$PROJECT_DIR/venv/bin/activate" && python3 "$PROJECT_DIR/gemini_chat.py" "$@"
