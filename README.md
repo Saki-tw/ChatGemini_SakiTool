@@ -1,7 +1,11 @@
 # ChatGemini_SakiTool  
 完整 Gemini AI 工具套件
 
-「一行安裝、一個指令」使用API不再麻煩 
+**ChatGemini_SakiTool:** Robust Gemini toolkit for text, image & *video* (Veo 3.1 gen, Flow Engine editing). Smart caching saves 50-95% tokens. Started as a personal script.
+
+「一行安裝、一個指令」使用API不再麻煩
+One-line install, one-command run. hassle-free API.
+
 
 這是一個功能強大的 Google Gemini AI 工具套件，  
 包含對話、圖片分析、影片分析、影片生成、快取管理等完整功能。  
