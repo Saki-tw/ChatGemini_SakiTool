@@ -660,9 +660,7 @@ A: 在對話中輸入 `help`，會顯示 6 大主題選單：
 
 唯一要求是保留原始授權聲明和版權聲明。
 
-## 🤝 貢獻
-
-歡迎提出問題和改進建議！
+唯二致謝：曾公益中、蔡師傅律安。
 
 ---
 
@@ -671,3 +669,13 @@ A: 在對話中輸入 `help`，會顯示 6 大主題選單：
 **最後更新**: 2025-10-22
 **版本**: v1.0.1
 **Python 版本**: 3.10+
+
+---
+
+## Related 
+Ongoing research explores the fundamental cognitive limits and conceptual integrity of Large Language Models. Details and proofs can be found in the following repository: 
+[LinguImplementation_Collīdunt-LLM](https://github.com/Saki-tw/LinguImplementation_Collidunt-LLM) 
+[[https://github.com/Saki-tw/LinguImplementation_Collidunt-LLMs](Github Page) 
+That time I got reincarnated as an end-user, but the LLM's safety breaks on its own?
+為啥只是正常寫寫提示詞，巨型模型的安全模組就全毀？
+附上一些能公開的案例，其他因為公眾安全的理由實在不知道要馬賽克到什麼程度才能放。
