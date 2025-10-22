@@ -1,6 +1,11 @@
-# ChatGemini_SakiTool - 完整 Gemini AI 工具套件
+# ChatGemini_SakiTool  
+完整 Gemini AI 工具套件
 
-這是一個功能強大的 Google Gemini AI 工具套件，包含對話、圖片分析、影片分析、影片生成、快取管理等完整功能。
+這是一個功能強大的 Google Gemini AI 工具套件，  
+包含對話、圖片分析、影片分析、影片生成、快取管理等完整功能。  
+需申請 Gemini API 才能用，  
+每個月以 2.5 Pro 而言有兩百萬 Token 的免費額，  
+快來白嫖  
 
 **專案名稱**: ChatGemini_SakiTool
 **版本**: v2.2.0
