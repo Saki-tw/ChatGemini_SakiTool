@@ -1,6 +1,8 @@
 # ChatGemini_SakiTool  
 完整 Gemini AI 工具套件
 
+「一行安裝、一個指令」使用API不再麻煩 
+
 這是一個功能強大的 Google Gemini AI 工具套件，  
 包含對話、圖片分析、影片分析、影片生成、快取管理等完整功能。  
 需申請 Gemini API 才能用，  
@@ -675,7 +677,7 @@ A: 在對話中輸入 `help`，會顯示 6 大主題選單：
 ## Related 
 Ongoing research explores the fundamental cognitive limits and conceptual integrity of Large Language Models. Details and proofs can be found in the following repository: 
 [LinguImplementation_Collīdunt-LLM](https://github.com/Saki-tw/LinguImplementation_Collidunt-LLM) 
-[[https://github.com/Saki-tw/LinguImplementation_Collidunt-LLMs](Github Page) 
+[[https://github.com/Saki-tw/LinguImplementation_Collidunt-LLMs](GithubPage) 
 That time I got reincarnated as an end-user, but the LLM's safety breaks on its own?
 為啥只是正常寫寫提示詞，巨型模型的安全模組就全毀？
 附上一些能公開的案例，其他因為公眾安全的理由實在不知道要馬賽克到什麼程度才能放。
