@@ -680,8 +680,8 @@ A: 在對話中輸入 `help`，會顯示 6 大主題選單：
 
 ## Related 
 Ongoing research explores the fundamental cognitive limits and conceptual integrity of Large Language Models. Details and proofs can be found in the following repository: 
-[LinguImplementation_Collīdunt-LLM](https://github.com/Saki-tw/LinguImplementation_Collidunt-LLM) 
-[[https://github.com/Saki-tw/LinguImplementation_Collidunt-LLMs](GithubPage) 
+[LinguImplementation_Collīdunt-LLM](https://github.com/Saki-tw/LinguImplementation_Collidunt-LLM)
+[https://github.com/Saki-tw/LinguImplementation_Collidunt-LLMs](GithubPage)
 That time I got reincarnated as an end-user, but the LLM's safety breaks on its own?
 為啥只是正常寫寫提示詞，巨型模型的安全模組就全毀？
 附上一些能公開的案例，其他因為公眾安全的理由實在不知道要馬賽克到什麼程度才能放。
