@@ -112,3 +112,8 @@ PERFORMANCE_IMPROVEMENTS_*.md
 # Deprecated and experimental code
 deprecated/
 experimental/
+
+# Test files
+tests/
+test_*.py
+*_test.py

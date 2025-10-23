@@ -75,21 +75,41 @@ class ConfigManager:
     - 載入/儲存配置到 JSON 檔案
     - 提供配置修改介面
     - 配置驗證
+
+    設計原則：
+    - 零循環導入（不依賴 path_manager，直接使用標準庫）
+    - 跨平台支援（Windows/macOS/Linux）
     """
 
-    # 使用統一快取目錄
-    import sys
-    sys.path.insert(0, str(Path(__file__).parent.parent))
-    from utils.path_manager import get_cache_dir
-    DEFAULT_CONFIG_PATH = get_cache_dir('codegemini') / "config.json"
+    DEFAULT_CONFIG_PATH = None  # 延遲初始化
+
+    @classmethod
+    def _get_default_config_path(cls) -> Path:
+        """取得預設配置路徑（零依賴，避免循環導入）
+
+        Returns:
+            預設配置檔案路徑 (~/.cache/codegemini/config.json)
+        """
+        if cls.DEFAULT_CONFIG_PATH is None:
+            import os
+
+            # 跨平台快取目錄計算
+            if os.name == 'nt':  # Windows
+                cache_base = Path(os.getenv('LOCALAPPDATA', Path.home() / 'AppData' / 'Local'))
+            else:  # macOS, Linux
+                cache_base = Path(os.getenv('XDG_CACHE_HOME', Path.home() / '.cache'))
+
+            cls.DEFAULT_CONFIG_PATH = cache_base / 'codegemini' / 'config.json'
+
+        return cls.DEFAULT_CONFIG_PATH
 
     def __init__(self, config_path: Optional[Path] = None):
         """初始化配置管理器
 
         Args:
-            config_path: 配置檔案路徑（預設：~/.codegemini/config.json）
+            config_path: 配置檔案路徑（預設：~/.cache/codegemini/config.json）
         """
-        self.config_path = config_path or self.DEFAULT_CONFIG_PATH
+        self.config_path = config_path or self._get_default_config_path()
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
 
         # 載入配置
@@ -318,10 +338,13 @@ def _validate_and_suggest_path(
     if not path_obj.is_absolute():
         # 相對路徑，相對於 base_dir 或 Cache 目錄
         if base_dir is None:
-            import sys
-            sys.path.insert(0, str(Path(__file__).parent.parent))
-            from utils.path_manager import get_cache_dir
-            base_dir = get_cache_dir('codegemini')
+            import os
+            # 直接使用標準庫計算快取目錄（避免循環導入）
+            if os.name == 'nt':  # Windows
+                cache_base = Path(os.getenv('LOCALAPPDATA', Path.home() / 'AppData' / 'Local'))
+            else:  # macOS, Linux
+                cache_base = Path(os.getenv('XDG_CACHE_HOME', Path.home() / '.cache'))
+            base_dir = cache_base / 'codegemini'
 
         path_obj = base_dir / path_input
 

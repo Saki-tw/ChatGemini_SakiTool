@@ -4,7 +4,7 @@ CodeGemini Tools Module (TESTING ONLY)
 工具模組 - 提供各種工具功能（僅供測試使用）
 
 ⚠️ 注意：此模組化版本僅供獨立測試使用
-主要實作位於 /Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/CodeGemini.py
+主要實作位於專案根目錄的 CodeGemini.py
 
 模組：
 - web_search: 網路搜尋工具（Stage 7）

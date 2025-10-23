@@ -112,7 +112,15 @@ class ModuleLoader:
             logger.warning(f"✗ 預載入失敗: {module_name} - {e}")
 
     def is_enabled(self, module_name: str) -> bool:
-        """檢查模組是否啟用（從 config 讀取）"""
+        """檢查模組是否啟用（從 config 讀取）
+
+        注意：預載入模組 (PRELOAD_MODULES) 默認視為已啟用，
+        因為它們是核心模組，不應受配置控制。
+        """
+        # 預載入模組默認啟用（核心模組，常駐記憶體）
+        if module_name in self.PRELOAD_MODULES:
+            return True
+
         if module_name not in self._enabled_modules:
             # 延遲導入 config 避免循環依賴
             try:
