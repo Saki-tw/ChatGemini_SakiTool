@@ -15,11 +15,11 @@ One-line install, one-command run. hassle-free API.
 每個月以 2.5 Pro 而言有兩百萬 Token 的免費額，  
 快來白嫖  
 
-**專案名稱**: ChatGemini_SakiTool
-**版本**: v1.0.2
-**作者**: Saki-tw, Claude Code
-**聯絡**: Saki@saki-studio.com.tw
-**最後更新**: 2025-10-24
+**專案名稱**: ChatGemini_SakiTool  
+**版本**: v1.0.2  
+**作者**: Saki-tw, Claude Code  
+**聯絡**: Saki@saki-studio.com.tw  
+**最後更新**: 2025-10-24  
 
 ---
 
