@@ -37,7 +37,7 @@ def test_fetched_page_creation():
         assert page.word_count == 4, f"字數統計錯誤：{page.word_count}"
         assert not page.is_redirect, "不應為重定向"
 
-        console.print(f"[green]✓ FetchedPage 建立成功[/green]")
+        console.print(f"[bright_magenta]✓ FetchedPage 建立成功[/green]")
         console.print(f"  URL：{page.url}")
         console.print(f"  標題：{page.title}")
         console.print(f"  字數：{page.word_count}")
@@ -45,7 +45,7 @@ def test_fetched_page_creation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -78,14 +78,14 @@ def test_redirect_detection():
         assert page2.is_redirect, "應為重定向"
         assert page2.redirected_from == "https://example.com/old", "重定向來源錯誤"
 
-        console.print(f"[green]✓ 重定向檢測成功[/green]")
+        console.print(f"[bright_magenta]✓ 重定向檢測成功[/green]")
         console.print(f"  無重定向：✓")
         console.print(f"  有重定向：✓")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -107,7 +107,7 @@ def test_web_fetcher_initialization():
         assert fetcher2.timeout == 10, "自訂超時時間錯誤"
         assert fetcher2.max_retries == 5, "自訂重試次數錯誤"
 
-        console.print(f"[green]✓ WebFetcher 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ WebFetcher 初始化成功[/green]")
         console.print(f"  預設超時：{fetcher.timeout} 秒")
         console.print(f"  預設重試：{fetcher.max_retries} 次")
         console.print(f"  快取已初始化：✓")
@@ -115,7 +115,7 @@ def test_web_fetcher_initialization():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -138,14 +138,14 @@ def test_url_validation():
         assert not fetcher._is_valid_url("ftp://example.com"), "不應為有效 URL"
         assert not fetcher._is_valid_url(""), "不應為有效 URL"
 
-        console.print(f"[green]✓ URL 驗證成功[/green]")
+        console.print(f"[bright_magenta]✓ URL 驗證成功[/green]")
         console.print(f"  有效 URL：✓")
         console.print(f"  無效 URL：✓")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -178,7 +178,7 @@ def test_html_title_extraction():
         title4 = fetcher._extract_title(html4)
         assert title4 == "（無標題）", f"無標題處理錯誤：{title4}"
 
-        console.print(f"[green]✓ 標題提取成功[/green]")
+        console.print(f"[bright_magenta]✓ 標題提取成功[/green]")
         console.print(f"  <title> 標籤：✓")
         console.print(f"  <h1> 標籤：✓")
         console.print(f"  og:title：✓")
@@ -187,7 +187,7 @@ def test_html_title_extraction():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -221,14 +221,14 @@ def test_html_to_markdown_conversion():
         assert "test" in markdown, "內容轉換失敗"
         assert isinstance(markdown, str), "應返回字串"
 
-        console.print(f"[green]✓ HTML 轉 Markdown 成功[/green]")
+        console.print(f"[bright_magenta]✓ HTML 轉 Markdown 成功[/green]")
         console.print(f"  標題轉換：✓")
         console.print(f"  內容轉換：✓")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -268,7 +268,7 @@ def test_cache_operations():
         stats_after = fetcher.get_cache_stats()
         assert stats_after["size"] == 0, "快取應已清空"
 
-        console.print(f"[green]✓ 快取操作成功[/green]")
+        console.print(f"[bright_magenta]✓ 快取操作成功[/green]")
         console.print(f"  儲存：✓")
         console.print(f"  讀取：✓")
         console.print(f"  統計：✓")
@@ -277,7 +277,7 @@ def test_cache_operations():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -298,17 +298,17 @@ def test_fetch_example_com():
             assert page.url == "https://example.com" or page.url == "http://www.example.com/", "URL 錯誤"
             assert len(page.content) > 0, "內容不應為空"
 
-            console.print(f"[green]✓ 抓取 example.com 成功[/green]")
+            console.print(f"[bright_magenta]✓ 抓取 example.com 成功[/green]")
             console.print(f"  標題：{page.title}")
             console.print(f"  狀態碼：{page.status_code}")
             console.print(f"  字數：{page.word_count}")
         else:
-            console.print(f"[yellow]⚠️  抓取失敗（可能是網路問題）[/yellow]")
+            console.print(f"[magenta]⚠️  抓取失敗（可能是網路問題）[/yellow]")
 
         return True
 
     except Exception as e:
-        console.print(f"[yellow]⚠️  測試跳過（網路問題）：{e}[/yellow]")
+        console.print(f"[magenta]⚠️  測試跳過（網路問題）：{e}[/yellow]")
         return True
 
 
@@ -332,15 +332,15 @@ def test_cache_reuse():
             assert page2 is not None, "應能從快取讀取"
             assert elapsed < 0.1, "快取讀取應很快"  # 應該在 0.1 秒內完成
 
-            console.print(f"[green]✓ 快取重用成功[/green]")
+            console.print(f"[bright_magenta]✓ 快取重用成功[/green]")
             console.print(f"  快取讀取時間：{elapsed:.3f} 秒")
         else:
-            console.print(f"[yellow]⚠️  測試跳過（網路問題）[/yellow]")
+            console.print(f"[magenta]⚠️  測試跳過（網路問題）[/yellow]")
 
         return True
 
     except Exception as e:
-        console.print(f"[yellow]⚠️  測試跳過（網路問題）：{e}[/yellow]")
+        console.print(f"[magenta]⚠️  測試跳過（網路問題）：{e}[/yellow]")
         return True
 
 
@@ -349,7 +349,7 @@ def test_cache_reuse():
 def main():
     """執行所有測試"""
     console.print("=" * 70)
-    console.print("[bold cyan]CodeGemini Web Fetch - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini Web Fetch - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -371,7 +371,7 @@ def main():
             result = test_func()
             results[test_name] = "✅ 通過" if result else "❌ 失敗"
         except Exception as e:
-            console.print(f"[red]測試異常：{e}[/red]")
+            console.print(f"[dim magenta]測試異常：{e}[/red]")
             results[test_name] = "❌ 失敗"
 
     # 顯示測試總結
@@ -390,9 +390,9 @@ def main():
     console.print(f"[bold]總計：{passed}/{total} 測試通過[/bold]")
 
     if passed < total:
-        console.print(f"\n[yellow]⚠️  {total - passed} 個測試失敗[/yellow]")
+        console.print(f"\n[magenta]⚠️  {total - passed} 個測試失敗[/yellow]")
     else:
-        console.print("\n[green]🎉 所有測試通過！Web Fetch 準備就緒。[/green]")
+        console.print("\n[bright_magenta]🎉 所有測試通過！Web Fetch 準備就緒。[/green]")
 
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ def test_plan_mode_initialization():
         assert pm.mode_active is False, "初始模式應為非啟用"
         assert len(pm.plan_history) == 0, "初始歷史應為空"
 
-        console.print(f"[green]✓ PlanMode 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ PlanMode 初始化成功[/green]")
         console.print(f"  current_plan: {pm.current_plan}")
         console.print(f"  mode_active: {pm.mode_active}")
         console.print(f"  plan_history: {len(pm.plan_history)} 個")
@@ -36,7 +36,7 @@ def test_plan_mode_initialization():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -58,7 +58,7 @@ def test_enter_plan_mode():
         assert plan.task_description == task, "任務描述應匹配"
         assert len(plan.steps) > 0, "計畫應包含步驟"
 
-        console.print(f"[green]✓ 進入規劃模式成功[/green]")
+        console.print(f"[bright_magenta]✓ 進入規劃模式成功[/green]")
         console.print(f"  mode_active: {pm.mode_active}")
         console.print(f"  計畫步驟數: {len(plan.steps)}")
         console.print(f"  預估時間: {plan.total_estimated_time}")
@@ -66,7 +66,7 @@ def test_enter_plan_mode():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -101,12 +101,12 @@ def test_plan_steps_generation():
             # 重置
             pm.exit_plan_mode(approved=False)
 
-        console.print(f"[green]✓ 計畫步驟生成成功[/green]")
+        console.print(f"[bright_magenta]✓ 計畫步驟生成成功[/green]")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -133,7 +133,7 @@ def test_exit_plan_mode_approved():
         assert pm.current_plan is None, "當前計畫應清空"
         assert len(pm.plan_history) == 1, "歷史應包含計畫"
 
-        console.print(f"[green]✓ 退出規劃模式（批准）成功[/green]")
+        console.print(f"[bright_magenta]✓ 退出規劃模式（批准）成功[/green]")
         console.print(f"  計畫已批准: {approved_plan.approved}")
         console.print(f"  反饋數量: {len(approved_plan.feedback)}")
         console.print(f"  歷史計畫數: {len(pm.plan_history)}")
@@ -141,7 +141,7 @@ def test_exit_plan_mode_approved():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -167,14 +167,14 @@ def test_exit_plan_mode_rejected():
         assert len(pm.plan_history) == 1, "歷史應包含計畫"
         assert pm.plan_history[0].approved is False, "歷史中的計畫應標記為未批准"
 
-        console.print(f"[green]✓ 退出規劃模式（拒絕）成功[/green]")
+        console.print(f"[bright_magenta]✓ 退出規劃模式（拒絕）成功[/green]")
         console.print(f"  返回結果: {result}")
         console.print(f"  歷史計畫已批准: {pm.plan_history[0].approved}")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -203,14 +203,14 @@ def test_update_plan():
         assert "請增加錯誤處理步驟" in updated_plan.feedback, "反饋應記錄"
         assert updated_plan.updated_at > original_time, "更新時間應改變"
 
-        console.print(f"[green]✓ 更新計畫成功[/green]")
+        console.print(f"[bright_magenta]✓ 更新計畫成功[/green]")
         console.print(f"  反饋數量: {len(updated_plan.feedback)}")
         console.print(f"  時間已更新: {updated_plan.updated_at > original_time}")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -247,14 +247,14 @@ def test_plan_step_operations():
         assert progress["total_steps"] == len(plan.steps), "總步驟數應正確"
         assert 0 < progress["progress_percentage"] < 100, "進度百分比應在 0-100 之間"
 
-        console.print(f"[green]✓ 計畫步驟操作成功[/green]")
+        console.print(f"[bright_magenta]✓ 計畫步驟操作成功[/green]")
         console.print(f"  已完成步驟: {progress['completed_steps']}/{progress['total_steps']}")
         console.print(f"  進度: {progress['progress_percentage']:.1f}%")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -296,13 +296,13 @@ def test_plan_dependencies():
         next_step = plan.get_next_step()
         assert next_step.step_number == 3, "步驟 1、2 完成後，步驟 3 應可執行"
 
-        console.print(f"[green]✓ 步驟依賴處理成功[/green]")
+        console.print(f"[bright_magenta]✓ 步驟依賴處理成功[/green]")
         console.print(f"  依賴鏈正確執行: ✓")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -321,12 +321,12 @@ def test_display_plan():
         # 展示計畫（不應拋出異常）
         pm.display_plan()
 
-        console.print(f"[green]✓ 展示計畫成功[/green]")
+        console.print(f"[bright_magenta]✓ 展示計畫成功[/green]")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -337,7 +337,7 @@ def test_display_plan():
 def main():
     """執行所有測試"""
     console.print("=" * 70)
-    console.print("[bold cyan]CodeGemini Plan Mode - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini Plan Mode - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -359,7 +359,7 @@ def main():
             result = test_func()
             results[test_name] = "✅ 通過" if result else "❌ 失敗"
         except Exception as e:
-            console.print(f"[red]測試異常：{e}[/red]")
+            console.print(f"[dim magenta]測試異常：{e}[/red]")
             results[test_name] = "❌ 失敗"
 
     # 顯示測試總結
@@ -378,9 +378,9 @@ def main():
     console.print(f"[bold]總計：{passed}/{total} 測試通過[/bold]")
 
     if passed < total:
-        console.print(f"\n[yellow]⚠️  {total - passed} 個測試失敗[/yellow]")
+        console.print(f"\n[magenta]⚠️  {total - passed} 個測試失敗[/yellow]")
     else:
-        console.print("\n[green]🎉 所有測試通過！Plan Mode 準備就緒。[/green]")
+        console.print("\n[bright_magenta]🎉 所有測試通過！Plan Mode 準備就緒。[/green]")
 
 
 if __name__ == "__main__":

@@ -15,7 +15,9 @@ from datetime import datetime
 console = Console()
 
 # 輸出目錄
-OUTPUT_DIR = os.path.join(os.path.expanduser("~"), "gemini_videos", "effects")
+# 使用統一輸出目錄配置
+from utils.path_manager import get_video_dir
+OUTPUT_DIR = str(get_video_dir('effects'))
 
 
 class VideoEffects:
@@ -41,8 +43,8 @@ class VideoEffects:
                 suggest_ffmpeg_not_installed()
             except ImportError:
                 # 降級方案：顯示基本錯誤訊息
-                console.print("[red]錯誤：未找到 ffmpeg[/red]")
-                console.print("[yellow]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
+                console.print("[dim magenta]錯誤：未找到 ffmpeg[/red]")
+                console.print("[magenta]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
 
             raise RuntimeError("ffmpeg 未安裝，請按照上述步驟安裝後重試")
 
@@ -66,7 +68,7 @@ class VideoEffects:
                 suggest_cannot_get_duration(video_path, e)
             except ImportError:
                 # 降級方案：顯示基本錯誤訊息
-                console.print(f"[red]錯誤：無法獲取影片時長[/red]")
+                console.print(f"[dim magenta]錯誤：無法獲取影片時長[/red]")
                 console.print(f"[dim]錯誤詳情：{e}[/dim]")
 
             raise RuntimeError(f"無法獲取影片時長: {e}")
@@ -99,7 +101,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -131,7 +133,7 @@ class VideoEffects:
 
         trim_duration = end_time - start_time
 
-        self.console.print(f"\n[cyan]✂️ 裁切影片時間段（無損）[/cyan]")
+        self.console.print(f"\n[magenta]✂️ 裁切影片時間段（無損）[/magenta]")
         self.console.print(f"開始時間: {start_time}s")
         self.console.print(f"結束時間: {end_time}s")
         self.console.print(f"片段長度: {trim_duration:.2f}s\n")
@@ -157,9 +159,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[green]✓ 完成[/green]")
+                progress.update(task, description="[bright_magenta]✓ 完成[/green]")
 
-            self.console.print(f"\n[green]✅ 影片已裁切：{output_path}[/green]")
+            self.console.print(f"\n[bright_magenta]✅ 影片已裁切：{output_path}[/green]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -167,7 +169,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[red]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim magenta]❌ 處理失敗：{error_msg}[/red]")
             raise
 
     def apply_filter(
@@ -198,7 +200,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -243,10 +245,10 @@ class VideoEffects:
             output_filename = f"{filter_name}_{timestamp}{ext}"
             output_path = os.path.join(self.output_dir, output_filename)
 
-        self.console.print(f"\n[cyan]🎨 應用濾鏡效果[/cyan]")
+        self.console.print(f"\n[magenta]🎨 應用濾鏡效果[/magenta]")
         self.console.print(f"濾鏡: {filter_name}")
         self.console.print(f"品質: {quality}")
-        self.console.print(f"\n[yellow]⚠️  此操作需要重新編碼影片（使用高品質設置）[/yellow]\n")
+        self.console.print(f"\n[magenta]⚠️  此操作需要重新編碼影片（使用高品質設置）[/yellow]\n")
 
         try:
             with Progress(
@@ -268,9 +270,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[green]✓ 完成[/green]")
+                progress.update(task, description="[bright_magenta]✓ 完成[/green]")
 
-            self.console.print(f"\n[green]✅ 濾鏡已應用：{output_path}[/green]")
+            self.console.print(f"\n[bright_magenta]✅ 濾鏡已應用：{output_path}[/green]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -278,7 +280,114 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[red]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim magenta]❌ 處理失敗：{error_msg}[/red]")
+            raise
+
+    def apply_multiple_filters(
+        self,
+        video_path: str,
+        filter_names: list,
+        output_path: Optional[str] = None,
+        quality: str = "high"
+    ) -> str:
+        """
+        批次應用多個濾鏡效果（使用 filter_complex，單次編碼）
+
+        Args:
+            video_path: 影片路徑
+            filter_names: 濾鏡名稱列表，依序應用
+            output_path: 輸出路徑（可選）
+            quality: 品質 (high, medium, low)
+
+        Returns:
+            輸出檔案路徑
+
+        Performance:
+            - 5 個濾鏡：單次編碼 vs 5 次編碼
+            - 時間：原時間 / 5 = 5x 提升
+            - 品質：無損失（避免多次重新編碼）
+
+        Example:
+            apply_multiple_filters('video.mp4', ['grayscale', 'sharpen', 'contrast'])
+        """
+        if not os.path.isfile(video_path):
+            raise FileNotFoundError(f"影片檔案不存在: {video_path}")
+
+        # 濾鏡定義
+        filters = {
+            'grayscale': 'hue=s=0',
+            'sepia': 'colorchannelmixer=.393:.769:.189:0:.349:.686:.168:0:.272:.534:.131',
+            'vintage': 'curves=vintage',
+            'sharpen': 'unsharp=5:5:1.0:5:5:0.0',
+            'blur': 'boxblur=2:1',
+            'brighten': 'eq=brightness=0.1',
+            'contrast': 'eq=contrast=1.2',
+        }
+
+        # 驗證所有濾鏡
+        for filter_name in filter_names:
+            if filter_name not in filters:
+                raise ValueError(f"不支援的濾鏡: {filter_name}。支援: {list(filters.keys())}")
+
+        # 品質設定
+        quality_settings = {
+            'high': ['-crf', '18', '-preset', 'slow'],
+            'medium': ['-crf', '23', '-preset', 'medium'],
+            'low': ['-crf', '28', '-preset', 'fast']
+        }
+
+        if quality not in quality_settings:
+            quality = 'high'
+
+        # 準備輸出路徑
+        if output_path is None:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            ext = Path(video_path).suffix
+            filter_chain_name = "_".join(filter_names)
+            output_filename = f"multi_{filter_chain_name}_{timestamp}{ext}"
+            output_path = os.path.join(self.output_dir, output_filename)
+
+        # 建立 filter chain（串聯所有濾鏡）
+        filter_chain = ",".join([filters[name] for name in filter_names])
+
+        self.console.print(f"\n[magenta]🎨 批次應用濾鏡效果[/magenta]")
+        self.console.print(f"濾鏡鏈: {' → '.join(filter_names)}")
+        self.console.print(f"品質: {quality}")
+        self.console.print(f"\n[bright_magenta]✨ 優化：單次編碼應用所有濾鏡（{len(filter_names)}x 提升）[/green]\n")
+
+        try:
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                console=self.console,
+            ) as progress:
+                task = progress.add_task(f"處理 {len(filter_names)} 個濾鏡...", total=None)
+
+                cmd = [
+                    'ffmpeg',
+                    '-i', video_path,
+                    '-vf', filter_chain,  # 使用 filter chain
+                    '-c:v', 'libx264',
+                    *quality_settings[quality],
+                    '-c:a', 'copy',
+                    '-y',  # 覆蓋輸出
+                    output_path
+                ]
+
+                subprocess.run(cmd, check=True, capture_output=True)
+                progress.update(task, description=f"[bright_magenta]✓ 完成 ({len(filter_names)} 個濾鏡)[/green]")
+
+            self.console.print(f"\n[bright_magenta]✅ 所有濾鏡已應用：{output_path}[/green]")
+            file_size = os.path.getsize(output_path) / (1024 * 1024)
+            self.console.print(f"檔案大小：{file_size:.2f} MB")
+            self.console.print(f"[dim]提示：單次編碼避免了 {len(filter_names)-1} 次額外的品質損失[/dim]")
+
+            return output_path
+
+        except subprocess.CalledProcessError as e:
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            self.console.print(f"\n[dim magenta]❌ 處理失敗：{error_msg}[/red]")
             raise
 
     def adjust_speed(
@@ -309,7 +418,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -343,10 +452,10 @@ class VideoEffects:
             output_filename = f"speed_{speed_str}_{timestamp}{ext}"
             output_path = os.path.join(self.output_dir, output_filename)
 
-        self.console.print(f"\n[cyan]⚡ 調整影片速度[/cyan]")
+        self.console.print(f"\n[magenta]⚡ 調整影片速度[/magenta]")
         self.console.print(f"速度倍數: {speed_factor}x")
         self.console.print(f"品質: {quality}")
-        self.console.print(f"\n[yellow]⚠️  此操作需要重新編碼影片（使用高品質設置）[/yellow]\n")
+        self.console.print(f"\n[magenta]⚠️  此操作需要重新編碼影片（使用高品質設置）[/yellow]\n")
 
         try:
             with Progress(
@@ -376,9 +485,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[green]✓ 完成[/green]")
+                progress.update(task, description="[bright_magenta]✓ 完成[/green]")
 
-            self.console.print(f"\n[green]✅ 速度已調整：{output_path}[/green]")
+            self.console.print(f"\n[bright_magenta]✅ 速度已調整：{output_path}[/green]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -386,7 +495,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[red]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim magenta]❌ 處理失敗：{error_msg}[/red]")
             raise
 
     def add_watermark(
@@ -421,7 +530,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -437,7 +546,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     watermark_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{watermark_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{watermark_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -486,11 +595,11 @@ class VideoEffects:
             output_filename = f"watermarked_{timestamp}{ext}"
             output_path = os.path.join(self.output_dir, output_filename)
 
-        self.console.print(f"\n[cyan]💧 添加浮水印[/cyan]")
+        self.console.print(f"\n[magenta]💧 添加浮水印[/magenta]")
         self.console.print(f"浮水印: {os.path.basename(watermark_path)}")
         self.console.print(f"位置: {position}")
         self.console.print(f"不透明度: {opacity}")
-        self.console.print(f"\n[yellow]⚠️  此操作需要重新編碼影片（使用高品質設置）[/yellow]\n")
+        self.console.print(f"\n[magenta]⚠️  此操作需要重新編碼影片（使用高品質設置）[/yellow]\n")
 
         try:
             with Progress(
@@ -516,9 +625,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[green]✓ 完成[/green]")
+                progress.update(task, description="[bright_magenta]✓ 完成[/green]")
 
-            self.console.print(f"\n[green]✅ 浮水印已添加：{output_path}[/green]")
+            self.console.print(f"\n[bright_magenta]✅ 浮水印已添加：{output_path}[/green]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -526,7 +635,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[red]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim magenta]❌ 處理失敗：{error_msg}[/red]")
             raise
 
 
@@ -534,17 +643,17 @@ def main():
     """主程式 - 命令列介面"""
     import sys
 
-    console.print("[bold cyan]Gemini 影片特效處理工具[/bold cyan]\n")
+    console.print("[bold magenta]Gemini 影片特效處理工具[/bold magenta]\n")
 
     if len(sys.argv) < 3:
-        console.print("[yellow]用法：[/yellow]")
+        console.print("[magenta]用法：[/yellow]")
         console.print("  python gemini_video_effects.py <影片路徑> <指令> [參數...]")
-        console.print("\n[cyan]可用指令：[/cyan]")
+        console.print("\n[magenta]可用指令：[/magenta]")
         console.print("  trim <開始秒數> <結束秒數>           - 裁切時間段（無損）")
         console.print("  filter <濾鏡名稱> [品質]             - 應用濾鏡（grayscale, sepia, vintage, sharpen, blur）")
         console.print("  speed <倍數> [品質]                  - 調整速度（0.5=慢動作, 2.0=2倍速）")
         console.print("  watermark <圖片路徑> [位置] [透明度] - 添加浮水印")
-        console.print("\n[cyan]範例：[/cyan]")
+        console.print("\n[magenta]範例：[/magenta]")
         console.print("  python gemini_video_effects.py video.mp4 trim 10 30")
         console.print("  python gemini_video_effects.py video.mp4 filter grayscale high")
         console.print("  python gemini_video_effects.py video.mp4 speed 2.0")
@@ -559,7 +668,7 @@ def main():
 
         if command == 'trim':
             if len(sys.argv) < 5:
-                console.print("[red]錯誤：trim 需要開始和結束時間[/red]")
+                console.print("[dim magenta]錯誤：trim 需要開始和結束時間[/red]")
                 return
             start = float(sys.argv[3])
             end = float(sys.argv[4])
@@ -567,7 +676,7 @@ def main():
 
         elif command == 'filter':
             if len(sys.argv) < 4:
-                console.print("[red]錯誤：filter 需要濾鏡名稱[/red]")
+                console.print("[dim magenta]錯誤：filter 需要濾鏡名稱[/red]")
                 return
             filter_name = sys.argv[3]
             quality = sys.argv[4] if len(sys.argv) > 4 else 'high'
@@ -575,7 +684,7 @@ def main():
 
         elif command == 'speed':
             if len(sys.argv) < 4:
-                console.print("[red]錯誤：speed 需要速度倍數[/red]")
+                console.print("[dim magenta]錯誤：speed 需要速度倍數[/red]")
                 return
             speed = float(sys.argv[3])
             quality = sys.argv[4] if len(sys.argv) > 4 else 'high'
@@ -583,7 +692,7 @@ def main():
 
         elif command == 'watermark':
             if len(sys.argv) < 4:
-                console.print("[red]錯誤：watermark 需要圖片路徑[/red]")
+                console.print("[dim magenta]錯誤：watermark 需要圖片路徑[/red]")
                 return
             watermark = sys.argv[3]
             position = sys.argv[4] if len(sys.argv) > 4 else 'bottom-right'
@@ -591,13 +700,13 @@ def main():
             output = effects.add_watermark(video_path, watermark, position, opacity)
 
         else:
-            console.print(f"[red]未知指令：{command}[/red]")
+            console.print(f"[dim magenta]未知指令：{command}[/red]")
             return
 
-        console.print(f"\n[green]✅ 處理完成：{output}[/green]")
+        console.print(f"\n[bright_magenta]✅ 處理完成：{output}[/green]")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         sys.exit(1)
 
 

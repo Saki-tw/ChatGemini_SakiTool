@@ -137,14 +137,14 @@ class TodoTracker:
         todo = self._get_todo_by_index(index)
 
         if not todo:
-            console.print(f"[red]✗ 任務不存在：#{index}[/red]")
+            console.print(f"[dim magenta]✗ 任務不存在：#{index}[/red]")
             return False
 
         # 如果要設為 in_progress，檢查是否已有其他 in_progress 任務
         if status == TodoStatus.IN_PROGRESS:
             in_progress_todos = [t for t in self.todos if t.is_in_progress]
             if in_progress_todos:
-                console.print(f"[yellow]⚠️  已有進行中的任務：{in_progress_todos[0].content}[/yellow]")
+                console.print(f"[magenta]⚠️  已有進行中的任務：{in_progress_todos[0].content}[/yellow]")
                 # 自動將其標記為 completed
                 in_progress_todos[0].mark_completed()
 
@@ -157,7 +157,7 @@ class TodoTracker:
         elif status == TodoStatus.COMPLETED:
             todo.mark_completed()
 
-        console.print(f"[green]✓ 任務 #{index} 狀態更新：{old_status.value} → {status.value}[/green]")
+        console.print(f"[bright_magenta]✓ 任務 #{index} 狀態更新：{old_status.value} → {status.value}[/green]")
 
         return True
 
@@ -213,16 +213,16 @@ class TodoTracker:
         percentage = progress_info["progress_percentage"]
 
         console.print(f"總任務：{total}")
-        console.print(f"已完成：[green]{completed}[/green]")
-        console.print(f"進行中：[yellow]{progress_info['in_progress']}[/yellow]")
+        console.print(f"已完成：[bright_magenta]{completed}[/green]")
+        console.print(f"進行中：[magenta]{progress_info['in_progress']}[/yellow]")
         console.print(f"待處理：[dim]{progress_info['pending']}[/dim]")
-        console.print(f"進度：[cyan]{percentage:.1f}%[/cyan]")
+        console.print(f"進度：[magenta]{percentage:.1f}%[/magenta]")
 
         # 進度條視覺化
         bar_length = 50
         filled_length = int(bar_length * completed / total) if total > 0 else 0
         bar = "█" * filled_length + "░" * (bar_length - filled_length)
-        console.print(f"\n[cyan]{bar}[/cyan] {percentage:.0f}%\n")
+        console.print(f"\n[magenta]{bar}[/magenta] {percentage:.0f}%\n")
 
     def display_todos(self, show_completed: bool = True) -> None:
         """
@@ -232,14 +232,15 @@ class TodoTracker:
             show_completed: 是否顯示已完成任務
         """
         if not self.todos:
-            console.print("[yellow]⚠️  無任務[/yellow]")
+            console.print("[magenta]⚠️  無任務[/yellow]")
             return
 
         console.print(f"\n[bold]📋 任務列表[/bold]\n")
 
-        table = Table(show_header=True, header_style="bold cyan")
-        table.add_column("#", style="dim", width=4)
-        table.add_column("狀態", style="white", width=10)
+        table = Table(show_header=True, header_style="bold bright_magenta")
+        console_width = console.width or 120
+        table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
+        table.add_column("狀態", style="white", width=max(10, int(console_width * 0.12)))
         table.add_column("任務", style="white")
 
         for todo in self.todos:
@@ -249,9 +250,9 @@ class TodoTracker:
 
             # 狀態圖示
             if todo.is_completed:
-                status_text = "[green]✅ 完成[/green]"
+                status_text = "[bright_magenta]✅ 完成[/green]"
             elif todo.is_in_progress:
-                status_text = "[yellow]⏳ 進行中[/yellow]"
+                status_text = "[magenta]⏳ 進行中[/yellow]"
             else:  # pending
                 status_text = "[dim]⏸️  待處理[/dim]"
 
@@ -282,11 +283,11 @@ class TodoTracker:
         todo = self._get_todo_by_index(index)
 
         if not todo:
-            console.print(f"[red]✗ 任務不存在：#{index}[/red]")
+            console.print(f"[dim magenta]✗ 任務不存在：#{index}[/red]")
             return False
 
         self.todos.remove(todo)
-        console.print(f"[green]✓ 任務 #{index} 已移除[/green]")
+        console.print(f"[bright_magenta]✓ 任務 #{index} 已移除[/green]")
 
         return True
 
@@ -299,7 +300,7 @@ class TodoTracker:
             self.todos.remove(todo)
 
         if count > 0:
-            console.print(f"[green]✓ 清除了 {count} 個已完成任務[/green]")
+            console.print(f"[bright_magenta]✓ 清除了 {count} 個已完成任務[/green]")
 
         return count
 
@@ -315,7 +316,7 @@ class TodoTracker:
 
 def main():
     """Todo Tracker 命令列工具"""
-    console.print("\n[bold cyan]CodeGemini Todo Tracker Demo[/bold cyan]\n")
+    console.print("\n[bold magenta]CodeGemini Todo Tracker Demo[/bold magenta]\n")
 
     tracker = TodoTracker()
 

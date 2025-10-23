@@ -169,10 +169,10 @@ class CodebaseScanner:
 
         # 檢查快取
         if self.cache_enabled and project_path in self._cache:
-            console.print(f"[yellow]使用快取的掃描結果[/yellow]")
+            console.print(f"[magenta]使用快取的掃描結果[/yellow]")
             return self._cache[project_path]
 
-        console.print(f"\n[cyan]🔍 掃描專案：{project_path}[/cyan]\n")
+        console.print(f"\n[magenta]🔍 掃描專案：{project_path}[/magenta]\n")
 
         with Progress(
             SpinnerColumn(),
@@ -207,7 +207,7 @@ class CodebaseScanner:
         # 步驟 5：建立符號索引（選用）
         symbol_index = None
         if build_symbol_index and project_type == ProjectType.PYTHON:
-            console.print(f"[cyan]建立符號索引...[/cyan]")
+            console.print(f"[magenta]建立符號索引...[/magenta]")
             symbol_index = self.build_symbol_index(project_path, source_files)
 
         # 步驟 6：生成專案結構樹
@@ -560,7 +560,7 @@ class CodebaseScanner:
         """顯示掃描摘要"""
         console.print(f"\n[bold green]✅ 掃描完成[/bold green]\n")
 
-        console.print(f"[bold cyan]專案資訊：[/bold cyan]")
+        console.print(f"[bold magenta]專案資訊：[/bold magenta]")
         console.print(f"  專案類型：{context.project_type.value}")
         console.print(f"  檔案總數：{context.file_count}")
         console.print(f"    - 源碼：{len(context.source_files)}")
@@ -568,16 +568,16 @@ class CodebaseScanner:
         console.print(f"    - 配置：{len(context.config_files)}")
 
         if context.frameworks:
-            console.print(f"\n[bold cyan]檢測到的框架：[/bold cyan]")
+            console.print(f"\n[bold magenta]檢測到的框架：[/bold magenta]")
             for fw in context.frameworks:
                 version_str = f" ({fw.version})" if fw.version else ""
                 console.print(f"  - {fw.name}{version_str}")
 
         if context.dependencies:
-            console.print(f"\n[bold cyan]依賴套件：[/bold cyan]{len(context.dependencies)} 個")
+            console.print(f"\n[bold magenta]依賴套件：[/bold magenta]{len(context.dependencies)} 個")
 
         if context.symbol_index:
-            console.print(f"\n[bold cyan]符號索引：[/bold cyan]")
+            console.print(f"\n[bold magenta]符號索引：[/bold magenta]")
             console.print(f"  類別：{len(context.symbol_index.classes)}")
             console.print(f"  函數：{len(context.symbol_index.functions)}")
 
@@ -587,9 +587,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print('  python scanner.py <專案路徑>')
-        console.print("\n[cyan]範例：[/cyan]")
+        console.print("\n[magenta]範例：[/magenta]")
         console.print('  python scanner.py .')
         sys.exit(1)
 
@@ -604,11 +604,11 @@ def main():
 
         # 顯示專案結構樹
         if context.project_structure:
-            console.print(f"\n[bold cyan]專案結構：[/bold cyan]")
+            console.print(f"\n[bold magenta]專案結構：[/bold magenta]")
             console.print(context.project_structure)
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-ChatGemini_SakiTool - Gemini 對話腳本 v2.0
+ChatGemini_SakiTool - Gemini 對話腳本 v2.1
 完全使用新 SDK (google-genai)
 支援功能：
 - 思考模式（動態控制）
@@ -9,6 +9,14 @@ ChatGemini_SakiTool - Gemini 對話腳本 v2.0
 - 快取自動管理
 - 檔案附加
 - 增強型輸入（方向鍵、歷史）
+- 互動式配置 UI（v2.1 新增）
+
+v2.1 更新：
+- ✨ 新增互動式配置 UI（ConfigUI 類別）
+- ✨ 支援首次執行引導配置
+- ✨ 使用 Rich UI 提供友善的配置體驗
+- ✨ 自動生成 config.py 檔案
+- ✨ 降低新使用者配置門檻
 """
 import sys
 import os
@@ -25,17 +33,29 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 
 # ==========================================
+# 動態模組載入器
+# ==========================================
+from gemini_module_loader import ModuleLoader
+module_loader = ModuleLoader()
+
+# ==========================================
 # 載入配置檔案（可選）
 # ==========================================
+# 統一配置管理（三層架構）
+# ==========================================
 try:
-    import config
+    from config_unified import unified_config as config
     CONFIG_AVAILABLE = True
-    print("✅ 已載入 config.py 配置")
+    print("✅ 已載入統一配置管理器（三層架構）")
 except ImportError:
     CONFIG_AVAILABLE = False
-    # 如果 config.py 不存在，使用預設配置
+    # 如果配置不可用，使用預設配置
     class config:
-        """預設配置（當 config.py 不存在時使用）"""
+        """預設配置（當統一配置不可用時使用）"""
+
+        @staticmethod
+        def get(key, default=None):
+            return default
         MODULES = {
             'pricing': {'enabled': True},
             'cache_manager': {'enabled': True},
@@ -72,6 +92,21 @@ except ImportError:
 # 新 SDK
 from google import genai
 from google.genai import types
+
+# 記憶體監控（必要依賴）
+import psutil
+
+# ==========================================
+# 檢查點系統
+# ==========================================
+try:
+    from gemini_checkpoint import get_checkpoint_manager, CheckpointManager, auto_checkpoint
+    from gemini_checkpoint import FileChangeType, CheckpointType
+    CHECKPOINT_ENABLED = True
+    print("✅ 檢查點系統已啟用")
+except ImportError:
+    CHECKPOINT_ENABLED = False
+    print("⚠️  檢查點系統未找到（gemini_checkpoint.py）")
 
 # ==========================================
 # 根據 config.py 動態導入模組
@@ -218,22 +253,73 @@ try:
 except ImportError:
     CODEGEMINI_ENABLED = False
 
-# 導入 Codebase Embedding（根據 config.py 控制）
+# ==========================================
+# CodeGemini 配置管理系統（獨立於 config.py）
+# ==========================================
+codegemini_config_manager = None
+codegemini_config = None
+
+if CODEGEMINI_ENABLED:
+    try:
+        # 自動載入 CodeGemini 配置管理器
+        import sys
+        from pathlib import Path
+        config_path = Path(__file__).parent / "CodeGemini"
+        if str(config_path) not in sys.path:
+            sys.path.insert(0, str(config_path))
+
+        from config_manager import ConfigManager
+        codegemini_config_manager = ConfigManager()
+        codegemini_config = codegemini_config_manager.get_codebase_embedding_config()
+        print("✅ CodeGemini 配置管理器已載入")
+    except ImportError as e:
+        print(f"提示：CodeGemini 配置管理器載入失敗: {e}")
+        codegemini_config = None
+
+# 導入 Codebase Embedding（支援多重配置載入）
+# 優先使用 CodeGemini 配置，回退到 config.py
 global_codebase_embedding = None
-if config.MODULES.get('codebase_embedding', {}).get('enabled', False):
+codebase_embedding_enabled = False
+
+# 判斷是否啟用（多重配置來源）
+if codegemini_config is not None:
+    # 優先使用 CodeGemini 配置管理器
+    codebase_embedding_enabled = codegemini_config.enabled
+    config_source = "CodeGemini 配置"
+elif config.MODULES.get('codebase_embedding', {}).get('enabled', False):
+    # 回退到 config.py
+    codebase_embedding_enabled = True
+    config_source = "config.py"
+else:
+    config_source = None
+
+if codebase_embedding_enabled:
     if CODEGEMINI_ENABLED:
         try:
             # 初始化 CodebaseEmbedding
             codegemini_instance = CodeGemini()
             API_KEY = os.getenv('GEMINI_API_KEY') or os.getenv('GOOGLE_API_KEY')
-            global_codebase_embedding = codegemini_instance.enable_codebase_embedding(
-                vector_db_path=os.path.expanduser("~/.gemini/embeddings"),
-                api_key=API_KEY,
-                orthogonal_mode=True,  # 啟用正交模式，自動去重
-                similarity_threshold=0.85
-            )
+
+            # 使用配置來源的參數
+            if codegemini_config is not None:
+                # 使用 CodeGemini 配置管理器的設定
+                global_codebase_embedding = codegemini_instance.enable_codebase_embedding(
+                    vector_db_path=os.path.expanduser(codegemini_config.vector_db_path),
+                    api_key=API_KEY,
+                    orthogonal_mode=codegemini_config.orthogonal_mode,
+                    similarity_threshold=codegemini_config.similarity_threshold
+                )
+            else:
+                # 使用 config.py 的預設值
+                global_codebase_embedding = codegemini_instance.enable_codebase_embedding(
+                    vector_db_path=os.path.expanduser("~/.gemini/embeddings"),
+                    api_key=API_KEY,
+                    orthogonal_mode=True,
+                    similarity_threshold=0.85
+                )
+
             CODEBASE_EMBEDDING_ENABLED = True
-            print("✅ Codebase Embedding 已啟用")
+            print(f"✅ Codebase Embedding 已啟用（配置來源: {config_source}）")
         except Exception as e:
             CODEBASE_EMBEDDING_ENABLED = False
             global_codebase_embedding = None
@@ -243,18 +329,6 @@ if config.MODULES.get('codebase_embedding', {}).get('enabled', False):
         print("提示：Codebase Embedding 需要 CodeGemini 模組")
 else:
     CODEBASE_EMBEDDING_ENABLED = False
-
-# 導入智能觸發器（無痕整合 CodeGemini 功能）
-try:
-    from gemini_smart_triggers import (
-        auto_enhance_prompt,
-        BackgroundTodoTracker
-    )
-    SMART_TRIGGERS_ENABLED = True
-    print("✅ 智能觸發器已啟用（無痕整合）")
-except ImportError:
-    SMART_TRIGGERS_ENABLED = False
-    print("提示：gemini_smart_triggers.py 不存在，智能觸發功能已停用")
 
 # 導入錯誤修復建議系統
 try:
@@ -321,7 +395,7 @@ except ImportError:
 # 導入 API 自動重試機制
 if config.MODULES.get('api_retry', {}).get('enabled', True):
     try:
-        from api_retry_wrapper import with_retry, APIRetryConfig
+        from utils.api_retry import with_retry, APIRetryConfig
         API_RETRY_ENABLED = True
         print("✅ API 自動重試機制已啟用")
     except ImportError:
@@ -343,31 +417,6 @@ else:
     ERROR_DIAGNOSTICS_ENABLED = False
     global_error_diagnostics = None
 
-# 導入相關對話建議系統
-if config.MODULES.get('conversation_suggestion', {}).get('enabled', True):
-    try:
-        from gemini_conversation_suggestion import ConversationSuggestion
-        CONVERSATION_SUGGESTION_ENABLED = True
-        # 初始化（如果 Codebase Embedding 已啟用）
-        if CODEBASE_EMBEDDING_ENABLED and global_codebase_embedding:
-            global_conversation_suggestion = ConversationSuggestion(
-                embedding=global_codebase_embedding,
-                enabled=True,
-                top_k=3,
-                min_similarity=0.7
-            )
-            print("✅ 相關對話建議系統已啟用")
-        else:
-            global_conversation_suggestion = None
-            CONVERSATION_SUGGESTION_ENABLED = False
-            print("⚠️  相關對話建議需要 Codebase Embedding 啟用")
-    except ImportError:
-        CONVERSATION_SUGGESTION_ENABLED = False
-        global_conversation_suggestion = None
-else:
-    CONVERSATION_SUGGESTION_ENABLED = False
-    global_conversation_suggestion = None
-
 # 導入智能觸發器（自動增強提示）
 if config.MODULES.get('smart_triggers', {}).get('enabled', True):
     try:
@@ -378,17 +427,6 @@ if config.MODULES.get('smart_triggers', {}).get('enabled', True):
         SMART_TRIGGERS_ENABLED = False
 else:
     SMART_TRIGGERS_ENABLED = False
-
-# 導入性能優化模組
-if config.MODULES.get('performance_optimization', {}).get('enabled', True):
-    try:
-        from gemini_performance import cached, LRUCache
-        PERFORMANCE_OPT_ENABLED = True
-        print("✅ 性能優化模組已啟用")
-    except ImportError:
-        PERFORMANCE_OPT_ENABLED = False
-else:
-    PERFORMANCE_OPT_ENABLED = False
 
 # 導入媒體查看器（附加檔案時自動顯示資訊）
 if config.MODULES.get('media_viewer', {}).get('enabled', True):
@@ -431,7 +469,9 @@ client = genai.Client(api_key=API_KEY)
 
 # 常數定義
 # 對話記錄統一儲存路徑
-DEFAULT_LOG_DIR = os.path.join(os.path.expanduser("~"), "SakiStudio", "ChatGemini", "ChatLOG")
+# 使用統一輸出目錄配置
+from utils.path_manager import get_chat_log_dir
+DEFAULT_LOG_DIR = str(get_chat_log_dir())
 
 DEFAULT_MODEL = 'gemini-2.5-flash'
 MAX_CONTEXT_TOKENS = 2000000
@@ -465,6 +505,11 @@ RECOMMENDED_MODELS: Dict[str, tuple] = {
 # 支援思考模式的模型
 THINKING_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-8b']
 
+
+# ==========================================
+# 互動式配置 UI 類別（v2.1 新增）
+# ==========================================
+
 # 各模型的最低快取門檻要求（tokens）
 # 根據 Gemini API Context Caching 規範
 MIN_TOKENS = {
@@ -488,6 +533,10 @@ if PROMPT_TOOLKIT_AVAILABLE:
                 self.commands.extend(['cli', 'gemini-cli'])
             if CODEBASE_EMBEDDING_ENABLED:
                 self.commands.extend(['/search_code', '/search_history'])
+            # 記憶體管理命令
+            self.commands.extend(['/clear-memory', '/memory-stats'])
+            # 檢查點系統命令
+            self.commands.extend(['/checkpoints', '/rewind', '/checkpoint'])
 
             # 思考模式語法提示
             self.think_patterns = [
@@ -644,247 +693,8 @@ def extract_thinking_process(response) -> Optional[str]:
         return None
 
 
-def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
-    """
-    解析思考模式配置
-
-    支援格式:
-    - [think:2000] 使用指定 tokens 思考
-    - [think:1000,response:500] 同時指定思考與回應 tokens
-    - [think:auto] 或 [think:-1] 動態思考
-    - [no-think] 或 [think:0] 不思考（部分模型支援）
-
-    各模型限制：
-    - gemini-2.5-pro: -1 (動態) 或 128-32768 tokens，無法停用
-    - gemini-2.5-flash: -1 (動態) 或 0-24576 tokens，0=停用
-    - gemini-2.5-flash-8b (lite): -1 (動態) 或 512-24576 tokens，0=停用
-
-    Args:
-        user_input: 使用者輸入
-        model_name: 模型名稱
-
-    Returns:
-        (清理後的輸入, 是否使用思考, 思考預算, 最大輸出tokens)
-    """
-    # 根據模型判斷限制
-    is_pro = 'pro' in model_name.lower()
-    is_lite = '8b' in model_name.lower() or 'lite' in model_name.lower()
-
-    # 設定各模型的限制
-    if is_pro:
-        MAX_TOKENS = 32768
-        MIN_TOKENS = 128
-        ALLOW_DISABLE = False  # Pro 無法停用思考
-    elif is_lite:
-        MAX_TOKENS = 24576
-        MIN_TOKENS = 512
-        ALLOW_DISABLE = True
-    else:  # flash
-        MAX_TOKENS = 24576
-        MIN_TOKENS = 0
-        ALLOW_DISABLE = True
-
-    # 預設值
-    use_thinking = True
-    thinking_budget = -1  # 動態
-    max_output_tokens = None  # None 表示使用模型預設值
-
-    # 檢查是否禁用思考
-    no_think_pattern = r'\[no-think\]'
-    if re.search(no_think_pattern, user_input, re.IGNORECASE):
-        if not ALLOW_DISABLE:
-            print(f"⚠️  {model_name} 不支援停用思考，將使用動態模式")
-            thinking_budget = -1
-        else:
-            thinking_budget = 0
-        user_input = re.sub(no_think_pattern, '', user_input, flags=re.IGNORECASE).strip()
-        return user_input, use_thinking, thinking_budget, max_output_tokens
-
-    # 檢查帶 response 參數的思考預算: [think:1000,response:500]
-    think_response_pattern = r'\[think:(-?\d+|auto),\s*response:(\d+)\]'
-    match = re.search(think_response_pattern, user_input, re.IGNORECASE)
-    if match:
-        budget_str = match.group(1).lower()
-        response_tokens = int(match.group(2))
-
-        # 處理思考預算
-        if budget_str == 'auto':
-            thinking_budget = -1
-        else:
-            thinking_budget = int(budget_str)
-
-            # 驗證思考預算範圍
-            if thinking_budget == 0:
-                if not ALLOW_DISABLE:
-                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens")
-                    thinking_budget = MIN_TOKENS
-            elif thinking_budget == -1:
-                pass  # 保持 -1
-            elif thinking_budget < MIN_TOKENS:
-                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整")
-                thinking_budget = MIN_TOKENS
-            elif thinking_budget > MAX_TOKENS:
-                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值")
-                thinking_budget = MAX_TOKENS
-
-        # 設定輸出 tokens（最大 8192）
-        if response_tokens < 1:
-            print(f"⚠️  回應 tokens 至少為 1，已調整")
-            max_output_tokens = 1
-        elif response_tokens > 8192:
-            print(f"⚠️  回應 tokens 超過上限 8192，已調整為最大值")
-            max_output_tokens = 8192
-        else:
-            max_output_tokens = response_tokens
-
-        user_input = re.sub(think_response_pattern, '', user_input, flags=re.IGNORECASE).strip()
-        return user_input, use_thinking, thinking_budget, max_output_tokens
-
-    # 檢查單獨的思考預算: [think:2000]
-    think_pattern = r'\[think:(-?\d+|auto)\]'
-    match = re.search(think_pattern, user_input, re.IGNORECASE)
-    if match:
-        budget_str = match.group(1).lower()
-        if budget_str == 'auto':
-            thinking_budget = -1
-        else:
-            thinking_budget = int(budget_str)
-
-            # 處理停用請求 (0)
-            if thinking_budget == 0:
-                if not ALLOW_DISABLE:
-                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens")
-                    thinking_budget = MIN_TOKENS
-                # else: thinking_budget = 0 保持不變
-            # 處理動態請求 (-1)
-            elif thinking_budget == -1:
-                pass  # 保持 -1
-            # 處理指定 tokens
-            elif thinking_budget < MIN_TOKENS:
-                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整")
-                thinking_budget = MIN_TOKENS
-            elif thinking_budget > MAX_TOKENS:
-                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值")
-                thinking_budget = MAX_TOKENS
-
-        user_input = re.sub(think_pattern, '', user_input, flags=re.IGNORECASE).strip()
-
-    return user_input, use_thinking, thinking_budget, max_output_tokens
 
 
-def process_file_attachments(user_input: str) -> tuple:
-    """
-    處理檔案附加（智慧判斷文字檔vs媒體檔）
-
-    支援格式:
-    - @/path/to/file.txt  （文字檔：直接讀取）
-    - 附加 image.jpg      （圖片：上傳API）
-    - 讀取 ~/code.py      （程式碼：直接讀取）
-    - 上傳 video.mp4      （影片：上傳API）
-
-    Args:
-        user_input: 使用者輸入
-
-    Returns:
-        (處理後的輸入, 上傳的檔案物件列表)
-    """
-    # 偵測檔案路徑模式
-    file_patterns = [
-        r'@([^\s]+)',           # @file.txt
-        r'附加\s+([^\s]+)',     # 附加 file.txt
-        r'讀取\s+([^\s]+)',     # 讀取 file.txt
-        r'上傳\s+([^\s]+)',     # 上傳 file.mp4
-    ]
-
-    # 文字檔副檔名（直接讀取）
-    TEXT_EXTENSIONS = {'.txt', '.py', '.js', '.ts', '.jsx', '.tsx', '.json', '.xml',
-                       '.html', '.css', '.md', '.yaml', '.yml', '.toml', '.ini',
-                       '.sh', '.bash', '.zsh', '.c', '.cpp', '.h', '.java', '.go',
-                       '.rs', '.php', '.rb', '.sql', '.log', '.csv', '.env'}
-
-    # 媒體檔副檔名（上傳API）
-    MEDIA_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg',
-                        '.mp4', '.mpeg', '.mov', '.avi', '.flv', '.webm', '.mkv',
-                        '.mp3', '.wav', '.aac', '.ogg', '.flac', '.m4a',
-                        '.pdf', '.doc', '.docx', '.ppt', '.pptx'}
-
-    files_content = []
-    uploaded_files = []
-
-    for pattern in file_patterns:
-        matches = re.findall(pattern, user_input)
-        for file_path in matches:
-            file_path = os.path.expanduser(file_path)
-
-            if not os.path.isfile(file_path):
-                # 使用錯誤修復建議系統
-                if ERROR_FIX_ENABLED:
-                    suggest_file_not_found(file_path)
-                else:
-                    print(f"⚠️  找不到檔案: {file_path}")
-                continue
-
-            # 判斷檔案類型
-            ext = os.path.splitext(file_path)[1].lower()
-
-            if ext in TEXT_EXTENSIONS:
-                # 文字檔：直接讀取
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        files_content.append(f"\n\n[檔案: {file_path}]\n```{ext[1:]}\n{content}\n```\n")
-                        print(f"✅ 已讀取文字檔: {file_path}")
-                except UnicodeDecodeError:
-                    # 嘗試其他編碼
-                    try:
-                        with open(file_path, 'r', encoding='latin-1') as f:
-                            content = f.read()
-                            files_content.append(f"\n\n[檔案: {file_path}]\n```\n{content}\n```\n")
-                            print(f"✅ 已讀取文字檔: {file_path} (latin-1)")
-                    except Exception as e:
-                        print(f"⚠️  無法讀取檔案 {file_path}: {e}")
-                except Exception as e:
-                    print(f"⚠️  無法讀取檔案 {file_path}: {e}")
-
-            elif ext in MEDIA_EXTENSIONS:
-                # 媒體檔：上傳 API
-                if FILE_MANAGER_ENABLED:
-                    try:
-                        # 媒體查看器：上傳前顯示檔案資訊（自動整合）
-                        if MEDIA_VIEWER_AUTO_ENABLED and global_media_viewer:
-                            try:
-                                global_media_viewer.show_file_info(file_path)
-                            except Exception as e:
-                                logger.debug(f"媒體查看器顯示失敗: {e}")
-
-                        uploaded_file = global_file_manager.upload_file(file_path)
-                        uploaded_files.append(uploaded_file)
-                        print(f"✅ 已上傳媒體檔: {file_path}")
-                    except Exception as e:
-                        print(f"⚠️  上傳失敗 {file_path}: {e}")
-                else:
-                    print(f"⚠️  檔案管理器未啟用，無法上傳 {file_path}")
-
-            else:
-                # 未知類型：嘗試當文字檔讀取
-                print(f"⚠️  未知檔案類型 {ext}，嘗試當文字檔讀取...")
-                try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
-                        content = f.read()
-                        files_content.append(f"\n\n[檔案: {file_path}]\n```\n{content}\n```\n")
-                        print(f"✅ 已讀取檔案: {file_path}")
-                except Exception as e:
-                    print(f"⚠️  無法處理檔案 {file_path}: {e}")
-
-    # 移除檔案路徑標記
-    for pattern in file_patterns:
-        user_input = re.sub(pattern, '', user_input)
-
-    # 將文字檔案內容添加到 prompt
-    if files_content:
-        user_input = user_input.strip() + "\n" + "\n".join(files_content)
-
-    return user_input, uploaded_files
 
 
 def get_user_input(prompt_text: str = "你: ") -> str:
@@ -939,360 +749,12 @@ def get_user_input(prompt_text: str = "你: ") -> str:
             return ""
 
 
-class AutoCacheManager:
-    """自動快取管理器"""
-
-    def __init__(self, enabled: bool = False, mode: str = 'auto', threshold: int = 5000, ttl: int = 1):
-        self.enabled = enabled
-        self.mode = mode  # 'auto' 或 'prompt'
-        self.threshold = threshold
-        self.ttl_hours = ttl
-        self.conversation_pairs = []  # [(user_msg, ai_msg, input_tokens), ...]
-        self.total_input_tokens = 0
-        self.cache_created = False
-        self.active_cache = None
-        self.exclude_next = False  # 下一次對話是否排除
-
-    def add_conversation(self, user_msg: str, ai_msg: str, input_tokens: int):
-        """記錄對話（除非被排除）"""
-        if not self.exclude_next:
-            self.conversation_pairs.append((user_msg, ai_msg, input_tokens))
-            self.total_input_tokens += input_tokens
-        self.exclude_next = False  # 重置排除標記
-
-    def should_trigger(self) -> bool:
-        """是否應該觸發快取建立"""
-        return (self.enabled and
-                not self.cache_created and
-                self.total_input_tokens >= self.threshold)
-
-    def show_trigger_prompt(self, model_name: str) -> bool:
-        """顯示快取觸發提示（含精確成本計算）"""
-        print("\n" + "🔔 " + "━" * 58)
-        print("快取觸發提醒")
-        print("━" * 60)
-        print(f"📊 目前狀態：")
-        print(f"  累積輸入：{self.total_input_tokens:,} tokens")
-        print(f"  對話輪次：{len(self.conversation_pairs)} 次")
-        print()
-
-        # 計算快取本身的成本與節省
-        if PRICING_ENABLED:
-            try:
-                # 1. 快取建立成本（一次性）
-                cache_create_cost, _ = global_pricing_calculator.calculate_text_cost(
-                    model_name, self.total_input_tokens, 0, 0
-                )
-
-                # 2. 未來使用快取的成本對比
-                # 假設後續還會輸入相同數量的 tokens
-                future_input = self.total_input_tokens
-                future_output = 2000  # 假設平均輸出
-
-                # 不使用快取：每次都要付全額
-                no_cache_cost, _ = global_pricing_calculator.calculate_text_cost(
-                    model_name, future_input, future_output, 0
-                )
-
-                # 使用快取：輸入部分享 90% 折扣
-                cache_input_cost, _ = global_pricing_calculator.calculate_text_cost(
-                    model_name, future_input, 0, 0
-                )
-                cache_output_cost, _ = global_pricing_calculator.calculate_text_cost(
-                    model_name, 0, future_output, 0
-                )
-                with_cache_cost = (cache_input_cost * 0.1) + cache_output_cost
-
-                # 每次節省
-                per_query_savings = no_cache_cost - with_cache_cost
-
-                # 計算損益平衡點（需要幾次查詢才回本）
-                if per_query_savings > 0:
-                    breakeven = int(cache_create_cost / per_query_savings) + 1
-                else:
-                    breakeven = 999
-
-                print(f"💰 成本分析：")
-                print(f"  快取建立成本：NT$ {cache_create_cost * USD_TO_TWD:.2f} (一次性)")
-                print()
-                print(f"  後續每次查詢（{future_input:,} tokens 輸入）：")
-                print(f"    不使用快取：NT$ {no_cache_cost * USD_TO_TWD:.2f}")
-                print(f"    使用快取：  NT$ {with_cache_cost * USD_TO_TWD:.2f}")
-                print(f"    每次節省：  NT$ {per_query_savings * USD_TO_TWD:.2f} (省 {((per_query_savings/no_cache_cost)*100):.0f}%)")
-                print()
-                print(f"  💡 損益平衡：{breakeven} 次查詢後開始省錢")
-                print(f"     (快取有效期 {self.ttl_hours} 小時)")
-                print()
-
-            except Exception as e:
-                logger.warning(f"成本計算失敗: {e}")
-
-        # 顯示快取內容預覽
-        print(f"📦 快取內容預覽：")
-        preview_count = min(3, len(self.conversation_pairs))
-        for i in range(preview_count):
-            user_msg, ai_msg, _ = self.conversation_pairs[i]
-            user_preview = user_msg[:50] + "..." if len(user_msg) > 50 else user_msg
-            ai_preview = ai_msg[:50] + "..." if len(ai_msg) > 50 else ai_msg
-            print(f"  - 你: {user_preview}")
-            print(f"  - AI: {ai_preview}")
-
-        if len(self.conversation_pairs) > preview_count:
-            print(f"  ... (共 {len(self.conversation_pairs)} 輪對話)")
-
-        print("━" * 60)
-        response = input("建立快取？ (y/n) [y]: ").strip().lower()
-        return response != 'n'
-
-    def create_cache(self, model_name: str) -> bool:
-        """建立快取"""
-        if not CACHE_ENABLED:
-            print("⚠️  快取功能未啟用（gemini_cache_manager.py 未找到）")
-            return False
-
-        try:
-            # 組合對話歷史 - 優化：使用 list 累積，單次 join（避免 O(n²) 記憶體使用）
-            cache_lines = []
-            for user_msg, ai_msg, _ in self.conversation_pairs:
-                cache_lines.append("User: ")
-                cache_lines.append(user_msg)
-                cache_lines.append("\n\nAssistant: ")
-                cache_lines.append(ai_msg)
-                cache_lines.append("\n\n")
-
-            # 單次分配和拷貝 - O(n) 記憶體複雜度
-            combined_content = "".join(cache_lines)
-
-            # 建立快取
-            print("\n⏳ 建立快取中...")
-            cache = global_cache_manager.create_cache(
-                model=model_name,
-                contents=[combined_content],
-                display_name=f"auto_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
-                ttl_hours=self.ttl_hours
-            )
-
-            self.active_cache = cache
-            self.cache_created = True
-            print("✅ 快取建立成功！後續對話將自動使用快取節省成本。\n")
-            return True
-
-        except Exception as e:
-            print(f"⚠️  快取建立失敗：{e}")
-            return False
 
 
-class ChatLogger:
-    """
-    對話記錄管理器 - 優化版
-
-    改良重點：
-    - 使用持久檔案句柄，避免重複開啟/關閉檔案（減少 OS 系統呼叫）
-    - 使用緩衝區，批次寫入（降低 I/O 次數）
-    - 避免長時間會話中的檔案句柄耗盡問題
-    """
-
-    def __init__(self, log_dir: str = DEFAULT_LOG_DIR):
-        self.log_dir = log_dir
-        os.makedirs(log_dir, exist_ok=True)
-        self.session_start = datetime.now()
-        self.session_file = os.path.join(
-            log_dir,
-            f"conversation_{self.session_start.strftime('%Y%m%d_%H%M%S')}.txt"
-        )
-        # JSON 記錄檔案（包含思考過程）
-        self.json_file = os.path.join(
-            log_dir,
-            f"conversation_{self.session_start.strftime('%Y%m%d_%H%M%S')}.json"
-        )
-        self.model_name = None
-        self.conversation_history = []  # 儲存完整對話歷史
-
-        # 優化：保持檔案句柄開啟，使用 64KB 緩衝區
-        self._log_file_handle = open(self.session_file, 'a', encoding='utf-8', buffering=64*1024)
-        self._buffer = []  # 記錄緩衝區
-        self._buffer_size = 10  # 每 10 條訊息刷新一次
-
-        logger.info(f"對話記錄將儲存至：{self.session_file}")
-
-    def set_model(self, model_name: str):
-        """設定當前使用的模型"""
-        self.model_name = model_name
-        self._log_message("SYSTEM", f"使用模型: {model_name}")
-        self.conversation_history.append({
-            "role": "system",
-            "content": f"使用模型: {model_name}",
-            "timestamp": datetime.now().isoformat()
-        })
-
-    def log_user(self, message: str):
-        """記錄使用者訊息"""
-        self._log_message("USER", message)
-        self.conversation_history.append({
-            "role": "user",
-            "content": message,
-            "timestamp": datetime.now().isoformat()
-        })
-
-    def log_assistant(self, message: str, thinking_process: Optional[str] = None):
-        """
-        記錄助手回應
-
-        Args:
-            message: 助手回應內容
-            thinking_process: 思考過程（可選）
-        """
-        self._log_message("ASSISTANT", message)
-
-        # 如果有思考過程，也記錄到文字檔
-        if thinking_process:
-            self._log_message("THINKING", thinking_process)
-
-        # 記錄到 JSON（包含思考過程）
-        entry = {
-            "role": "assistant",
-            "content": message,
-            "timestamp": datetime.now().isoformat()
-        }
-        if thinking_process:
-            entry["thinking_process"] = thinking_process
-
-        self.conversation_history.append(entry)
-
-    def _log_message(self, role: str, message: str):
-        """內部記錄方法 - 優化：使用緩衝區批次寫入"""
-        try:
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-            log_entry = f"\n[{timestamp}] {role}:\n{message}\n" + "-" * 80 + "\n"
-            self._buffer.append(log_entry)
-
-            # 達到緩衝大小時自動刷新
-            if len(self._buffer) >= self._buffer_size:
-                self._flush_buffer()
-        except Exception as e:
-            logger.error(f"記錄失敗：{e}")
-
-    def _flush_buffer(self):
-        """刷新緩衝區到檔案"""
-        if self._buffer:
-            try:
-                self._log_file_handle.writelines(self._buffer)
-                self._log_file_handle.flush()  # 確保立即寫入磁碟
-                self._buffer.clear()
-            except Exception as e:
-                logger.error(f"刷新緩衝區失敗：{e}")
-
-    def save_session(self):
-        """儲存會話（同時儲存文字和 JSON）- 優化：先刷新緩衝區"""
-        # 優化：確保所有未寫入的記錄都刷新到檔案
-        self._flush_buffer()
-
-        # 儲存 JSON
-        try:
-            with open(self.json_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    "session_start": self.session_start.isoformat(),
-                    "model": self.model_name,
-                    "conversation": self.conversation_history
-                }, f, ensure_ascii=False, indent=2)
-            logger.info(f"JSON 記錄已儲存至：{self.json_file}")
-        except Exception as e:
-            logger.error(f"JSON 儲存失敗：{e}")
-
-        logger.info(f"對話已儲存至：{self.session_file}")
-
-    def __del__(self):
-        """清理：關閉檔案句柄"""
-        if hasattr(self, '_log_file_handle') and self._log_file_handle:
-            try:
-                self._flush_buffer()  # 最後一次刷新
-                self._log_file_handle.close()
-            except Exception:
-                pass  # 解構時忽略錯誤
 
 
-class ThinkingSignatureManager:
-    """思考簽名持久化管理器
 
-    用於保存和載入思考簽名，以維持多輪對話的思考脈絡。
-    注意：思考簽名僅在啟用函數呼叫時產生。
-    """
 
-    def __init__(self, state_dir: str = DEFAULT_LOG_DIR):
-        self.state_dir = state_dir
-        os.makedirs(state_dir, exist_ok=True)
-        self.state_file = os.path.join(state_dir, "thinking_signature_state.json")
-        self.last_response_parts = None  # 保存最後一次完整的 response parts
-        self.has_function_calling = False  # 標記是否啟用函數呼叫
-
-        # 啟動時自動載入
-        self._load_state()
-
-    def _load_state(self):
-        """從檔案載入最後保存的思考簽名狀態"""
-        try:
-            if os.path.exists(self.state_file):
-                with open(self.state_file, 'r', encoding='utf-8') as f:
-                    data = json.load(f)
-                    self.has_function_calling = data.get('has_function_calling', False)
-                    # 注意：response parts 無法直接序列化，這裡只記錄狀態
-                    if self.has_function_calling:
-                        logger.info("已載入思考簽名狀態（函數呼叫已啟用）")
-                    else:
-                        logger.debug("思考簽名狀態：函數呼叫未啟用")
-        except Exception as e:
-            logger.warning(f"載入思考簽名狀態失敗：{e}")
-
-    def save_response(self, response, has_function_calling: bool = False):
-        """保存完整的 response（包含思考簽名）
-
-        Args:
-            response: Gemini API 回應物件
-            has_function_calling: 當前請求是否包含函數宣告
-        """
-        self.has_function_calling = has_function_calling
-
-        if has_function_calling and hasattr(response, 'candidates'):
-            # 只有啟用函數呼叫時才保存 parts
-            try:
-                # 提取完整的 parts（包含 thought_signature）
-                if response.candidates and len(response.candidates) > 0:
-                    candidate = response.candidates[0]
-                    if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
-                        self.last_response_parts = candidate.content.parts
-                        logger.debug("已保存思考簽名（含 parts）")
-            except Exception as e:
-                logger.warning(f"保存思考簽名失敗：{e}")
-
-        # 保存狀態到檔案
-        self._save_state()
-
-    def _save_state(self):
-        """保存狀態到檔案"""
-        try:
-            with open(self.state_file, 'w', encoding='utf-8') as f:
-                json.dump({
-                    'has_function_calling': self.has_function_calling,
-                    'last_updated': datetime.now().isoformat()
-                }, f, ensure_ascii=False, indent=2)
-            logger.debug("思考簽名狀態已保存")
-        except Exception as e:
-            logger.warning(f"保存思考簽名狀態失敗：{e}")
-
-    def get_last_response_parts(self):
-        """獲取最後保存的 response parts（用於下次請求）
-
-        Returns:
-            最後一次的 response parts，如果沒有則返回 None
-        """
-        return self.last_response_parts if self.has_function_calling else None
-
-    def clear(self):
-        """清除保存的思考簽名"""
-        self.last_response_parts = None
-        self.has_function_calling = False
-        self._save_state()
-        logger.info("已清除思考簽名")
 
 
 def setup_auto_cache(model_name: str) -> dict:
@@ -1344,76 +806,14 @@ def setup_auto_cache(model_name: str) -> dict:
         return {'enabled': True, 'mode': 'auto', 'threshold': 5000, 'ttl': 1}
 
 
-def parse_cache_control(user_input: str, cache_mgr: AutoCacheManager) -> tuple:
-    """
-    解析快取即時控制指令
-
-    Returns:
-        (處理後的輸入, 快取動作)
-    """
-    # [cache:now] - 立即建立快取
-    if re.search(r'\[cache:now\]', user_input, re.I):
-        user_input = re.sub(r'\[cache:now\]', '', user_input, flags=re.I).strip()
-        return user_input, 'create_now'
-
-    # [cache:off] - 暫停自動快取
-    if re.search(r'\[cache:off\]', user_input, re.I):
-        user_input = re.sub(r'\[cache:off\]', '', user_input, flags=re.I).strip()
-        cache_mgr.enabled = False
-        print("⚠️  自動快取已暫停")
-        return user_input, None
-
-    # [cache:on] - 恢復自動快取
-    if re.search(r'\[cache:on\]', user_input, re.I):
-        user_input = re.sub(r'\[cache:on\]', '', user_input, flags=re.I).strip()
-        cache_mgr.enabled = True
-        print("✓ 自動快取已恢復")
-        return user_input, None
-
-    # [no-cache] - 本次對話不列入快取
-    if re.search(r'\[no-cache\]', user_input, re.I):
-        user_input = re.sub(r'\[no-cache\]', '', user_input, flags=re.I).strip()
-        cache_mgr.exclude_next = True
-        print("⚠️  本次對話不列入快取")
-        return user_input, None
-
-    return user_input, None
 
 
-def select_model() -> str:
-    """選擇 Gemini 模型"""
-    print("\n" + "=" * 60)
-    print("請選擇 Gemini 模型：")
-    print("=" * 60)
-
-    for key, (model_name, description) in RECOMMENDED_MODELS.items():
-        print(f"{key}. {description}")
-
-    print("\n0. 自訂模型名稱")
-    print("-" * 60)
-
-    while True:
-        choice = input(f"\n請輸入選項 (1-{len(RECOMMENDED_MODELS)} 或 0): ").strip()
-
-        if choice == '0':
-            custom_model = input("請輸入模型名稱: ").strip()
-            if custom_model:
-                return custom_model
-            else:
-                print("模型名稱不能為空，請重試")
-                continue
-
-        if choice in RECOMMENDED_MODELS:
-            model_name, _ = RECOMMENDED_MODELS[choice]
-            return model_name
-
-        print("無效的選項，請重試")
 
 
 def send_message(
     model_name: str,
     user_input: str,
-    chat_logger: ChatLogger,
+    chat_logger,
     use_thinking: bool = True,
     thinking_budget: int = -1,
     max_output_tokens: Optional[int] = None,
@@ -1594,6 +994,15 @@ def send_message(
         # 串流結束，換行
         print()
 
+        # 顯示 Markdown 格式化版本（如果有內容）
+        if response_text.strip():
+            console.print("\n")
+            console.print(Panel(
+                Markdown(response_text),
+                title="[bright_magenta]📝 格式化輸出[/bright_magenta]",
+                border_style="magenta"
+            ))
+
         # 保存思考過程
         thinking_process = thoughts_text if thoughts_text else None
         LAST_THINKING_PROCESS = thinking_process
@@ -1688,6 +1097,11 @@ def send_message(
             except Exception as e:
                 logger.warning(f"計價失敗: {e}")
 
+        # 🔧 記憶體洩漏修復：釋放上傳檔案的記憶體引用
+        if uploaded_files:
+            uploaded_files.clear()
+            uploaded_files = None
+
         return response_text
 
     except Exception as e:
@@ -1719,17 +1133,22 @@ def send_message(
             except Exception as diag_error:
                 logger.debug(f"錯誤診斷失敗: {diag_error}")
 
+        # 🔧 記憶體洩漏修復：異常情況下也要釋放記憶體
+        if uploaded_files:
+            uploaded_files.clear()
+            uploaded_files = None
+
         return None
 
 
-def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, codebase_embedding=None):
+def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embedding=None):
     """互動式對話主循環"""
     print("\n" + "=" * 60)
     print(f"Gemini 對話（模型：{model_name}）")
     print("=" * 60)
 
     # 初始化自動快取管理器
-    auto_cache_mgr = AutoCacheManager(
+    auto_cache_mgr = module_loader.get("cache").AutoCacheManager(
         enabled=auto_cache_config.get('enabled', False),
         mode=auto_cache_config.get('mode', 'auto'),
         threshold=auto_cache_config.get('threshold', 5000),
@@ -2023,9 +1442,61 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                 return 'switch_model'
 
             elif user_input.lower() == 'clear':
-                print("\n✓ 對話已清除")
-                # 新 SDK 不需要手動清除，每次都是新請求
+                # 🔧 F-2 修復：實際清空對話歷史記憶體快取
+                stats = chat_logger.conversation_manager.get_stats()
+
+                console.print(f"\n[bright_magenta]📊 對話狀態[/bright_magenta]")
+                console.print(f"   記憶體快取：{stats['active_messages']} 條")
+                console.print(f"   [dim]硬碟已存檔：{stats['archived_messages']} 條[/dim]\n")
+
+                from rich.prompt import Confirm
+                if Confirm.ask(
+                    "[bright_magenta]清空記憶體快取嗎？[/bright_magenta]\n"
+                    "[dim]· 只清除 RAM 中的對話（釋放記憶體）\n"
+                    "· 硬碟儲存的對話記錄不受影響[/dim]",
+                    default=False
+                ):
+                    chat_logger.conversation_manager.clear()
+                    console.print("\n[bright_magenta]✓ 記憶體已清空[/bright_magenta]")
+                    console.print("[dim]  硬碟對話記錄：{archive_file} 保留[/dim]".format(
+                        archive_file=stats['archive_file']
+                    ))
+                else:
+                    console.print("\n[dim]已取消[/dim]")
+
                 continue
+
+            elif user_input.lower() == '/clear-memory':
+                # 手動清理記憶體（調用新的處理函數）
+                return handle_clear_memory_command(chat_logger)
+
+            elif user_input.lower() == '/memory-stats':
+                # 顯示記憶體統計（調用新的處理函數）
+                return handle_memory_stats_command(chat_logger)
+
+            elif user_input.lower() == '/help-memory':
+                # 顯示記憶體管理說明（調用新的處理函數）
+                return handle_memory_help_command()
+
+            elif user_input.lower() == '/checkpoints':
+                # 列出所有檢查點
+                return handle_checkpoints_command()
+
+            elif user_input.lower().startswith('/rewind'):
+                # 回溯至檢查點
+                parts = user_input.split(maxsplit=1)
+                checkpoint_id = parts[1] if len(parts) > 1 else ""
+                return handle_rewind_command(checkpoint_id)
+
+            elif user_input.lower().startswith('/checkpoint'):
+                # 建立手動檢查點
+                parts = user_input.split(maxsplit=1)
+                description = parts[1] if len(parts) > 1 else ""
+                return handle_checkpoint_command(description)
+
+            elif user_input.lower() == '/help-checkpoint':
+                # 顯示檢查點系統說明
+                return handle_checkpoint_help_command()
 
             elif user_input.lower() == 'cache':
                 if not CACHE_ENABLED:
@@ -2078,7 +1549,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             ttl_hours=ttl_hours
                         )
                     except Exception as e:
-                        console.print(f"[red]建立失敗：{e}[/red]")
+                        console.print(f"[dim magenta]建立失敗：{e}[/red]")
 
                 elif cache_choice == '3':
                     cache_id = input("輸入要刪除的快取名稱或 ID: ").strip()
@@ -2199,7 +1670,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 console.print(f"  100 次費用：NT$ {cost_twd*100:.2f}")
                                 console.print(f"\n  費率：NT$ {input_price * USD_TO_TWD:.4f} / 1K tokens")
                             except Exception as e:
-                                console.print(f"[red]計算失敗：{e}[/red]")
+                                console.print(f"[dim magenta]計算失敗：{e}[/red]")
                         else:
                             console.print("[magenta]計價功能未啟用[/magenta]")
                     else:
@@ -2276,7 +1747,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             cg = CodeGemini()
                             cg.print_status()
                         except Exception as e:
-                            console.print(f"[red]錯誤：{e}[/red]")
+                            console.print(f"[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif cli_choice == '2':
@@ -2287,9 +1758,9 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             try:
                                 subprocess.run([str(script_path)], check=True)
                             except Exception as e:
-                                console.print(f"[red]啟動失敗：{e}[/red]")
+                                console.print(f"[dim magenta]啟動失敗：{e}[/red]")
                         else:
-                            console.print(f"[red]腳本不存在：{script_path}[/red]")
+                            console.print(f"[dim magenta]腳本不存在：{script_path}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif cli_choice == '3':
@@ -2300,9 +1771,9 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             try:
                                 subprocess.run([str(script_path)], check=True)
                             except Exception as e:
-                                console.print(f"[red]啟動失敗：{e}[/red]")
+                                console.print(f"[dim magenta]啟動失敗：{e}[/red]")
                         else:
-                            console.print(f"[red]腳本不存在：{script_path}[/red]")
+                            console.print(f"[dim magenta]腳本不存在：{script_path}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif cli_choice == '4':
@@ -2321,23 +1792,23 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 if cg.cli_manager.install():
                                     console.print("[bright_magenta]✓ 安裝成功[/bright_magenta]")
                                 else:
-                                    console.print("[red]✗ 安裝失敗[/red]")
+                                    console.print("[dim magenta]✗ 安裝失敗[/red]")
                             elif install_choice == '2':
                                 if cg.cli_manager.update():
                                     console.print("[bright_magenta]✓ 更新成功[/bright_magenta]")
                                 else:
-                                    console.print("[red]✗ 更新失敗[/red]")
+                                    console.print("[dim magenta]✗ 更新失敗[/red]")
                             elif install_choice == '3':
                                 confirm = input("確定要卸載 Gemini CLI？(yes/no): ").strip().lower()
                                 if confirm == 'yes':
                                     if cg.cli_manager.uninstall():
                                         console.print("[bright_magenta]✓ 卸載成功[/bright_magenta]")
                                     else:
-                                        console.print("[red]✗ 卸載失敗[/red]")
+                                        console.print("[dim magenta]✗ 卸載失敗[/red]")
                                 else:
                                     console.print("[magenta]已取消[/magenta]")
                         except Exception as e:
-                            console.print(f"[red]錯誤：{e}[/red]")
+                            console.print(f"[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif cli_choice == '5':
@@ -2347,35 +1818,33 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             if cg.api_key_manager.setup_interactive():
                                 console.print("[bright_magenta]✓ API Key 設定完成[/bright_magenta]")
                             else:
-                                console.print("[red]✗ API Key 設定失敗[/red]")
+                                console.print("[dim magenta]✗ API Key 設定失敗[/red]")
                         except Exception as e:
-                            console.print(f"[red]錯誤：{e}[/red]")
+                            console.print(f"[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                 continue
 
             elif user_input.lower() == 'config':
-                # 配置管理選單
-                try:
-                    # 動態導入配置管理器
-                    import sys
-                    from pathlib import Path
-                    config_path = Path(__file__).parent / "CodeGemini"
-                    sys.path.insert(0, str(config_path))
+                # 配置管理選單（使用已載入的配置管理器）
+                if codegemini_config_manager is not None:
+                    try:
+                        from config_manager import interactive_config_menu
 
-                    from config_manager import ConfigManager, interactive_config_menu
+                        # 使用已載入的配置管理器
+                        interactive_config_menu(codegemini_config_manager)
 
-                    # 建立或載入配置管理器
-                    config_mgr = ConfigManager()
+                        # 配置更新後重新載入
+                        codegemini_config = codegemini_config_manager.get_codebase_embedding_config()
+                        console.print("\n[bright_magenta]✓ 配置已更新（重啟程式後生效）[/bright_magenta]")
 
-                    # 進入互動式配置選單
-                    interactive_config_menu(config_mgr)
-
-                except ImportError as e:
-                    console.print(f"[red]✗ 無法載入配置管理器: {e}[/red]")
-                    console.print("[magenta]請確認 CodeGemini/config_manager.py 存在[/magenta]")
-                except Exception as e:
-                    console.print(f"[red]✗ 配置管理錯誤: {e}[/red]")
+                    except Exception as e:
+                        console.print(f"[dim magenta]✗ 配置管理錯誤: {e}[/red]")
+                else:
+                    console.print("[dim magenta]✗ CodeGemini 配置管理器未載入[/red]")
+                    console.print("[magenta]請確認：[/magenta]")
+                    console.print("[magenta]  1. CodeGemini 模組已安裝[/magenta]")
+                    console.print("[magenta]  2. CodeGemini/config_manager.py 存在[/magenta]")
 
                 continue
 
@@ -2460,7 +1929,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 os.system(f'open "{file_path}"')
 
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '1' and FLOW_ENGINE_ENABLED:
@@ -2529,7 +1998,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             else:
                                 console.print("\n[magenta]已取消生成[/magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
 
                         input("\n按 Enter 繼續...")
 
@@ -2619,7 +2088,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             output_path = processor.extract_audio(video_path, format=audio_format)
                             console.print(f"\n[bright_magenta]✅ 音訊已提取：{output_path}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '8' and AUDIO_PROCESSOR_ENABLED:
@@ -2648,7 +2117,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             output_path = processor.merge_audio(video_path, audio_path, replace=replace_mode)
                             console.print(f"\n[bright_magenta]✅ 音訊已合併：{output_path}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '9' and AUDIO_PROCESSOR_ENABLED:
@@ -2677,7 +2146,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             output_path = processor.adjust_volume(file_path, volume)
                             console.print(f"\n[bright_magenta]✅ 音量已調整：{output_path}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '10' and AUDIO_PROCESSOR_ENABLED:
@@ -2715,7 +2184,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             )
                             console.print(f"\n[bright_magenta]✅ 背景音樂已添加：{output_path}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '11' and AUDIO_PROCESSOR_ENABLED:
@@ -2743,7 +2212,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             output_path = processor.fade_in_out(file_path, fade_in=fade_in, fade_out=fade_out)
                             console.print(f"\n[bright_magenta]✅ 淡入淡出已完成：{output_path}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '12' and IMAGEN_GENERATOR_ENABLED:
@@ -2786,7 +2255,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 for path in output_paths:
                                     os.system(f'open "{path}"')
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '13' and IMAGEN_GENERATOR_ENABLED:
@@ -2817,7 +2286,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             if open_img == 'y':
                                 os.system(f'open "{output_path}"')
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '14' and IMAGEN_GENERATOR_ENABLED:
@@ -2841,7 +2310,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             if open_img == 'y':
                                 os.system(f'open "{output_path}"')
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '15' and VIDEO_EFFECTS_ENABLED:
@@ -2866,7 +2335,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             console.print(f"\n[bright_magenta]✅ 影片已裁切：{output_path}[/bright_magenta]")
                             console.print("[dim]提示：使用 -c copy 無損裁切，保持原始品質[/dim]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '16' and VIDEO_EFFECTS_ENABLED:
@@ -2919,7 +2388,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             console.print(f"\n[bright_magenta]✅ 濾鏡已套用：{output_path}[/bright_magenta]")
                             console.print("[dim]注意：濾鏡需要重新編碼，已使用高品質設定[/dim]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '17' and VIDEO_EFFECTS_ENABLED:
@@ -2963,7 +2432,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             console.print(f"\n[bright_magenta]✅ 速度已調整：{output_path}[/bright_magenta]")
                             console.print("[dim]注意：同時調整影片和音訊速度，已使用高品質設定[/dim]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '18' and VIDEO_EFFECTS_ENABLED:
@@ -3020,7 +2489,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             console.print(f"\n[bright_magenta]✅ 浮水印已添加：{output_path}[/bright_magenta]")
                             console.print("[dim]注意：添加浮水印需要重新編碼，已使用高品質設定[/dim]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     elif media_choice == '19' and SUBTITLE_GENERATOR_ENABLED:
@@ -3087,7 +2556,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
                                 console.print(f"\n[bright_magenta]✅ 燒錄完成：{video_with_subs}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                             import traceback
                             traceback.print_exc()
                         input("\n按 Enter 繼續...")
@@ -3113,7 +2582,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             output_path = generator.burn_subtitles(video_path, subtitle_path)
                             console.print(f"\n[bright_magenta]✅ 字幕已燒錄：{output_path}[/bright_magenta]")
                         except Exception as e:
-                            console.print(f"\n[red]錯誤：{e}[/red]")
+                            console.print(f"\n[dim magenta]錯誤：{e}[/red]")
                         input("\n按 Enter 繼續...")
 
                     else:
@@ -3169,14 +2638,14 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                         test_script = Path(__file__).parent / "testTool" / script_name
 
                         if not test_script.exists():
-                            console.print(f"[red]錯誤：找不到 testTool/{script_name}[/red]")
+                            console.print(f"[dim magenta]錯誤：找不到 testTool/{script_name}[/red]")
                         else:
                             try:
                                 subprocess.run([sys.executable, str(test_script)], check=True)
                             except subprocess.CalledProcessError:
                                 console.print(f"[magenta]測試完成（部分項目未通過）[/magenta]")
                             except Exception as e:
-                                console.print(f"[red]執行錯誤：{e}[/red]")
+                                console.print(f"[dim magenta]執行錯誤：{e}[/red]")
 
                         input("\n按 Enter 繼續...")
 
@@ -3228,7 +2697,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                     console.print("\n[magenta]⚠️  未找到相關對話[/magenta]")
                                     console.print("[dim]   提示：對話會在 EMBEDDING_AUTO_SAVE_CONVERSATIONS = True 時自動儲存[/dim]")
                             except Exception as e:
-                                console.print(f"\n[red]✗ 搜尋錯誤：{e}[/red]")
+                                console.print(f"\n[dim magenta]✗ 搜尋錯誤：{e}[/red]")
                                 import traceback
                                 traceback.print_exc()
                         else:
@@ -3281,7 +2750,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                             console.print("\n" + "=" * 60)
 
                         except Exception as e:
-                            console.print(f"\n[red]✗ 獲取統計失敗：{e}[/red]")
+                            console.print(f"\n[dim magenta]✗ 獲取統計失敗：{e}[/red]")
                             import traceback
                             traceback.print_exc()
 
@@ -3305,7 +2774,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 monitor.print_summary()
 
                         except Exception as e:
-                            console.print(f"[red]✗ 獲取性能摘要失敗：{e}[/red]")
+                            console.print(f"[dim magenta]✗ 獲取性能摘要失敗：{e}[/red]")
 
                         input("\n按 Enter 繼續...")
 
@@ -3327,7 +2796,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 monitor.print_bottleneck_report(top_n=10)
 
                         except Exception as e:
-                            console.print(f"[red]✗ 獲取瓶頸分析失敗：{e}[/red]")
+                            console.print(f"[dim magenta]✗ 獲取瓶頸分析失敗：{e}[/red]")
 
                         input("\n按 Enter 繼續...")
 
@@ -3357,7 +2826,7 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                                 console.print(f"[dim]   包含 {summary['total_operations']} 個操作的詳細統計資料[/dim]")
 
                         except Exception as e:
-                            console.print(f"[red]✗ 匯出報告失敗：{e}[/red]")
+                            console.print(f"[dim magenta]✗ 匯出報告失敗：{e}[/red]")
 
                         input("\n按 Enter 繼續...")
 
@@ -3369,25 +2838,13 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
 
             # 一般對話訊息 - 完整處理流程
             # 1. 解析快取即時控制
-            user_input, cache_action = parse_cache_control(user_input, auto_cache_mgr)
+            user_input, cache_action = module_loader.get("cache").parse_cache_control(user_input, auto_cache_mgr)
 
             # 2. 解析思考模式配置
-            user_input, use_thinking, thinking_budget, max_output_tokens = parse_thinking_config(user_input, model_name)
+            user_input, use_thinking, thinking_budget, max_output_tokens = module_loader.get("thinking").parse_thinking_config(user_input, model_name)
 
             # 3. 處理檔案附加（文字檔直接讀取，媒體檔上傳API）
-            user_input, uploaded_files = process_file_attachments(user_input)
-
-            # 3.5. 顯示相關對話建議（自動整合）
-            if CONVERSATION_SUGGESTION_ENABLED and global_conversation_suggestion:
-                try:
-                    suggestions = global_conversation_suggestion.get_suggestions(
-                        current_question=user_input,
-                        session_id=None
-                    )
-                    if suggestions:
-                        global_conversation_suggestion.display_suggestions(suggestions, show_full=False)
-                except Exception as e:
-                    logger.debug(f"對話建議顯示失敗: {e}")
+            user_input, uploaded_files = module_loader.get("file_manager").process_file_attachments(user_input)
 
             # 4. 處理快取即時動作
             if cache_action == 'create_now':
@@ -3396,6 +2853,28 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                     auto_cache_mgr.create_cache(model_name)
                 else:
                     print("⚠️  尚無對話內容可建立快取")
+
+            # 4.5. 智能觸發檢測（新增）
+            if SMART_TRIGGERS_ENABLED:
+                try:
+                    # 檢測任務規劃意圖
+                    if detect_task_planning_intent(user_input):
+                        console.print("[dim magenta]💡 偵測到任務規劃需求，增強提示中...[/dim magenta]")
+                        user_input = enhance_prompt_with_context(user_input, intent="task_planning")
+
+                    # 檢測網頁搜尋意圖
+                    elif detect_web_search_intent(user_input):
+                        console.print("[dim magenta]💡 偵測到網頁搜尋需求，增強提示中...[/dim magenta]")
+                        user_input = enhance_prompt_with_context(user_input, intent="web_search")
+
+                    # 檢測代碼分析意圖
+                    elif detect_code_analysis_intent(user_input):
+                        console.print("[dim magenta]💡 偵測到代碼分析需求，增強提示中...[/dim magenta]")
+                        user_input = enhance_prompt_with_context(user_input, intent="code_analysis")
+
+                except Exception as e:
+                    logger.warning(f"智能觸發器執行失敗: {e}")
+                    # 靜默失敗，不影響正常對話
 
             # 5. 發送訊息
             response = send_message(
@@ -3430,18 +2909,6 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
                 except Exception as e:
                     logger.debug(f"Embedding 儲存對話失敗: {e}")
 
-            # 6.5b. 儲存對話到相關對話建議系統（自動整合）
-            if CONVERSATION_SUGGESTION_ENABLED and global_conversation_suggestion:
-                try:
-                    session_id = f"chat_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                    global_conversation_suggestion.add_conversation(
-                        question=user_input,
-                        answer=response,
-                        session_id=session_id
-                    )
-                except Exception as e:
-                    logger.debug(f"對話建議儲存失敗: {e}")
-
             # 6.6. 更新背景待辦事項追蹤器（無痕整合）
             if background_todo_tracker and background_todo_tracker.enabled:
                 try:
@@ -3468,16 +2935,347 @@ def chat(model_name: str, chat_logger: ChatLogger, auto_cache_config: dict, code
             print(f"\n錯誤：{e}")
 
 
+# ==========================================
+# 記憶體管理命令處理函數
+# ==========================================
+
+def handle_clear_memory_command(chat_logger) -> str:
+    """
+    處理 /clear-memory 命令
+
+    手動清理記憶體，將對話存檔到磁碟
+
+    Args:
+        chat_logger 實例
+
+    Returns:
+        'clear_memory' - 指示主迴圈記憶體已清理
+        'continue' - 指示繼續對話（取消或無需清理）
+    """
+    from rich.prompt import Confirm
+
+    # 獲取當前統計
+    stats = chat_logger.conversation_manager.get_stats()
+    active = stats['active_messages']
+
+    # 顯示當前狀態
+    console.print(f"\n[plum]當前活躍訊息數: {active} 條[/plum]")
+
+    if active == 0:
+        console.print("[dim]記憶體已是空的，無需清理[/dim]\n")
+        return 'continue'
+
+    # 確認清理（保留對話記錄）
+    console.print("\n[yellow]⚠️  清理記憶體將：[/yellow]")
+    console.print("  • 保留當前對話到磁碟")
+    console.print("  • 釋放記憶體中的歷史記錄")
+    console.print("  • 不影響已保存的對話日誌\n")
+
+    if Confirm.ask("[plum]確定要清理記憶體嗎？[/plum]", default=False):
+        # 觸發存檔（強制存檔所有訊息）
+        if hasattr(chat_logger.conversation_manager, '_archive_old_messages'):
+            # 先存檔所有訊息
+            if len(chat_logger.conversation_manager.history) > 0:
+                try:
+                    # 手動存檔所有訊息
+                    to_archive = chat_logger.conversation_manager.history.copy()
+                    archive_file = chat_logger.conversation_manager.archive_file
+
+                    with open(archive_file, 'a', encoding='utf-8') as f:
+                        for msg in to_archive:
+                            json.dump(msg, f, ensure_ascii=False)
+                            f.write('\n')
+
+                    chat_logger.conversation_manager.archived_count += len(to_archive)
+                    cleared_count = len(to_archive)
+
+                    # 清空活躍記憶體
+                    chat_logger.conversation_manager.history = []
+
+                    console.print(f"\n[green]✓ 已清理 {cleared_count} 條訊息[/green]")
+                    console.print("[dim]記憶體已釋放，對話已保存到磁碟[/dim]\n")
+                except Exception as e:
+                    console.print(f"[red]✗ 清理失敗：{e}[/red]\n")
+                    return 'continue'
+
+        return 'clear_memory'
+    else:
+        console.print("[dim]已取消[/dim]\n")
+        return 'continue'
+
+
+def handle_memory_stats_command(chat_logger) -> str:
+    """
+    處理 /memory-stats 命令
+
+    顯示記憶體使用統計資訊
+
+    Args:
+        chat_logger 實例
+
+    Returns:
+        'show_memory_stats' - 指示主迴圈統計已顯示
+    """
+    from rich.table import Table
+
+    # 獲取統計資訊
+    stats = chat_logger.conversation_manager.get_stats()
+    mem_info = chat_logger.conversation_manager.check_memory_usage()
+
+    # 建立統計表格
+    table = Table(title="[plum]📊 記憶體統計[/plum]", show_header=True)
+    table.add_column("項目", style="plum")
+    table.add_column("數值", style="orchid1", justify="right")
+
+    table.add_row("活躍訊息", f"{stats['active_messages']} 條")
+    table.add_row("已存檔訊息", f"{stats['archived_messages']} 條")
+    table.add_row("總訊息數", f"{stats['total_messages']} 條")
+
+    # 顯示記憶體上限（如果不是無限模式）
+    if stats['max_history'] != float('inf'):
+        table.add_row("記憶體上限", f"{int(stats['max_history'])} 條")
+    else:
+        table.add_row("記憶體上限", "無限 ⚠️")
+
+    if mem_info:
+        table.add_row("", "")  # 分隔線
+        table.add_row("當前記憶體", f"{mem_info['memory_gb']:.2f} GB")
+        table.add_row("警告閾值", f"{mem_info['threshold_gb']:.2f} GB")
+        status = "[yellow]⚠️ 警告[/yellow]" if mem_info['warning'] else "[green]✓ 正常[/green]"
+        table.add_row("記憶體狀態", status)
+
+    console.print("\n")
+    console.print(table)
+    console.print(f"\n[dim]存檔位置: {stats['archive_file']}[/dim]\n")
+
+    return 'show_memory_stats'
+
+
+def handle_memory_help_command() -> str:
+    """
+    處理 /help-memory 命令
+
+    顯示記憶體管理命令的說明
+
+    Returns:
+        'continue' - 指示繼續對話
+    """
+    from rich import box
+
+    help_text = """[plum]記憶體管理命令[/plum]
+
+[orchid1]/clear-memory[/orchid1]
+  手動清理記憶體，保存對話到磁碟
+  • 不會丟失任何對話記錄
+  • 釋放記憶體空間
+  • 需要確認操作
+
+[orchid1]/memory-stats[/orchid1]
+  查看記憶體使用統計
+  • 活躍訊息數量
+  • 已存檔訊息數量
+  • 當前記憶體使用量
+
+[orchid1]/help-memory[/orchid1]
+  顯示此說明訊息
+
+[dim]提示：系統會自動管理記憶體，僅在收到警告時才需要手動清理。[/dim]
+"""
+
+    console.print(Panel(help_text, border_style="plum", box=box.ROUNDED))
+    return 'continue'
+
+
+# ============================================================================
+# 檢查點系統命令處理
+# ============================================================================
+
+def handle_checkpoints_command() -> str:
+    """
+    處理 /checkpoints 命令
+
+    顯示所有檢查點清單
+
+    Returns:
+        'continue' - 指示繼續對話
+    """
+    if not CHECKPOINT_ENABLED:
+        console.print("[yellow]⚠️  檢查點系統未啟用[/yellow]")
+        return 'continue'
+
+    try:
+        manager = get_checkpoint_manager()
+        manager.show_checkpoints_ui(limit=20)
+        console.print("\n[dim]使用 /rewind <ID> 回溯至指定檢查點[/dim]")
+        console.print("[dim]使用 /checkpoint <描述> 建立手動檢查點[/dim]\n")
+    except Exception as e:
+        console.print(f"[red]✗[/red] 檢查點系統錯誤: {e}")
+
+    return 'continue'
+
+
+def handle_rewind_command(checkpoint_id: str) -> str:
+    """
+    處理 /rewind 命令
+
+    回溯至指定檢查點
+
+    Args:
+        checkpoint_id: 檢查點 ID（可為部分 ID）
+
+    Returns:
+        'continue' - 指示繼續對話
+    """
+    if not CHECKPOINT_ENABLED:
+        console.print("[yellow]⚠️  檢查點系統未啟用[/yellow]")
+        return 'continue'
+
+    if not checkpoint_id:
+        console.print("[yellow]請指定檢查點 ID[/yellow]")
+        console.print("[dim]範例: /rewind a1b2c3d4[/dim]\n")
+        return 'continue'
+
+    try:
+        manager = get_checkpoint_manager()
+        success = manager.rewind_to_checkpoint(checkpoint_id, confirm=True)
+
+        if success:
+            console.print("\n[green]✓[/green] 回溯成功！")
+        else:
+            console.print("\n[yellow]回溯失敗或已取消[/yellow]")
+
+    except Exception as e:
+        console.print(f"[red]✗[/red] 回溯錯誤: {e}")
+
+    return 'continue'
+
+
+def handle_checkpoint_command(description: str = "") -> str:
+    """
+    處理 /checkpoint 命令
+
+    建立手動檢查點
+
+    Args:
+        description: 檢查點描述
+
+    Returns:
+        'continue' - 指示繼續對話
+    """
+    if not CHECKPOINT_ENABLED:
+        console.print("[yellow]⚠️  檢查點系統未啟用[/yellow]")
+        return 'continue'
+
+    try:
+        from rich.prompt import Prompt
+
+        # 如果沒有提供描述，詢問使用者
+        if not description:
+            description = Prompt.ask("\n[cyan]請輸入檢查點描述[/cyan]", default="手動檢查點")
+
+        # 掃描當前專案檔案（這裡簡化為空列表，實際應掃描最近修改的檔案）
+        # TODO: 整合檔案監控系統，自動偵測變更的檔案
+        console.print(f"\n[cyan]建立檢查點...[/cyan]")
+        console.print(f"[dim]描述: {description}[/dim]\n")
+
+        manager = get_checkpoint_manager()
+
+        # 暫時建立空檢查點（未來整合檔案監控）
+        from gemini_checkpoint import Checkpoint, FileChange
+        checkpoint = manager.create_checkpoint(
+            file_changes=[],  # 空變更列表
+            description=description,
+            checkpoint_type=CheckpointType.MANUAL
+        )
+
+        console.print(f"[green]✓[/green] 檢查點已建立: [cyan]{checkpoint.id[:8]}[/cyan]")
+        console.print(f"[dim]使用 /checkpoints 查看所有檢查點[/dim]\n")
+
+    except Exception as e:
+        console.print(f"[red]✗[/red] 建立檢查點失敗: {e}")
+
+    return 'continue'
+
+
+def handle_checkpoint_help_command() -> str:
+    """
+    處理 /help-checkpoint 命令
+
+    顯示檢查點系統說明
+
+    Returns:
+        'continue' - 指示繼續對話
+    """
+    from rich import box
+
+    help_text = """[cyan]檢查點系統命令[/cyan]
+
+[bright_cyan]/checkpoints[/bright_cyan]
+  列出所有檢查點
+  • 顯示檢查點 ID、時間、描述
+  • 顯示檔案變更數量
+  • 最多顯示 20 個最近的檢查點
+
+[bright_cyan]/rewind <ID>[/bright_cyan]
+  回溯至指定檢查點
+  • 恢復檔案至檢查點狀態
+  • 支援部分 ID 匹配（例如：a1b2c3d4）
+  • 需要確認操作
+
+[bright_cyan]/checkpoint <描述>[/bright_cyan]
+  建立手動檢查點
+  • 保存當前狀態
+  • 可添加自訂描述
+  • 用於重要變更前的備份
+
+[bright_cyan]/help-checkpoint[/bright_cyan]
+  顯示此說明訊息
+
+[bold yellow]檢查點類型：[/bold yellow]
+  🤖 [dim]auto[/dim]     - 自動檢查點（檔案變更前）
+  👤 [dim]manual[/dim]   - 手動檢查點（使用者建立）
+  📸 [dim]snapshot[/dim] - 完整快照（非增量）
+  🌿 [dim]branch[/dim]   - 分支檢查點（實驗性變更）
+
+[dim]提示：檢查點儲存於 .checkpoints/ 目錄，使用 SQLite + gzip 壓縮[/dim]
+"""
+
+    console.print(Panel(help_text, border_style="cyan", box=box.ROUNDED))
+    return 'continue'
+
+
 def main():
     """主程式"""
     console.print("[bold bright_magenta]Gemini 對話工具（新 SDK 版本）[/bold bright_magenta]\n")
 
+    # 🔴 無限記憶體模式警告
+    if config.UNLIMITED_MEMORY_MODE:
+        console.print(Panel(
+            "[bold red]🔴 警告：無限記憶體模式已啟用！[/bold red]\n\n"
+            "[yellow]您已選擇「我就是要用爆記憶體」模式。[/yellow]\n\n"
+            "記憶體管理功能已完全停用：\n"
+            "  ❌ 自動清理機制已停用\n"
+            "  ❌ 記憶體警告已停用\n"
+            "  ❌ 對話歷史限制已移除\n\n"
+            "[bold]風險：[/bold]\n"
+            "  • 長時間運行可能導致記憶體溢出（OOM）\n"
+            "  • 可能導致系統變慢或程式崩潰\n"
+            "  • 記憶體使用可能超過 4GB+\n\n"
+            "[dim]如需停用無限模式，請在 config.py 中設定：[/dim]\n"
+            "[dim]UNLIMITED_MEMORY_MODE = False[/dim]\n\n"
+            "[bright_magenta]使用 /memory-stats 命令監控記憶體使用[/bright_magenta]",
+            border_style="red",
+            title="⚠️ 危險模式警告",
+            padding=(1, 2)
+        ))
+        console.print()  # 空行
+
     # 建立對話記錄器
-    chat_logger = ChatLogger()
+    chat_logger = module_loader.get("logger").ChatLogger()
 
     # 初始化思考簽名管理器
     global global_thinking_signature_manager
-    global_thinking_signature_manager = ThinkingSignatureManager()
+    global_thinking_signature_manager = module_loader.get("thinking").ThinkingSignatureManager()
 
     # 初始化 Codebase Embedding（如果啟用）
     codebase_embedding = None
@@ -3494,7 +3292,7 @@ def main():
             codebase_embedding = None
 
     # 選擇模型
-    current_model = select_model()
+    current_model = module_loader.get("model_selector").select_model()
 
     # 配置自動快取
     auto_cache_config = setup_auto_cache(current_model)
@@ -3503,12 +3301,76 @@ def main():
         result = chat(current_model, chat_logger, auto_cache_config, codebase_embedding)
 
         if result == 'switch_model':
-            current_model = select_model()
+            current_model = module_loader.get("model_selector").select_model()
             # 切換模型後重新配置快取（因為不同模型有不同門檻）
             auto_cache_config = setup_auto_cache(current_model)
+        elif result == 'clear_memory':
+            # 記憶體已清理，繼續對話
+            console.print("[green]✓ 記憶體清理完成，繼續對話[/green]\n")
+            continue
+        elif result == 'show_memory_stats':
+            # 統計已顯示，繼續對話
+            continue
+        elif result == 'continue':
+            # 繼續對話（用於取消操作或顯示說明後）
+            continue
         else:
             break
 
 
 if __name__ == "__main__":
+    import argparse
+
+    # 命令列參數解析
+    parser = argparse.ArgumentParser(
+        description='ChatGemini_SakiTool - Gemini 對話工具',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+使用範例:
+  python gemini_chat.py                # 正常啟動對話
+  python gemini_chat.py --config       # 啟動互動式配置精靈
+  python gemini_chat.py --setup        # 同 --config（別名）
+
+互動式配置精靈說明:
+  首次使用或想要調整配置時，可以使用 --config 參數啟動友善的配置引導介面。
+  配置精靈會引導您：
+  - 選擇預設模型
+  - 啟用/停用功能模組（計價、快取、翻譯等）
+  - 設定進階參數（匯率、快取門檻等）
+  - 自動生成 config.py 檔案
+
+  配置完成後，您隨時可以手動編輯 config.py 調整設定。
+        """
+    )
+    parser.add_argument(
+        '--config', '--setup',
+        action='store_true',
+        dest='config_mode',
+        help='啟動互動式配置精靈（首次使用或調整設定時使用）'
+    )
+
+    args = parser.parse_args()
+
+    # 如果使用 --config 參數，啟動互動式配置
+    if args.config_mode:
+        console.print(Panel(
+            "[bold magenta]互動式配置模式[/bold magenta]\n\n"
+            "[dim]此模式將引導您完成配置設定。\n"
+            "配置完成後，請再次執行程式開始對話。[/dim]",
+            title="[bold magenta]🎛️  配置精靈[/bold magenta]",
+            border_style="magenta"
+        ))
+
+        config_ui = module_loader.get("config_ui").ConfigUI()
+        result = config_ui.interactive_setup()
+
+        if result:
+            console.print("\n[bold green]✅ 配置完成！[/bold green]")
+            console.print("[dim]請再次執行 python gemini_chat.py 開始對話[/dim]\n")
+        else:
+            console.print("\n[magenta]配置已取消[/yellow]\n")
+
+        sys.exit(0)
+
+    # 正常模式：啟動對話
     main()

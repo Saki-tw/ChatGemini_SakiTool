@@ -406,7 +406,7 @@ class ErrorDiagnostics:
             solutions: 解決方案列表
         """
         # 顯示錯誤訊息
-        console.print(f"\n[red]✗ {error_message}[/red]\n")
+        console.print(f"\n[dim magenta]✗ {error_message}[/red]\n")
 
         if not solutions:
             console.print("[dim]無可用的自動解決方案[/dim]")
@@ -416,16 +416,16 @@ class ErrorDiagnostics:
         solutions.sort(key=lambda s: s.priority)
 
         # 顯示解決方案
-        console.print("[cyan]💡 建議的解決方案：[/cyan]\n")
+        console.print("[magenta]💡 建議的解決方案：[/magenta]\n")
 
         for i, solution in enumerate(solutions, 1):
             # 解決方案標題
             if solution.auto_fixable:
                 icon = "🔧"
-                auto_tag = " [green](可自動修復)[/green]"
+                auto_tag = " [bright_magenta](可自動修復)[/green]"
             elif solution.command:
                 icon = "⚡"
-                auto_tag = " [yellow](一鍵執行)[/yellow]"
+                auto_tag = " [magenta](一鍵執行)[/yellow]"
             else:
                 icon = "📝"
                 auto_tag = ""
@@ -435,7 +435,7 @@ class ErrorDiagnostics:
 
             # 顯示指令
             if solution.command:
-                console.print(f"   [green]執行指令：[/green]")
+                console.print(f"   [bright_magenta]執行指令：[/green]")
                 console.print(Panel(
                     solution.command,
                     border_style="green",
@@ -444,7 +444,7 @@ class ErrorDiagnostics:
 
             # 顯示手動步驟
             if solution.manual_steps:
-                console.print(f"   [yellow]手動步驟：[/yellow]")
+                console.print(f"   [magenta]手動步驟：[/yellow]")
                 for step in solution.manual_steps:
                     console.print(f"   {step}")
 
@@ -491,7 +491,7 @@ def display_error_with_solutions(
 
 if __name__ == "__main__":
     # 測試範例
-    console.print("[bold cyan]智能錯誤診斷系統 - 測試範例[/bold cyan]\n")
+    console.print("[bold magenta]智能錯誤診斷系統 - 測試範例[/bold magenta]\n")
 
     # 模擬磁碟空間不足錯誤
     error = RuntimeError("ffmpeg: Disk quota exceeded")

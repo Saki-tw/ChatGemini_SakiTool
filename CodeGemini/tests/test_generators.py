@@ -102,14 +102,14 @@ def test_test_generator_initialization():
         gen_unittest = TestGenerator(framework="unittest")
         assert gen_unittest.framework == "unittest", "unittest 框架初始化失敗"
 
-        console.print(f"[green]✓ TestGenerator 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ TestGenerator 初始化成功[/green]")
         console.print(f"  pytest 框架：✓")
         console.print(f"  unittest 框架：✓")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -140,7 +140,7 @@ def test_code_analysis():
         assert cls.name == "Calculator", "類別名稱錯誤"
         assert len(cls.methods) >= 2, "類別方法數量不足"
 
-        console.print(f"[green]✓ 程式碼分析成功[/green]")
+        console.print(f"[bright_magenta]✓ 程式碼分析成功[/green]")
         console.print(f"  函數：{len(analysis['functions'])} 個")
         console.print(f"  類別：{len(analysis['classes'])} 個")
 
@@ -151,7 +151,7 @@ def test_code_analysis():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -175,7 +175,7 @@ def test_pytest_generation():
         assert "class TestCalculator:" in test_code, "缺少 Calculator 測試類別"
         assert "@pytest.fixture" in test_code, "缺少 fixture"
 
-        console.print(f"[green]✓ pytest 測試生成成功[/green]")
+        console.print(f"[bright_magenta]✓ pytest 測試生成成功[/green]")
         console.print(f"  包含 pytest 導入：✓")
         console.print(f"  包含測試函數：✓")
         console.print(f"  包含測試類別：✓")
@@ -187,7 +187,7 @@ def test_pytest_generation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -211,7 +211,7 @@ def test_unittest_generation():
         assert "class TestCalculator(unittest.TestCase):" in test_code, "缺少 Calculator 測試類別"
         assert "def setUp(self):" in test_code, "缺少 setUp 方法"
 
-        console.print(f"[green]✓ unittest 測試生成成功[/green]")
+        console.print(f"[bright_magenta]✓ unittest 測試生成成功[/green]")
         console.print(f"  包含 unittest 導入：✓")
         console.print(f"  包含測試類別：✓")
         console.print(f"  包含 setUp 方法：✓")
@@ -223,7 +223,7 @@ def test_unittest_generation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -241,7 +241,7 @@ def test_doc_generator_initialization():
         assert generator.project_path == Path(temp_dir), "專案路徑錯誤"
         assert len(generator.modules) == 0, "初始模組列表應為空"
 
-        console.print(f"[green]✓ DocumentationGenerator 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ DocumentationGenerator 初始化成功[/green]")
         console.print(f"  專案路徑：{generator.project_path}")
 
         # 清理
@@ -251,7 +251,7 @@ def test_doc_generator_initialization():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -274,7 +274,7 @@ def test_project_scanning():
         assert len(module.functions) == 2, "函數數量錯誤"
         assert len(module.classes) == 1, "類別數量錯誤"
 
-        console.print(f"[green]✓ 專案掃描成功[/green]")
+        console.print(f"[bright_magenta]✓ 專案掃描成功[/green]")
         console.print(f"  掃描到模組：{len(generator.modules)} 個")
         console.print(f"  函數：{len(module.functions)} 個")
         console.print(f"  類別：{len(module.classes)} 個")
@@ -286,7 +286,7 @@ def test_project_scanning():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -311,7 +311,7 @@ def test_readme_generation():
         assert "## 📦 模組清單" in readme, "缺少模組清單"
         assert "sample" in readme, "缺少 sample 模組"
 
-        console.print(f"[green]✓ README 生成成功[/green]")
+        console.print(f"[bright_magenta]✓ README 生成成功[/green]")
         console.print(f"  包含專案標題：✓")
         console.print(f"  包含專案結構：✓")
         console.print(f"  包含模組清單：✓")
@@ -323,7 +323,7 @@ def test_readme_generation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -347,7 +347,7 @@ def test_api_docs_generation():
         assert "def add" in api_docs, "缺少 add 函數文檔"
         assert "將兩個數字相加" in api_docs, "缺少函數說明"
 
-        console.print(f"[green]✓ API 文檔生成成功[/green]")
+        console.print(f"[bright_magenta]✓ API 文檔生成成功[/green]")
         console.print(f"  包含類別文檔：✓")
         console.print(f"  包含函數文檔：✓")
         console.print(f"  包含說明文字：✓")
@@ -359,7 +359,7 @@ def test_api_docs_generation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -370,7 +370,7 @@ def test_api_docs_generation():
 def main():
     """執行所有測試"""
     console.print("=" * 70)
-    console.print("[bold cyan]CodeGemini Code Generators - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini Code Generators - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -391,7 +391,7 @@ def main():
             result = test_func()
             results[test_name] = "✅ 通過" if result else "❌ 失敗"
         except Exception as e:
-            console.print(f"[red]測試異常：{e}[/red]")
+            console.print(f"[dim magenta]測試異常：{e}[/red]")
             results[test_name] = "❌ 失敗"
 
     # 顯示測試總結
@@ -410,9 +410,9 @@ def main():
     console.print(f"[bold]總計：{passed}/{total} 測試通過[/bold]")
 
     if passed < total:
-        console.print(f"\n[yellow]⚠️  {total - passed} 個測試失敗[/yellow]")
+        console.print(f"\n[magenta]⚠️  {total - passed} 個測試失敗[/yellow]")
     else:
-        console.print("\n[green]🎉 所有測試通過！Code Generators 準備就緒。[/green]")
+        console.print("\n[bright_magenta]🎉 所有測試通過！Code Generators 準備就緒。[/green]")
 
 
 if __name__ == "__main__":

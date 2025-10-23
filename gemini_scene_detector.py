@@ -62,11 +62,9 @@ class SceneDetector:
         self.preprocessor = VideoPreprocessor()
 
         if output_dir is None:
-            output_dir = os.path.join(
-                os.path.expanduser("~"),
-                "gemini_videos",
-                "scenes"
-            )
+            # 使用統一輸出目錄配置
+            from utils.path_manager import get_video_dir
+            output_dir = str(get_video_dir('scenes'))
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -90,12 +88,12 @@ class SceneDetector:
             場景列表
         """
         console.print(Panel.fit(
-            "[bold cyan]🎬 自動場景檢測[/bold cyan]",
-            border_style="cyan"
+            "[bold magenta]🎬 自動場景檢測[/bold magenta]",
+            border_style="bright_magenta"
         ))
 
         # 1. 提取關鍵幀
-        console.print(f"\n[cyan]📹 分析影片：{os.path.basename(video_path)}[/cyan]")
+        console.print(f"\n[magenta]📹 分析影片：{os.path.basename(video_path)}[/magenta]")
 
         # 獲取影片資訊
         video_info = self.preprocessor.get_video_info(video_path)
@@ -107,10 +105,10 @@ class SceneDetector:
         # 修改 extract_keyframes 為支持更多幀數
         keyframes = self._extract_uniform_frames(video_path, num_keyframes, duration)
 
-        console.print(f"[green]✓ 已提取 {len(keyframes)} 個關鍵幀[/green]\n")
+        console.print(f"[bright_magenta]✓ 已提取 {len(keyframes)} 個關鍵幀[/green]\n")
 
         # 2. 分析每個幀的內容
-        console.print("[cyan]🤖 使用 Gemini Vision 分析關鍵幀...[/cyan]\n")
+        console.print("[magenta]🤖 使用 Gemini Vision 分析關鍵幀...[/magenta]\n")
 
         frame_descriptions = []
         total_cost = 0.0
@@ -139,13 +137,13 @@ class SceneDetector:
                 progress.update(task, advance=1)
 
         # 3. 檢測場景變化
-        console.print("\n[cyan]🔍 檢測場景變化...[/cyan]")
+        console.print("\n[magenta]🔍 檢測場景變化...[/magenta]")
         scenes = self._detect_scene_changes(
             frame_descriptions,
             similarity_threshold
         )
 
-        console.print(f"[green]✓ 檢測到 {len(scenes)} 個場景[/green]\n")
+        console.print(f"[bright_magenta]✓ 檢測到 {len(scenes)} 個場景[/green]\n")
 
         # 4. 顯示成本
         if PRICING_ENABLED and show_cost and global_pricing_calculator:
@@ -206,7 +204,7 @@ class SceneDetector:
                     'frame_number': i + 1
                 })
             except subprocess.CalledProcessError as e:
-                console.print(f"[yellow]警告：提取幀 {i+1} 失敗[/yellow]")
+                console.print(f"[magenta]警告：提取幀 {i+1} 失敗[/yellow]")
 
         return frame_paths
 
@@ -265,7 +263,7 @@ class SceneDetector:
             return response.text.strip()
 
         except Exception as e:
-            console.print(f"[yellow]警告：分析幀失敗：{e}[/yellow]")
+            console.print(f"[magenta]警告：分析幀失敗：{e}[/yellow]")
             return "無法分析"
 
     def _detect_scene_changes(
@@ -396,11 +394,12 @@ class SceneDetector:
         """
         table = Table(title="🎬 場景列表", show_header=True, header_style="bold magenta")
 
-        table.add_column("#", style="dim", width=4)
-        table.add_column("時間範圍", width=20)
-        table.add_column("時長", width=10)
-        table.add_column("描述", width=50)
-        table.add_column("關鍵元素", width=30)
+        console_width = console.width or 120
+        table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
+        table.add_column("時間範圍", width=max(18, int(console_width * 0.15)))
+        table.add_column("時長", width=max(8, int(console_width * 0.08)))
+        table.add_column("描述", width=max(35, int(console_width * 0.40)))
+        table.add_column("關鍵元素", width=max(20, int(console_width * 0.25)))
 
         for scene in scenes:
             duration = scene.end_time - scene.start_time
@@ -478,7 +477,7 @@ class SceneDetector:
                         f.write(f"關鍵元素：{', '.join(scene.key_elements)}\n")
                     f.write(f"\n")
 
-        console.print(f"[green]✓ 場景索引已保存：{output_file}[/green]")
+        console.print(f"[bright_magenta]✓ 場景索引已保存：{output_file}[/green]")
         return output_file
 
     def _format_time(self, seconds: float) -> str:
@@ -505,7 +504,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(f"[red]錯誤：找不到影片檔案：{args.video}[/red]")
+        console.print(f"[dim magenta]錯誤：找不到影片檔案：{args.video}[/red]")
         return
 
     # 創建檢測器

@@ -79,14 +79,15 @@ class ApprovalWorkflow:
         Args:
             changes: 檔案變更列表
         """
-        console.print("\n[bold cyan]📝 變更預覽[/bold cyan]\n")
+        console.print("\n[bold magenta]📝 變更預覽[/bold magenta]\n")
 
         # 建立變更表格
-        table = Table(show_header=True, header_style="bold cyan")
-        table.add_column("動作", style="yellow", width=10)
+        table = Table(show_header=True, header_style="bold bright_magenta")
+        console_width = console.width or 120
+        table.add_column("動作", style="yellow", width=max(10, int(console_width * 0.10)))
         table.add_column("檔案路徑", style="white")
         table.add_column("變更描述", style="green")
-        table.add_column("預估行數", justify="right", style="blue")
+        table.add_column("預估行數", justify="right", style="magenta")
 
         for change in changes:
             action_emoji = {
@@ -166,16 +167,16 @@ class ApprovalWorkflow:
             all_changes.extend(step.file_changes)
 
         # 展示摘要
-        console.print(f"\n[bold cyan]任務摘要：[/bold cyan]")
+        console.print(f"\n[bold magenta]任務摘要：[/bold magenta]")
         console.print(f"  {plan.task_summary}")
-        console.print(f"\n[bold cyan]統計：[/bold cyan]")
+        console.print(f"\n[bold magenta]統計：[/bold magenta]")
         console.print(f"  • 步驟數量：{len(plan.steps)}")
         console.print(f"  • 受影響檔案：{len(plan.affected_files)}")
         console.print(f"  • 預估時間：{plan.estimated_total_time}")
 
         # 互動式確認
         while True:
-            console.print("\n[bold cyan]請選擇操作：[/bold cyan]")
+            console.print("\n[bold magenta]請選擇操作：[/bold magenta]")
             options = [
                 "[bold green]y[/bold green] - 批准並執行",
                 "[bold red]n[/bold red] - 拒絕",
@@ -185,7 +186,7 @@ class ApprovalWorkflow:
                 options.append("[bold yellow]p[/bold yellow] - 預覽變更")
 
             if allow_step_by_step and len(plan.steps) > 1:
-                options.append("[bold blue]s[/bold blue] - 分步執行")
+                options.append("[bold magenta]s[/bold magenta] - 分步執行")
 
             options.append("[bold white]c[/bold white] - 取消")
 
@@ -243,7 +244,7 @@ class ApprovalWorkflow:
             bool: 是否全部批准
         """
         plan = request.plan
-        console.print("\n[bold cyan]🔄 分步確認模式[/bold cyan]\n")
+        console.print("\n[bold magenta]🔄 分步確認模式[/bold magenta]\n")
 
         approved_steps = []
 
@@ -269,25 +270,25 @@ class ApprovalWorkflow:
 
             if approved:
                 approved_steps.append(step.step_number)
-                console.print(f"  [green]✓ 步驟 {step.step_number} 已批准[/green]")
+                console.print(f"  [bright_magenta]✓ 步驟 {step.step_number} 已批准[/green]")
             else:
-                console.print(f"  [red]✗ 步驟 {step.step_number} 已跳過[/red]")
+                console.print(f"  [dim magenta]✗ 步驟 {step.step_number} 已跳過[/red]")
 
                 # 詢問是否繼續
                 if not Confirm.ask("\n是否繼續檢視剩餘步驟？", default=True):
                     break
 
         # 摘要
-        console.print(f"\n[bold cyan]分步確認摘要：[/bold cyan]")
+        console.print(f"\n[bold magenta]分步確認摘要：[/bold magenta]")
         console.print(f"  已批准：{len(approved_steps)}/{len(plan.steps)} 個步驟")
 
         if len(approved_steps) == 0:
-            console.print("\n[yellow]沒有任何步驟被批准[/yellow]")
+            console.print("\n[magenta]沒有任何步驟被批准[/yellow]")
             request.status = ApprovalStatus.REJECTED
             return False
 
         elif len(approved_steps) < len(plan.steps):
-            console.print("\n[yellow]部分步驟被批准[/yellow]")
+            console.print("\n[magenta]部分步驟被批准[/yellow]")
 
             # 詢問是否執行已批准的步驟
             execute = Confirm.ask("\n是否執行已批准的步驟？", default=True)
@@ -301,7 +302,7 @@ class ApprovalWorkflow:
                 return False
 
         else:
-            console.print("\n[green]所有步驟已批准[/green]")
+            console.print("\n[bright_magenta]所有步驟已批准[/green]")
             request.status = ApprovalStatus.APPROVED
             return True
 
@@ -321,10 +322,10 @@ class ApprovalWorkflow:
             bool: 執行是否成功
         """
         if request.status != ApprovalStatus.APPROVED:
-            console.print("[red]錯誤：計畫尚未被批准[/red]")
+            console.print("[dim magenta]錯誤：計畫尚未被批准[/red]")
             return False
 
-        console.print("\n[bold cyan]🚀 開始執行計畫...[/bold cyan]\n")
+        console.print("\n[bold magenta]🚀 開始執行計畫...[/bold magenta]\n")
 
         if executor:
             # 使用提供的執行器
@@ -344,16 +345,16 @@ class ApprovalWorkflow:
         else:
             # 預設行為：僅顯示執行步驟（實際執行需要整合 MultiFileEditor）
             for step in request.plan.steps:
-                console.print(f"\n[cyan]執行步驟 {step.step_number}：[/cyan]{step.description}")
+                console.print(f"\n[magenta]執行步驟 {step.step_number}：[/magenta]{step.description}")
 
                 # 模擬執行
                 import time
                 time.sleep(0.5)
 
-                console.print(f"  [green]✓ 完成[/green]")
+                console.print(f"  [bright_magenta]✓ 完成[/green]")
 
             console.print("\n[bold green]✅ 所有步驟已執行（模擬模式）[/bold green]")
-            console.print("[yellow]注意：實際執行需要整合 MultiFileEditor 模組[/yellow]")
+            console.print("[magenta]注意：實際執行需要整合 MultiFileEditor 模組[/yellow]")
 
             return True
 
@@ -389,7 +390,7 @@ def main():
     """測試用主程式"""
     from .task_planner import TaskPlanner
 
-    console.print("[bold cyan]CodeGemini Approval Workflow 測試[/bold cyan]\n")
+    console.print("[bold magenta]CodeGemini Approval Workflow 測試[/bold magenta]\n")
 
     # 建立範例計畫
     try:
@@ -406,7 +407,7 @@ def main():
             console.print("\n[bold yellow]⏸️  流程已取消或拒絕[/bold yellow]")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
 

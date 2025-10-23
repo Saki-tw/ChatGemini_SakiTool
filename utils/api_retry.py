@@ -124,7 +124,7 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
     """
     error_str = str(error).lower()
 
-    console.print(f"\n[cyan]💡 解決方案：[/cyan]")
+    console.print(f"\n[magenta]💡 解決方案：[/magenta]")
 
     # API 金鑰相關錯誤
     if "401" in error_str or "unauthorized" in error_str or "invalid api key" in error_str:
@@ -136,14 +136,14 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
         console.print("   查看 API 金鑰設定：")
         console.print(Panel(
             "echo $GEMINI_API_KEY",
-            border_style="cyan",
+            border_style="bright_magenta",
             expand=False
         ))
 
         console.print("\n   取得新的 API 金鑰：")
         console.print(Panel(
             "https://makersuite.google.com/app/apikey",
-            border_style="cyan",
+            border_style="bright_magenta",
             expand=False
         ))
 
@@ -157,7 +157,7 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
         console.print("   查看配額狀態：")
         console.print(Panel(
             "https://console.cloud.google.com/apis/api/generativelanguage.googleapis.com/quotas",
-            border_style="cyan",
+            border_style="bright_magenta",
             expand=False
         ))
 
@@ -178,7 +178,7 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
         console.print("   測試網路連線：")
         console.print(Panel(
             "ping -c 4 generativelanguage.googleapis.com",
-            border_style="cyan",
+            border_style="bright_magenta",
             expand=False
         ))
 
@@ -192,7 +192,7 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
         console.print("   API 文檔：")
         console.print(Panel(
             "https://ai.google.dev/api",
-            border_style="cyan",
+            border_style="bright_magenta",
             expand=False
         ))
 
@@ -206,7 +206,7 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
         console.print("   檢查服務狀態：")
         console.print(Panel(
             "https://status.cloud.google.com/",
-            border_style="cyan",
+            border_style="bright_magenta",
             expand=False
         ))
 
@@ -262,7 +262,7 @@ def api_retry(
                 try:
                     # 顯示進度
                     if show_progress and attempt == 1:
-                        console.print(f"\n[cyan]🔄 {operation_name}中...[/cyan]")
+                        console.print(f"\n[magenta]🔄 {operation_name}中...[/magenta]")
 
                     # 執行 API 調用
                     result = func(*args, **kwargs)
@@ -274,7 +274,7 @@ def api_retry(
                         success_rate = ((attempt - retry_stats['failures']) / attempt) * 100
 
                         console.print(
-                            f"\n[green]✓ {operation_name}成功（第 {attempt} 次嘗試）[/green]"
+                            f"\n[bright_magenta]✓ {operation_name}成功（第 {attempt} 次嘗試）[/green]"
                         )
                         console.print(
                             f"   [dim]耗時：{total_time:.1f} 秒（含重試）[/dim]"
@@ -282,14 +282,14 @@ def api_retry(
 
                         # 顯示重試統計
                         if show_progress:
-                            console.print(f"\n[cyan]📊 重試統計：[/cyan]")
+                            console.print(f"\n[magenta]📊 重試統計：[/magenta]")
                             console.print(f"   - 總嘗試次數：{attempt}")
                             console.print(f"   - 失敗次數：{retry_stats['failures']}")
                             console.print(f"   - 成功率：{success_rate:.0f}%")
 
                             if retry_stats['failures'] >= 2:
                                 console.print(
-                                    "   - [yellow]建議：網路連線可能不穩定，建議檢查網路狀況[/yellow]"
+                                    "   - [magenta]建議：網路連線可能不穩定，建議檢查網路狀況[/yellow]"
                                 )
 
                     return result
@@ -305,7 +305,7 @@ def api_retry(
                     # 顯示錯誤
                     error_prefix = "⚠️ " if retryable else "✗"
                     console.print(
-                        f"\n[yellow]{error_prefix} {operation_name}失敗（第 {attempt}/{retries} 次）[/yellow]"
+                        f"\n[magenta]{error_prefix} {operation_name}失敗（第 {attempt}/{retries} 次）[/yellow]"
                     )
                     console.print(f"   錯誤：{str(e)[:100]}")
                     console.print(f"   原因：{error_reason}")
@@ -313,7 +313,7 @@ def api_retry(
                     # 不可重試
                     if not retryable:
                         console.print(
-                            f"\n[red]⚠️  此錯誤無法透過重試解決[/red]\n"
+                            f"\n[dim magenta]⚠️  此錯誤無法透過重試解決[/red]\n"
                         )
 
                         # 提供解決建議
@@ -323,7 +323,7 @@ def api_retry(
                     # 最後一次嘗試
                     if attempt == retries:
                         console.print(
-                            f"\n[red]✗ {operation_name}失敗（已達最大重試次數）[/red]\n"
+                            f"\n[dim magenta]✗ {operation_name}失敗（已達最大重試次數）[/red]\n"
                         )
 
                         # 仍然顯示解決方案
@@ -342,7 +342,7 @@ def api_retry(
                     retry_stats['total_delay'] += delay
 
                     # 顯示重試提示
-                    console.print(f"\n   [cyan]⏳ {delay:.0f} 秒後自動重試...[/cyan]")
+                    console.print(f"\n   [magenta]⏳ {delay:.0f} 秒後自動重試...[/magenta]")
                     time.sleep(delay)
 
             # 理論上不會到這裡
