@@ -25,6 +25,12 @@ from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
+# 匯入智慧偵測器
+try:
+    from .detector import MCPServerDetector
+except ImportError:
+    from detector import MCPServerDetector
+
 console = Console()
 
 
@@ -59,17 +65,24 @@ class MCPClient:
     連接並管理 MCP 伺服器，執行遠端工具調用
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: Optional[str] = None, enable_auto_detect: bool = True):
         """
         初始化 MCP 客戶端
 
         Args:
             config_path: MCP 配置檔路徑（JSON 格式）
+            enable_auto_detect: 是否啟用智慧偵測器（預設 True）
         """
         self.config_path = config_path or self._get_default_config_path()
         self.servers: Dict[str, MCPServer] = {}
         self.tools: Dict[str, MCPTool] = {}
         self.processes: Dict[str, subprocess.Popen] = {}
+
+        # 初始化智慧偵測器
+        self.enable_auto_detect = enable_auto_detect
+        if enable_auto_detect:
+            self.detector = MCPServerDetector()
+            console.print("[dim magenta]✓ MCP 智慧偵測器已啟用[/dim magenta]")
 
         # 載入配置
         if os.path.exists(self.config_path):
@@ -88,7 +101,7 @@ class MCPClient:
 
     def load_config(self) -> None:
         """從配置檔載入 MCP 伺服器"""
-        console.print(f"\n[cyan]📡 載入 MCP 配置：{self.config_path}[/cyan]")
+        console.print(f"\n[magenta]📡 載入 MCP 配置：{self.config_path}[/magenta]")
 
         try:
             with open(self.config_path, 'r', encoding='utf-8') as f:
@@ -106,14 +119,14 @@ class MCPClient:
                 )
                 self.servers[server.name] = server
 
-            console.print(f"[green]✓ 載入 {len(self.servers)} 個 MCP 伺服器[/green]")
+            console.print(f"[bright_magenta]✓ 載入 {len(self.servers)} 個 MCP 伺服器[/green]")
 
         except FileNotFoundError:
-            console.print(f"[yellow]⚠️  配置檔不存在：{self.config_path}[/yellow]")
+            console.print(f"[magenta]⚠️  配置檔不存在：{self.config_path}[/yellow]")
         except json.JSONDecodeError as e:
-            console.print(f"[red]✗ 配置檔格式錯誤：{e}[/red]")
+            console.print(f"[dim magenta]✗ 配置檔格式錯誤：{e}[/red]")
         except Exception as e:
-            console.print(f"[red]✗ 載入配置失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 載入配置失敗：{e}[/red]")
 
     def list_servers(self) -> List[MCPServer]:
         """列出所有已配置的伺服器"""
@@ -130,15 +143,15 @@ class MCPClient:
             bool: 是否成功啟動
         """
         if server_name not in self.servers:
-            console.print(f"[red]✗ 伺服器不存在：{server_name}[/red]")
+            console.print(f"[dim magenta]✗ 伺服器不存在：{server_name}[/red]")
             return False
 
         if server_name in self.processes:
-            console.print(f"[yellow]伺服器已在運行：{server_name}[/yellow]")
+            console.print(f"[magenta]伺服器已在運行：{server_name}[/yellow]")
             return True
 
         server = self.servers[server_name]
-        console.print(f"\n[cyan]🚀 啟動 MCP 伺服器：{server_name}[/cyan]")
+        console.print(f"\n[magenta]🚀 啟動 MCP 伺服器：{server_name}[/magenta]")
         console.print(f"  指令：{server.command} {' '.join(server.args)}")
 
         try:
@@ -158,7 +171,7 @@ class MCPClient:
             )
 
             self.processes[server_name] = process
-            console.print(f"[green]✓ 伺服器已啟動（PID: {process.pid}）[/green]")
+            console.print(f"[bright_magenta]✓ 伺服器已啟動（PID: {process.pid}）[/green]")
 
             # 發現工具
             self._discover_tools(server_name)
@@ -166,7 +179,7 @@ class MCPClient:
             return True
 
         except Exception as e:
-            console.print(f"[red]✗ 啟動失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 啟動失敗：{e}[/red]")
             return False
 
     def stop_server(self, server_name: str) -> bool:
@@ -180,10 +193,10 @@ class MCPClient:
             bool: 是否成功停止
         """
         if server_name not in self.processes:
-            console.print(f"[yellow]伺服器未運行：{server_name}[/yellow]")
+            console.print(f"[magenta]伺服器未運行：{server_name}[/yellow]")
             return True
 
-        console.print(f"\n[cyan]🛑 停止 MCP 伺服器：{server_name}[/cyan]")
+        console.print(f"\n[magenta]🛑 停止 MCP 伺服器：{server_name}[/magenta]")
 
         try:
             process = self.processes[server_name]
@@ -193,26 +206,26 @@ class MCPClient:
             try:
                 process.wait(timeout=5)
             except subprocess.TimeoutExpired:
-                console.print("[yellow]強制終止進程...[/yellow]")
+                console.print("[magenta]強制終止進程...[/yellow]")
                 process.kill()
                 process.wait()
 
             del self.processes[server_name]
-            console.print(f"[green]✓ 伺服器已停止[/green]")
+            console.print(f"[bright_magenta]✓ 伺服器已停止[/green]")
             return True
 
         except Exception as e:
-            console.print(f"[red]✗ 停止失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 停止失敗：{e}[/red]")
             return False
 
     def stop_all_servers(self) -> None:
         """停止所有運行中的伺服器"""
-        console.print(f"\n[cyan]🛑 停止所有 MCP 伺服器...[/cyan]")
+        console.print(f"\n[magenta]🛑 停止所有 MCP 伺服器...[/magenta]")
 
         for server_name in list(self.processes.keys()):
             self.stop_server(server_name)
 
-        console.print(f"[green]✓ 所有伺服器已停止[/green]")
+        console.print(f"[bright_magenta]✓ 所有伺服器已停止[/green]")
 
     def _discover_tools(self, server_name: str) -> None:
         """
@@ -318,22 +331,22 @@ class MCPClient:
             ]
 
             if not matching_tools:
-                console.print(f"[red]✗ 工具不存在：{tool_name}[/red]")
+                console.print(f"[dim magenta]✗ 工具不存在：{tool_name}[/red]")
                 return None
 
             if len(matching_tools) > 1 and not server_name:
-                console.print(f"[yellow]⚠️  發現多個同名工具，請指定伺服器[/yellow]")
+                console.print(f"[magenta]⚠️  發現多個同名工具，請指定伺服器[/yellow]")
                 return None
 
             tool = matching_tools[0]
 
         # 檢查伺服器是否運行
         if tool.server_name not in self.processes:
-            console.print(f"[yellow]伺服器未運行，嘗試啟動：{tool.server_name}[/yellow]")
+            console.print(f"[magenta]伺服器未運行，嘗試啟動：{tool.server_name}[/yellow]")
             if not self.start_server(tool.server_name):
                 return None
 
-        console.print(f"\n[cyan]🔧 調用工具：{tool.name} @ {tool.server_name}[/cyan]")
+        console.print(f"\n[magenta]🔧 調用工具：{tool.name} @ {tool.server_name}[/magenta]")
         console.print(f"  參數：{arguments}")
 
         try:
@@ -351,7 +364,7 @@ class MCPClient:
             # 發送請求（這裡是模擬，實際應透過 stdio 通訊）
             # 實際實作需要使用 MCP SDK 或實作完整的 JSON-RPC 通訊
 
-            console.print(f"[green]✓ 工具調用成功[/green]")
+            console.print(f"[bright_magenta]✓ 工具調用成功[/green]")
 
             # 模擬回應
             return {
@@ -361,7 +374,7 @@ class MCPClient:
             }
 
         except Exception as e:
-            console.print(f"[red]✗ 工具調用失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 工具調用失敗：{e}[/red]")
             return None
 
     def get_server_status(self, server_name: str) -> Dict[str, Any]:
@@ -399,10 +412,10 @@ class MCPClient:
 
     def print_status(self) -> None:
         """印出所有伺服器狀態"""
-        console.print("\n[cyan]📊 MCP 伺服器狀態[/cyan]\n")
+        console.print("\n[magenta]📊 MCP 伺服器狀態[/magenta]\n")
 
         if not self.servers:
-            console.print("[yellow]沒有配置任何 MCP 伺服器[/yellow]")
+            console.print("[magenta]沒有配置任何 MCP 伺服器[/yellow]")
             return
 
         for server_name in self.servers:
@@ -422,6 +435,59 @@ class MCPClient:
 
             console.print()
 
+    def auto_start_by_intent(self, user_input: str, threshold: float = 0.65) -> List[str]:
+        """
+        根據使用者輸入自動偵測並啟動需要的 MCP Server
+
+        Args:
+            user_input: 使用者輸入的文字
+            threshold: 信心度閾值（0-1），預設 0.65
+
+        Returns:
+            List[str]: 已啟動的 Server 名稱列表
+        """
+        if not self.enable_auto_detect:
+            console.print("[yellow]⚠️  智慧偵測器未啟用[/yellow]")
+            return []
+
+        # 使用偵測器分析輸入
+        detections = self.detector.detect(user_input, threshold=threshold)
+
+        if not detections:
+            return []
+
+        console.print(f"\n[magenta]🔍 智慧偵測結果：[/magenta]")
+        for detection in detections:
+            console.print(f"  • {detection['server_name']} "
+                        f"(信心度: {detection['confidence']:.2f}) - {detection['reason']}")
+
+        started_servers = []
+
+        # 自動啟動偵測到的 Server
+        for detection in detections:
+            server_name = detection['server_name']
+
+            # 檢查 Server 是否存在於配置中
+            if server_name not in self.servers:
+                console.print(f"[yellow]⚠️  Server 未配置：{server_name}[/yellow]")
+                continue
+
+            # 檢查是否已經在運行
+            if server_name in self.processes:
+                console.print(f"[dim]Server 已運行：{server_name}[/dim]")
+                started_servers.append(server_name)
+                continue
+
+            # 啟動 Server
+            console.print(f"[magenta]🚀 自動啟動 Server：{server_name}[/magenta]")
+            if self.start_server(server_name):
+                started_servers.append(server_name)
+
+        if started_servers:
+            console.print(f"\n[green]✓ 已啟動 {len(started_servers)} 個 Server[/green]")
+
+        return started_servers
+
     def __del__(self):
         """清理：停止所有伺服器"""
         self.stop_all_servers()
@@ -433,7 +499,7 @@ def main():
     """MCP Client 命令列工具"""
     import sys
 
-    console.print("\n[bold cyan]CodeGemini MCP Client[/bold cyan]\n")
+    console.print("\n[bold magenta]CodeGemini MCP Client[/bold magenta]\n")
 
     client = MCPClient()
 
@@ -451,17 +517,17 @@ def main():
     if command == "list":
         servers = client.list_servers()
         if servers:
-            console.print(f"[cyan]已配置的 MCP 伺服器（{len(servers)} 個）：[/cyan]\n")
+            console.print(f"[magenta]已配置的 MCP 伺服器（{len(servers)} 個）：[/magenta]\n")
             for server in servers:
                 console.print(f"  • {server.name}")
                 console.print(f"    {server.description}")
                 console.print(f"    能力：{', '.join(server.capabilities)}\n")
         else:
-            console.print("[yellow]沒有配置任何伺服器[/yellow]")
+            console.print("[magenta]沒有配置任何伺服器[/yellow]")
 
     elif command == "start":
         if len(sys.argv) < 3:
-            console.print("[red]請指定伺服器名稱[/red]")
+            console.print("[dim magenta]請指定伺服器名稱[/red]")
             return
 
         server_name = sys.argv[2]
@@ -469,7 +535,7 @@ def main():
 
     elif command == "stop":
         if len(sys.argv) < 3:
-            console.print("[red]請指定伺服器名稱[/red]")
+            console.print("[dim magenta]請指定伺服器名稱[/red]")
             return
 
         server_name = sys.argv[2]
@@ -487,16 +553,16 @@ def main():
             if server_name:
                 title += f" - {server_name}"
 
-            console.print(f"[cyan]{title}：[/cyan]\n")
+            console.print(f"[magenta]{title}：[/magenta]\n")
 
             for tool in tools:
                 console.print(f"  • {tool.name} @ {tool.server_name}")
                 console.print(f"    {tool.description}\n")
         else:
-            console.print("[yellow]沒有可用工具[/yellow]")
+            console.print("[magenta]沒有可用工具[/yellow]")
 
     else:
-        console.print(f"[red]未知指令：{command}[/red]")
+        console.print(f"[dim magenta]未知指令：{command}[/red]")
 
 
 if __name__ == "__main__":

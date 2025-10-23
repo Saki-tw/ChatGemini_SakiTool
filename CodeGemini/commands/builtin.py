@@ -369,7 +369,7 @@ class BuiltinCommands:
 
 def main():
     """測試用主程式"""
-    console.print("[bold cyan]CodeGemini Built-in Commands 測試[/bold cyan]\n")
+    console.print("[bold magenta]CodeGemini Built-in Commands 測試[/bold magenta]\n")
 
     # 取得所有內建命令
     commands = BuiltinCommands.get_all_commands()
@@ -387,11 +387,11 @@ def main():
     # 測試註冊到 Registry
     from .registry import CommandRegistry
 
-    console.print("[bold cyan]測試註冊到 Registry：[/bold cyan]")
+    console.print("[bold magenta]測試註冊到 Registry：[/bold magenta]")
     registry = CommandRegistry()
     count = BuiltinCommands.register_all(registry)
 
-    console.print(f"\n[green]✓ 成功註冊 {count} 個內建命令[/green]")
+    console.print(f"\n[bright_magenta]✓ 成功註冊 {count} 個內建命令[/green]")
 
     # 顯示註冊表中的命令
     registry.show_commands_table(filter_type=CommandType.BUILTIN)

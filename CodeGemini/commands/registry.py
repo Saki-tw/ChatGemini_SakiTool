@@ -100,17 +100,17 @@ class CommandRegistry:
         """
         # 驗證名稱
         if not name or not isinstance(name, str):
-            console.print(f"[red]錯誤：命令名稱無效[/red]")
+            console.print(f"[dim magenta]錯誤：命令名稱無效[/red]")
             return False
 
         # 檢查是否已存在
         if name in self.commands:
-            console.print(f"[yellow]警告：命令 '{name}' 已存在，將被覆蓋[/yellow]")
+            console.print(f"[magenta]警告：命令 '{name}' 已存在，將被覆蓋[/yellow]")
 
         # 註冊命令
         self.commands[name] = template
 
-        console.print(f"[green]✓ 已註冊命令：{name}[/green]")
+        console.print(f"[bright_magenta]✓ 已註冊命令：{name}[/green]")
 
         # 儲存到配置檔
         if save_to_config:
@@ -129,16 +129,16 @@ class CommandRegistry:
             bool: 是否成功取消註冊
         """
         if name not in self.commands:
-            console.print(f"[red]錯誤：命令 '{name}' 不存在[/red]")
+            console.print(f"[dim magenta]錯誤：命令 '{name}' 不存在[/red]")
             return False
 
         # 檢查是否為內建命令
         if self.commands[name].command_type == CommandType.BUILTIN:
-            console.print(f"[red]錯誤：無法取消註冊內建命令[/red]")
+            console.print(f"[dim magenta]錯誤：無法取消註冊內建命令[/red]")
             return False
 
         del self.commands[name]
-        console.print(f"[green]✓ 已取消註冊命令：{name}[/green]")
+        console.print(f"[bright_magenta]✓ 已取消註冊命令：{name}[/green]")
 
         # 儲存到配置檔
         self._save_commands()
@@ -172,7 +172,7 @@ class CommandRegistry:
         command = self.commands[name]
         args = args or {}
 
-        console.print(f"\n[cyan]🚀 執行命令：{name}[/cyan]")
+        console.print(f"\n[magenta]🚀 執行命令：{name}[/magenta]")
 
         # 驗證參數
         validation_result = self._validate_parameters(command, args)
@@ -193,14 +193,14 @@ class CommandRegistry:
                 args
             )
 
-            console.print(f"[green]✓ 命令已渲染[/green]")
+            console.print(f"[bright_magenta]✓ 命令已渲染[/green]")
 
             # 記錄歷史
             self._add_to_history(name, args, rendered)
 
             # 如果有執行器，實際執行
             if executor:
-                console.print(f"[cyan]使用執行器執行...[/cyan]")
+                console.print(f"[magenta]使用執行器執行...[/magenta]")
                 # 這裡可以整合 Gemini API 或其他執行器
                 # 目前返回渲染結果
                 pass
@@ -216,7 +216,7 @@ class CommandRegistry:
             )
 
         except Exception as e:
-            console.print(f"[red]錯誤：{e}[/red]")
+            console.print(f"[dim magenta]錯誤：{e}[/red]")
             return CommandResult(
                 success=False,
                 output="",
@@ -276,10 +276,10 @@ class CommandRegistry:
             int: 成功導入的命令數量
         """
         if not os.path.exists(config_file):
-            console.print(f"[red]錯誤：配置檔不存在：{config_file}[/red]")
+            console.print(f"[dim magenta]錯誤：配置檔不存在：{config_file}[/red]")
             return 0
 
-        console.print(f"\n[cyan]📥 導入命令：{config_file}[/cyan]")
+        console.print(f"\n[magenta]📥 導入命令：{config_file}[/magenta]")
 
         try:
             # 讀取檔案
@@ -289,7 +289,7 @@ class CommandRegistry:
                 elif config_file.endswith('.json'):
                     data = json.load(f)
                 else:
-                    console.print(f"[red]錯誤：不支援的檔案格式[/red]")
+                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/red]")
                     return 0
 
             # 解析命令
@@ -316,17 +316,17 @@ class CommandRegistry:
                     count += 1
 
                 except Exception as e:
-                    console.print(f"[yellow]警告：導入命令 '{cmd_data.get('name', 'unknown')}' 失敗 - {e}[/yellow]")
+                    console.print(f"[magenta]警告：導入命令 '{cmd_data.get('name', 'unknown')}' 失敗 - {e}[/yellow]")
 
             # 儲存所有導入的命令
             if count > 0:
                 self._save_commands()
 
-            console.print(f"[green]✓ 成功導入 {count} 個命令[/green]")
+            console.print(f"[bright_magenta]✓ 成功導入 {count} 個命令[/green]")
             return count
 
         except Exception as e:
-            console.print(f"[red]錯誤：導入失敗 - {e}[/red]")
+            console.print(f"[dim magenta]錯誤：導入失敗 - {e}[/red]")
             return 0
 
     def export_commands(self, output_file: str) -> bool:
@@ -339,7 +339,7 @@ class CommandRegistry:
         Returns:
             bool: 是否成功匯出
         """
-        console.print(f"\n[cyan]📤 匯出命令：{output_file}[/cyan]")
+        console.print(f"\n[magenta]📤 匯出命令：{output_file}[/magenta]")
 
         try:
             # 準備資料
@@ -370,14 +370,14 @@ class CommandRegistry:
                 elif output_file.endswith('.json'):
                     json.dump(data, f, ensure_ascii=False, indent=2)
                 else:
-                    console.print(f"[red]錯誤：不支援的檔案格式[/red]")
+                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/red]")
                     return False
 
-            console.print(f"[green]✓ 成功匯出 {len(commands_data)} 個命令[/green]")
+            console.print(f"[bright_magenta]✓ 成功匯出 {len(commands_data)} 個命令[/green]")
             return True
 
         except Exception as e:
-            console.print(f"[red]錯誤：匯出失敗 - {e}[/red]")
+            console.print(f"[dim magenta]錯誤：匯出失敗 - {e}[/red]")
             return False
 
     def show_command_details(self, name: str):
@@ -385,7 +385,7 @@ class CommandRegistry:
         command = self.get_command(name)
 
         if not command:
-            console.print(f"[red]命令 '{name}' 不存在[/red]")
+            console.print(f"[dim magenta]命令 '{name}' 不存在[/red]")
             return
 
         # 建立詳情面板
@@ -402,15 +402,15 @@ class CommandRegistry:
         if command.tags:
             details += f"\n[bold]標籤：[/bold]{', '.join(command.tags)}"
 
-        console.print(Panel(details, title=f"命令詳情", border_style="cyan"))
+        console.print(Panel(details, title=f"命令詳情", border_style="bright_magenta"))
 
         # 顯示模板
-        console.print(f"\n[bold cyan]模板內容：[/bold cyan]")
+        console.print(f"\n[bold magenta]模板內容：[/bold magenta]")
         console.print(command.template)
 
         # 顯示範例
         if command.examples:
-            console.print(f"\n[bold cyan]使用範例：[/bold cyan]")
+            console.print(f"\n[bold magenta]使用範例：[/bold magenta]")
             for i, example in enumerate(command.examples, 1):
                 console.print(f"  {i}. {example}")
 
@@ -419,14 +419,14 @@ class CommandRegistry:
         commands = self.list_commands(filter_type=filter_type)
 
         if not commands:
-            console.print("[yellow]沒有已註冊的命令[/yellow]")
+            console.print("[magenta]沒有已註冊的命令[/yellow]")
             return
 
-        table = Table(show_header=True, header_style="bold cyan")
+        table = Table(show_header=True, header_style="bold bright_magenta")
         table.add_column("名稱", style="yellow")
         table.add_column("描述", style="white")
         table.add_column("類型", style="green")
-        table.add_column("參數", style="blue")
+        table.add_column("參數", style="magenta")
 
         for cmd in commands:
             table.add_row(
@@ -436,7 +436,7 @@ class CommandRegistry:
                 str(len(cmd.parameters))
             )
 
-        console.print(f"\n[bold cyan]已註冊命令（共 {len(commands)} 個）：[/bold cyan]")
+        console.print(f"\n[bold magenta]已註冊命令（共 {len(commands)} 個）：[/bold magenta]")
         console.print(table)
 
     def _validate_parameters(
@@ -477,14 +477,14 @@ class CommandRegistry:
             try:
                 self.import_commands(self.commands_file)
             except Exception as e:
-                console.print(f"[yellow]警告：載入命令失敗 - {e}[/yellow]")
+                console.print(f"[magenta]警告：載入命令失敗 - {e}[/yellow]")
 
     def _save_commands(self):
         """儲存命令到配置檔"""
         try:
             self.export_commands(self.commands_file)
         except Exception as e:
-            console.print(f"[yellow]警告：儲存命令失敗 - {e}[/yellow]")
+            console.print(f"[magenta]警告：儲存命令失敗 - {e}[/yellow]")
 
     def get_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
@@ -501,7 +501,7 @@ class CommandRegistry:
 
 def main():
     """測試用主程式"""
-    console.print("[bold cyan]CodeGemini Command Registry 測試[/bold cyan]\n")
+    console.print("[bold magenta]CodeGemini Command Registry 測試[/bold magenta]\n")
 
     # 建立註冊表
     registry = CommandRegistry()
@@ -536,7 +536,7 @@ def main():
 
     if result.success:
         console.print(f"\n[bold green]✅ 命令執行成功[/bold green]")
-        console.print(f"\n[cyan]輸出：[/cyan]")
+        console.print(f"\n[magenta]輸出：[/magenta]")
         console.print(result.output)
     else:
         console.print(f"\n[bold red]❌ 命令執行失敗[/bold red]")

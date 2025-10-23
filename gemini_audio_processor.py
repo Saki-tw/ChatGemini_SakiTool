@@ -47,11 +47,9 @@ class AudioProcessor:
             output_dir: 輸出目錄，預設為 ~/gemini_videos/audio
         """
         if output_dir is None:
-            output_dir = os.path.join(
-                os.path.expanduser("~"),
-                "gemini_videos",
-                "audio"
-            )
+            # 使用統一輸出目錄配置（音訊算影片處理的一部分）
+            from utils.path_manager import get_video_dir
+            output_dir = str(get_video_dir('audio'))
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -79,8 +77,8 @@ class AudioProcessor:
                         details={"command": "ffmpeg -version", "error": str(e)}
                     )
             else:
-                console.print("[red]錯誤：未找到 ffmpeg[/red]")
-                console.print("[yellow]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
+                console.print("[dim magenta]錯誤：未找到 ffmpeg[/red]")
+                console.print("[magenta]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
 
             raise RuntimeError("ffmpeg 未安裝或無法執行，請參考上述建議")
 
@@ -104,7 +102,7 @@ class AudioProcessor:
         # 驗證輸入檔案
         self._validate_media_file(video_path, required_type="video")
 
-        console.print(f"\n[cyan]🎵 提取音訊...[/cyan]")
+        console.print(f"\n[magenta]🎵 提取音訊...[/magenta]")
         console.print(f"  影片：{os.path.basename(video_path)}")
 
         # 設定輸出路徑
@@ -142,9 +140,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 提取完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 提取完成[/green]")
 
-            console.print(f"[green]✓ 音訊已提取：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 音訊已提取：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -178,7 +176,7 @@ class AudioProcessor:
         self._validate_media_file(video_path, required_type="video")
         self._validate_media_file(audio_path, required_type="audio")
 
-        console.print(f"\n[cyan]🎵 合併音訊...[/cyan]")
+        console.print(f"\n[magenta]🎵 合併音訊...[/magenta]")
         console.print(f"  影片：{os.path.basename(video_path)}")
         console.print(f"  音訊：{os.path.basename(audio_path)}")
         console.print(f"  模式：{'替換' if replace else '混合'}原音訊")
@@ -234,9 +232,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 合併完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 合併完成[/green]")
 
-            console.print(f"[green]✓ 影片已合併：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 影片已合併：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -267,7 +265,7 @@ class AudioProcessor:
         # 驗證輸入檔案
         self._validate_media_file(audio_or_video_path, required_type="any")
 
-        console.print(f"\n[cyan]🔊 調整音量...[/cyan]")
+        console.print(f"\n[magenta]🔊 調整音量...[/magenta]")
         console.print(f"  檔案：{os.path.basename(audio_or_video_path)}")
         console.print(f"  音量：{volume * 100:.0f}%")
 
@@ -319,9 +317,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 處理完成[/green]")
 
-            console.print(f"[green]✓ 音量已調整：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 音量已調整：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -357,7 +355,7 @@ class AudioProcessor:
         self._validate_media_file(video_path, required_type="video")
         self._validate_media_file(music_path, required_type="audio")
 
-        console.print(f"\n[cyan]🎵 添加背景音樂...[/cyan]")
+        console.print(f"\n[magenta]🎵 添加背景音樂...[/magenta]")
         console.print(f"  影片：{os.path.basename(video_path)}")
         console.print(f"  音樂：{os.path.basename(music_path)}")
         console.print(f"  音樂音量：{music_volume * 100:.0f}%")
@@ -414,9 +412,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 處理完成[/green]")
 
-            console.print(f"[green]✓ 背景音樂已添加：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 背景音樂已添加：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -449,7 +447,7 @@ class AudioProcessor:
         # 驗證輸入檔案
         self._validate_media_file(audio_or_video_path, required_type="any")
 
-        console.print(f"\n[cyan]🎵 添加淡入淡出...[/cyan]")
+        console.print(f"\n[magenta]🎵 添加淡入淡出...[/magenta]")
         console.print(f"  檔案：{os.path.basename(audio_or_video_path)}")
         console.print(f"  淡入：{fade_in} 秒")
         console.print(f"  淡出：{fade_out} 秒")
@@ -517,9 +515,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 處理完成[/green]")
 
-            console.print(f"[green]✓ 淡入淡出已添加：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 淡入淡出已添加：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -577,7 +575,7 @@ class AudioProcessor:
             return float(data['format']['duration'])
 
         except Exception as e:
-            console.print(f"[yellow]警告：無法獲取檔案時長 - {e}[/yellow]")
+            console.print(f"[magenta]警告：無法獲取檔案時長 - {e}[/yellow]")
             return None
 
     def _validate_media_file(self, file_path: str, required_type: str = "any") -> bool:
@@ -601,7 +599,7 @@ class AudioProcessor:
             if ERROR_FIX_ENABLED:
                 alternative = suggest_video_file_not_found(file_path, auto_fix=True)
                 if alternative and os.path.isfile(alternative):
-                    console.print(f"[green]✅ 已切換至：{alternative}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{alternative}[/green]\n")
                     file_path = alternative
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
@@ -792,15 +790,264 @@ ffmpeg 錯誤碼：{error.returncode}
 
         raise RuntimeError(error_msg.strip())
 
+    def batch_extract_audio(
+        self,
+        video_paths: List[str],
+        format: str = "aac",
+        max_workers: int = 3
+    ) -> List[Tuple[str, str]]:
+        """
+        批次提取音訊（並行處理）
+
+        Args:
+            video_paths: 影片路徑列表
+            format: 音訊格式 (aac, mp3, wav)
+            max_workers: 最大並行數（預設 3）
+
+        Returns:
+            List[Tuple[str, str]]: [(影片路徑, 輸出音訊路徑), ...]
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        console.print(f"\n[magenta]🎵 批次提取音訊（{len(video_paths)} 個檔案）[/magenta]")
+        console.print(f"  格式：{format.upper()}")
+        console.print(f"  並行數：{max_workers}\n")
+
+        results = []
+        failed = []
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # 提交所有任務
+            futures = {
+                executor.submit(self.extract_audio, path, None, format): path
+                for path in video_paths
+            }
+
+            # 顯示進度
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                console=console
+            ) as progress:
+                task = progress.add_task("處理中...", total=len(futures))
+
+                # 收集結果
+                for future in as_completed(futures):
+                    video_path = futures[future]
+                    try:
+                        output_path = future.result()
+                        results.append((video_path, output_path))
+                        progress.update(task, advance=1, description=f"[bright_magenta]✓[/green] {os.path.basename(video_path)}")
+                    except Exception as e:
+                        failed.append((video_path, str(e)))
+                        progress.update(task, advance=1, description=f"[dim magenta]✗[/red] {os.path.basename(video_path)}")
+
+        # 顯示結果
+        console.print(f"\n[bright_magenta]✓ 成功：{len(results)} 個檔案[/green]")
+        if failed:
+            console.print(f"[dim magenta]✗ 失敗：{len(failed)} 個檔案[/red]")
+            for path, error in failed:
+                console.print(f"  [dim]- {os.path.basename(path)}: {error[:100]}[/dim]")
+
+        return results
+
+    def batch_adjust_volume(
+        self,
+        file_paths: List[str],
+        volume: float,
+        max_workers: int = 3
+    ) -> List[Tuple[str, str]]:
+        """
+        批次調整音量（並行處理）
+
+        Args:
+            file_paths: 檔案路徑列表
+            volume: 音量倍數（如 0.5 = 50%，2.0 = 200%）
+            max_workers: 最大並行數（預設 3）
+
+        Returns:
+            List[Tuple[str, str]]: [(輸入路徑, 輸出路徑), ...]
+        """
+        from concurrent.futures import ThreadPoolExecutor, as_completed
+
+        console.print(f"\n[magenta]🔊 批次調整音量（{len(file_paths)} 個檔案）[/magenta]")
+        console.print(f"  音量：{volume * 100:.0f}%")
+        console.print(f"  並行數：{max_workers}\n")
+
+        results = []
+        failed = []
+
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # 提交所有任務
+            futures = {
+                executor.submit(self.adjust_volume, path, None, volume): path
+                for path in file_paths
+            }
+
+            # 顯示進度
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                console=console
+            ) as progress:
+                task = progress.add_task("處理中...", total=len(futures))
+
+                # 收集結果
+                for future in as_completed(futures):
+                    file_path = futures[future]
+                    try:
+                        output_path = future.result()
+                        results.append((file_path, output_path))
+                        progress.update(task, advance=1, description=f"[bright_magenta]✓[/green] {os.path.basename(file_path)}")
+                    except Exception as e:
+                        failed.append((file_path, str(e)))
+                        progress.update(task, advance=1, description=f"[dim magenta]✗[/red] {os.path.basename(file_path)}")
+
+        # 顯示結果
+        console.print(f"\n[bright_magenta]✓ 成功：{len(results)} 個檔案[/green]")
+        if failed:
+            console.print(f"[dim magenta]✗ 失敗：{len(failed)} 個檔案[/red]")
+
+        return results
+
+    def process_large_audio_chunked(
+        self,
+        audio_path: str,
+        chunk_duration: int = 60,
+        operation: callable = None,
+        **kwargs
+    ) -> str:
+        """
+        分塊處理大音訊檔案（避免記憶體溢出）
+
+        Args:
+            audio_path: 音訊檔案路徑
+            chunk_duration: 每塊時長（秒，預設 60 秒）
+            operation: 對每塊執行的操作函數
+            **kwargs: 傳遞給 operation 的參數
+
+        Returns:
+            str: 合併後的輸出檔案路徑
+        """
+        import math
+
+        console.print(f"\n[magenta]🔧 分塊處理大檔案...[/magenta]")
+        console.print(f"  檔案：{os.path.basename(audio_path)}")
+        console.print(f"  塊大小：{chunk_duration} 秒\n")
+
+        # 獲取總時長
+        total_duration = self._get_duration(audio_path)
+        if total_duration is None:
+            raise RuntimeError("無法獲取檔案時長")
+
+        num_chunks = math.ceil(total_duration / chunk_duration)
+        console.print(f"  總時長：{total_duration:.1f} 秒")
+        console.print(f"  分塊數：{num_chunks} 塊\n")
+
+        # 建立臨時目錄
+        temp_dir = tempfile.mkdtemp(prefix="audio_chunks_")
+        chunk_files = []
+
+        try:
+            # 分塊提取
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                BarColumn(),
+                TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                console=console
+            ) as progress:
+                task = progress.add_task("分塊提取...", total=num_chunks)
+
+                for i in range(num_chunks):
+                    start_time = i * chunk_duration
+                    chunk_file = os.path.join(temp_dir, f"chunk_{i:04d}.aac")
+
+                    cmd = [
+                        "ffmpeg",
+                        "-ss", str(start_time),
+                        "-t", str(chunk_duration),
+                        "-i", audio_path,
+                        "-c", "copy",
+                        "-y",
+                        chunk_file
+                    ]
+
+                    subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+                    chunk_files.append(chunk_file)
+                    progress.update(task, advance=1)
+
+            console.print(f"[bright_magenta]✓ 分塊完成：{len(chunk_files)} 個塊[/green]")
+
+            # 如果提供了處理函數，對每塊執行處理
+            if operation:
+                processed_chunks = []
+                with Progress(
+                    SpinnerColumn(),
+                    TextColumn("[progress.description]{task.description}"),
+                    BarColumn(),
+                    TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+                    console=console
+                ) as progress:
+                    task = progress.add_task("處理中...", total=len(chunk_files))
+
+                    for chunk_file in chunk_files:
+                        processed_file = operation(chunk_file, **kwargs)
+                        processed_chunks.append(processed_file)
+                        progress.update(task, advance=1)
+
+                chunk_files = processed_chunks
+                console.print(f"[bright_magenta]✓ 處理完成[/green]")
+
+            # 合併所有塊
+            console.print("\n[magenta]合併中...[/magenta]")
+            concat_file = os.path.join(temp_dir, "concat_list.txt")
+            with open(concat_file, 'w') as f:
+                for chunk_file in chunk_files:
+                    f.write(f"file '{chunk_file}'\n")
+
+            output_path = os.path.join(
+                self.output_dir,
+                f"{Path(audio_path).stem}_processed{Path(audio_path).suffix}"
+            )
+
+            cmd = [
+                "ffmpeg",
+                "-f", "concat",
+                "-safe", "0",
+                "-i", concat_file,
+                "-c", "copy",
+                "-y",
+                output_path
+            ]
+
+            subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            console.print(f"[bright_magenta]✓ 合併完成：{output_path}[/green]")
+
+            return output_path
+
+        finally:
+            # 清理臨時檔案
+            import shutil
+            try:
+                shutil.rmtree(temp_dir)
+                logger.info(f"已清理臨時目錄：{temp_dir}")
+            except Exception as e:
+                logger.warning(f"清理臨時目錄失敗：{e}")
+
 
 def main():
     """測試用主程式"""
     import sys
 
     if len(sys.argv) < 3:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print("  python gemini_audio_processor.py <命令> <參數>")
-        console.print("\n[cyan]命令：[/cyan]")
+        console.print("\n[magenta]命令：[/magenta]")
         console.print("  extract <影片路徑>                     - 提取音訊")
         console.print("  merge <影片路徑> <音訊路徑>             - 合併音訊（替換）")
         console.print("  volume <檔案路徑> <音量倍數>            - 調整音量")
@@ -814,29 +1061,29 @@ def main():
     try:
         if command == "extract":
             if len(sys.argv) < 3:
-                console.print("[red]錯誤：需要提供影片路徑[/red]")
+                console.print("[dim magenta]錯誤：需要提供影片路徑[/red]")
                 sys.exit(1)
             output = processor.extract_audio(sys.argv[2])
-            console.print(f"\n[green]✓ 完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 完成：{output}[/green]")
 
         elif command == "merge":
             if len(sys.argv) < 4:
-                console.print("[red]錯誤：需要提供影片路徑和音訊路徑[/red]")
+                console.print("[dim magenta]錯誤：需要提供影片路徑和音訊路徑[/red]")
                 sys.exit(1)
             output = processor.merge_audio(sys.argv[2], sys.argv[3])
-            console.print(f"\n[green]✓ 完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 完成：{output}[/green]")
 
         elif command == "volume":
             if len(sys.argv) < 4:
-                console.print("[red]錯誤：需要提供檔案路徑和音量倍數[/red]")
+                console.print("[dim magenta]錯誤：需要提供檔案路徑和音量倍數[/red]")
                 sys.exit(1)
             volume = float(sys.argv[3])
             output = processor.adjust_volume(sys.argv[2], volume)
-            console.print(f"\n[green]✓ 完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 完成：{output}[/green]")
 
         elif command == "bgm":
             if len(sys.argv) < 4:
-                console.print("[red]錯誤：需要提供影片路徑和音樂路徑[/red]")
+                console.print("[dim magenta]錯誤：需要提供影片路徑和音樂路徑[/red]")
                 sys.exit(1)
             music_volume = float(sys.argv[4]) if len(sys.argv) > 4 else 0.3
             output = processor.add_background_music(
@@ -844,11 +1091,11 @@ def main():
                 sys.argv[3],
                 music_volume=music_volume
             )
-            console.print(f"\n[green]✓ 完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 完成：{output}[/green]")
 
         elif command == "fade":
             if len(sys.argv) < 3:
-                console.print("[red]錯誤：需要提供檔案路徑[/red]")
+                console.print("[dim magenta]錯誤：需要提供檔案路徑[/red]")
                 sys.exit(1)
             fade_in = float(sys.argv[3]) if len(sys.argv) > 3 else 2.0
             fade_out = float(sys.argv[4]) if len(sys.argv) > 4 else 2.0
@@ -857,14 +1104,14 @@ def main():
                 fade_in=fade_in,
                 fade_out=fade_out
             )
-            console.print(f"\n[green]✓ 完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 完成：{output}[/green]")
 
         else:
-            console.print(f"[red]未知命令：{command}[/red]")
+            console.print(f"[dim magenta]未知命令：{command}[/red]")
             sys.exit(1)
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

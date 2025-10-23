@@ -118,7 +118,7 @@ class ContextBuilder:
         Returns:
             Context: 建立的上下文
         """
-        console.print(f"\n[cyan]🔨 建立任務上下文...[/cyan]")
+        console.print(f"\n[magenta]🔨 建立任務上下文...[/magenta]")
         console.print(f"  任務：{task_description[:60]}...")
 
         # 步驟 1：掃描專案（如果還沒掃描）
@@ -170,7 +170,7 @@ class ContextBuilder:
             }
         )
 
-        console.print(f"[green]✓ 上下文已建立[/green]")
+        console.print(f"[bright_magenta]✓ 上下文已建立[/green]")
         console.print(f"  包含檔案：{context.included_files}")
         console.print(f"  預估 tokens：{context.total_tokens:,}")
         console.print(f"  預算使用率：{context.total_tokens / context.token_budget * 100:.1f}%")
@@ -194,7 +194,7 @@ class ContextBuilder:
         Returns:
             List[str]: 排序後的檔案列表（由高到低）
         """
-        console.print(f"\n[cyan]📊 計算檔案相關性...[/cyan]")
+        console.print(f"\n[magenta]📊 計算檔案相關性...[/magenta]")
 
         file_scores: List[Tuple[str, float]] = []
 
@@ -219,8 +219,8 @@ class ContextBuilder:
         file_scores.sort(key=lambda x: x[1], reverse=True)
 
         # 顯示前 10 個最相關的檔案
-        console.print(f"[green]✓ 相關性評分完成[/green]")
-        console.print(f"\n[cyan]前 10 個最相關檔案：[/cyan]")
+        console.print(f"[bright_magenta]✓ 相關性評分完成[/green]")
+        console.print(f"\n[magenta]前 10 個最相關檔案：[/magenta]")
         for i, (file, score) in enumerate(file_scores[:10], 1):
             level = self._get_relevance_level(score)
             console.print(f"  {i}. [{level.value}] {os.path.basename(file)} ({score:.2f})")
@@ -286,7 +286,7 @@ class ContextBuilder:
             return snippets[:max_snippets]
 
         except Exception as e:
-            console.print(f"[yellow]警告：無法讀取 {file_path} - {e}[/yellow]")
+            console.print(f"[magenta]警告：無法讀取 {file_path} - {e}[/yellow]")
             return []
 
     def estimate_token_usage(self, context: Context) -> int:
@@ -319,7 +319,7 @@ class ContextBuilder:
         Returns:
             Context: 壓縮後的上下文
         """
-        console.print(f"\n[cyan]🗜️  壓縮上下文...[/cyan]")
+        console.print(f"\n[magenta]🗜️  壓縮上下文...[/magenta]")
         console.print(f"  原始 tokens：{context.total_tokens:,}")
         console.print(f"  目標減少：{target_reduction * 100:.0f}%")
 
@@ -347,7 +347,7 @@ class ContextBuilder:
         compressed_context.total_tokens = self.estimate_token_usage(compressed_context)
         compressed_context.included_files = len(filtered_files)
 
-        console.print(f"[green]✓ 壓縮完成[/green]")
+        console.print(f"[bright_magenta]✓ 壓縮完成[/green]")
         console.print(f"  壓縮後 tokens：{compressed_context.total_tokens:,}")
         console.print(f"  實際減少：{(1 - compressed_context.total_tokens / context.total_tokens) * 100:.0f}%")
 
@@ -461,7 +461,7 @@ class ContextBuilder:
         for file_path in files:
             # 檢查預算
             if used_tokens >= token_budget:
-                console.print(f"[yellow]已達 token 預算上限，停止載入[/yellow]")
+                console.print(f"[magenta]已達 token 預算上限，停止載入[/yellow]")
                 break
 
             # 提取相關片段
@@ -486,7 +486,7 @@ class ContextBuilder:
                             )
                             snippets = [snippet]
                     except Exception as e:
-                        console.print(f"[yellow]警告：無法讀取 {file_path} - {e}[/yellow]")
+                        console.print(f"[magenta]警告：無法讀取 {file_path} - {e}[/yellow]")
                         continue
                 else:
                     continue
@@ -571,9 +571,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print('  python builder.py <專案路徑> "<任務描述>"')
-        console.print("\n[cyan]範例：[/cyan]")
+        console.print("\n[magenta]範例：[/magenta]")
         console.print('  python builder.py . "新增使用者登入功能"')
         sys.exit(1)
 
@@ -585,18 +585,18 @@ def main():
         context = builder.build_for_task(task_description, max_files=10)
 
         console.print(f"\n[bold green]✅ 上下文建立成功[/bold green]")
-        console.print(f"\n[cyan]上下文摘要：[/cyan]")
+        console.print(f"\n[magenta]上下文摘要：[/magenta]")
         console.print(f"  任務：{context.task_description}")
         console.print(f"  檔案數：{context.included_files}")
         console.print(f"  預估 tokens：{context.total_tokens:,}")
 
         # 顯示檔案列表
-        console.print(f"\n[cyan]包含的檔案：[/cyan]")
+        console.print(f"\n[magenta]包含的檔案：[/magenta]")
         for fc in context.file_contexts[:5]:
             console.print(f"  - {fc.file_path} (分數: {fc.relevance_score:.2f}, 片段: {len(fc.snippets)})")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

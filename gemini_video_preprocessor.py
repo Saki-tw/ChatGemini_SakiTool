@@ -11,7 +11,31 @@ from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
 
+# 導入統一的錯誤修復建議系統
+try:
+    from error_fix_suggestions import (
+        suggest_ffmpeg_install,
+        suggest_video_file_not_found,
+        suggest_empty_file,
+        suggest_corrupted_file,
+        suggest_missing_stream,
+        suggest_cannot_get_duration,
+        suggest_ffprobe_failed,
+        suggest_video_transcode_failed,
+        ErrorLogger
+    )
+    ERROR_FIX_ENABLED = True
+except ImportError:
+    ERROR_FIX_ENABLED = False
+
 console = Console()
+
+# 設定日誌
+import logging
+logger = logging.getLogger(__name__)
+
+# 初始化錯誤記錄器
+error_logger = ErrorLogger() if ERROR_FIX_ENABLED else None
 
 
 class VideoPreprocessor:
@@ -25,11 +49,9 @@ class VideoPreprocessor:
             output_dir: 輸出目錄，預設為 ~/gemini_videos/preprocessed
         """
         if output_dir is None:
-            output_dir = os.path.join(
-                os.path.expanduser("~"),
-                "gemini_videos",
-                "preprocessed"
-            )
+            # 使用統一輸出目錄配置
+            from utils.path_manager import get_video_dir
+            output_dir = str(get_video_dir('preprocessed'))
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -51,15 +73,21 @@ class VideoPreprocessor:
                 stderr=subprocess.PIPE,
                 check=True
             )
-        except (subprocess.CalledProcessError, FileNotFoundError):
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
             # 🎯 一鍵修復：顯示 ffmpeg 安裝建議
-            try:
-                from error_fix_suggestions import suggest_ffmpeg_not_installed
-                suggest_ffmpeg_not_installed()
-            except ImportError:
+            if ERROR_FIX_ENABLED:
+                suggest_ffmpeg_install()
+                # 記錄錯誤
+                if error_logger:
+                    error_logger.log_error(
+                        error_type="FFmpegNotInstalled",
+                        file_path="N/A",
+                        details={"command": "ffmpeg -version", "error": str(e)}
+                    )
+            else:
                 # 降級方案：顯示基本錯誤訊息
-                console.print("[red]錯誤：未找到 ffmpeg 或 ffprobe[/red]")
-                console.print("[yellow]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
+                console.print("[dim magenta]錯誤：未找到 ffmpeg 或 ffprobe[/red]")
+                console.print("[magenta]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
 
             raise RuntimeError("ffmpeg 未安裝，請按照上述步驟安裝後重試")
 
@@ -123,8 +151,8 @@ class VideoPreprocessor:
             if not video_stream:
                 # 顯示詳細的修復建議（包含檔案資訊和修復指令）
                 try:
-                    from gemini_error_fixer import show_missing_stream_error
-                    show_missing_stream_error(video_path, stream_type="video")
+                    from error_fix_suggestions import suggest_no_video_stream
+                    suggest_no_video_stream(video_path)
                 except ImportError:
                     # 降級方案：顯示基本錯誤訊息
                     pass
@@ -149,6 +177,13 @@ class VideoPreprocessor:
             return info
 
         except subprocess.CalledProcessError as e:
+            # 顯示 ffprobe 執行失敗的修復建議
+            try:
+                from error_fix_suggestions import suggest_ffprobe_failed
+                suggest_ffprobe_failed(video_path, e)
+            except ImportError:
+                pass
+
             raise RuntimeError(f"ffprobe 執行失敗：{e.stderr}")
         except json.JSONDecodeError as e:
             try:
@@ -205,7 +240,7 @@ class VideoPreprocessor:
         info = self.get_video_info(video_path)
         current_size_mb = info["size_mb"]
 
-        console.print(f"\n[cyan]📊 影片資訊：[/cyan]")
+        console.print(f"\n[magenta]📊 影片資訊：[/magenta]")
         console.print(f"  檔案大小：{current_size_mb:.2f} MB")
         console.print(f"  解析度：{info['width']}x{info['height']}")
         console.print(f"  時長：{info['duration']:.2f} 秒")
@@ -213,14 +248,14 @@ class VideoPreprocessor:
 
         # 檢查是否符合大小要求
         if current_size_mb <= target_size_mb:
-            console.print(f"[green]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/green]")
+            console.print(f"[bright_magenta]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/green]")
             return video_path
 
         # 檔案過大，拒絕處理
-        console.print(f"\n[red]✗ 錯誤：影片檔案過大[/red]")
+        console.print(f"\n[dim magenta]✗ 錯誤：影片檔案過大[/red]")
         console.print(f"  當前大小：{current_size_mb:.2f} MB")
         console.print(f"  限制大小：{target_size_mb} MB")
-        console.print(f"\n[yellow]建議解決方案：[/yellow]")
+        console.print(f"\n[magenta]建議解決方案：[/yellow]")
         console.print(f"  1. 使用 split_by_duration() 分割影片為多個小片段")
         console.print(f"  2. 在影片編輯軟體中預先分割影片")
         console.print(f"  3. 使用較短的影片片段")
@@ -262,14 +297,14 @@ class VideoPreprocessor:
             raise FileNotFoundError(f"找不到影片檔案：{video_path}")
 
         if num_frames > 3:
-            console.print("[yellow]警告：Veo 最多支援 3 張參考圖片，將限制為 3 張[/yellow]")
+            console.print("[magenta]警告：Veo 最多支援 3 張參考圖片，將限制為 3 張[/yellow]")
             num_frames = 3
 
         # 獲取影片資訊
         info = self.get_video_info(video_path)
         duration = info["duration"]
 
-        console.print(f"\n[cyan]🖼️  提取關鍵幀...[/cyan]")
+        console.print(f"\n[magenta]🖼️  提取關鍵幀...[/magenta]")
         console.print(f"  影片時長：{duration:.2f} 秒")
         console.print(f"  提取數量：{num_frames} 幀")
 
@@ -309,7 +344,7 @@ class VideoPreprocessor:
             except subprocess.CalledProcessError as e:
                 console.print(f"  ✗ 提取幀 {i+1} 失敗：{e}")
 
-        console.print(f"\n[green]✓ 已提取 {len(frame_paths)} 幀[/green]")
+        console.print(f"\n[bright_magenta]✓ 已提取 {len(frame_paths)} 幀[/green]")
         for path in frame_paths:
             console.print(f"  - {path}")
 
@@ -367,7 +402,7 @@ class VideoPreprocessor:
         # 計算片段數量
         num_segments = int(duration / segment_duration) + (1 if duration % segment_duration > 0 else 0)
 
-        console.print(f"\n[cyan]✂️  分割影片...[/cyan]")
+        console.print(f"\n[magenta]✂️  分割影片...[/magenta]")
         console.print(f"  影片時長：{duration:.2f} 秒")
         console.print(f"  片段時長：{segment_duration} 秒")
         console.print(f"  片段數量：{num_segments}")
@@ -414,16 +449,16 @@ class VideoPreprocessor:
                     progress.update(task, advance=1)
                 except subprocess.CalledProcessError as e:
                     stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
-                    console.print(f"[red]✗ 分割片段 {i+1} 失敗[/red]")
+                    console.print(f"[dim magenta]✗ 分割片段 {i+1} 失敗[/red]")
 
                     # 顯示轉碼失敗修復建議
                     try:
                         from error_fix_suggestions import suggest_video_transcode_failed
                         suggest_video_transcode_failed(video_path, output_path, stderr)
                     except ImportError:
-                        console.print(f"[red]錯誤：{stderr[:200]}[/red]")
+                        console.print(f"[dim magenta]錯誤：{stderr[:200]}[/red]")
 
-        console.print(f"\n[green]✓ 已分割為 {len(segment_paths)} 個片段[/green]")
+        console.print(f"\n[bright_magenta]✓ 已分割為 {len(segment_paths)} 個片段[/green]")
         for i, path in enumerate(segment_paths, 1):
             segment_info = self.get_video_info(path)
             console.print(f"  {i}. {os.path.basename(path)} ({segment_info['duration']:.2f}s)")
@@ -436,9 +471,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print("  python gemini_video_preprocessor.py <video_path> [command]")
-        console.print("\n[cyan]命令：[/cyan]")
+        console.print("\n[magenta]命令：[/magenta]")
         console.print("  info         - 顯示影片資訊（預設）")
         console.print("  compress     - 壓縮影片")
         console.print("  keyframes    - 提取關鍵幀")
@@ -453,28 +488,28 @@ def main():
     try:
         if command == "info":
             info = preprocessor.get_video_info(video_path)
-            console.print("\n[cyan]📊 影片資訊：[/cyan]")
+            console.print("\n[magenta]📊 影片資訊：[/magenta]")
             for key, value in info.items():
                 console.print(f"  {key}: {value}")
 
         elif command == "compress":
             output = preprocessor.compress_for_api(video_path)
-            console.print(f"\n[green]✓ 壓縮完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 壓縮完成：{output}[/green]")
 
         elif command == "keyframes":
             frames = preprocessor.extract_keyframes(video_path)
-            console.print(f"\n[green]✓ 已提取 {len(frames)} 幀[/green]")
+            console.print(f"\n[bright_magenta]✓ 已提取 {len(frames)} 幀[/green]")
 
         elif command == "split":
             segments = preprocessor.split_by_duration(video_path)
-            console.print(f"\n[green]✓ 已分割為 {len(segments)} 個片段[/green]")
+            console.print(f"\n[bright_magenta]✓ 已分割為 {len(segments)} 個片段[/green]")
 
         else:
-            console.print(f"[red]未知命令：{command}[/red]")
+            console.print(f"[dim magenta]未知命令：{command}[/red]")
             sys.exit(1)
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         sys.exit(1)
 
 

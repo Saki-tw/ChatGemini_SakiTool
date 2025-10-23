@@ -99,14 +99,14 @@ class WebSearch:
         # 驗證設定
         if engine == SearchEngine.GOOGLE_CUSTOM:
             if not self.api_key or not self.cx_id:
-                console.print("[yellow]⚠️  Google Custom Search 需要 API Key 和 CSE ID[/yellow]")
-                console.print("[yellow]   回退到 DuckDuckGo[/yellow]")
+                console.print("[magenta]⚠️  Google Custom Search 需要 API Key 和 CSE ID[/yellow]")
+                console.print("[magenta]   回退到 DuckDuckGo[/yellow]")
                 self.engine = SearchEngine.DUCKDUCKGO
 
         elif engine == SearchEngine.BRAVE:
             if not self.api_key:
-                console.print("[yellow]⚠️  Brave Search 需要 API Key[/yellow]")
-                console.print("[yellow]   回退到 DuckDuckGo[/yellow]")
+                console.print("[magenta]⚠️  Brave Search 需要 API Key[/yellow]")
+                console.print("[magenta]   回退到 DuckDuckGo[/yellow]")
                 self.engine = SearchEngine.DUCKDUCKGO
 
     def search(
@@ -130,7 +130,7 @@ class WebSearch:
         Returns:
             List[SearchResult]: 搜尋結果列表
         """
-        console.print(f"\n[cyan]🔍 搜尋：{query}[/cyan]")
+        console.print(f"\n[magenta]🔍 搜尋：{query}[/magenta]")
         console.print(f"[dim]搜尋引擎：{self.engine.value}[/dim]")
 
         try:
@@ -166,12 +166,12 @@ class WebSearch:
 
                 self.pricing_tracker.track_search_usage(engine_key, query_count=1)
 
-            console.print(f"[green]✓ 找到 {len(results)} 個結果[/green]")
+            console.print(f"[bright_magenta]✓ 找到 {len(results)} 個結果[/green]")
 
             return results
 
         except Exception as e:
-            console.print(f"[red]✗ 搜尋失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 搜尋失敗：{e}[/red]")
             return []
 
     def _search_duckduckgo(
@@ -206,7 +206,7 @@ class WebSearch:
             return results[:max_results]
 
         except Exception as e:
-            console.print(f"[yellow]⚠️  DuckDuckGo 搜尋錯誤：{e}[/yellow]")
+            console.print(f"[magenta]⚠️  DuckDuckGo 搜尋錯誤：{e}[/yellow]")
             return []
 
     def _parse_duckduckgo_html(self, html: str) -> List[SearchResult]:
@@ -295,7 +295,7 @@ class WebSearch:
             return results
 
         except Exception as e:
-            console.print(f"[yellow]⚠️  Google Custom Search 錯誤：{e}[/yellow]")
+            console.print(f"[magenta]⚠️  Google Custom Search 錯誤：{e}[/yellow]")
             return []
 
     def _search_brave(
@@ -343,20 +343,20 @@ class WebSearch:
             return results
 
         except Exception as e:
-            console.print(f"[yellow]⚠️  Brave Search 錯誤：{e}[/yellow]")
+            console.print(f"[magenta]⚠️  Brave Search 錯誤：{e}[/yellow]")
             return []
 
     def display_results(self, results: List[SearchResult]) -> None:
         """展示搜尋結果"""
         if not results:
-            console.print("[yellow]⚠️  無搜尋結果[/yellow]")
+            console.print("[magenta]⚠️  無搜尋結果[/yellow]")
             return
 
         console.print(f"\n[bold]🔍 搜尋結果（{len(results)} 個）[/bold]\n")
 
         for result in results:
-            console.print(f"[bold cyan]{result.rank}. {result.title}[/bold cyan]")
-            console.print(f"   [blue]{result.url}[/blue]")
+            console.print(f"[bold magenta]{result.rank}. {result.title}[/bold magenta]")
+            console.print(f"   [magenta]{result.url}[/magenta]")
             if result.snippet:
                 # 限制摘要長度
                 snippet = result.snippet[:200] + "..." if len(result.snippet) > 200 else result.snippet
@@ -370,7 +370,7 @@ def main():
     """Web Search 命令列工具"""
     import sys
 
-    console.print("\n[bold cyan]CodeGemini Web Search Tool[/bold cyan]\n")
+    console.print("\n[bold magenta]CodeGemini Web Search Tool[/bold magenta]\n")
 
     if len(sys.argv) < 2:
         console.print("用法：")

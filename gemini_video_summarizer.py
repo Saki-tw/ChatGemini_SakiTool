@@ -108,13 +108,13 @@ class VideoSummarizer:
         Returns:
             VideoSummary 物件
         """
-        console.print("\n[bold cyan]📝 智能影片摘要分析[/bold cyan]\n")
+        console.print("\n[bold magenta]📝 智能影片摘要分析[/bold magenta]\n")
         console.print(f"📁 影片：{os.path.basename(video_path)}")
 
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print("[red]錯誤：無法獲取影片資訊[/red]")
+            console.print("[dim magenta]錯誤：無法獲取影片資訊[/red]")
             return None
 
         duration = info['duration']
@@ -124,18 +124,18 @@ class VideoSummarizer:
         # 2. 場景檢測
         scenes = []
         if self.use_scene_detection:
-            console.print("\n[cyan]📦 執行場景檢測...[/cyan]")
+            console.print("\n[magenta]📦 執行場景檢測...[/magenta]")
             # 根據影片長度調整關鍵幀數
             num_keyframes = min(30, max(10, int(duration / 10)))
             scenes = self.scene_detector.detect_scenes(video_path, num_keyframes=num_keyframes)
             console.print(f"✓ 檢測到 {len(scenes)} 個場景")
 
         # 3. 生成內容概覽
-        console.print("\n[cyan]🔍 分析影片內容...[/cyan]")
+        console.print("\n[magenta]🔍 分析影片內容...[/magenta]")
         content_overview = self._analyze_content_overview(video_path, scenes, duration)
 
         # 4. 生成摘要
-        console.print("\n[cyan]✍️  生成多層次摘要...[/cyan]")
+        console.print("\n[magenta]✍️  生成多層次摘要...[/magenta]")
         summaries = self._generate_multilevel_summaries(
             video_path,
             scenes,
@@ -144,11 +144,11 @@ class VideoSummarizer:
         )
 
         # 5. 提取主題和標籤
-        console.print("\n[cyan]🏷️  提取主題和標籤...[/cyan]")
+        console.print("\n[magenta]🏷️  提取主題和標籤...[/magenta]")
         topics_and_tags = self._extract_topics_and_tags(scenes, content_overview)
 
         # 6. 創建章節
-        console.print("\n[cyan]📑 生成章節標記...[/cyan]")
+        console.print("\n[magenta]📑 生成章節標記...[/magenta]")
         chapters = self._create_chapters(video_path, scenes, num_chapters)
         console.print(f"✓ 已生成 {len(chapters)} 個章節")
 
@@ -170,7 +170,7 @@ class VideoSummarizer:
             confidence=content_overview.get('confidence', 0.8)
         )
 
-        console.print("\n[green]✓ 摘要生成完成！[/green]")
+        console.print("\n[bright_magenta]✓ 摘要生成完成！[/green]")
 
         return summary
 
@@ -284,7 +284,7 @@ class VideoSummarizer:
             return summaries
 
         except Exception as e:
-            console.print(f"[yellow]警告：生成摘要時出錯，使用預設摘要: {e}[/yellow]")
+            console.print(f"[magenta]警告：生成摘要時出錯，使用預設摘要: {e}[/yellow]")
             return self._generate_default_summaries(scenes, overview)
 
     def _build_summary_prompt(
@@ -518,47 +518,48 @@ LONG: [長摘要]
     def display_summary(self, summary: VideoSummary):
         """顯示摘要"""
         if not summary:
-            console.print("[yellow]沒有可顯示的摘要[/yellow]")
+            console.print("[magenta]沒有可顯示的摘要[/yellow]")
             return
 
         console.print("\n" + "=" * 80)
-        console.print(f"[bold cyan]📝 影片摘要：{summary.video_name}[/bold cyan]")
+        console.print(f"[bold magenta]📝 影片摘要：{summary.video_name}[/bold magenta]")
         console.print("=" * 80 + "\n")
 
         # 1. 基本資訊
         info_panel = f"""
-[cyan]影片名稱：[/cyan] {summary.video_name}
-[cyan]總長度：[/cyan] {self._format_time(summary.duration)}
-[cyan]類別：[/cyan] {summary.category}
-[cyan]語言：[/cyan] {summary.language}
-[cyan]章節數：[/cyan] {len(summary.chapters)}
-[cyan]置信度：[/cyan] {summary.confidence:.1%}
+[magenta]影片名稱：[/magenta] {summary.video_name}
+[magenta]總長度：[/magenta] {self._format_time(summary.duration)}
+[magenta]類別：[/magenta] {summary.category}
+[magenta]語言：[/magenta] {summary.language}
+[magenta]章節數：[/magenta] {len(summary.chapters)}
+[magenta]置信度：[/magenta] {summary.confidence:.1%}
 """
-        console.print(Panel(info_panel, title="📊 基本資訊", border_style="cyan"))
+        console.print(Panel(info_panel, title="📊 基本資訊", border_style="magenta"))
 
         # 2. 建議標題
         console.print(f"\n[bold yellow]💡 建議標題：[/bold yellow] {summary.title}\n")
 
         # 3. 多層次摘要
-        console.print("[bold cyan]📄 摘要內容：[/bold cyan]\n")
+        console.print("[bold magenta]📄 摘要內容：[/bold magenta]\n")
 
-        console.print(Panel(summary.short_summary, title="短摘要（社群媒體）", border_style="green"))
-        console.print(Panel(summary.medium_summary, title="中摘要（影片描述）", border_style="blue"))
-        console.print(Panel(summary.long_summary, title="長摘要（詳細說明）", border_style="magenta"))
+        console.print(Panel(Markdown(summary.short_summary), title="短摘要（社群媒體）", border_style="magenta"))
+        console.print(Panel(Markdown(summary.medium_summary), title="中摘要（影片描述）", border_style="magenta"))
+        console.print(Panel(Markdown(summary.long_summary), title="長摘要（詳細說明）", border_style="magenta"))
 
         # 4. 主題和標籤
-        console.print(f"\n[bold cyan]🏷️  主要話題：[/bold cyan] {', '.join(summary.key_topics)}")
-        console.print(f"[bold cyan]🔖 標籤：[/bold cyan] {', '.join(summary.tags[:10])}\n")
+        console.print(f"\n[bold magenta]🏷️  主要話題：[/bold magenta] {', '.join(summary.key_topics)}")
+        console.print(f"[bold magenta]🔖 標籤：[/bold magenta] {', '.join(summary.tags[:10])}\n")
 
         # 5. 章節列表
         if summary.chapters:
-            console.print("[bold cyan]📑 章節標記：[/bold cyan]\n")
+            console.print("[bold magenta]📑 章節標記：[/bold magenta]\n")
 
-            table = Table(show_header=True, header_style="bold cyan")
-            table.add_column("#", width=4)
-            table.add_column("標題", width=30)
-            table.add_column("時間範圍", width=20)
-            table.add_column("關鍵要點", width=30)
+            table = Table(show_header=True, header_style="bold magenta")
+            console_width = console.width or 120
+            table.add_column("#", width=max(4, int(console_width * 0.03)))
+            table.add_column("標題", width=max(25, int(console_width * 0.30)))
+            table.add_column("時間範圍", width=max(18, int(console_width * 0.15)))
+            table.add_column("關鍵要點", width=max(25, int(console_width * 0.30)))
 
             for chapter in summary.chapters:
                 time_range = f"{self._format_time(chapter.start_time)} - {self._format_time(chapter.end_time)}"
@@ -602,7 +603,7 @@ LONG: [長摘要]
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             saved_files.append(output_file)
-            console.print(f"[green]✓ JSON 已保存：{output_file}[/green]")
+            console.print(f"[bright_magenta]✓ JSON 已保存：{output_file}[/green]")
 
         # TXT 格式
         if format in ['txt', 'all']:
@@ -635,7 +636,7 @@ LONG: [長摘要]
                         f.write(f"     關鍵要點：{', '.join(chapter.key_points)}\n\n")
 
             saved_files.append(output_file)
-            console.print(f"[green]✓ TXT 已保存：{output_file}[/green]")
+            console.print(f"[bright_magenta]✓ TXT 已保存：{output_file}[/green]")
 
         # Markdown 格式
         if format in ['md', 'all']:
@@ -665,7 +666,7 @@ LONG: [長摘要]
                         f.write(f"**關鍵要點：** {', '.join(chapter.key_points)}  \n\n")
 
             saved_files.append(output_file)
-            console.print(f"[green]✓ Markdown 已保存：{output_file}[/green]")
+            console.print(f"[bright_magenta]✓ Markdown 已保存：{output_file}[/green]")
 
         # YouTube 描述格式
         if format in ['youtube', 'all']:
@@ -683,7 +684,7 @@ LONG: [長摘要]
                 f.write(f"#{'  #'.join(summary.tags[:10])}\n")
 
             saved_files.append(output_file)
-            console.print(f"[green]✓ YouTube 描述已保存：{output_file}[/green]")
+            console.print(f"[bright_magenta]✓ YouTube 描述已保存：{output_file}[/green]")
 
         return str(saved_files[0]) if saved_files else ""
 
@@ -714,7 +715,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(f"[red]錯誤：找不到影片檔案：{args.video}[/red]")
+        console.print(f"[dim magenta]錯誤：找不到影片檔案：{args.video}[/red]")
         return
 
     # 創建摘要器

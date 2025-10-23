@@ -87,13 +87,13 @@ class ClipAdvisor:
         Returns:
             剪輯建議列表
         """
-        console.print("\n[bold cyan]🎬 AI 剪輯建議分析[/bold cyan]\n")
+        console.print("\n[bold magenta]🎬 AI 剪輯建議分析[/bold magenta]\n")
         console.print(f"📁 影片：{os.path.basename(video_path)}")
 
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print("[red]錯誤：無法獲取影片資訊[/red]")
+            console.print("[dim magenta]錯誤：無法獲取影片資訊[/red]")
             return []
 
         duration = info['duration']
@@ -105,16 +105,16 @@ class ClipAdvisor:
         # 2. 場景檢測（如果啟用）
         scenes = []
         if self.use_scene_detection:
-            console.print("\n[cyan]📦 執行場景檢測...[/cyan]")
+            console.print("\n[magenta]📦 執行場景檢測...[/magenta]")
             scenes = self.scene_detector.detect_scenes(video_path, num_keyframes=20)
             console.print(f"✓ 檢測到 {len(scenes)} 個場景")
 
         # 3. 分析內容特徵
-        console.print("\n[cyan]🔍 分析影片內容特徵...[/cyan]")
+        console.print("\n[magenta]🔍 分析影片內容特徵...[/magenta]")
         content_features = self._analyze_content_features(video_path, scenes, duration)
 
         # 4. 生成剪輯建議
-        console.print("\n[cyan]💡 生成剪輯建議...[/cyan]")
+        console.print("\n[magenta]💡 生成剪輯建議...[/magenta]")
         suggestions = self._generate_suggestions(
             video_path,
             scenes,
@@ -128,7 +128,7 @@ class ClipAdvisor:
         # 5. 排序並篩選
         suggestions = self._rank_and_filter_suggestions(suggestions, num_suggestions)
 
-        console.print(f"\n[green]✓ 已生成 {len(suggestions)} 個剪輯建議[/green]")
+        console.print(f"\n[bright_magenta]✓ 已生成 {len(suggestions)} 個剪輯建議[/green]")
 
         return suggestions
 
@@ -550,7 +550,7 @@ class ClipAdvisor:
             subprocess.run(cmd, capture_output=True, check=True)
             return str(frame_path)
         except Exception as e:
-            console.print(f"[yellow]警告：提取預覽幀失敗 ({timestamp}s): {e}[/yellow]")
+            console.print(f"[magenta]警告：提取預覽幀失敗 ({timestamp}s): {e}[/yellow]")
             return ""
 
     def _rank_and_filter_suggestions(
@@ -575,24 +575,25 @@ class ClipAdvisor:
     def display_suggestions(self, suggestions: List[ClipSuggestion]):
         """顯示剪輯建議"""
         if not suggestions:
-            console.print("[yellow]沒有生成剪輯建議[/yellow]")
+            console.print("[magenta]沒有生成剪輯建議[/yellow]")
             return
 
-        console.print(f"\n[bold cyan]📋 剪輯建議列表（{len(suggestions)} 個）[/bold cyan]\n")
+        console.print(f"\n[bold magenta]📋 剪輯建議列表（{len(suggestions)} 個）[/bold magenta]\n")
 
         # 創建表格
-        table = Table(show_header=True, header_style="bold cyan")
-        table.add_column("#", style="dim", width=4)
-        table.add_column("類型", width=12)
-        table.add_column("時間範圍", width=20)
-        table.add_column("描述", width=40)
-        table.add_column("評分", justify="right", width=8)
+        table = Table(show_header=True, header_style="bold bright_magenta")
+        console_width = console.width or 120
+        table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
+        table.add_column("類型", width=max(10, int(console_width * 0.10)))
+        table.add_column("時間範圍", width=max(18, int(console_width * 0.15)))
+        table.add_column("描述", width=max(35, int(console_width * 0.50)))
+        table.add_column("評分", justify="right", width=max(8, int(console_width * 0.08)))
 
         for suggestion in suggestions:
             # 類型顏色
             type_colors = {
-                'intro': 'blue',
-                'outro': 'blue',
+                'intro': 'magenta',
+                'outro': 'magenta',
                 'highlight': 'green',
                 'key_moment': 'yellow',
                 'transition': 'magenta'
@@ -622,26 +623,26 @@ class ClipAdvisor:
         console.print(table)
 
         # 顯示詳細資訊
-        console.print("\n[bold cyan]💡 詳細建議：[/bold cyan]\n")
+        console.print("\n[bold magenta]💡 詳細建議：[/bold magenta]\n")
         for suggestion in suggestions[:5]:  # 只顯示前 5 個的詳細資訊
             self._display_suggestion_detail(suggestion)
 
     def _display_suggestion_detail(self, suggestion: ClipSuggestion):
         """顯示單個建議的詳細資訊"""
         content = f"""
-[cyan]時間：[/cyan] {self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)
-[cyan]類型：[/cyan] {suggestion.clip_type}
-[cyan]描述：[/cyan] {suggestion.description}
-[cyan]推薦理由：[/cyan] {suggestion.reasoning}
-[cyan]評分：[/cyan] {suggestion.engagement_score:.1f}/10
-[cyan]標籤：[/cyan] {', '.join(suggestion.tags)}
+[magenta]時間：[/magenta] {self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)
+[magenta]類型：[/magenta] {suggestion.clip_type}
+[magenta]描述：[/magenta] {suggestion.description}
+[magenta]推薦理由：[/magenta] {suggestion.reasoning}
+[magenta]評分：[/magenta] {suggestion.engagement_score:.1f}/10
+[magenta]標籤：[/magenta] {', '.join(suggestion.tags)}
 
-[yellow]編輯建議：[/yellow]
+[magenta]編輯建議：[/yellow]
 """
         for tip in suggestion.editing_tips:
             content += f"  • {tip}\n"
 
-        console.print(Panel(content, title=f"[bold]#{suggestion.id} - {suggestion.clip_type.upper()}[/bold]", border_style="cyan"))
+        console.print(Panel(content, title=f"[bold]#{suggestion.id} - {suggestion.clip_type.upper()}[/bold]", border_style="bright_magenta"))
         console.print()
 
     def save_suggestions(
@@ -712,10 +713,10 @@ class ClipAdvisor:
                     f.write(f"* COMMENT: {suggestion.clip_type} - {suggestion.reasoning}\n\n")
 
         else:
-            console.print(f"[red]不支援的格式：{format}[/red]")
+            console.print(f"[dim magenta]不支援的格式：{format}[/red]")
             return ""
 
-        console.print(f"[green]✓ 剪輯建議已保存：{output_file}[/green]")
+        console.print(f"[bright_magenta]✓ 剪輯建議已保存：{output_file}[/green]")
         return str(output_file)
 
     def _format_time(self, seconds: float) -> str:
@@ -753,7 +754,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(f"[red]錯誤：找不到影片檔案：{args.video}[/red]")
+        console.print(f"[dim magenta]錯誤：找不到影片檔案：{args.video}[/red]")
         return
 
     # 創建建議器

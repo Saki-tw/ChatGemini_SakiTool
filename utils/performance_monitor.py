@@ -348,8 +348,8 @@ class PerformanceMonitor:
         summary = self.get_summary()
 
         if RICH_AVAILABLE and console:
-            table = Table(title="⚡ 性能監控摘要", show_header=True, header_style="bold cyan")
-            table.add_column("指標", style="cyan")
+            table = Table(title="⚡ 性能監控摘要", show_header=True, header_style="bold bright_magenta")
+            table.add_column("指標", style="bright_magenta")
             table.add_column("數值", style="yellow")
 
             table.add_row("總操作數", f"{summary['total_operations']:,}")
@@ -380,7 +380,7 @@ class PerformanceMonitor:
 
         if not bottlenecks:
             if RICH_AVAILABLE and console:
-                console.print("[yellow]沒有性能數據可供分析[/yellow]")
+                console.print("[magenta]沒有性能數據可供分析[/yellow]")
             else:
                 print("沒有性能數據可供分析")
             return
@@ -391,14 +391,15 @@ class PerformanceMonitor:
                 show_header=True,
                 header_style="bold magenta"
             )
-            table.add_column("排名", style="cyan", width=6)
+            console_width = console.width or 120
+            table.add_column("排名", style="bright_magenta", width=max(6, int(console_width * 0.05)))
             table.add_column("操作", style="yellow")
             table.add_column("總耗時", style="red")
             table.add_column("占比", style="red")
             table.add_column("次數", style="green")
-            table.add_column("平均", style="blue")
+            table.add_column("平均", style="bright_magenta")
             table.add_column("記憶體", style="magenta")
-            table.add_column("CPU", style="cyan")
+            table.add_column("CPU", style="bright_magenta")
 
             for idx, b in enumerate(bottlenecks, 1):
                 table.add_row(
@@ -415,7 +416,7 @@ class PerformanceMonitor:
             console.print(table)
 
             # 建議
-            console.print("\n[bold cyan]💡 優化建議：[/bold cyan]")
+            console.print("\n[bold magenta]💡 優化建議：[/bold magenta]")
             for idx, b in enumerate(bottlenecks[:3], 1):
                 suggestion = self._get_optimization_suggestion(b)
                 console.print(f"  {idx}. {b.operation}: {suggestion}")
@@ -506,7 +507,7 @@ class PerformanceMonitor:
             json.dump(report, f, ensure_ascii=False, indent=2)
 
         if RICH_AVAILABLE and console:
-            console.print(f"[green]✓ 性能報告已匯出：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 性能報告已匯出：{output_path}[/green]")
         else:
             print(f"✓ 性能報告已匯出：{output_path}")
 

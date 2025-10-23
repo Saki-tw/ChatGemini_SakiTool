@@ -28,14 +28,14 @@ def test_manager_initialization():
         assert manager.shells == {}, "初始 shells 應為空"
         assert manager._shell_counter == 0, "初始計數器應為 0"
 
-        console.print(f"[green]✓ BackgroundShellManager 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ BackgroundShellManager 初始化成功[/green]")
         console.print(f"  shells: {len(manager.shells)} 個")
         console.print(f"  counter: {manager._shell_counter}")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -61,7 +61,7 @@ def test_start_simple_shell():
         # 等待完成
         time.sleep(0.5)
 
-        console.print(f"[green]✓ 簡單 Shell 啟動成功[/green]")
+        console.print(f"[bright_magenta]✓ 簡單 Shell 啟動成功[/green]")
         console.print(f"  Shell ID：{shell_id}")
         console.print(f"  PID：{bg_shell.process.pid}")
 
@@ -72,7 +72,7 @@ def test_start_simple_shell():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -96,7 +96,7 @@ def test_shell_output_capture():
 
         assert "Line 1" in output or "Line" in output, "應包含輸出內容"
 
-        console.print(f"[green]✓ 輸出捕獲成功[/green]")
+        console.print(f"[bright_magenta]✓ 輸出捕獲成功[/green]")
         console.print(f"  輸出長度：{len(output)} 字元")
 
         # 清理
@@ -107,7 +107,7 @@ def test_shell_output_capture():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -131,7 +131,7 @@ def test_output_filtering():
 
         assert "ERROR" in filtered_output, "應包含 ERROR"
 
-        console.print(f"[green]✓ 輸出過濾成功[/green]")
+        console.print(f"[bright_magenta]✓ 輸出過濾成功[/green]")
         console.print(f"  過濾結果：包含 ERROR 行")
 
         # 清理
@@ -142,7 +142,7 @@ def test_output_filtering():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -166,7 +166,7 @@ def test_long_running_shell():
         time.sleep(0.5)
         assert bg_shell.is_running, "Shell 應仍在運行"
 
-        console.print(f"[green]✓ 長時間運行 Shell 正常[/green]")
+        console.print(f"[bright_magenta]✓ 長時間運行 Shell 正常[/green]")
         console.print(f"  運行時間：{bg_shell.runtime:.1f}s")
 
         # 終止
@@ -175,7 +175,7 @@ def test_long_running_shell():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -201,14 +201,14 @@ def test_kill_shell():
         assert bg_shell.status == ShellStatus.KILLED, "狀態應為 KILLED"
         assert bg_shell.ended_at is not None, "應有結束時間"
 
-        console.print(f"[green]✓ Shell 終止成功[/green]")
+        console.print(f"[bright_magenta]✓ Shell 終止成功[/green]")
         console.print(f"  狀態：{bg_shell.status.value}")
         console.print(f"  運行時間：{bg_shell.runtime:.1f}s")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -240,7 +240,7 @@ def test_list_shells():
             assert "status" in info, "應有 status"
             assert "runtime" in info, "應有 runtime"
 
-        console.print(f"[green]✓ 列出 Shell 成功[/green]")
+        console.print(f"[bright_magenta]✓ 列出 Shell 成功[/green]")
         console.print(f"  Shell 數量：{len(shells_info)}")
 
         # 清理
@@ -252,7 +252,7 @@ def test_list_shells():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -280,13 +280,13 @@ def test_cleanup_completed():
 
         assert cleaned >= 0, "清理數量應 >= 0"
 
-        console.print(f"[green]✓ 清理已完成 Shell 成功[/green]")
+        console.print(f"[bright_magenta]✓ 清理已完成 Shell 成功[/green]")
         console.print(f"  清理數量：{cleaned}")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -306,7 +306,7 @@ def test_custom_shell_id():
         assert shell_id == custom_id, "Shell ID 應為自訂值"
         assert custom_id in manager.shells, "自訂 ID 應被記錄"
 
-        console.print(f"[green]✓ 自訂 Shell ID 成功[/green]")
+        console.print(f"[bright_magenta]✓ 自訂 Shell ID 成功[/green]")
         console.print(f"  Shell ID：{shell_id}")
 
         # 清理
@@ -317,7 +317,7 @@ def test_custom_shell_id():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -328,7 +328,7 @@ def test_custom_shell_id():
 def main():
     """執行所有測試"""
     console.print("=" * 70)
-    console.print("[bold cyan]CodeGemini Background Shell - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini Background Shell - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -350,7 +350,7 @@ def main():
             result = test_func()
             results[test_name] = "✅ 通過" if result else "❌ 失敗"
         except Exception as e:
-            console.print(f"[red]測試異常：{e}[/red]")
+            console.print(f"[dim magenta]測試異常：{e}[/red]")
             results[test_name] = "❌ 失敗"
 
     # 顯示測試總結
@@ -369,9 +369,9 @@ def main():
     console.print(f"[bold]總計：{passed}/{total} 測試通過[/bold]")
 
     if passed < total:
-        console.print(f"\n[yellow]⚠️  {total - passed} 個測試失敗[/yellow]")
+        console.print(f"\n[magenta]⚠️  {total - passed} 個測試失敗[/yellow]")
     else:
-        console.print("\n[green]🎉 所有測試通過！Background Shell 準備就緒。[/green]")
+        console.print("\n[bright_magenta]🎉 所有測試通過！Background Shell 準備就緒。[/green]")
 
 
 if __name__ == "__main__":
