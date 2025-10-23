@@ -11,11 +11,11 @@ Requires Gemini API Key.
 Free tier includes 2 million tokens per month for Gemini 2.5 Pro.
 Come and take advantage of the free tier!
 
-**Project Name**: ChatGemini_SakiTool
-**Version**: v1.0.2
-**Author**: Saki-tw, Claude Code
-**Contact**: Saki@saki-studio.com.tw
-**Last Updated**: 2025-10-24
+**Project Name**: ChatGemini_SakiTool  
+**Version**: v1.0.2  
+**Author**: Saki-tw, Claude Code  
+**Contact**: Saki@saki-studio.com.tw  
+**Last Updated**: 2025-10-24  
 
 ---
 
