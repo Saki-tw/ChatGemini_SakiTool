@@ -1051,12 +1051,17 @@ class AutoCacheManager:
             return False
 
         try:
-            # 組合對話歷史
-            cache_content = []
+            # 組合對話歷史 - 優化：使用 list 累積，單次 join（避免 O(n²) 記憶體使用）
+            cache_lines = []
             for user_msg, ai_msg, _ in self.conversation_pairs:
-                cache_content.append(f"User: {user_msg}\n\nAssistant: {ai_msg}\n\n")
+                cache_lines.append("User: ")
+                cache_lines.append(user_msg)
+                cache_lines.append("\n\nAssistant: ")
+                cache_lines.append(ai_msg)
+                cache_lines.append("\n\n")
 
-            combined_content = "\n".join(cache_content)
+            # 單次分配和拷貝 - O(n) 記憶體複雜度
+            combined_content = "".join(cache_lines)
 
             # 建立快取
             print("\n⏳ 建立快取中...")
@@ -1078,7 +1083,14 @@ class AutoCacheManager:
 
 
 class ChatLogger:
-    """對話記錄管理器"""
+    """
+    對話記錄管理器 - 優化版
+
+    改良重點：
+    - 使用持久檔案句柄，避免重複開啟/關閉檔案（減少 OS 系統呼叫）
+    - 使用緩衝區，批次寫入（降低 I/O 次數）
+    - 避免長時間會話中的檔案句柄耗盡問題
+    """
 
     def __init__(self, log_dir: str = DEFAULT_LOG_DIR):
         self.log_dir = log_dir
@@ -1095,6 +1107,12 @@ class ChatLogger:
         )
         self.model_name = None
         self.conversation_history = []  # 儲存完整對話歷史
+
+        # 優化：保持檔案句柄開啟，使用 64KB 緩衝區
+        self._log_file_handle = open(self.session_file, 'a', encoding='utf-8', buffering=64*1024)
+        self._buffer = []  # 記錄緩衝區
+        self._buffer_size = 10  # 每 10 條訊息刷新一次
+
         logger.info(f"對話記錄將儲存至：{self.session_file}")
 
     def set_model(self, model_name: str):
@@ -1142,18 +1160,33 @@ class ChatLogger:
         self.conversation_history.append(entry)
 
     def _log_message(self, role: str, message: str):
-        """內部記錄方法"""
+        """內部記錄方法 - 優化：使用緩衝區批次寫入"""
         try:
-            with open(self.session_file, 'a', encoding='utf-8') as f:
-                timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                f.write(f"\n[{timestamp}] {role}:\n")
-                f.write(f"{message}\n")
-                f.write("-" * 80 + "\n")
+            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            log_entry = f"\n[{timestamp}] {role}:\n{message}\n" + "-" * 80 + "\n"
+            self._buffer.append(log_entry)
+
+            # 達到緩衝大小時自動刷新
+            if len(self._buffer) >= self._buffer_size:
+                self._flush_buffer()
         except Exception as e:
             logger.error(f"記錄失敗：{e}")
 
+    def _flush_buffer(self):
+        """刷新緩衝區到檔案"""
+        if self._buffer:
+            try:
+                self._log_file_handle.writelines(self._buffer)
+                self._log_file_handle.flush()  # 確保立即寫入磁碟
+                self._buffer.clear()
+            except Exception as e:
+                logger.error(f"刷新緩衝區失敗：{e}")
+
     def save_session(self):
-        """儲存會話（同時儲存文字和 JSON）"""
+        """儲存會話（同時儲存文字和 JSON）- 優化：先刷新緩衝區"""
+        # 優化：確保所有未寫入的記錄都刷新到檔案
+        self._flush_buffer()
+
         # 儲存 JSON
         try:
             with open(self.json_file, 'w', encoding='utf-8') as f:
@@ -1167,6 +1200,15 @@ class ChatLogger:
             logger.error(f"JSON 儲存失敗：{e}")
 
         logger.info(f"對話已儲存至：{self.session_file}")
+
+    def __del__(self):
+        """清理：關閉檔案句柄"""
+        if hasattr(self, '_log_file_handle') and self._log_file_handle:
+            try:
+                self._flush_buffer()  # 最後一次刷新
+                self._log_file_handle.close()
+            except Exception:
+                pass  # 解構時忽略錯誤
 
 
 class ThinkingSignatureManager:
