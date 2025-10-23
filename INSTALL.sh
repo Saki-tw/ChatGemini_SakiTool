@@ -193,13 +193,17 @@ install_all() {
         fi
 
         if grep -q "# ChatGemini_SakiTool" "$SHELL_RC" 2>/dev/null; then
-            sed -i.bak '/# ChatGemini_SakiTool/,/alias ChatGemini=/d' "$SHELL_RC" 2>/dev/null
+            sed -i.bak '/# ChatGemini_SakiTool/,/^$/d' "$SHELL_RC" 2>/dev/null
         fi
 
         cat >> "$SHELL_RC" << ALIASES
 
 # ChatGemini_SakiTool Global Aliases (v${PROJECT_VERSION})
-alias ChatGemini='${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias ChatGemini='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias chatgemini='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias CHATGEMINI='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias ChatGEMINI='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+
 ALIASES
 
     ) > /dev/null 2>&1 &

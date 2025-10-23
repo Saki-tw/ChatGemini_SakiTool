@@ -4,12 +4,28 @@ Gemini 對話日誌記錄器
 從 gemini_chat.py 抽離
 """
 
+import os
+import json
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
-import logging
 
 logger = logging.getLogger(__name__)
+
+# 從配置取得預設日誌目錄
+try:
+    from config import OUTPUT_DIRS
+    DEFAULT_LOG_DIR = str(OUTPUT_DIRS.get('chat_logs', Path.cwd() / 'ChatLogs'))
+except ImportError:
+    DEFAULT_LOG_DIR = str(Path.cwd() / 'ChatLogs')
+
+# 導入對話管理器（如果可用）
+try:
+    from gemini_conversation import ConversationManager
+except ImportError:
+    logger.warning("ConversationManager 不可用，使用簡化版對話記錄")
+    ConversationManager = None
 
 
 
@@ -39,7 +55,10 @@ class ChatLogger:
         self.model_name = None
 
         # 🔧 記憶體洩漏修復：使用 ConversationManager 管理對話歷史
-        self.conversation_manager = ConversationManager(max_history=100, archive_dir=log_dir)
+        if ConversationManager:
+            self.conversation_manager = ConversationManager(max_history=100, archive_dir=log_dir)
+        else:
+            self.conversation_manager = None
 
         # 優化：保持檔案句柄開啟，使用 64KB 緩衝區
         self._log_file_handle = open(self.session_file, 'a', encoding='utf-8', buffering=64*1024)
@@ -53,21 +72,23 @@ class ChatLogger:
         self.model_name = model_name
         self._log_message("SYSTEM", f"使用模型: {model_name}")
         # 🔧 使用 ConversationManager
-        self.conversation_manager.add_message({
-            "role": "system",
-            "content": f"使用模型: {model_name}",
-            "timestamp": datetime.now().isoformat()
-        })
+        if self.conversation_manager:
+            self.conversation_manager.add_message({
+                "role": "system",
+                "content": f"使用模型: {model_name}",
+                "timestamp": datetime.now().isoformat()
+            })
 
     def log_user(self, message: str):
         """記錄使用者訊息"""
         self._log_message("USER", message)
         # 🔧 使用 ConversationManager
-        self.conversation_manager.add_message({
-            "role": "user",
-            "content": message,
-            "timestamp": datetime.now().isoformat()
-        })
+        if self.conversation_manager:
+            self.conversation_manager.add_message({
+                "role": "user",
+                "content": message,
+                "timestamp": datetime.now().isoformat()
+            })
 
     def log_assistant(self, message: str, thinking_process: Optional[str] = None):
         """
@@ -93,7 +114,8 @@ class ChatLogger:
             entry["thinking_process"] = thinking_process
 
         # 🔧 使用 ConversationManager
-        self.conversation_manager.add_message(entry)
+        if self.conversation_manager:
+            self.conversation_manager.add_message(entry)
 
     def _log_message(self, role: str, message: str):
         """內部記錄方法 - 優化：使用緩衝區批次寫入"""
@@ -127,12 +149,14 @@ class ChatLogger:
         try:
             # 🔧 從 ConversationManager 獲取活躍對話歷史
             with open(self.json_file, 'w', encoding='utf-8') as f:
-                json.dump({
+                data = {
                     "session_start": self.session_start.isoformat(),
-                    "model": self.model_name,
-                    "conversation": self.conversation_manager.get_recent_history(),
-                    "stats": self.conversation_manager.get_stats()
-                }, f, ensure_ascii=False, indent=2)
+                    "model": self.model_name
+                }
+                if self.conversation_manager:
+                    data["conversation"] = self.conversation_manager.get_recent_history()
+                    data["stats"] = self.conversation_manager.get_stats()
+                json.dump(data, f, ensure_ascii=False, indent=2)
             logger.info(f"JSON 記錄已儲存至：{self.json_file}")
         except Exception as e:
             logger.error(f"JSON 儲存失敗：{e}")

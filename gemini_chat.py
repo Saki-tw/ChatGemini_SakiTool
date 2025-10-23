@@ -1178,25 +1178,56 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
         except Exception as e:
             logger.debug(f"快取狀態檢查失敗: {e}")
 
-    print("\n基本指令：")
-    print("  exit, quit - 退出")
-    print("  model - 切換模型")
-    print("  clear - 清除對話")
-    print("  cache - 快取管理（節省成本 75-90%）")
-    print("  config - 配置管理（資料庫設定）")
-    print("  media - 影音功能選單（Flow/Veo/分析）")
-    print("  debug - 除錯與測試工具")
-    print("  help - 完整指令列表")
+    import shutil
+
+    # 檢測終端機大小
+    terminal_height = shutil.get_terminal_size().lines
+
+    # 建立指令說明內容（馬卡龍紫色系）
+    console.print("\n[#DDA0DD]基本指令：[/#DDA0DD]")
+    console.print("  [#DA70D6]exit, quit[/#DA70D6] - 退出")
+    console.print("  [#DA70D6]model[/#DA70D6] - 切換模型")
+    console.print("  [#DA70D6]clear[/#DA70D6] - 清除對話")
+    console.print("  [#DA70D6]cache[/#DA70D6] - 快取管理（節省成本 75-90%）")
+    console.print("  [#DA70D6]config[/#DA70D6] - 配置管理（資料庫設定）")
+    console.print("  [#DA70D6]media[/#DA70D6] - 影音功能選單（Flow/Veo/分析）")
+    console.print("  [#DA70D6]debug[/#DA70D6] - 除錯與測試工具")
+    console.print("  [#DA70D6]help[/#DA70D6] - 完整指令列表")
+
+    # 計算已顯示的行數
+    lines_printed = 10  # 基本指令區塊
 
     # 顯示思考模式提示（僅支援的模型）
     if any(tm in model_name for tm in THINKING_MODELS):
-        print("\n💡 思考模式（在輸入前加上）：")
-        print("  [think:auto] - 動態思考（預設）")
-        print("  [think:2000] - 固定 2000 tokens 思考")
-        print("  [no-think] - 關閉思考")
-        print("\n  示例：[think:5000] 請分析這段程式碼的效能問題...")
+        console.print("\n[#BA55D3]💡 思考模式（在輸入前加上）：[/#BA55D3]")
+        console.print("  [#DDA0DD][think:auto][/#DDA0DD] - 動態思考（預設）")
+        console.print("  [#DDA0DD][think:2000][/#DDA0DD] - 固定 2000 tokens 思考")
+        console.print("  [#DDA0DD][no-think][/#DDA0DD] - 關閉思考")
+        console.print("\n  [dim]示例：[think:5000] 請分析這段程式碼的效能問題...[/dim]")
+        lines_printed += 6
 
-    print("-" * 60 + "\n")
+    console.print("[#DDA0DD]" + "-" * 60 + "[/#DDA0DD]")
+    lines_printed += 1
+
+    # 智能暫停：如果內容在 1-2 頁之間，顯示暫停提示
+    if terminal_height < lines_printed <= terminal_height * 2:
+        console.print("\n[dim]按任意鍵開始對話...[/dim]")
+        import sys
+        import tty
+        import termios
+
+        fd = sys.stdin.fileno()
+        old_settings = termios.tcgetattr(fd)
+        try:
+            tty.setraw(fd)
+            sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
+
+    # 如果超過 2 頁，使用靜態顯示（依賴終端機回滾）
+    # 如果不到 1 頁，直接繼續
+
+    console.print()
 
     chat_logger.set_model(model_name)
 

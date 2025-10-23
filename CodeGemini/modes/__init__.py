@@ -4,7 +4,7 @@ CodeGemini Modes Module (TESTING ONLY)
 模式系統 - 提供不同的操作模式（僅供測試使用）
 
 ⚠️ 注意：此模組化版本僅供獨立測試使用
-主要實作位於 /Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/CodeGemini.py
+主要實作位於專案根目錄的 CodeGemini.py
 
 模組：
 - plan_mode: 規劃模式（Plan Mode）

@@ -19,10 +19,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from config_unified import unified_config
 
-# 從統一配置獲取路徑設定
-OUTPUT_DIRS = unified_config.get('output_dirs', {})
-MEDIA_SUBDIRS = unified_config.get('media_subdirs', {})
-PROJECT_ROOT = unified_config.get('project_root', Path(__file__).parent.parent)
+# 從統一配置獲取路徑設定（config.py 使用大寫 KEY）
+OUTPUT_DIRS = unified_config.get('OUTPUT_DIRS', {})
+MEDIA_SUBDIRS = unified_config.get('MEDIA_SUBDIRS', {})
+PROJECT_ROOT = unified_config.get('PROJECT_ROOT', Path(__file__).parent.parent)
 
 
 # ==========================================
