@@ -234,6 +234,56 @@ MODULES = {
         'file': 'gemini_media_viewer.py',
         'notes': '附加檔案時自動顯示檔案資訊'
     },
+
+    # ========== 動態載入模組（Phase 2/3 從 gemini_chat.py 抽離）==========
+
+    'thinking': {
+        'enabled': True,
+        'required': True,
+        'description': '思考模式管理（簽名持久化、配置解析）',
+        'dependencies': [],
+        'file': 'gemini_thinking.py'
+    },
+
+    'cache': {
+        'enabled': True,
+        'required': True,
+        'description': '快取控制系統（快取狀態、動作解析）',
+        'dependencies': [],
+        'file': 'gemini_cache.py'
+    },
+
+    'conversation': {
+        'enabled': True,
+        'required': True,
+        'description': '對話管理器（記憶體管理、歷史記錄）',
+        'dependencies': [],
+        'file': 'gemini_conversation.py'
+    },
+
+    'logger': {
+        'enabled': True,
+        'required': True,
+        'description': '對話記錄器（日誌儲存、格式化）',
+        'dependencies': [],
+        'file': 'gemini_logger.py'
+    },
+
+    'config_ui': {
+        'enabled': True,
+        'required': False,
+        'description': '配置介面（互動式設定選單）',
+        'dependencies': ['rich'],
+        'file': 'gemini_config_ui.py'
+    },
+
+    'model_selector': {
+        'enabled': True,
+        'required': False,
+        'description': '模型選擇器（切換模型、顯示資訊）',
+        'dependencies': [],
+        'file': 'gemini_model_selector.py'
+    },
 }
 
 # ==========================================
@@ -791,3 +841,62 @@ if __name__ == "__main__":
     print(f"  USD_TO_TWD = {config.get('USD_TO_TWD')}")
 
     print("\n✅ 三層配置系統測試通過！")
+
+
+# ==========================================
+# Markdown 渲染主題（馬卡龍紫）
+# ==========================================
+
+MARKDOWN_THEME = {
+    'name': 'macaron_purple',
+    'colors': {
+        # 主要顏色：馬卡龍紫色系
+        'primary': 'plum',              # 主標題、重點文字
+        'secondary': 'orchid1',         # 次標題
+        'accent': 'medium_purple3',     # 強調色
+        
+        # 文字顏色
+        'text': 'white',                # 一般文字
+        'text_dim': 'bright_black',     # 暗色文字
+        'text_code': 'bright_magenta',  # 程式碼
+        
+        # 背景與邊框
+        'bg_code': 'grey11',            # 程式碼區塊背景
+        'border': 'plum',               # 邊框
+        
+        # 特殊元素
+        'link': 'deep_sky_blue3',       # 連結
+        'quote': 'grey50',              # 引用
+        'list_marker': 'orchid',        # 清單標記
+    },
+    
+    'styles': {
+        # 標題樣式
+        'h1': 'bold plum',
+        'h2': 'bold orchid1',
+        'h3': 'bold medium_purple3',
+        'h4': 'medium_purple2',
+        'h5': 'plum',
+        'h6': 'thistle3',
+        
+        # 程式碼樣式
+        'code': 'bright_magenta on grey11',
+        'code_block': 'white on grey11',
+        
+        # 文字樣式
+        'bold': 'bold plum',
+        'italic': 'italic orchid1',
+        'strikethrough': 'strike dim',
+        
+        # 清單樣式
+        'list': 'orchid',
+        'list_item': 'white',
+        
+        # 其他元素
+        'link': 'underline deep_sky_blue3',
+        'quote': 'italic grey50',
+        'hr': 'plum',
+        'table': 'plum',
+    }
+}
+

@@ -4,10 +4,21 @@ Gemini 對話管理器
 從 gemini_chat.py 抽離
 """
 
-from typing import List, Dict, Any
+import os
+import json
 import logging
+from typing import List, Dict, Any
+from datetime import datetime
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# 從配置取得預設日誌目錄
+try:
+    from config import OUTPUT_DIRS
+    DEFAULT_LOG_DIR = str(OUTPUT_DIRS.get('chat_logs', Path.cwd() / 'ChatLogs'))
+except ImportError:
+    DEFAULT_LOG_DIR = str(Path.cwd() / 'ChatLogs')
 
 
 
