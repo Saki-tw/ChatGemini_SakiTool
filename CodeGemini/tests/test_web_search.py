@@ -26,7 +26,7 @@ def test_search_engine_enum():
         assert SearchEngine.GOOGLE_CUSTOM == "google_custom", "Google Custom 值錯誤"
         assert SearchEngine.BRAVE == "brave", "Brave 值錯誤"
 
-        console.print(f"[green]✓ SearchEngine 列舉正確[/green]")
+        console.print(f"[bright_magenta]✓ SearchEngine 列舉正確[/green]")
         console.print(f"  DuckDuckGo: {SearchEngine.DUCKDUCKGO}")
         console.print(f"  Google Custom: {SearchEngine.GOOGLE_CUSTOM}")
         console.print(f"  Brave: {SearchEngine.BRAVE}")
@@ -34,7 +34,7 @@ def test_search_engine_enum():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -59,7 +59,7 @@ def test_search_result_creation():
         assert result.source == "example.com", "來源錯誤"
         assert result.rank == 1, "排名錯誤"
 
-        console.print(f"[green]✓ SearchResult 建立成功[/green]")
+        console.print(f"[bright_magenta]✓ SearchResult 建立成功[/green]")
         console.print(f"  標題：{result.title}")
         console.print(f"  URL：{result.url}")
         console.print(f"  排名：{result.rank}")
@@ -67,7 +67,7 @@ def test_search_result_creation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -91,14 +91,14 @@ def test_domain_extraction():
         domain2 = result._extract_domain("http://github.com/user/repo")
         assert domain2 == "github.com", f"域名提取錯誤：{domain2}"
 
-        console.print(f"[green]✓ 域名提取成功[/green]")
+        console.print(f"[bright_magenta]✓ 域名提取成功[/green]")
         console.print(f"  {result.url} -> {domain}")
         console.print(f"  http://github.com/user/repo -> {domain2}")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -127,7 +127,7 @@ def test_domain_filtering():
             blocked_domains=["spam.com"]
         ), "組合過濾測試失敗"
 
-        console.print(f"[green]✓ 域名過濾成功[/green]")
+        console.print(f"[bright_magenta]✓ 域名過濾成功[/green]")
         console.print(f"  允許列表：✓")
         console.print(f"  封鎖列表：✓")
         console.print(f"  組合過濾：✓")
@@ -135,7 +135,7 @@ def test_domain_filtering():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -155,14 +155,14 @@ def test_web_search_initialization():
         # 因為沒有 API Key，應該回退到 DuckDuckGo
         assert searcher_google.engine == SearchEngine.DUCKDUCKGO, "無 API Key 應回退到 DuckDuckGo"
 
-        console.print(f"[green]✓ WebSearch 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ WebSearch 初始化成功[/green]")
         console.print(f"  預設引擎：{searcher.engine}")
         console.print(f"  回退機制：✓")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -189,16 +189,16 @@ def test_duckduckgo_search():
             for i, result in enumerate(results, 1):
                 assert result.rank == i, f"排名應為 {i}"
 
-            console.print(f"[green]✓ DuckDuckGo 搜尋成功[/green]")
+            console.print(f"[bright_magenta]✓ DuckDuckGo 搜尋成功[/green]")
             console.print(f"  結果數量：{len(results)}")
             console.print(f"  第一個結果：{results[0].title}")
         else:
-            console.print(f"[yellow]⚠️  未獲得搜尋結果（可能是網路問題）[/yellow]")
+            console.print(f"[magenta]⚠️  未獲得搜尋結果（可能是網路問題）[/yellow]")
 
         return True
 
     except Exception as e:
-        console.print(f"[yellow]⚠️  搜尋測試跳過（網路問題）：{e}[/yellow]")
+        console.print(f"[magenta]⚠️  搜尋測試跳過（網路問題）：{e}[/yellow]")
         # 網路測試失敗不應算作測試失敗
         return True
 
@@ -223,16 +223,16 @@ def test_search_with_domain_filter():
                 domain = result._extract_domain(result.url)
                 assert "github.com" in domain, f"結果應來自 github.com，但得到 {domain}"
 
-            console.print(f"[green]✓ 域名過濾搜尋成功[/green]")
+            console.print(f"[bright_magenta]✓ 域名過濾搜尋成功[/green]")
             console.print(f"  過濾後結果：{len(results)} 個")
             console.print(f"  全部來自 github.com：✓")
         else:
-            console.print(f"[yellow]⚠️  過濾後無結果（正常）[/yellow]")
+            console.print(f"[magenta]⚠️  過濾後無結果（正常）[/yellow]")
 
         return True
 
     except Exception as e:
-        console.print(f"[yellow]⚠️  搜尋測試跳過（網路問題）：{e}[/yellow]")
+        console.print(f"[magenta]⚠️  搜尋測試跳過（網路問題）：{e}[/yellow]")
         return True
 
 
@@ -257,16 +257,16 @@ def test_search_with_blocked_domains():
                 assert "w3schools.com" not in domain, f"不應包含封鎖域名"
                 assert "tutorialspoint.com" not in domain, f"不應包含封鎖域名"
 
-            console.print(f"[green]✓ 封鎖域名搜尋成功[/green]")
+            console.print(f"[bright_magenta]✓ 封鎖域名搜尋成功[/green]")
             console.print(f"  結果數量：{len(results)} 個")
             console.print(f"  已排除封鎖域名：✓")
         else:
-            console.print(f"[yellow]⚠️  無搜尋結果[/yellow]")
+            console.print(f"[magenta]⚠️  無搜尋結果[/yellow]")
 
         return True
 
     except Exception as e:
-        console.print(f"[yellow]⚠️  搜尋測試跳過（網路問題）：{e}[/yellow]")
+        console.print(f"[magenta]⚠️  搜尋測試跳過（網路問題）：{e}[/yellow]")
         return True
 
 
@@ -298,12 +298,12 @@ def test_display_results():
         # 展示結果（不應拋出異常）
         searcher.display_results(results)
 
-        console.print(f"[green]✓ 結果展示成功[/green]")
+        console.print(f"[bright_magenta]✓ 結果展示成功[/green]")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -314,7 +314,7 @@ def test_display_results():
 def main():
     """執行所有測試"""
     console.print("=" * 70)
-    console.print("[bold cyan]CodeGemini Web Search - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini Web Search - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -336,7 +336,7 @@ def main():
             result = test_func()
             results[test_name] = "✅ 通過" if result else "❌ 失敗"
         except Exception as e:
-            console.print(f"[red]測試異常：{e}[/red]")
+            console.print(f"[dim magenta]測試異常：{e}[/red]")
             results[test_name] = "❌ 失敗"
 
     # 顯示測試總結
@@ -355,9 +355,9 @@ def main():
     console.print(f"[bold]總計：{passed}/{total} 測試通過[/bold]")
 
     if passed < total:
-        console.print(f"\n[yellow]⚠️  {total - passed} 個測試失敗[/yellow]")
+        console.print(f"\n[magenta]⚠️  {total - passed} 個測試失敗[/yellow]")
     else:
-        console.print("\n[green]🎉 所有測試通過！Web Search 準備就緒。[/green]")
+        console.print("\n[bright_magenta]🎉 所有測試通過！Web Search 準備就緒。[/green]")
 
 
 if __name__ == "__main__":

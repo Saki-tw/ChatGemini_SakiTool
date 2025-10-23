@@ -10,6 +10,7 @@ from typing import Optional, List
 from PIL import Image
 from rich.console import Console
 from rich.panel import Panel
+from rich.markdown import Markdown
 
 # 新 SDK
 from google.genai import types
@@ -22,9 +23,16 @@ from utils.pricing_loader import (
     USD_TO_TWD
 )
 
+# 導入記憶體管理模組
+from gemini_memory_manager import (
+    load_image_chunked,
+    MemoryPoolManager,
+    ParallelProcessor
+)
+
 # 導入 API 重試機制
 try:
-    from api_retry_wrapper import with_retry
+    from utils.api_retry import with_retry
     API_RETRY_ENABLED = True
 except ImportError:
     # 如果未安裝，提供空裝飾器
@@ -68,14 +76,19 @@ class ImageAnalyzer:
 
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model_name = model_name
-        console.print(f"[green]✓ 已載入模型：{model_name}[/green]")
+        console.print(f"[bright_magenta]✓ 已載入模型：{model_name}[/green]")
 
-    def _image_to_part(self, image_path: str) -> types.Part:
-        """將圖片轉換為 Part 物件"""
-        # 讀取圖片
-        with open(image_path, 'rb') as f:
-            image_bytes = f.read()
+    def _image_to_part(self, image_path: str, use_memory_optimization: bool = True) -> types.Part:
+        """
+        將圖片轉換為 Part 物件
 
+        Args:
+            image_path: 圖片路徑
+            use_memory_optimization: 是否使用記憶體優化（自動縮放大圖）
+
+        Returns:
+            types.Part 物件
+        """
         # 取得 MIME 類型
         ext = os.path.splitext(image_path)[1].lower()
         mime_map = {
@@ -87,6 +100,20 @@ class ImageAnalyzer:
             '.webp': 'image/webp',
         }
         mime_type = mime_map.get(ext, 'image/jpeg')
+
+        # 使用記憶體優化載入（自動處理大圖片）
+        if use_memory_optimization:
+            try:
+                image_bytes = load_image_chunked(image_path, max_size=(1920, 1080))
+            except Exception as e:
+                console.print(f"[magenta]⚠️  記憶體優化失敗，使用標準載入: {e}[/yellow]")
+                # 降級到標準載入
+                with open(image_path, 'rb') as f:
+                    image_bytes = f.read()
+        else:
+            # 標準載入
+            with open(image_path, 'rb') as f:
+                image_bytes = f.read()
 
         # 建立 Part
         return types.Part(
@@ -125,7 +152,7 @@ class ImageAnalyzer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     image_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{image_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{image_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到圖片，請參考上述建議")
             except ImportError:
@@ -135,12 +162,12 @@ class ImageAnalyzer:
         # 檢查格式
         ext = os.path.splitext(image_path)[1].lower()
         if ext not in SUPPORTED_FORMATS:
-            console.print(f"[yellow]警告：{ext} 可能不受支援[/yellow]")
+            console.print(f"[magenta]警告：{ext} 可能不受支援[/yellow]")
 
         # 載入圖片資訊
         try:
             img = Image.open(image_path)
-            console.print(f"\n[cyan]📷 圖片資訊：[/cyan]")
+            console.print(f"\n[magenta]📷 圖片資訊：[/magenta]")
             console.print(f"   檔案：{os.path.basename(image_path)}")
             console.print(f"   大小：{img.size[0]} × {img.size[1]}")
             console.print(f"   格式：{img.format}")
@@ -158,11 +185,11 @@ class ImageAnalyzer:
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['describe'])
 
-        console.print(f"\n[cyan]💭 任務：{task}[/cyan]")
-        console.print(f"[cyan]📝 提示：{prompt[:50]}...[/cyan]" if len(prompt) > 50 else f"[cyan]📝 提示：{prompt}[/cyan]")
+        console.print(f"\n[magenta]💭 任務：{task}[/magenta]")
+        console.print(f"[magenta]📝 提示：{prompt[:50]}...[/magenta]" if len(prompt) > 50 else f"[magenta]📝 提示：{prompt}[/magenta]")
 
         # 分析圖片
-        console.print(f"\n[cyan]🤖 Gemini 分析中...[/cyan]\n")
+        console.print(f"\n[magenta]🤖 Gemini 分析中...[/magenta]\n")
 
         try:
             # 轉換圖片為 Part
@@ -183,10 +210,12 @@ class ImageAnalyzer:
                 config=config
             )
 
-            # 顯示結果
-            console.print("[cyan]Gemini：[/cyan]")
-            console.print(response.text)
-            console.print("\n")
+            # 顯示結果（Markdown 格式化）
+            console.print(Panel(
+                Markdown(response.text),
+                title="[bright_magenta]📝 Gemini 分析結果[/bright_magenta]",
+                border_style="magenta"
+            ))
 
             # 提取 tokens
             thinking_tokens = 0
@@ -217,7 +246,7 @@ class ImageAnalyzer:
             return response.text
 
         except Exception as e:
-            console.print(f"[red]✗ 分析失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
             raise
 
     def analyze_multiple_images(
@@ -228,7 +257,7 @@ class ImageAnalyzer:
     ) -> str:
         """分析多張圖片"""
         # 載入所有圖片
-        console.print(f"\n[cyan]📷 載入 {len(image_paths)} 張圖片：[/cyan]")
+        console.print(f"\n[magenta]📷 載入 {len(image_paths)} 張圖片：[/magenta]")
 
         parts = []
         for i, path in enumerate(image_paths, 1):
@@ -237,7 +266,7 @@ class ImageAnalyzer:
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(f"   [red]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]")
+                console.print(f"   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]")
 
         if not parts:
             # 🎯 一鍵修復：顯示無圖片載入修復建議
@@ -254,10 +283,10 @@ class ImageAnalyzer:
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['compare'])
 
-        console.print(f"\n[cyan]💭 任務：{task}[/cyan]")
+        console.print(f"\n[magenta]💭 任務：{task}[/magenta]")
 
         # 分析
-        console.print(f"\n[cyan]🤖 Gemini 分析中...[/cyan]\n")
+        console.print(f"\n[magenta]🤖 Gemini 分析中...[/magenta]\n")
 
         try:
             # 配置
@@ -275,14 +304,16 @@ class ImageAnalyzer:
                 config=config
             )
 
-            console.print("[cyan]Gemini：[/cyan]")
-            console.print(response.text)
-            console.print("\n")
+            console.print(Panel(
+                Markdown(response.text),
+                title="[bright_magenta]📝 Gemini 分析結果[/bright_magenta]",
+                border_style="magenta"
+            ))
 
             return response.text
 
         except Exception as e:
-            console.print(f"[red]✗ 分析失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
             raise
 
     def batch_analyze(
@@ -293,10 +324,10 @@ class ImageAnalyzer:
         """批次分析多張圖片"""
         results = []
 
-        console.print(f"\n[bold cyan]📦 批次分析 {len(image_paths)} 張圖片[/bold cyan]")
+        console.print(f"\n[bold magenta]📦 批次分析 {len(image_paths)} 張圖片[/bold magenta]")
 
         for i, path in enumerate(image_paths, 1):
-            console.print(f"\n[cyan]━━━ 圖片 {i}/{len(image_paths)} ━━━[/cyan]")
+            console.print(f"\n[magenta]━━━ 圖片 {i}/{len(image_paths)} ━━━[/magenta]")
 
             try:
                 result_text = self.analyze_image(path, task=task)
@@ -308,7 +339,7 @@ class ImageAnalyzer:
                     'success': True
                 })
             except Exception as e:
-                console.print(f"[red]✗ 分析失敗：{e}[/red]")
+                console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
                 results.append({
                     'path': path,
                     'filename': os.path.basename(path),
@@ -319,7 +350,7 @@ class ImageAnalyzer:
 
         # 統計
         success_count = sum(1 for r in results if r['success'])
-        console.print(f"\n[green]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/green]")
+        console.print(f"\n[bright_magenta]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/green]")
 
         return results
 
@@ -327,24 +358,24 @@ class ImageAnalyzer:
 def show_examples():
     """顯示使用範例"""
     console.print(Panel.fit(
-        """[bold cyan]Gemini 圖像分析工具 - 使用範例[/bold cyan]
+        """[bold magenta]Gemini 圖像分析工具 - 使用範例[/bold magenta]
 
-[yellow]1. 基本圖片描述[/yellow]
+[magenta]1. 基本圖片描述[/yellow]
    python3 gemini_image_analyzer.py describe image.jpg
 
-[yellow]2. OCR 文字提取[/yellow]
+[magenta]2. OCR 文字提取[/yellow]
    python3 gemini_image_analyzer.py ocr document.png
 
-[yellow]3. 物體偵測[/yellow]
+[magenta]3. 物體偵測[/yellow]
    python3 gemini_image_analyzer.py objects photo.jpg
 
-[yellow]4. 圖片比較[/yellow]
+[magenta]4. 圖片比較[/yellow]
    python3 gemini_image_analyzer.py compare image1.jpg image2.jpg
 
-[yellow]5. 批次分析[/yellow]
+[magenta]5. 批次分析[/yellow]
    python3 gemini_image_analyzer.py batch *.jpg
         """,
-        border_style="cyan"
+        border_style="magenta"
     ))
 
 
@@ -367,7 +398,7 @@ def main():
 
     # 檢查圖片
     if not args.images:
-        console.print("[red]錯誤：請提供圖片路徑[/red]")
+        console.print("[dim magenta]錯誤：請提供圖片路徑[/red]")
         show_examples()
         sys.exit(1)
 
@@ -392,7 +423,7 @@ def main():
             analyzer.analyze_image(args.images[0], task=args.task)
 
     except Exception as e:
-        console.print(f"[red]✗ 執行失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 執行失敗：{e}[/red]")
         sys.exit(1)
 
 

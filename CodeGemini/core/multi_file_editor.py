@@ -114,13 +114,13 @@ class MultiFileEditor:
         # 生成編輯 ID
         edit_id = f"edit_{int(time.time())}"
 
-        console.print(f"\n[cyan]✏️  開始批次編輯（ID: {edit_id}）[/cyan]\n")
+        console.print(f"\n[magenta]✏️  開始批次編輯（ID: {edit_id}）[/magenta]\n")
 
         # 步驟 1：驗證變更
         validation = self.validate_changes(changes)
 
         if not validation.is_valid:
-            console.print(f"[red]✗ 驗證失敗：[/red]")
+            console.print(f"[dim magenta]✗ 驗證失敗：[/red]")
             for error in validation.errors:
                 console.print(f"  - {error}")
 
@@ -133,7 +133,7 @@ class MultiFileEditor:
 
         # 顯示警告
         if validation.warnings:
-            console.print(f"[yellow]⚠️  警告：[/yellow]")
+            console.print(f"[magenta]⚠️  警告：[/yellow]")
             for warning in validation.warnings:
                 console.print(f"  - {warning}")
 
@@ -142,9 +142,9 @@ class MultiFileEditor:
         if self.auto_backup:
             try:
                 backup_id = self.create_backup([c.file_path for c in changes])
-                console.print(f"[green]✓ 已建立備份：{backup_id}[/green]")
+                console.print(f"[bright_magenta]✓ 已建立備份：{backup_id}[/green]")
             except Exception as e:
-                console.print(f"[yellow]警告：備份失敗 - {e}[/yellow]")
+                console.print(f"[magenta]警告：備份失敗 - {e}[/yellow]")
 
         # 步驟 3：執行變更
         result = EditResult(
@@ -171,8 +171,8 @@ class MultiFileEditor:
                     result.error_messages.append(f"{change.file_path}: {str(e)}")
 
                     # 原子性：若有失敗，回滾所有變更
-                    console.print(f"\n[red]✗ 錯誤：{change.file_path} - {e}[/red]")
-                    console.print(f"[yellow]回滾所有變更...[/yellow]")
+                    console.print(f"\n[dim magenta]✗ 錯誤：{change.file_path} - {e}[/red]")
+                    console.print(f"[magenta]回滾所有變更...[/yellow]")
 
                     if backup_id:
                         self.rollback(edit_id, backup_id)
@@ -191,9 +191,9 @@ class MultiFileEditor:
                     message=commit_message or f"CodeGemini edit {edit_id}",
                     files=[c.file_path for c in changes]
                 )
-                console.print(f"[green]✓ 已建立 Git commit[/green]")
+                console.print(f"[bright_magenta]✓ 已建立 Git commit[/green]")
             except Exception as e:
-                console.print(f"[yellow]警告：Git commit 失敗 - {e}[/yellow]")
+                console.print(f"[magenta]警告：Git commit 失敗 - {e}[/yellow]")
 
         result.status = EditStatus.SUCCESS
         console.print(f"\n[bold green]✅ 批次編輯完成[/bold green]")
@@ -298,16 +298,16 @@ class MultiFileEditor:
         Returns:
             bool: 是否成功回滾
         """
-        console.print(f"\n[yellow]🔄 回滾變更（編輯 ID: {edit_id}）[/yellow]")
+        console.print(f"\n[magenta]🔄 回滾變更（編輯 ID: {edit_id}）[/yellow]")
 
         if not backup_id:
-            console.print("[red]錯誤：沒有備份 ID，無法回滾[/red]")
+            console.print("[dim magenta]錯誤：沒有備份 ID，無法回滾[/red]")
             return False
 
         backup_path = os.path.join(self.backup_dir, backup_id)
 
         if not os.path.exists(backup_path):
-            console.print(f"[red]錯誤：找不到備份：{backup_path}[/red]")
+            console.print(f"[dim magenta]錯誤：找不到備份：{backup_path}[/red]")
             return False
 
         try:
@@ -322,11 +322,11 @@ class MultiFileEditor:
                     os.makedirs(os.path.dirname(target_file), exist_ok=True)
                     shutil.copy2(backup_file, target_file)
 
-            console.print(f"[green]✓ 已從備份還原[/green]")
+            console.print(f"[bright_magenta]✓ 已從備份還原[/green]")
             return True
 
         except Exception as e:
-            console.print(f"[red]錯誤：回滾失敗 - {e}[/red]")
+            console.print(f"[dim magenta]錯誤：回滾失敗 - {e}[/red]")
             return False
 
     def create_backup(self, files: List[str]) -> str:
@@ -383,7 +383,7 @@ class MultiFileEditor:
 
     def show_change_preview(self, changes: List[FileChange]):
         """顯示變更預覽"""
-        console.print("\n[bold cyan]📝 變更預覽[/bold cyan]\n")
+        console.print("\n[bold magenta]📝 變更預覽[/bold magenta]\n")
 
         for i, change in enumerate(changes, 1):
             action_emoji = {
@@ -421,7 +421,7 @@ def main():
     """測試用主程式"""
     import sys
 
-    console.print("[bold cyan]CodeGemini Multi-File Editor 測試[/bold cyan]\n")
+    console.print("[bold magenta]CodeGemini Multi-File Editor 測試[/bold magenta]\n")
 
     # 建立測試變更
     test_changes = [
@@ -453,17 +453,17 @@ def main():
             console.print("\n[bold green]✅ 測試成功[/bold green]")
 
             # 清理測試檔案
-            console.print("\n[cyan]清理測試檔案...[/cyan]")
+            console.print("\n[magenta]清理測試檔案...[/magenta]")
             for change in test_changes:
                 if os.path.exists(change.file_path):
                     os.remove(change.file_path)
-            console.print("[green]✓ 清理完成[/green]")
+            console.print("[bright_magenta]✓ 清理完成[/green]")
 
         else:
-            console.print(f"\n[red]✗ 測試失敗：{result.status.value}[/red]")
+            console.print(f"\n[dim magenta]✗ 測試失敗：{result.status.value}[/red]")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
 

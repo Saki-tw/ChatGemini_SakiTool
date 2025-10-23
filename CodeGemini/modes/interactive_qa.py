@@ -52,7 +52,7 @@ class InteractiveQA:
         Returns:
             List[str]: 選中的選項標籤列表
         """
-        console.print(f"\n[bold cyan]{'=' * 70}[/bold cyan]")
+        console.print(f"\n[bold magenta]{'=' * 70}[/bold magenta]")
 
         # 顯示標題
         if header:
@@ -64,7 +64,8 @@ class InteractiveQA:
 
         # 顯示選項表格
         table = Table(show_header=False, box=None, padding=(0, 1))
-        table.add_column("編號", style="cyan", width=6)
+        console_width = console.width or 120
+        table.add_column("編號", style="bright_magenta", width=max(6, int(console_width * 0.05)))
         table.add_column("選項", style="white")
         table.add_column("說明", style="dim")
 
@@ -84,7 +85,7 @@ class InteractiveQA:
         else:
             console.print("\n[dim]💡 輸入選項編號，或輸入 0 自訂[/dim]")
 
-        console.print(f"[bold cyan]{'=' * 70}[/bold cyan]\n")
+        console.print(f"[bold magenta]{'=' * 70}[/bold magenta]\n")
 
         # 取得使用者輸入
         while True:
@@ -92,7 +93,7 @@ class InteractiveQA:
                 user_input = Prompt.ask("請選擇").strip()
 
                 if not user_input:
-                    console.print("[yellow]⚠️  請輸入選項編號[/yellow]")
+                    console.print("[magenta]⚠️  請輸入選項編號[/yellow]")
                     continue
 
                 # 處理自訂輸入
@@ -107,10 +108,10 @@ class InteractiveQA:
                     return self._parse_single_select(user_input, options)
 
             except ValueError as e:
-                console.print(f"[red]✗ {e}[/red]")
+                console.print(f"[dim magenta]✗ {e}[/red]")
                 continue
             except KeyboardInterrupt:
-                console.print("\n\n[yellow]⚠️  已取消[/yellow]")
+                console.print("\n\n[magenta]⚠️  已取消[/yellow]")
                 return []
 
     def _parse_single_select(
@@ -168,7 +169,7 @@ class InteractiveQA:
         Returns:
             bool: 使用者確認結果
         """
-        return Confirm.ask(f"[yellow]{message}[/yellow]", default=default)
+        return Confirm.ask(f"[magenta]{message}[/yellow]", default=default)
 
     def ask_text(self, prompt: str, default: str = "") -> str:
         """
@@ -181,14 +182,14 @@ class InteractiveQA:
         Returns:
             str: 使用者輸入
         """
-        return Prompt.ask(f"[cyan]{prompt}[/cyan]", default=default)
+        return Prompt.ask(f"[magenta]{prompt}[/magenta]", default=default)
 
 
 # ==================== 命令列介面 ====================
 
 def main():
     """Interactive Q&A 命令列工具"""
-    console.print("\n[bold cyan]CodeGemini Interactive Q&A Demo[/bold cyan]\n")
+    console.print("\n[bold magenta]CodeGemini Interactive Q&A Demo[/bold magenta]\n")
 
     qa = InteractiveQA()
 
@@ -204,7 +205,7 @@ def main():
         ],
         multi_select=False
     )
-    console.print(f"\n[green]✓ 您選擇了：{answers}[/green]\n")
+    console.print(f"\n[bright_magenta]✓ 您選擇了：{answers}[/green]\n")
 
     # 示例 2：多選
     console.print("[bold]示例 2：選擇要實作的功能（多選）[/bold]")
@@ -219,13 +220,13 @@ def main():
         ],
         multi_select=True
     )
-    console.print(f"\n[green]✓ 您選擇了：{', '.join(answers)}[/green]\n")
+    console.print(f"\n[bright_magenta]✓ 您選擇了：{', '.join(answers)}[/green]\n")
 
     # 示例 3：確認
     if qa.confirm("是否繼續執行？"):
-        console.print("[green]✓ 繼續執行[/green]")
+        console.print("[bright_magenta]✓ 繼續執行[/green]")
     else:
-        console.print("[yellow]⚠️  已取消[/yellow]")
+        console.print("[magenta]⚠️  已取消[/yellow]")
 
 
 if __name__ == "__main__":

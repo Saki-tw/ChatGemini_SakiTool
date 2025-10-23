@@ -123,7 +123,7 @@ class TaskPlanner:
         Returns:
             TaskAnalysis: 任務分析結果
         """
-        console.print(f"\n[cyan]🔍 分析使用者請求...[/cyan]")
+        console.print(f"\n[magenta]🔍 分析使用者請求...[/magenta]")
 
         # 使用 Gemini 分析請求
         prompt = f"""你是一個專業的程式碼分析助手。請分析以下使用者請求：
@@ -171,7 +171,7 @@ class TaskPlanner:
                 keywords=data.get('keywords', [])
             )
 
-            console.print(f"  [green]✓ 分析完成[/green]")
+            console.print(f"  [bright_magenta]✓ 分析完成[/green]")
             console.print(f"  意圖：{analysis.intent}")
             console.print(f"  類型：{analysis.task_type.value}")
             console.print(f"  複雜度：{analysis.complexity}")
@@ -179,7 +179,7 @@ class TaskPlanner:
             return analysis
 
         except Exception as e:
-            console.print(f"[yellow]警告：Gemini 分析失敗，使用備用分析 - {e}[/yellow]")
+            console.print(f"[magenta]警告：Gemini 分析失敗，使用備用分析 - {e}[/yellow]")
 
             # 備用：簡單的啟發式分析
             return self._fallback_analysis(user_request)
@@ -224,7 +224,7 @@ class TaskPlanner:
         Returns:
             CodebaseContext: 程式碼庫上下文
         """
-        console.print(f"\n[cyan]📂 掃描程式碼庫...[/cyan]")
+        console.print(f"\n[magenta]📂 掃描程式碼庫...[/magenta]")
 
         if not os.path.isdir(project_path):
             raise ValueError(f"專案路徑不存在：{project_path}")
@@ -257,7 +257,7 @@ class TaskPlanner:
             relevant_files=python_files[:10],  # 取前 10 個檔案
         )
 
-        console.print(f"  [green]✓ 掃描完成[/green]")
+        console.print(f"  [bright_magenta]✓ 掃描完成[/green]")
         console.print(f"  專案類型：{context.project_type}")
         console.print(f"  檔案數量：{context.file_count}")
         if context.framework:
@@ -282,7 +282,7 @@ class TaskPlanner:
         Returns:
             ExecutionPlan: 執行計畫
         """
-        console.print(f"\n[cyan]📋 生成執行計畫...[/cyan]")
+        console.print(f"\n[magenta]📋 生成執行計畫...[/magenta]")
 
         # 使用 Gemini 生成詳細計畫
         prompt = f"""你是一個專業的軟體開發規劃師。請為以下任務生成執行計畫：
@@ -375,14 +375,14 @@ class TaskPlanner:
                 considerations=data.get('considerations', [])
             )
 
-            console.print(f"  [green]✓ 計畫生成完成[/green]")
+            console.print(f"  [bright_magenta]✓ 計畫生成完成[/green]")
             console.print(f"  步驟數量：{len(plan.steps)}")
             console.print(f"  風險等級：{plan.risk_level.value}")
 
             return plan
 
         except Exception as e:
-            console.print(f"[yellow]警告：Gemini 計畫生成失敗，使用備用計畫 - {e}[/yellow]")
+            console.print(f"[magenta]警告：Gemini 計畫生成失敗，使用備用計畫 - {e}[/yellow]")
 
             # 備用：生成簡單計畫
             return self._fallback_plan(analysis)
@@ -419,19 +419,19 @@ class TaskPlanner:
         """
         console.print("\n" + "=" * 70)
         console.print(Panel.fit(
-            f"[bold cyan]執行計畫[/bold cyan]\n\n"
+            f"[bold magenta]執行計畫[/bold magenta]\n\n"
             f"[bold]任務類型：[/bold]{plan.task_type.value}\n"
             f"[bold]風險等級：[/bold]{plan.risk_level.value}\n"
             f"[bold]預估時間：[/bold]{plan.estimated_total_time}",
             title="CodeGemini Agent Mode",
-            border_style="cyan"
+            border_style="bright_magenta"
         ))
 
-        console.print(f"\n[bold cyan]任務摘要：[/bold cyan]")
+        console.print(f"\n[bold magenta]任務摘要：[/bold magenta]")
         console.print(f"  {plan.task_summary}")
 
         # 執行步驟
-        console.print(f"\n[bold cyan]執行步驟：[/bold cyan]")
+        console.print(f"\n[bold magenta]執行步驟：[/bold magenta]")
         for step in plan.steps:
             console.print(f"\n  [bold]步驟 {step.step_number}：[/bold]{step.description}")
             console.print(f"    預估時間：{step.estimated_time}")
@@ -449,7 +449,7 @@ class TaskPlanner:
 
         # 受影響的檔案
         if plan.affected_files:
-            console.print(f"\n[bold cyan]受影響的檔案：[/bold cyan]")
+            console.print(f"\n[bold magenta]受影響的檔案：[/bold magenta]")
             for file in plan.affected_files[:10]:  # 只顯示前 10 個
                 console.print(f"  - {file}")
             if len(plan.affected_files) > 10:
@@ -549,9 +549,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print('  python task_planner.py "任務描述" [專案路徑]')
-        console.print("\n[cyan]範例：[/cyan]")
+        console.print("\n[magenta]範例：[/magenta]")
         console.print('  python task_planner.py "新增使用者登入功能" .')
         sys.exit(1)
 
@@ -565,7 +565,7 @@ def main():
         console.print(f"\n[bold green]✅ 計畫生成成功！[/bold green]")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

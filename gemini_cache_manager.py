@@ -82,11 +82,11 @@ class CacheManager:
 
         # 檢查模型支援
         if not self._check_model_support(model):
-            console.print(f"[yellow]警告：{model} 可能不支援 Context Caching[/yellow]")
+            console.print(f"[magenta]警告：{model} 可能不支援 Context Caching[/yellow]")
 
         # 檢查最低 token 要求
         min_tokens = MIN_TOKENS.get(model, 1024)
-        console.print(f"\n[cyan]📦 建立 Context Cache[/cyan]")
+        console.print(f"\n[magenta]📦 建立 Context Cache[/magenta]")
         console.print(f"   模型：{model}")
         console.print(f"   最低 tokens：{min_tokens:,}")
         console.print(f"   TTL：{ttl_seconds} 秒 ({ttl_seconds / 3600:.1f} 小時)")
@@ -108,14 +108,14 @@ class CacheManager:
                 config_params["display_name"] = display_name
 
             # 建立快取
-            console.print("\n[cyan]⏳ 建立中...[/cyan]")
+            console.print("\n[magenta]⏳ 建立中...[/magenta]")
 
             cache = client.caches.create(
                 model=f"models/{model}",
                 config=types.CreateCachedContentConfig(**config_params)
             )
 
-            console.print(f"[green]✓ 快取已建立[/green]")
+            console.print(f"[bright_magenta]✓ 快取已建立[/green]")
             console.print(f"   快取名稱：{cache.name}")
             console.print(f"   過期時間：{cache.expire_time}")
 
@@ -129,15 +129,15 @@ class CacheManager:
             return cache
 
         except Exception as e:
-            console.print(f"[red]✗ 建立快取失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 建立快取失敗：{e}[/red]")
 
             # 檢查常見錯誤
             error_str = str(e).lower()
             if 'token' in error_str and 'minimum' in error_str:
-                console.print(f"\n[yellow]提示：內容可能少於最低 {min_tokens} tokens[/yellow]")
-                console.print(f"[yellow]請增加內容長度以使用 Context Caching[/yellow]")
+                console.print(f"\n[magenta]提示：內容可能少於最低 {min_tokens} tokens[/yellow]")
+                console.print(f"[magenta]請增加內容長度以使用 Context Caching[/yellow]")
             elif 'not support' in error_str:
-                console.print(f"\n[yellow]提示：{model} 可能不支援 Context Caching[/yellow]")
+                console.print(f"\n[magenta]提示：{model} 可能不支援 Context Caching[/yellow]")
 
             raise
 
@@ -176,12 +176,12 @@ class CacheManager:
         cache = self.active_caches.get(cache_name_or_key)
         if not cache:
             # 嘗試列出並查找
-            console.print(f"[yellow]在本地找不到快取，嘗試從 API 獲取...[/yellow]")
+            console.print(f"[magenta]在本地找不到快取，嘗試從 API 獲取...[/yellow]")
             cache = self._find_cache_by_name(cache_name_or_key)
             if not cache:
                 raise ValueError(f"找不到快取：{cache_name_or_key}")
 
-        console.print(f"\n[cyan]🔍 使用快取查詢[/cyan]")
+        console.print(f"\n[magenta]🔍 使用快取查詢[/magenta]")
         console.print(f"   快取：{cache.name}")
         console.print(f"   問題：{question}\n")
 
@@ -195,13 +195,13 @@ class CacheManager:
                 )
             )
 
-            console.print("[cyan]Gemini (使用快取)：[/cyan]")
+            console.print("[magenta]Gemini (使用快取)：[/magenta]")
             console.print(response.text)
 
             return response.text
 
         except Exception as e:
-            console.print(f"[red]✗ 查詢失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 查詢失敗：{e}[/red]")
             raise
 
     def _find_cache_by_name(self, name: str) -> Optional[Any]:
@@ -212,22 +212,22 @@ class CacheManager:
                 if name in cache.name or (hasattr(cache, 'display_name') and cache.display_name == name):
                     return cache
         except Exception as e:
-            console.print(f"[red]列出快取失敗：{e}[/red]")
+            console.print(f"[dim magenta]列出快取失敗：{e}[/red]")
         return None
 
     def list_caches(self) -> List[Any]:
         """列出所有快取"""
-        console.print("\n[cyan]📦 已建立的 Context Caches：[/cyan]\n")
+        console.print("\n[magenta]📦 已建立的 Context Caches：[/magenta]\n")
 
         try:
             caches = list(client.caches.list())
 
             if not caches:
-                console.print("[yellow]沒有找到快取[/yellow]")
+                console.print("[magenta]沒有找到快取[/yellow]")
                 return []
 
             # 建立表格
-            table = Table(show_header=True, header_style="bold cyan")
+            table = Table(show_header=True, header_style="bold bright_magenta")
             table.add_column("名稱", style="green")
             table.add_column("模型")
             table.add_column("建立時間")
@@ -242,7 +242,7 @@ class CacheManager:
                 expire_time = cache.expire_time
                 is_expired = expire_time < now if expire_time else False
 
-                status = "[red]已過期[/red]" if is_expired else "[green]有效[/green]"
+                status = "[dim magenta]已過期[/red]" if is_expired else "[bright_magenta]有效[/green]"
 
                 table.add_row(
                     display_name,
@@ -258,7 +258,7 @@ class CacheManager:
             return caches
 
         except Exception as e:
-            console.print(f"[red]✗ 列出快取失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 列出快取失敗：{e}[/red]")
             return []
 
     def delete_cache(self, cache_name_or_key: str) -> bool:
@@ -283,7 +283,7 @@ class CacheManager:
                     cache_name = f"cachedContents/{cache_name}"
 
             client.caches.delete(name=cache_name)
-            console.print(f"[green]✓ 已刪除快取：{cache_name_or_key}[/green]")
+            console.print(f"[bright_magenta]✓ 已刪除快取：{cache_name_or_key}[/green]")
 
             # 從 active_caches 移除
             if cache_name_or_key in self.active_caches:
@@ -292,7 +292,7 @@ class CacheManager:
             return True
 
         except Exception as e:
-            console.print(f"[red]✗ 刪除快取失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 刪除快取失敗：{e}[/red]")
             return False
 
     def calculate_savings(
@@ -343,12 +343,12 @@ class CacheManager:
         result = self.calculate_savings(model, cached_tokens, query_count)
 
         panel_content = f"""
-[cyan]模型：[/cyan] {model}
-[cyan]快取 Tokens：[/cyan] {result['cached_tokens']:,}
-[cyan]查詢次數：[/cyan] {result['query_count']}
+[magenta]模型：[/magenta] {model}
+[magenta]快取 Tokens：[/magenta] {result['cached_tokens']:,}
+[magenta]查詢次數：[/magenta] {result['query_count']}
 
-[yellow]不使用快取成本：[/yellow] ${result['without_cache']:.6f}
-[green]使用快取成本：[/green] ${result['with_cache']:.6f}
+[magenta]不使用快取成本：[/yellow] ${result['without_cache']:.6f}
+[bright_magenta]使用快取成本：[/green] ${result['with_cache']:.6f}
 [bold green]節省：[/bold green] ${result['savings']:.6f} ({result['discount_percent']}% 折扣)
 
 [dim]約合台幣節省：NT${result['savings'] * USD_TO_TWD:.2f}[/dim]
@@ -379,7 +379,7 @@ def main():
 
     if args.command == 'create':
         if not args.content:
-            console.print("[red]錯誤：請提供 --content[/red]")
+            console.print("[dim magenta]錯誤：請提供 --content[/red]")
             sys.exit(1)
 
         # 檢查是否為檔案
@@ -400,19 +400,19 @@ def main():
 
     elif args.command == 'delete':
         if not args.cache:
-            console.print("[red]錯誤：請提供 --cache[/red]")
+            console.print("[dim magenta]錯誤：請提供 --cache[/red]")
             sys.exit(1)
         manager.delete_cache(args.cache)
 
     elif args.command == 'query':
         if not args.cache or not args.question:
-            console.print("[red]錯誤：請提供 --cache 和 --question[/red]")
+            console.print("[dim magenta]錯誤：請提供 --cache 和 --question[/red]")
             sys.exit(1)
         manager.query_with_cache(args.cache, args.question)
 
     elif args.command == 'calculate':
         if not args.tokens:
-            console.print("[red]錯誤：請提供 --tokens[/red]")
+            console.print("[dim magenta]錯誤：請提供 --tokens[/red]")
             sys.exit(1)
         manager.show_savings_report(
             model=args.model,
@@ -423,7 +423,7 @@ def main():
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        console.print("\n[bold cyan]Gemini Context Caching 管理器[/bold cyan]\n")
+        console.print("\n[bold magenta]Gemini Context Caching 管理器[/bold magenta]\n")
         console.print("💰 [bold]使用快取可節省最高 90% 的成本！[/bold]\n")
         console.print("使用方式：")
         console.print("  建立快取：")

@@ -15,7 +15,134 @@ from rich.panel import Panel
 from rich.markdown import Markdown
 from rich.prompt import Confirm, IntPrompt
 
+# 導入智能檔案選擇器 (C-2 違規修復)
+from smart_file_selector import SmartFileSelector
+
 console = Console()
+
+# ========================================
+# 全域錯誤記錄器（記憶體洩漏修復）
+# ========================================
+
+# Diagnostics 目錄路徑
+DIAGNOSTICS_DIR = os.path.join(os.path.dirname(__file__), "Diagnostics")
+os.makedirs(DIAGNOSTICS_DIR, exist_ok=True)
+
+# 全域 ErrorLogger 實例（延遲初始化，在類別定義後）
+_error_logger = None
+
+
+def _get_error_logger():
+    """
+    獲取全域 ErrorLogger 實例（延遲初始化）
+
+    Returns:
+        ErrorLogger 實例
+    """
+    global _error_logger
+    if _error_logger is None:
+        _error_logger = ErrorLogger(
+            log_file=os.path.join(DIAGNOSTICS_DIR, "error_diagnostics.log"),
+            max_errors=1000
+        )
+    return _error_logger
+
+
+def _simplify_path(path: str) -> str:
+    """
+    簡化路徑顯示，使其更簡潔易讀
+
+    策略：
+    1. 如果路徑在當前工作目錄下，顯示相對路徑 (./...)
+    2. 如果路徑在家目錄下，使用 ~ 代替 (~/)
+    3. 否則顯示完整絕對路徑
+
+    Args:
+        path: 完整路徑字符串
+
+    Returns:
+        簡化後的路徑字符串
+
+    Examples:
+        /Users/user/project/file.py -> ./file.py (如果在 /Users/user/project 目錄)
+        /Users/user/documents/file.txt -> ~/documents/file.txt
+        /opt/system/file.conf -> /opt/system/file.conf (保持原樣)
+    """
+    try:
+        path_obj = Path(path).resolve()
+        cwd = Path.cwd()
+        home = Path.home()
+
+        # 嘗試獲取相對於當前目錄的路徑
+        try:
+            rel_path = path_obj.relative_to(cwd)
+            return f"./{rel_path}"
+        except ValueError:
+            pass
+
+        # 嘗試使用 ~ 代替家目錄
+        try:
+            rel_home = path_obj.relative_to(home)
+            return f"~/{rel_home}"
+        except ValueError:
+            pass
+
+        # 如果都不適用，返回絕對路徑
+        return str(path_obj)
+
+    except Exception:
+        # 如果發生任何錯誤，返回原始路徑
+        return path
+
+
+def _convert_paths_to_file_info(paths: List[str]) -> List[Dict]:
+    """
+    將路徑列表轉換為檔案資訊字典列表 (供智能選擇器使用)
+
+    Args:
+        paths: 檔案路徑列表
+
+    Returns:
+        檔案資訊字典列表
+    """
+    file_infos = []
+
+    for path_str in paths:
+        path_str = path_str.strip()
+        if not os.path.isfile(path_str):
+            continue
+
+        try:
+            stat = os.stat(path_str)
+            file_size = stat.st_size
+            mod_time = stat.st_mtime
+            mod_time_str = datetime.fromtimestamp(mod_time)
+
+            # 計算時間差
+            now = datetime.now()
+            time_diff = now - mod_time_str
+
+            if time_diff.days > 0:
+                time_ago = f"{time_diff.days} 天前"
+            elif time_diff.seconds > 3600:
+                time_ago = f"{time_diff.seconds // 3600} 小時前"
+            elif time_diff.seconds > 60:
+                time_ago = f"{time_diff.seconds // 60} 分鐘前"
+            else:
+                time_ago = "剛才"
+
+            file_infos.append({
+                'name': os.path.basename(path_str),
+                'path': path_str,
+                'size': file_size,
+                'similarity': 0.70,  # 搜尋結果預設中等信心度
+                'time_ago': time_ago,
+                'modified_time': mod_time
+            })
+        except (OSError, FileNotFoundError):
+            continue
+
+    return file_infos
 
 
 def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[str]:
@@ -29,8 +156,19 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
     Returns:
         Optional[str]: 如果用戶選擇了替代檔案，返回新路徑；否則返回 None
     """
-    console.print(f"\n[red]✗ 找不到檔案：{file_path}[/red]\n")
-    console.print("[cyan]💡 解決方案：[/cyan]\n")
+    # 🔧 記錄錯誤到 ErrorLogger
+    _get_error_logger().log_error(
+        error_type="FileNotFound",
+        file_path=file_path,
+        details={
+            'auto_fix': auto_fix,
+            'parent_dir': os.path.dirname(file_path) or '.',
+            'filename': os.path.basename(file_path)
+        }
+    )
+
+    console.print(f"\n[dim magenta]✗ 找不到檔案：{file_path}[/red]\n")
+    console.print(Markdown("**💡 解決方案：**\n"))
 
     # 嘗試找相似檔案
     parent_dir = os.path.dirname(file_path) or '.'
@@ -78,51 +216,46 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
                         'path': full_path,
                         'size': file_size,
                         'similarity': similarity,
-                        'time_ago': time_ago
+                        'time_ago': time_ago,
+                        'modified_time': mod_time  # 添加時間戳供智能選擇器使用
                     })
 
-            # 按相似度排序
+            # 按相似度排序 (保留所有找到的檔案，不限制數量)
             similar_files.sort(key=lambda x: x['similarity'], reverse=True)
-            similar_files = similar_files[:5]  # 只取前5個
 
         except PermissionError:
             pass
 
-    # 顯示相似檔案並提供一鍵選擇
-    if similar_files:
-        console.print("[bold]📂 在相同目錄找到相似檔案：[/bold]\n")
+    # 🎯 使用智能檔案選擇器 (C-2 違規修復)
+    if similar_files and auto_fix:
+        try:
+            selector = SmartFileSelector()
+            selected_files = selector.smart_select(similar_files)
 
-        for i, file_info in enumerate(similar_files, 1):
-            size_mb = file_info['size'] / (1024 * 1024)
-            similarity_pct = int(file_info['similarity'] * 100)
+            if selected_files:
+                # 返回第一個選中的檔案 (保持向後兼容性)
+                selected_path = selected_files[0]['path']
 
-            console.print(
-                f"   {i}. [green]{file_info['name']}[/green] "
-                f"({size_mb:.1f} MB) - 修改於 {file_info['time_ago']}"
-            )
-            console.print(
-                f"      [dim]相似度: {similarity_pct}%[/dim]"
-            )
+                if len(selected_files) > 1:
+                    console.print(
+                        f"\n[plum]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
+                        f"當前將使用: {selected_files[0]['name']}[/plum]\n"
+                    )
+                else:
+                    console.print(
+                        f"\n[plum]✅ 已選擇: {selected_files[0]['name']}[/plum]"
+                    )
 
-        console.print("\n   💡 [yellow]提示：檔名相似度 > 50%，可能是您要找的檔案[/yellow]\n")
-
-        # 🎯 一鍵修復：讓用戶直接選擇
-        if auto_fix:
-            console.print("[bold yellow]⚡ 一鍵修復[/bold yellow]")
-            try:
-                choice = IntPrompt.ask(
-                    "選擇要使用的檔案 (1-5, 0=取消)",
-                    default=0,
-                    show_default=True
-                )
-
-                if 1 <= choice <= len(similar_files):
-                    selected_file = similar_files[choice - 1]
-                    console.print(f"\n[green]✅ 已選擇：{selected_file['name']}[/green]")
-                    console.print(f"[cyan]新路徑：{selected_file['path']}[/cyan]\n")
-                    return selected_file['path']
-            except (KeyboardInterrupt, EOFError):
-                console.print("\n[yellow]已取消[/yellow]")
+                simplified_path = _simplify_path(selected_path)
+                console.print(f"[dim]路徑: {simplified_path}[/dim]\n")
+                return selected_path
+            else:
+                console.print("\n[yellow]已取消選擇[/yellow]")
+        except (KeyboardInterrupt, EOFError):
+            console.print("\n[yellow]已取消[/yellow]")
+        except Exception as e:
+            console.print(f"\n[yellow]選擇器錯誤: {e}[/yellow]")
+            console.print("[dim]將繼續執行搜尋流程...[/dim]\n")
 
     # 搜尋指令
     console.print("[bold]🔍 搜尋檔案：[/bold]")
@@ -134,7 +267,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
     else:
         search_cmd = f'find "{parent_dir}" -name "*{target_name}*"'
 
-    console.print(Panel(search_cmd, border_style="cyan"))
+    console.print(Panel(search_cmd, border_style="magenta"))
 
     if target_ext:
         console.print(f"\n   或只搜尋 {target_ext} 檔案：")
@@ -142,7 +275,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
             ext_search_cmd = f'dir /s /b "{parent_dir}\\*{target_ext}"'
         else:
             ext_search_cmd = f'find "{parent_dir}" -name "*{target_ext}"'
-        console.print(Panel(ext_search_cmd, border_style="cyan"))
+        console.print(Panel(ext_search_cmd, border_style="magenta"))
 
     console.print()
 
@@ -160,33 +293,46 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
                 )
 
                 if result.stdout:
-                    console.print("\n[green]搜尋結果：[/green]")
+                    console.print("\n[plum]🔍 搜尋結果[/plum]")
                     lines = result.stdout.strip().split('\n')
-                    for i, line in enumerate(lines[:10], 1):  # 只顯示前10個結果
-                        console.print(f"  {i}. {line}")
+                    console.print(f"[dim]找到 {len(lines)} 個檔案[/dim]\n")
 
-                    if len(lines) > 10:
-                        console.print(f"\n[dim]... 還有 {len(lines) - 10} 個結果[/dim]")
-
-                    # 讓用戶選擇
+                    # 🎯 使用智能檔案選擇器 (C-3 違規修復)
                     try:
-                        choice = IntPrompt.ask(
-                            f"\n選擇要使用的檔案 (1-{min(10, len(lines))}, 0=取消)",
-                            default=0
-                        )
-                        if 1 <= choice <= min(10, len(lines)):
-                            selected_path = lines[choice - 1].strip()
-                            console.print(f"\n[green]✅ 已選擇：{selected_path}[/green]\n")
-                            return selected_path
+                        # 轉換路徑為檔案資訊格式
+                        search_file_infos = _convert_paths_to_file_info(lines)
+
+                        if search_file_infos:
+                            selector = SmartFileSelector()
+                            selected_files = selector.smart_select(search_file_infos)
+
+                            if selected_files:
+                                selected_path = selected_files[0]['path']
+
+                                if len(selected_files) > 1:
+                                    console.print(
+                                        f"\n[plum]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
+                                        f"當前將使用: {selected_files[0]['name']}[/plum]\n"
+                                    )
+                                else:
+                                    console.print(f"\n[plum]✅ 已選擇: {selected_files[0]['name']}[/plum]")
+
+                                simplified_path = _simplify_path(selected_path)
+                                console.print(f"[dim]路徑: {simplified_path}[/dim]\n")
+                                return selected_path
+                        else:
+                            console.print("[yellow]⚠ 無法獲取檔案資訊[/yellow]")
                     except (KeyboardInterrupt, EOFError):
-                        pass
+                        console.print("\n[yellow]已取消[/yellow]")
+                    except Exception as e:
+                        console.print(f"\n[yellow]選擇器錯誤: {e}[/yellow]")
                 else:
-                    console.print("[yellow]未找到符合的檔案[/yellow]")
+                    console.print("[magenta]未找到符合的檔案[/yellow]")
 
             except subprocess.TimeoutExpired:
-                console.print("[yellow]搜尋超時[/yellow]")
+                console.print("[magenta]搜尋超時[/yellow]")
             except Exception as e:
-                console.print(f"[red]搜尋失敗：{e}[/red]")
+                console.print(f"[dim magenta]搜尋失敗：{e}[/red]")
 
         console.print()
 
@@ -199,7 +345,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
     else:
         ls_cmd = f'ls -lh "{parent_dir}/"'
 
-    console.print(Panel(ls_cmd, border_style="cyan"))
+    console.print(Panel(ls_cmd, border_style="magenta"))
     console.print()
 
     # 常見原因
@@ -222,12 +368,22 @@ def suggest_ffmpeg_install() -> None:
     # 偵測作業系統
     system = platform.system()
 
-    console.print("\n[red]✗ ffmpeg 未安裝[/red]\n")
-    console.print("[cyan]💡 一鍵修復方案：[/cyan]\n")
+    # 🔧 記錄錯誤到 ErrorLogger
+    _get_error_logger().log_error(
+        error_type="FFmpegNotInstalled",
+        file_path="",
+        details={
+            'system': system,
+            'platform_version': platform.version()
+        }
+    )
+
+    console.print("\n[dim magenta]✗ ffmpeg 未安裝[/red]\n")
+    console.print("[magenta]💡 一鍵修復方案：[/magenta]\n")
 
     # macOS
     if system == "Darwin":
-        console.print("[bold green]🔧 macOS 用戶（推薦）[/bold green]")
+        console.print("[bold magenta]🔧 macOS 用戶（推薦）[/bold green]")
 
         # 檢查是否有 Homebrew
         has_brew = _check_command("brew")
@@ -236,22 +392,22 @@ def suggest_ffmpeg_install() -> None:
             console.print("   [dim]已偵測到 Homebrew[/dim]")
             console.print(Panel(
                 "brew install ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="📋 執行指令",
                 padding=(0, 1)
             ))
         else:
-            console.print("   [yellow]未偵測到 Homebrew，請先安裝 Homebrew：[/yellow]")
+            console.print("   [magenta]未偵測到 Homebrew，請先安裝 Homebrew：[/yellow]")
             console.print(Panel(
                 '/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
-                border_style="yellow",
+                border_style="magenta",
                 title="1️⃣ 安裝 Homebrew",
                 padding=(0, 1)
             ))
-            console.print("\n   [green]然後安裝 ffmpeg：[/green]")
+            console.print("\n   [magenta]然後安裝 ffmpeg：[/green]")
             console.print(Panel(
                 "brew install ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="2️⃣ 安裝 ffmpeg",
                 padding=(0, 1)
             ))
@@ -262,52 +418,52 @@ def suggest_ffmpeg_install() -> None:
         distro = _detect_linux_distro()
 
         if distro == "ubuntu" or distro == "debian":
-            console.print("[bold green]🔧 Linux (Ubuntu/Debian) 用戶（推薦）[/bold green]")
+            console.print("[bold magenta]🔧 Linux (Ubuntu/Debian) 用戶（推薦）[/bold green]")
             console.print(Panel(
                 "sudo apt-get update && sudo apt-get install -y ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="📋 執行指令",
                 padding=(0, 1)
             ))
         elif distro == "fedora" or distro == "rhel" or distro == "centos":
-            console.print("[bold green]🔧 Linux (Fedora/CentOS/RHEL) 用戶（推薦）[/bold green]")
+            console.print("[bold magenta]🔧 Linux (Fedora/CentOS/RHEL) 用戶（推薦）[/bold green]")
             console.print(Panel(
                 "sudo dnf install -y ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="📋 執行指令",
                 padding=(0, 1)
             ))
         elif distro == "arch":
-            console.print("[bold green]🔧 Linux (Arch) 用戶（推薦）[/bold green]")
+            console.print("[bold magenta]🔧 Linux (Arch) 用戶（推薦）[/bold green]")
             console.print(Panel(
                 "sudo pacman -S ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="📋 執行指令",
                 padding=(0, 1)
             ))
         else:
             # 無法檢測發行版，顯示所有選項
             console.print("[bold]🔧 Linux 用戶[/bold]")
-            console.print("\n[cyan]根據你的發行版選擇：[/cyan]\n")
+            console.print("\n[magenta]根據你的發行版選擇：[/magenta]\n")
 
-            console.print("   [yellow]Ubuntu/Debian：[/yellow]")
+            console.print("   [magenta]Ubuntu/Debian：[/yellow]")
             console.print(Panel(
                 "sudo apt-get update && sudo apt-get install -y ffmpeg",
-                border_style="yellow",
+                border_style="magenta",
                 padding=(0, 1)
             ))
 
-            console.print("\n   [yellow]Fedora/CentOS/RHEL：[/yellow]")
+            console.print("\n   [magenta]Fedora/CentOS/RHEL：[/yellow]")
             console.print(Panel(
                 "sudo dnf install -y ffmpeg",
-                border_style="yellow",
+                border_style="magenta",
                 padding=(0, 1)
             ))
 
-            console.print("\n   [yellow]Arch Linux：[/yellow]")
+            console.print("\n   [magenta]Arch Linux：[/yellow]")
             console.print(Panel(
                 "sudo pacman -S ffmpeg",
-                border_style="yellow",
+                border_style="magenta",
                 padding=(0, 1)
             ))
         console.print()
@@ -315,61 +471,61 @@ def suggest_ffmpeg_install() -> None:
     # Windows
     elif system == "Windows":
         console.print("[bold yellow]🔧 Windows 用戶[/bold yellow]")
-        console.print("\n[cyan]方案 1：使用 Chocolatey（推薦）[/cyan]")
+        console.print("\n[magenta]方案 1：使用 Chocolatey（推薦）[/magenta]")
 
         has_choco = _check_command("choco")
         if has_choco:
             console.print("   [dim]已偵測到 Chocolatey[/dim]")
             console.print(Panel(
                 "choco install ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="📋 執行指令（以管理員身分執行 PowerShell）",
                 padding=(0, 1)
             ))
         else:
-            console.print("   [yellow]未偵測到 Chocolatey，請先安裝：[/yellow]")
+            console.print("   [magenta]未偵測到 Chocolatey，請先安裝：[/yellow]")
             console.print(Panel(
                 'Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString(\'https://community.chocolatey.org/install.ps1\'))',
-                border_style="yellow",
+                border_style="magenta",
                 title="1️⃣ 安裝 Chocolatey（以管理員身分執行 PowerShell）",
                 padding=(0, 1)
             ))
-            console.print("\n   [green]然後安裝 ffmpeg：[/green]")
+            console.print("\n   [magenta]然後安裝 ffmpeg：[/green]")
             console.print(Panel(
                 "choco install ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 title="2️⃣ 安裝 ffmpeg",
                 padding=(0, 1)
             ))
 
-        console.print("\n[cyan]方案 2：手動安裝[/cyan]")
+        console.print("\n[magenta]方案 2：手動安裝[/magenta]")
         console.print("   [dim]手動安裝步驟：[/dim]")
-        console.print("   1. 前往 [blue]https://ffmpeg.org/download.html[/blue]")
+        console.print("   1. 前往 [bright_magenta]https://ffmpeg.org/download.html[/bright_magenta]")
         console.print("   2. 點擊 'Windows builds from gyan.dev'")
         console.print("   3. 下載 'ffmpeg-release-full.7z'")
-        console.print("   4. 解壓縮到 [yellow]C:\\ffmpeg[/yellow]")
-        console.print("   5. 將 [yellow]C:\\ffmpeg\\bin[/yellow] 添加到系統 PATH：")
+        console.print("   4. 解壓縮到 [magenta]C:\\ffmpeg[/yellow]")
+        console.print("   5. 將 [magenta]C:\\ffmpeg\\bin[/yellow] 添加到系統 PATH：")
         console.print("      • 右鍵「本機」→「內容」→「進階系統設定」")
         console.print("      • 點擊「環境變數」")
         console.print("      • 在「系統變數」中找到「Path」，點擊「編輯」")
-        console.print("      • 點擊「新增」，輸入 [yellow]C:\\ffmpeg\\bin[/yellow]")
+        console.print("      • 點擊「新增」，輸入 [magenta]C:\\ffmpeg\\bin[/yellow]")
         console.print("      • 按「確定」儲存")
         console.print()
 
     # 其他系統
     else:
         console.print("[bold]🔧 其他系統[/bold]")
-        console.print("   請前往 [blue]https://ffmpeg.org/download.html[/blue] 下載對應版本")
+        console.print("   請前往 [bright_magenta]https://ffmpeg.org/download.html[/bright_magenta] 下載對應版本")
         console.print()
 
     # 通用提示
-    console.print("[yellow]⏸️  安裝完成後，請重新執行程式[/yellow]\n")
+    console.print("[magenta]⏸️  安裝完成後，請重新執行程式[/yellow]\n")
 
     # 驗證安裝
-    console.print("[cyan]📝 驗證安裝：[/cyan]")
+    console.print("[magenta]📝 驗證安裝：[/magenta]")
     console.print(Panel(
         "ffmpeg -version",
-        border_style="cyan",
+        border_style="magenta",
         title="執行指令檢查版本",
         padding=(0, 1)
     ))
@@ -389,9 +545,19 @@ def suggest_api_key_setup() -> None:
     """
     system = platform.system()
 
+    # 🔧 記錄錯誤到 ErrorLogger
+    _get_error_logger().log_error(
+        error_type="APIKeyNotSet",
+        file_path="",
+        details={
+            'system': system,
+            'env_var_name': 'GEMINI_API_KEY'
+        }
+    )
+
     # 錯誤標題
-    console.print("\n[red]✗ Gemini API 金鑰未設定[/red]\n")
-    console.print("[cyan]💡 設定方式：[/cyan]\n")
+    console.print("\n[dim magenta]✗ Gemini API 金鑰未設定[/red]\n")
+    console.print("[magenta]💡 設定方式：[/magenta]\n")
 
     # ==================== 方法 1：臨時環境變數 ====================
     console.print("[bold]🔧 方法 1：使用環境變數（臨時，本次終端有效）[/bold]\n")
@@ -400,7 +566,7 @@ def suggest_api_key_setup() -> None:
         console.print("   macOS/Linux:")
         console.print(Panel(
             'export GEMINI_API_KEY="your-api-key-here"',
-            border_style="green",
+            border_style="magenta",
             title="執行指令",
             padding=(0, 1)
         ))
@@ -408,7 +574,7 @@ def suggest_api_key_setup() -> None:
         console.print("   Windows (PowerShell):")
         console.print(Panel(
             '$env:GEMINI_API_KEY="your-api-key-here"',
-            border_style="green",
+            border_style="magenta",
             title="執行指令",
             padding=(0, 1)
         ))
@@ -425,7 +591,7 @@ def suggest_api_key_setup() -> None:
             console.print("   macOS/Linux (zsh):")
             console.print(Panel(
                 'echo \'export GEMINI_API_KEY="your-key"\' >> ~/.zshrc\nsource ~/.zshrc',
-                border_style="green",
+                border_style="magenta",
                 title="執行指令",
                 padding=(0, 1)
             ))
@@ -433,7 +599,7 @@ def suggest_api_key_setup() -> None:
             console.print("   macOS/Linux (bash):")
             console.print(Panel(
                 'echo \'export GEMINI_API_KEY="your-key"\' >> ~/.bashrc\nsource ~/.bashrc',
-                border_style="green",
+                border_style="magenta",
                 title="執行指令",
                 padding=(0, 1)
             ))
@@ -445,22 +611,22 @@ def suggest_api_key_setup() -> None:
         console.print("   2. 點擊「編輯系統環境變數」")
         console.print("   3. 點擊「環境變數」")
         console.print("   4. 在「用戶變數」中新增：")
-        console.print("      變數名：[yellow]GEMINI_API_KEY[/yellow]")
-        console.print("      變數值：[yellow]your-api-key-here[/yellow]")
+        console.print("      變數名：[magenta]GEMINI_API_KEY[/yellow]")
+        console.print("      變數值：[magenta]your-api-key-here[/yellow]")
     console.print()
 
     # ==================== 方法 3：.env 檔案 ====================
     console.print("[bold]🔧 方法 3：使用 .env 檔案（專案專用）[/bold]\n")
     console.print(Panel(
         "echo 'GEMINI_API_KEY=your-api-key' > .env",
-        border_style="green",
+        border_style="magenta",
         title="在專案目錄執行",
         padding=(0, 1)
     ))
     console.print()
 
     # ==================== 如何取得 API 金鑰 ====================
-    console.print("[bold cyan]📝 如何取得 API 金鑰：[/bold cyan]\n")
+    console.print("[bold magenta]📝 如何取得 API 金鑰：[/bold magenta]\n")
 
     console.print("   1. 前往 Google AI Studio")
     console.print("      🔗 [link=https://aistudio.google.com/apikey]https://aistudio.google.com/apikey[/link]")
@@ -489,20 +655,20 @@ def suggest_api_key_setup() -> None:
     console.print()
 
     # ==================== 驗證設定 ====================
-    console.print("[bold cyan]✅ 驗證設定：[/bold cyan]")
+    console.print("[bold magenta]✅ 驗證設定：[/bold magenta]")
     console.print("   執行指令檢查：")
 
     if system in ["Darwin", "Linux"]:
         console.print(Panel(
             "echo $GEMINI_API_KEY",
-            border_style="cyan",
+            border_style="magenta",
             title="macOS/Linux",
             padding=(0, 1)
         ))
     elif system == "Windows":
         console.print(Panel(
             "echo %GEMINI_API_KEY%  # Windows CMD\necho $env:GEMINI_API_KEY  # Windows PowerShell",
-            border_style="cyan",
+            border_style="magenta",
             title="Windows",
             padding=(0, 1)
         ))
@@ -518,16 +684,27 @@ def suggest_missing_module(module_name: str, install_command: Optional[str] = No
         module_name: 模組名稱
         install_command: 自訂安裝指令（若未提供則使用預設的 pip install）
     """
-    console.print(f"\n[red]✗ Python 模組 '{module_name}' 未安裝[/red]\n")
-    console.print("[cyan]💡 一鍵修復方案：[/cyan]\n")
+    # 🔧 記錄錯誤到 ErrorLogger
+    _get_error_logger().log_error(
+        error_type="ModuleMissing",
+        file_path="",
+        details={
+            'module_name': module_name,
+            'install_command': install_command or f"pip install {module_name}",
+            'in_virtualenv': _check_virtualenv()
+        }
+    )
+
+    console.print(f"\n[dim magenta]✗ Python 模組 '{module_name}' 未安裝[/red]\n")
+    console.print("[magenta]💡 一鍵修復方案：[/magenta]\n")
 
     if install_command is None:
         install_command = f"pip install {module_name}"
 
-    console.print("[bold green]🔧 使用 pip 安裝（推薦）[/bold green]")
+    console.print("[bold magenta]🔧 使用 pip 安裝（推薦）[/bold green]")
     console.print(Panel(
         install_command,
-        border_style="green",
+        border_style="magenta",
         title="📋 執行指令",
         padding=(0, 1)
     ))
@@ -535,18 +712,18 @@ def suggest_missing_module(module_name: str, install_command: Optional[str] = No
     # 如果在虛擬環境中
     in_venv = _check_virtualenv()
     if in_venv:
-        console.print("\n[green]✓ 已偵測到虛擬環境[/green]")
+        console.print("\n[magenta]✓ 已偵測到虛擬環境[/green]")
     else:
-        console.print("\n[yellow]⚠️  建議在虛擬環境中安裝[/yellow]")
+        console.print("\n[magenta]⚠️  建議在虛擬環境中安裝[/yellow]")
         console.print("   [dim]如果尚未建立虛擬環境，可執行：[/dim]")
         console.print(Panel(
             "python3 -m venv venv\nsource venv/bin/activate  # macOS/Linux\nvenv\\Scripts\\activate  # Windows",
-            border_style="yellow",
+            border_style="magenta",
             title="建立並啟用虛擬環境",
             padding=(0, 1)
         ))
 
-    console.print("\n[yellow]⏸️  安裝完成後，請重新執行程式[/yellow]\n")
+    console.print("\n[magenta]⏸️  安裝完成後，請重新執行程式[/yellow]\n")
 
 
 # ==================== 輔助函數 ====================
@@ -646,11 +823,11 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         file_path: 損壞的檔案路徑
         ffprobe_error: ffprobe 錯誤訊息
     """
-    console.print(f"\n[red]✗ 檔案格式錯誤或損壞：{file_path}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 檔案格式錯誤或損壞：{file_path}[/red]\n")
 
     # 顯示錯誤詳細資訊
     if ffprobe_error:
-        console.print("[yellow]詳細資訊：[/yellow]")
+        console.print("[magenta]詳細資訊：[/yellow]")
         # 只顯示前3行錯誤
         error_lines = ffprobe_error.strip().split('\n')[:3]
         for line in error_lines:
@@ -662,12 +839,12 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         size = os.path.getsize(file_path) / (1024 * 1024)
         mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
 
-        console.print("[cyan]檔案資訊：[/cyan]")
+        console.print("[magenta]檔案資訊：[/magenta]")
         console.print(f"  - 大小：{size:.1f} MB")
         console.print(f"  - 建立時間：{mtime.strftime('%Y-%m-%d %H:%M:%S')}")
         console.print()
 
-    console.print("[cyan]💡 修復選項：[/cyan]\n")
+    console.print("[magenta]💡 修復選項：[/magenta]\n")
 
     # ==================== 選項 1：重新封裝 ====================
     console.print("[bold]🔧 選項 1：嘗試修復檔案（重新封裝，推薦）[/bold]\n")
@@ -681,11 +858,11 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         f'ffmpeg -i "{file_path}"\n'
         f'       -c copy\n'
         f'       "{repaired_full_path}"',
-        border_style="green",
+        border_style="magenta",
         title="修復檔案"
     ))
 
-    console.print("\n   [yellow]⚠️  注意：[/yellow]")
+    console.print("\n   [magenta]⚠️  注意：[/yellow]")
     console.print("   - 原檔案不會被修改")
     console.print("   - 修復後檔案會略小（去除損壞部分）")
     console.print("   - 如果修復失敗，請嘗試選項 2")
@@ -703,7 +880,7 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         f'ffmpeg -i "{file_path}"\n'
         f'       -c:v libx264 -c:a aac\n'
         f'       "{converted_full_path}"',
-        border_style="green",
+        border_style="magenta",
         title="重新編碼"
     ))
 
@@ -719,7 +896,7 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
     console.print("   先檢查檔案的詳細錯誤資訊：")
     console.print(Panel(
         f'ffprobe -v error "{file_path}"',
-        border_style="cyan"
+        border_style="magenta"
     ))
     console.print()
 
@@ -743,7 +920,7 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
     console.print("   - 不當的檔案轉換")
     console.print()
 
-    console.print("[bold green]✅ 修復成功後：[/bold green]")
+    console.print("[bold magenta]✅ 修復成功後：[/bold green]")
     console.print("   重新執行原始指令，使用修復後的檔案路徑\n")
 
 
@@ -823,10 +1000,10 @@ def suggest_json_parse_failed(
     Returns:
         修復後的 JSON 文字（如果自動修復成功），否則返回 None
     """
-    console.print(f"\n[red]✗ {context}結果解析失敗[/red]\n")
+    console.print(f"\n[dim magenta]✗ {context}結果解析失敗[/red]\n")
 
     # 顯示錯誤訊息
-    console.print(f"[yellow]JSON 解析錯誤：{error_message}[/yellow]\n")
+    console.print(f"[magenta]JSON 解析錯誤：{error_message}[/yellow]\n")
 
     # 顯示原始回應預覽
     preview_length = 500
@@ -834,15 +1011,15 @@ def suggest_json_parse_failed(
     if len(json_text) > preview_length:
         preview_text += "\n... (已截斷)"
 
-    console.print("[cyan]原始回應預覽（前 500 字元）：[/cyan]")
+    console.print("[magenta]原始回應預覽（前 500 字元）：[/magenta]")
     console.print(Panel(
         preview_text,
-        border_style="yellow",
+        border_style="magenta",
         title="JSON 內容"
     ))
     console.print()
 
-    console.print("[cyan]💡 修復選項：[/cyan]\n")
+    console.print("[magenta]💡 修復選項：[/magenta]\n")
 
     # ==================== 選項 1：自動修復 JSON ====================
     console.print("[bold]🔄 選項 1：自動修復 JSON 格式（推薦）[/bold]\n")
@@ -852,18 +1029,18 @@ def suggest_json_parse_failed(
 
     if fixed_json:
         # 修復成功
-        console.print("[green]   ✓ JSON 修復成功！[/green]\n")
+        console.print("[magenta]   ✓ JSON 修復成功！[/green]\n")
         if fixes:
             console.print("   [dim]已套用的修復：[/dim]")
             for fix in fixes:
-                console.print(f"   [green]✓[/green] {fix}")
+                console.print(f"   [magenta]✓[/green] {fix}")
         console.print()
-        console.print("   [bold green]已自動使用修復後的 JSON 繼續處理[/bold green]")
+        console.print("   [bold magenta]已自動使用修復後的 JSON 繼續處理[/bold green]")
         console.print()
         return fixed_json
     else:
         # 修復失敗
-        console.print("   [yellow]✗ 自動修復失敗[/yellow]")
+        console.print("   [magenta]✗ 自動修復失敗[/yellow]")
         if fixes:
             console.print("   [dim]已嘗試：[/dim]")
             for fix in fixes:
@@ -892,15 +1069,15 @@ def suggest_json_parse_failed(
         with open(temp_file, 'w', encoding='utf-8') as f:
             f.write(json_text)
         console.print(f"   完整回應已保存至：")
-        console.print(f"   [cyan]{temp_file}[/cyan]\n")
+        console.print(f"   [magenta]{temp_file}[/magenta]\n")
 
         console.print("   執行指令查看：")
         console.print(Panel(
             f'cat "{temp_file}"',
-            border_style="cyan"
+            border_style="magenta"
         ))
     except Exception as e:
-        console.print(f"   [yellow]⚠️  無法保存檔案：{e}[/yellow]")
+        console.print(f"   [magenta]⚠️  無法保存檔案：{e}[/yellow]")
     console.print()
 
     # ==================== 選項 4：手動修復 ====================
@@ -913,7 +1090,7 @@ def suggest_json_parse_failed(
         f'# 範例：手動修復後重新處理\n'
         f'# （需要自行實作導入功能）\n'
         f'python import_subtitles.py "{temp_file}"',
-        border_style="cyan",
+        border_style="magenta",
         title="手動修復"
     ))
     console.print()
@@ -983,56 +1160,76 @@ def suggest_video_file_not_found(file_path: str, auto_fix: bool = True) -> Optio
                     mtime = datetime.fromtimestamp(os.path.getmtime(item_path))
                     similar_files.append((item, size, mtime, similarity, item_path))
 
-            # 按相似度排序
+            # 按相似度排序 (保留所有，不限制數量)
             similar_files.sort(key=lambda x: x[3], reverse=True)
 
-            if similar_files[:3]:
-                console.print("[bold cyan]💡 智能建議：[/bold cyan]\n")
-                console.print("[bold]📂 相似檔案（在相同目錄）[/bold]")
-                console.print(f"   找到 {len(similar_files[:3])} 個相似檔案：\n")
+            if similar_files:
+                # 轉換為字典格式供智能選擇器使用
+                similar_files_dict = []
+                for (name, size, mtime, similarity, full_path) in similar_files:
+                    # 計算時間差顯示
+                    now = datetime.now()
+                    time_diff = now - mtime
+                    if time_diff.days > 0:
+                        time_ago = f"{time_diff.days} 天前"
+                    elif time_diff.seconds > 3600:
+                        time_ago = f"{time_diff.seconds // 3600} 小時前"
+                    elif time_diff.seconds > 60:
+                        time_ago = f"{time_diff.seconds // 60} 分鐘前"
+                    else:
+                        time_ago = "剛才"
 
-                for i, (name, size, mtime, similarity, full_path) in enumerate(similar_files[:3], 1):
-                    size_mb = size / (1024 * 1024)
-                    mtime_str = mtime.strftime("%Y-%m-%d %H:%M")
-                    console.print(
-                        f"   {i}. {name:<30} ({size_mb:.1f} MB, 修改於 {mtime_str})"
-                    )
+                    similar_files_dict.append({
+                        'name': name,
+                        'path': full_path,
+                        'size': size,
+                        'similarity': similarity,
+                        'time_ago': time_ago,
+                        'modified_time': mtime.timestamp()
+                    })
 
-                console.print("\n[bold green]⚡ 使用相似檔案[/bold green]")
-                console.print("   將參數路徑替換為上述檔案之一重新執行\n")
-
-                # 🎯 一鍵修復：讓用戶直接選擇
+                # 🎯 使用智能檔案選擇器 (C-2/C-3 違規修復)
                 if auto_fix:
                     try:
-                        choice = IntPrompt.ask(
-                            f"選擇要使用的檔案 (1-{len(similar_files[:3])}, 0=取消)",
-                            default=0,
-                            show_default=True
-                        )
+                        selector = SmartFileSelector()
+                        selected_files = selector.smart_select(similar_files_dict)
 
-                        if 1 <= choice <= len(similar_files[:3]):
-                            selected_file = similar_files[choice - 1]
-                            console.print(f"\n[green]✅ 已選擇：{selected_file[0]}[/green]")
-                            console.print(f"[cyan]新路徑：{selected_file[4]}[/cyan]\n")
-                            return selected_file[4]
+                        if selected_files:
+                            selected_path = selected_files[0]['path']
+
+                            if len(selected_files) > 1:
+                                console.print(
+                                    f"\n[plum]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
+                                    f"當前將使用: {selected_files[0]['name']}[/plum]\n"
+                                )
+                            else:
+                                console.print(f"\n[plum]✅ 已選擇: {selected_files[0]['name']}[/plum]")
+
+                            simplified_path = _simplify_path(selected_path)
+                            console.print(f"[dim]路徑: {simplified_path}[/dim]\n")
+                            return selected_path
+                        else:
+                            console.print("\n[yellow]已取消選擇[/yellow]")
                     except (KeyboardInterrupt, EOFError):
-                        console.print("\n[yellow]已取消[/yellow]\n")
+                        console.print("\n[yellow]已取消[/yellow]")
+                    except Exception as e:
+                        console.print(f"\n[yellow]選擇器錯誤: {e}[/yellow]")
 
         except Exception:
             pass
 
     # 搜尋指令
-    console.print("[bold green]🔍 在目錄中搜尋[/bold green]")
+    console.print("[bold magenta]🔍 在目錄中搜尋[/bold green]")
     console.print("   執行以下指令：")
     search_term = os.path.splitext(filename)[0][:10]  # 取檔名前10字元
     console.print(Panel(
         f'find {directory} -name "*{search_term}*" -type f',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2)
     ))
 
     # 常見原因
-    console.print("\n[yellow]📝 常見原因：[/yellow]")
+    console.print("\n[magenta]📝 常見原因：[/yellow]")
     console.print("   • 檔案路徑拼寫錯誤")
     console.print("   • 檔案已被移動或刪除")
     console.print("   • 使用了相對路徑（建議使用絕對路徑）\n")
@@ -1065,15 +1262,15 @@ def suggest_invalid_watermark_params(
     has_position_error = False
 
     if opacity is not None and (opacity < 0.0 or opacity > 1.0):
-        console.print(f"[red]問題 1: 不透明度 {opacity} 超出範圍[/red]")
+        console.print(f"[dim magenta]問題 1: 不透明度 {opacity} 超出範圍[/red]")
         has_opacity_error = True
 
     if position is not None and supported_positions is not None:
         if position not in supported_positions:
-            console.print(f"[red]問題 2: 不支援的位置 {position}[/red]")
+            console.print(f"[dim magenta]問題 2: 不支援的位置 {position}[/red]")
             has_position_error = True
 
-    console.print("\n[bold cyan]💡 正確參數設定：[/bold cyan]\n")
+    console.print("\n[bold magenta]💡 正確參數設定：[/bold magenta]\n")
 
     # ==================== 不透明度說明 ====================
     console.print("[bold]📊 不透明度 (opacity)[/bold]")
@@ -1089,10 +1286,10 @@ def suggest_invalid_watermark_params(
     if has_opacity_error:
         if opacity > 1.0:
             suggested = 1.0
-            console.print(f"\n   [yellow]💡 建議：將 {opacity} 改為 {suggested}[/yellow]")
+            console.print(f"\n   [magenta]💡 建議：將 {opacity} 改為 {suggested}[/yellow]")
         elif opacity < 0.0:
             suggested = 0.0
-            console.print(f"\n   [yellow]💡 建議：將 {opacity} 改為 {suggested}[/yellow]")
+            console.print(f"\n   [magenta]💡 建議：將 {opacity} 改為 {suggested}[/yellow]")
     console.print()
 
     # ==================== 位置說明 ====================
@@ -1129,14 +1326,14 @@ def suggest_invalid_watermark_params(
             from difflib import get_close_matches
             matches = get_close_matches(position, supported_positions.keys(), n=1, cutoff=0.3)
             if matches:
-                console.print(f"\n   [yellow]💡 建議：將 '{position}' 改為 '{matches[0]}'[/yellow]")
+                console.print(f"\n   [magenta]💡 建議：將 '{position}' 改為 '{matches[0]}'[/yellow]")
             else:
-                console.print(f"\n   [yellow]💡 建議：使用 'bottom-right'（最常用）[/yellow]")
+                console.print(f"\n   [magenta]💡 建議：使用 'bottom-right'（最常用）[/yellow]")
 
     console.print()
 
     # ==================== 使用範例 ====================
-    console.print("[bold green]⚡ 正確使用範例：[/bold green]")
+    console.print("[bold magenta]⚡ 正確使用範例：[/bold green]")
 
     # 根據錯誤類型顯示修正後的範例
     example_opacity = 0.7
@@ -1163,7 +1360,7 @@ def suggest_invalid_watermark_params(
         f'    position="{example_position}",\n'
         f'    opacity={example_opacity}\n'
         f')',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print()
@@ -1198,11 +1395,11 @@ def suggest_video_transcode_failed(
     error_preview = stderr[:300] if len(stderr) > 300 else stderr
     if len(stderr) > 300:
         error_preview += "\n... (錯誤訊息已截斷)"
-    console.print(f"[red]{error_preview}[/red]\n")
+    console.print(f"[dim magenta]{error_preview}[/red]\n")
 
-    console.print("[bold cyan]💡 診斷與解決：[/bold cyan]\n")
+    console.print("[bold magenta]💡 診斷與解決：[/bold magenta]\n")
 
-    console.print("[yellow]⚠️  常見錯誤原因：[/yellow]\n")
+    console.print("[magenta]⚠️  常見錯誤原因：[/yellow]\n")
 
     # ==================== 原因 1：缺少編碼器 ====================
     if "not found" in stderr.lower() or "encoder" in stderr.lower() or "codec" in stderr.lower():
@@ -1214,26 +1411,26 @@ def suggest_video_transcode_failed(
             console.print("   macOS:")
             console.print(Panel(
                 "brew reinstall ffmpeg",
-                border_style="green",
+                border_style="magenta",
                 padding=(0, 2)
             ))
             console.print("\n   [dim]如需完整編碼器支援：[/dim]")
             console.print(Panel(
                 "brew install ffmpeg --with-libx264 --with-libx265",
-                border_style="cyan",
+                border_style="magenta",
                 padding=(0, 2)
             ))
         elif system == "Linux":
             console.print("   Linux (Ubuntu/Debian):")
             console.print(Panel(
                 "sudo apt update\nsudo apt install ffmpeg libx264-dev libx265-dev",
-                border_style="green",
+                border_style="magenta",
                 padding=(0, 2)
             ))
             console.print("\n   Linux (Fedora/CentOS):")
             console.print(Panel(
                 "sudo dnf install ffmpeg x264-devel x265-devel",
-                border_style="cyan",
+                border_style="magenta",
                 padding=(0, 2)
             ))
         else:
@@ -1251,7 +1448,7 @@ def suggest_video_transcode_failed(
     parent_dir = os.path.dirname(output_path) or '.'
     console.print(Panel(
         f"df -h {parent_dir}",
-        border_style="cyan",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print()
@@ -1265,21 +1462,21 @@ def suggest_video_transcode_failed(
     console.print("   驗證檔案：")
     console.print(Panel(
         f'ffmpeg -v error -i "{input_path}" -f null -',
-        border_style="cyan",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print("\n   [dim]如果顯示錯誤，表示檔案確實損壞[/dim]")
     console.print()
 
     # ==================== 替代方案 ====================
-    console.print("[bold green]🔧 嘗試使用不同的編碼參數[/bold green]\n")
+    console.print("[bold magenta]🔧 嘗試使用不同的編碼參數[/bold green]\n")
 
     console.print("   [bold]方案 1：僅複製串流（最快，不重新編碼）[/bold]")
     console.print(Panel(
         f'ffmpeg -i "{input_path}"\n'
         f'       -c:v copy -c:a copy\n'
         f'       "{output_path}"',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2),
         title="快速複製"
     ))
@@ -1292,7 +1489,7 @@ def suggest_video_transcode_failed(
         f'       -c:v libx264 -preset fast -crf 23\n'
         f'       -c:a aac -b:a 128k\n'
         f'       "{output_path}"',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2),
         title="標準編碼"
     ))
@@ -1305,7 +1502,7 @@ def suggest_video_transcode_failed(
         f'       -c:v libx264 -preset ultrafast -crf 28\n'
         f'       -c:a copy\n'
         f'       "{output_path}"',
-        border_style="yellow",
+        border_style="magenta",
         padding=(0, 2),
         title="快速編碼"
     ))
@@ -1315,11 +1512,11 @@ def suggest_video_transcode_failed(
     # ==================== 進階診斷 ====================
     console.print("[bold yellow]🔍 進階診斷：[/bold yellow]")
     console.print("   1. 檢查 ffmpeg 版本和支援的編碼器：")
-    console.print(Panel("ffmpeg -codecs | grep x264", border_style="cyan", padding=(0, 2)))
+    console.print(Panel("ffmpeg -codecs | grep x264", border_style="magenta", padding=(0, 2)))
     console.print("\n   2. 查看完整的 ffmpeg 輸出（用於診斷）：")
     console.print(Panel(
         f'ffmpeg -i "{input_path}" "{output_path}"',
-        border_style="cyan",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print()
@@ -1346,7 +1543,7 @@ def suggest_video_upload_failed(
         error_message: 錯誤訊息
         uploaded_bytes: 已上傳的位元組數（可選）
     """
-    console.print(f"\n[red]✗ 影片上傳失敗：{error_message}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 影片上傳失敗：{error_message}[/red]\n")
 
     # ==================== 檔案資訊 ====================
     if os.path.isfile(file_path):
@@ -1370,7 +1567,7 @@ def suggest_video_upload_failed(
         except Exception:
             pass
 
-        console.print("[cyan]檔案資訊：[/cyan]")
+        console.print("[magenta]檔案資訊：[/magenta]")
         console.print(f"  - 路徑：{file_path}")
         console.print(f"  - 大小：{size_mb:.1f} MB")
         console.print(f"  - 時長：{duration_str}")
@@ -1383,10 +1580,10 @@ def suggest_video_upload_failed(
             console.print(f"上傳進度：已上傳 {uploaded_mb:.1f} MB / {size_mb:.1f} MB ({progress_pct:.0f}%)")
             console.print()
     else:
-        console.print(f"[yellow]⚠️  無法讀取檔案資訊：{file_path}[/yellow]\n")
+        console.print(f"[magenta]⚠️  無法讀取檔案資訊：{file_path}[/yellow]\n")
         size_mb = 0  # 預設值
 
-    console.print("[cyan]💡 解決方案：[/cyan]\n")
+    console.print("[magenta]💡 解決方案：[/magenta]\n")
 
     # ==================== 選項 1：自動重試 ====================
     console.print("[bold]🔄 選項 1：自動重試上傳（推薦）[/bold]\n")
@@ -1410,7 +1607,7 @@ def suggest_video_upload_failed(
             f'       -c:v libx264 -crf 28\n'
             f'       -c:a aac -b:a 128k\n'
             f'       "{compressed_full_path}"',
-            border_style="green"
+            border_style="magenta"
         ))
 
         # 估算時間和大小
@@ -1432,7 +1629,7 @@ def suggest_video_upload_failed(
             f'       -preset fast\n'
             f'       -c:a aac -b:a 96k\n'
             f'       "{optimized_full_path}"',
-            border_style="green"
+            border_style="magenta"
         ))
 
         est_size_min2 = int(size_mb * 0.20)
@@ -1454,7 +1651,7 @@ def suggest_video_upload_failed(
             f'       -segment_time 300\n'
             f'       -reset_timestamps 1\n'
             f'       "{segment_pattern}"',
-            border_style="cyan"
+            border_style="magenta"
         ))
     else:
         console.print(Panel(
@@ -1463,7 +1660,7 @@ def suggest_video_upload_failed(
             f'       -segment_time 300\n'
             f'       -reset_timestamps 1\n'
             f'       "segment_%03d.mp4"',
-            border_style="cyan"
+            border_style="magenta"
         ))
 
     console.print("\n   [dim]將生成：segment_001.mp4, segment_002.mp4, ...[/dim]")
@@ -1472,16 +1669,16 @@ def suggest_video_upload_failed(
     # ==================== 選項 4：網路診斷 ====================
     console.print("[bold]🔍 選項 4：檢查網路連線[/bold]\n")
     console.print("   執行網路診斷：")
-    console.print(Panel("ping -c 5 google.com", border_style="cyan"))
+    console.print(Panel("ping -c 5 google.com", border_style="magenta"))
     console.print("\n   測試上傳速度：")
     console.print(Panel(
         "curl -o /dev/null http://speedtest.wdc01.softlayer.com/downloads/test100.zip",
-        border_style="cyan"
+        border_style="magenta"
     ))
     console.print()
 
     # ==================== API 限制說明 ====================
-    console.print("[bold cyan]📊 Gemini API 檔案大小限制：[/bold cyan]")
+    console.print("[bold magenta]📊 Gemini API 檔案大小限制：[/bold magenta]")
     console.print("   - 免費版：最大 20 MB")
     console.print("   - 付費版：最大 2 GB")
     console.print("   - 建議大小：< 100 MB（最佳上傳速度）")
@@ -1509,7 +1706,7 @@ def suggest_empty_file(file_path: str) -> None:
     Args:
         file_path: 空檔案路徑
     """
-    console.print(f"\n[red]✗ 檔案為空（0 bytes）：{file_path}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 檔案為空（0 bytes）：{file_path}[/red]\n")
 
     # ==================== 檔案資訊 ====================
     if os.path.exists(file_path):
@@ -1517,7 +1714,7 @@ def suggest_empty_file(file_path: str) -> None:
         ctime = datetime.fromtimestamp(os.path.getctime(file_path))
         mtime = datetime.fromtimestamp(os.path.getmtime(file_path))
 
-        console.print("[cyan]檔案資訊：[/cyan]")
+        console.print("[magenta]檔案資訊：[/magenta]")
         console.print(f"  - 路徑：{file_path}")
         console.print(f"  - 大小：0 bytes")
         console.print(f"  - 建立時間：{ctime.strftime('%Y-%m-%d %H:%M:%S')}")
@@ -1525,11 +1722,11 @@ def suggest_empty_file(file_path: str) -> None:
 
         # 如果建立和修改時間相同，可能是傳輸失敗
         if abs((mtime - ctime).total_seconds()) < 1:
-            console.print("\n  [yellow]⚠️  建立和修改時間幾乎相同，可能是傳輸失敗[/yellow]")
+            console.print("\n  [magenta]⚠️  建立和修改時間幾乎相同，可能是傳輸失敗[/yellow]")
 
         console.print()
 
-    console.print("[cyan]💡 可能的原因與解決方案：[/cyan]\n")
+    console.print("[magenta]💡 可能的原因與解決方案：[/magenta]\n")
 
     # ==================== 原因 1：下載未完成 ====================
     console.print("[bold]🔍 原因 1：下載未完成或中斷[/bold]\n")
@@ -1546,7 +1743,7 @@ def suggest_empty_file(file_path: str) -> None:
     console.print(Panel(
         'wget -c "https://example.com/video.mp4"\n'
         f'     -O "{file_path}"',
-        border_style="green",
+        border_style="magenta",
         title="斷點續傳下載"
     ))
     console.print()
@@ -1566,7 +1763,7 @@ def suggest_empty_file(file_path: str) -> None:
     console.print(Panel(
         f'rsync -avz --progress source:/path/to/video.mp4\n'
         f'      "{file_path}"',
-        border_style="green",
+        border_style="magenta",
         title="可靠傳輸"
     ))
     console.print()
@@ -1577,7 +1774,7 @@ def suggest_empty_file(file_path: str) -> None:
     console.print("   執行指令檢查磁碟空間：")
 
     parent_dir = os.path.dirname(file_path) or '.'
-    console.print(Panel(f'df -h {parent_dir}', border_style="cyan"))
+    console.print(Panel(f'df -h {parent_dir}', border_style="magenta"))
 
     console.print("\n   解決方案：")
     console.print("   - 清理磁碟空間")
@@ -1595,10 +1792,10 @@ def suggest_empty_file(file_path: str) -> None:
     system = platform.system()
     if system == "Darwin":
         console.print("   執行指令檢查檔案系統（macOS）：")
-        console.print(Panel('diskutil verifyVolume /', border_style="cyan"))
+        console.print(Panel('diskutil verifyVolume /', border_style="magenta"))
     elif system == "Linux":
         console.print("   執行指令檢查檔案系統（Linux）：")
-        console.print(Panel('sudo fsck /dev/sdX  # 替換為實際裝置', border_style="cyan"))
+        console.print(Panel('sudo fsck /dev/sdX  # 替換為實際裝置', border_style="magenta"))
     console.print()
 
     # ==================== 清理空檔案 ====================
@@ -1609,7 +1806,7 @@ def suggest_empty_file(file_path: str) -> None:
     console.print("\n   或搜尋並刪除所有空檔案（小心使用）：")
     console.print(Panel(
         f'find {parent_dir} -type f -size 0 -delete',
-        border_style="yellow",
+        border_style="magenta",
         title="⚠️  危險操作"
     ))
     console.print()
@@ -1630,7 +1827,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
         file_path: 圖片檔案路徑
         error: 載入錯誤的異常物件
     """
-    console.print(f"\n[red]✗ 無法載入圖片：{str(error)}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 無法載入圖片：{str(error)}[/red]\n")
 
     # 檔案資訊
     size_mb = 0
@@ -1640,7 +1837,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
     if os.path.isfile(file_path):
         size_mb = os.path.getsize(file_path) / (1024 * 1024)
 
-        console.print("[cyan]檔案資訊：[/cyan]")
+        console.print("[magenta]檔案資訊：[/magenta]")
         console.print(f"  - 路徑：{file_path}")
         console.print(f"  - 大小：{size_mb:.1f} MB")
 
@@ -1661,12 +1858,12 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
             format_lower = actual_format.lower()
 
             if extension in ['.jpg', '.jpeg'] and 'png' in format_lower:
-                console.print("\n[yellow]⚠️  問題：檔案副檔名與實際格式不符[/yellow]")
+                console.print("\n[magenta]⚠️  問題：檔案副檔名與實際格式不符[/yellow]")
                 console.print(f"   副檔名：{extension}")
                 console.print(f"   實際格式：PNG")
                 mismatch = True
             elif extension == '.png' and 'jpeg' in format_lower:
-                console.print("\n[yellow]⚠️  問題：檔案副檔名與實際格式不符[/yellow]")
+                console.print("\n[magenta]⚠️  問題：檔案副檔名與實際格式不符[/yellow]")
                 console.print(f"   副檔名：{extension}")
                 console.print(f"   實際格式：JPEG")
                 mismatch = True
@@ -1677,7 +1874,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
 
         console.print()
 
-    console.print("[cyan]💡 解決方案：[/cyan]\n")
+    console.print("[magenta]💡 解決方案：[/magenta]\n")
 
     # 選項 1：修正副檔名（如果檢測到不符）
     if mismatch and actual_format:
@@ -1701,7 +1898,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
         console.print("   執行指令重新命名：")
         console.print(Panel(
             f'mv "{file_path}" "{new_path}"',
-            border_style="green",
+            border_style="magenta",
             title="修正副檔名"
         ))
         console.print("\n   [dim]然後使用新路徑重新執行[/dim]\n")
@@ -1717,23 +1914,23 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
     console.print("   轉換為標準 JPEG 格式：")
     console.print(Panel(
         f'ffmpeg -i "{file_path}" "{converted_jpg}"',
-        border_style="green"
+        border_style="magenta"
     ))
 
     console.print("\n   或轉換為 PNG：")
     console.print(Panel(
         f'ffmpeg -i "{file_path}" "{converted_png}"',
-        border_style="green"
+        border_style="magenta"
     ))
     console.print()
 
     # 選項 3：檢查詳細資訊
     console.print("[bold]🔍 選項 3：檢查圖片詳細資訊[/bold]\n")
     console.print("   執行指令查看實際格式：")
-    console.print(Panel(f'file "{file_path}"', border_style="cyan"))
+    console.print(Panel(f'file "{file_path}"', border_style="magenta"))
 
     console.print("\n   使用 ImageMagick 識別：")
-    console.print(Panel(f'identify "{file_path}"', border_style="cyan"))
+    console.print(Panel(f'identify "{file_path}"', border_style="magenta"))
     console.print()
 
     # 選項 4：修復圖片
@@ -1742,13 +1939,13 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
     repaired = os.path.join(parent_dir, f"{stem}_repaired{Path(file_path).suffix}")
     console.print(Panel(
         f'convert "{file_path}" "{repaired}"',
-        border_style="green",
+        border_style="magenta",
         title="使用 ImageMagick 修復"
     ))
     console.print()
 
     # 支援格式
-    console.print("[bold green]✅ 支援的圖片格式：[/bold green]")
+    console.print("[bold magenta]✅ 支援的圖片格式：[/bold green]")
     console.print("   - JPEG/JPG (.jpg, .jpeg)")
     console.print("   - PNG (.png)")
     console.print("   - GIF (.gif)")
@@ -1768,13 +1965,13 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
 
     # 尺寸過大的解決方案
     if size_mb > 50:
-        console.print("[bold cyan]💡 圖片尺寸過大，建議壓縮：[/bold cyan]")
+        console.print("[bold magenta]💡 圖片尺寸過大，建議壓縮：[/bold magenta]")
         resized = os.path.join(parent_dir, f"{stem}_resized{Path(file_path).suffix}")
         console.print(Panel(
             f'ffmpeg -i "{file_path}"\n'
             f'       -vf "scale=iw/2:ih/2"\n'
             f'       "{resized}"',
-            border_style="cyan",
+            border_style="magenta",
             title="壓縮圖片（縮小為原尺寸的 1/2）"
         ))
         console.print()
@@ -1789,11 +1986,11 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
         error: 可選的錯誤物件，用於顯示詳細錯誤資訊
     """
     if error:
-        console.print(f"\n[red]✗ 無法獲取檔案時長：{file_path}[/red]")
+        console.print(f"\n[dim magenta]✗ 無法獲取檔案時長：{file_path}[/red]")
         console.print(f"[dim]錯誤詳情：{error}[/dim]\n")
     else:
-        console.print(f"\n[red]✗ 無法獲取檔案時長：{file_path}[/red]\n")
-    console.print("[cyan]💡 診斷與解決方案：[/cyan]\n")
+        console.print(f"\n[dim magenta]✗ 無法獲取檔案時長：{file_path}[/red]\n")
+    console.print("[magenta]💡 診斷與解決方案：[/magenta]\n")
 
     # ==================== 步驟 1：手動檢查 ====================
     console.print("[bold]🔍 步驟 1：手動檢查檔案時長[/bold]\n")
@@ -1803,7 +2000,7 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
         f'        -show_entries format=duration\n'
         f'        -of default=noprint_wrappers=1\n'
         f'        "{file_path}"',
-        border_style="cyan",
+        border_style="magenta",
         title="獲取時長",
         padding=(0, 1)
     ))
@@ -1823,7 +2020,7 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
         f'ffmpeg -i "{file_path}"\n'
         f'       -c copy\n'
         f'       "{repaired}"',
-        border_style="green",
+        border_style="magenta",
         title="重新封裝",
         padding=(0, 1)
     ))
@@ -1840,7 +2037,7 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
         f'ffmpeg -i "{file_path}"\n'
         f'       -c:v libx264 -c:a aac\n'
         f'       "{converted}"',
-        border_style="green",
+        border_style="magenta",
         title="轉換格式",
         padding=(0, 1)
     ))
@@ -1853,7 +2050,7 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
     console.print(Panel(
         'which ffprobe\n'
         'ffprobe -version',
-        border_style="cyan",
+        border_style="magenta",
         title="檢查 ffprobe",
         padding=(0, 1)
     ))
@@ -1865,12 +2062,12 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
     console.print("   [dim]duration = 123.45  # 您的檔案時長（秒）[/dim]\n")
 
     # ==================== 更多資訊 ====================
-    console.print("[bold cyan]💡 獲取更多檔案資訊：[/bold cyan]\n")
+    console.print("[bold magenta]💡 獲取更多檔案資訊：[/bold magenta]\n")
     console.print("   執行指令查看完整資訊：")
     console.print(Panel(
         f'ffprobe -v error -show_format -show_streams\n'
         f'        "{file_path}"',
-        border_style="cyan",
+        border_style="magenta",
         title="完整檔案資訊",
         padding=(0, 1)
     ))
@@ -1887,7 +2084,7 @@ def suggest_invalid_speed(speed: float) -> None:
     console.print(f"\n[bold red]✗ 速度倍數無效：{speed}[/bold red]\n")
     console.print("[bold red]❌ 問題：速度倍數必須大於 0[/bold red]\n")
 
-    console.print("[bold cyan]💡 常用速度設定：[/bold cyan]\n")
+    console.print("[bold magenta]💡 常用速度設定：[/bold magenta]\n")
 
     console.print("[bold]⏩ 快速播放[/bold]")
     console.print("   • 1.5x - 輕微加速（適合演講）")
@@ -1901,7 +2098,7 @@ def suggest_invalid_speed(speed: float) -> None:
     console.print("[bold]⏸️  正常速度[/bold]")
     console.print("   • 1.0x - 原始速度\n")
 
-    console.print("[yellow]📝 參數說明：[/yellow]")
+    console.print("[magenta]📝 參數說明：[/yellow]")
     console.print("   • 值 > 1：加速播放（如 2.0 = 2倍速）")
     console.print("   • 值 < 1：慢動作（如 0.5 = 半速）")
     console.print("   • 值 = 1：正常速度")
@@ -1931,26 +2128,26 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
         requested_format.upper()
     )
 
-    console.print(f"\n[red]✗ 不支援的字幕格式：{requested_format}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 不支援的字幕格式：{requested_format}[/red]\n")
     console.print(f"您請求的格式：{format_full_name}\n")
 
-    console.print("[cyan]💡 支援的字幕格式：[/cyan]\n")
+    console.print("[magenta]💡 支援的字幕格式：[/magenta]\n")
 
     # ==================== SRT ====================
-    console.print("[bold green]✅ srt (SubRip)[/bold green]")
+    console.print("[bold magenta]✅ srt (SubRip)[/bold green]")
     console.print("   - 最通用的字幕格式")
     console.print("   - 幾乎所有播放器都支援")
     console.print("   - 格式簡單，易於編輯")
-    console.print("   - [green]推薦用於大多數場景[/green]\n")
+    console.print("   - [magenta]推薦用於大多數場景[/green]\n")
 
     # ==================== VTT ====================
-    console.print("[bold green]✅ vtt (WebVTT)[/bold green]")
+    console.print("[bold magenta]✅ vtt (WebVTT)[/bold green]")
     console.print("   - HTML5 標準字幕格式")
     console.print("   - 適用於網頁播放器")
     console.print("   - 支援樣式和定位")
-    console.print("   - [green]推薦用於網頁應用[/green]\n")
+    console.print("   - [magenta]推薦用於網頁應用[/green]\n")
 
-    console.print("[cyan]⚡ 解決方案：[/cyan]\n")
+    console.print("[magenta]⚡ 解決方案：[/magenta]\n")
 
     # ==================== 選項 1：使用 SRT ====================
     console.print("[bold]🔧 選項 1：使用 SRT 格式（推薦）[/bold]\n")
@@ -1961,7 +2158,7 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
         '    video_path="video.mp4",\n'
         '    format="srt"  # ← 使用 SRT 格式\n'
         ')',
-        border_style="green",
+        border_style="magenta",
         title="使用 SRT",
         padding=(0, 1)
     ))
@@ -1976,7 +2173,7 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
         '    video_path="video.mp4",\n'
         '    format="vtt"  # ← 使用 VTT 格式\n'
         ')',
-        border_style="green",
+        border_style="magenta",
         title="使用 VTT",
         padding=(0, 1)
     ))
@@ -1997,7 +2194,7 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
         console.print(f"   {name}：")
         console.print(Panel(
             cmd,
-            border_style="cyan",
+            border_style="magenta",
             padding=(0, 1)
         ))
         console.print()
@@ -2005,18 +2202,18 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
     console.print("   任意格式轉換：")
     console.print(Panel(
         f"ffmpeg -i input_subtitle.{requested_format} output.srt",
-        border_style="cyan",
+        border_style="magenta",
         title="通用轉換",
         padding=(0, 1)
     ))
     console.print()
 
     # ==================== 格式比較表 ====================
-    console.print("[bold cyan]📊 格式比較：[/bold cyan]\n")
+    console.print("[bold magenta]📊 格式比較：[/bold magenta]\n")
 
     from rich.table import Table
     table = Table()
-    table.add_column("格式", style="cyan")
+    table.add_column("格式", style="magenta")
     table.add_column("相容性", style="green")
     table.add_column("樣式支援")
     table.add_column("檔案大小")
@@ -2029,14 +2226,14 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
     console.print()
 
     # ==================== 常見轉換 ====================
-    console.print("[bold cyan]💡 常見其他格式轉換：[/bold cyan]\n")
+    console.print("[bold magenta]💡 常見其他格式轉換：[/bold magenta]\n")
     console.print("   - ASS/SSA → SRT：適用於進階字幕轉通用格式")
     console.print("   - SUB → SRT：DVD 字幕轉換")
     console.print("   - SMI → SRT：SAMI 格式轉換")
     console.print()
 
     # ==================== 線上工具 ====================
-    console.print("[bold cyan]🔗 線上轉換工具（如果不想用指令）：[/bold cyan]")
+    console.print("[bold magenta]🔗 線上轉換工具（如果不想用指令）：[/bold magenta]")
     console.print("   - https://subtitletools.com/convert-to-srt-online")
     console.print("   - https://www.nikse.dk/SubtitleEdit/Online")
     console.print()
@@ -2057,14 +2254,14 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
 
     console.print("[bold red]❌ 問題：無法解析影片元數據（可能是 ffprobe 版本問題）[/bold red]\n")
 
-    console.print("[bold cyan]💡 解決方案：[/bold cyan]\n")
+    console.print("[bold magenta]💡 解決方案：[/bold magenta]\n")
 
     # ==================== 步驟 1：檢查版本 ====================
     console.print("[bold]⚡ 步驟 1：檢查 ffprobe 版本[/bold]")
     console.print("   執行以下指令：")
     console.print(Panel(
         "ffprobe -version",
-        border_style="cyan",
+        border_style="magenta",
         title="檢查版本",
         padding=(0, 1)
     ))
@@ -2077,7 +2274,7 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
         f'ffprobe -v quiet -print_format json\n'
         f'        -show_format -show_streams\n'
         f'        "{file_path}"',
-        border_style="cyan",
+        border_style="magenta",
         title="獲取影片資訊",
         padding=(0, 1)
     ))
@@ -2088,21 +2285,21 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
     console.print("   嘗試使用基本的 ffprobe 指令：")
     console.print(Panel(
         f'ffprobe "{file_path}"',
-        border_style="yellow",
+        border_style="magenta",
         title="基本檢查",
         padding=(0, 1)
     ))
     console.print("   [dim]如果此指令也失敗，檔案可能已損壞[/dim]\n")
 
     # ==================== 更新 ffmpeg/ffprobe ====================
-    console.print("[bold green]🔧 更新 ffmpeg/ffprobe[/bold green]\n")
+    console.print("[bold magenta]🔧 更新 ffmpeg/ffprobe[/bold green]\n")
 
     system = platform.system()
     if system == "Darwin":
         console.print("   macOS:")
         console.print(Panel(
             "brew upgrade ffmpeg",
-            border_style="green",
+            border_style="magenta",
             title="Homebrew 更新",
             padding=(0, 1)
         ))
@@ -2110,7 +2307,7 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
         console.print("   Linux:")
         console.print(Panel(
             "sudo apt update && sudo apt upgrade ffmpeg",
-            border_style="green",
+            border_style="magenta",
             title="APT 更新",
             padding=(0, 1)
         ))
@@ -2127,7 +2324,7 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
     console.print("   選項 1：使用 mediainfo")
     console.print(Panel(
         f'mediainfo "{file_path}"',
-        border_style="yellow",
+        border_style="magenta",
         title="MediaInfo 指令",
         padding=(0, 1)
     ))
@@ -2136,7 +2333,7 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
     console.print("   選項 2：使用 exiftool")
     console.print(Panel(
         f'exiftool "{file_path}"',
-        border_style="yellow",
+        border_style="magenta",
         title="ExifTool 指令",
         padding=(0, 1)
     ))
@@ -2151,32 +2348,32 @@ def suggest_ffprobe_parse_failed(file_path: str, error: Exception) -> None:
 
 def test_suggestions():
     """測試所有建議功能"""
-    console.print("[bold cyan]===== 測試 ffmpeg 安裝建議 =====[/bold cyan]")
+    console.print("[bold magenta]===== 測試 ffmpeg 安裝建議 =====[/bold magenta]")
     suggest_ffmpeg_install()
 
-    console.print("\n[bold cyan]===== 測試 API 金鑰設定建議 =====[/bold cyan]")
+    console.print("\n[bold magenta]===== 測試 API 金鑰設定建議 =====[/bold magenta]")
     suggest_api_key_setup()
 
-    console.print("\n[bold cyan]===== 測試缺少模組建議 =====[/bold cyan]")
+    console.print("\n[bold magenta]===== 測試缺少模組建議 =====[/bold magenta]")
     suggest_missing_module("psutil")
 
-    console.print("\n[bold cyan]===== 測試檔案損壞建議 =====[/bold cyan]")
+    console.print("\n[bold magenta]===== 測試檔案損壞建議 =====[/bold magenta]")
     suggest_file_corrupted(
         "/path/to/video.mp4",
         "moov atom not found\nInvalid data found when processing input"
     )
 
-    console.print("\n[bold cyan]===== 測試影片上傳失敗建議 =====[/bold cyan]")
+    console.print("\n[bold magenta]===== 測試影片上傳失敗建議 =====[/bold magenta]")
     suggest_video_upload_failed(
         "/path/to/large_video.mp4",
         "Connection timeout after 60s",
         uploaded_bytes=120 * 1024 * 1024  # 120 MB
     )
 
-    console.print("\n[bold cyan]===== 測試空檔案建議 =====[/bold cyan]")
+    console.print("\n[bold magenta]===== 測試空檔案建議 =====[/bold magenta]")
     suggest_empty_file("/path/to/empty_video.mp4")
 
-    console.print("\n[bold cyan]===== 測試 JSON 解析失敗建議 =====[/bold cyan]")
+    console.print("\n[bold magenta]===== 測試 JSON 解析失敗建議 =====[/bold magenta]")
     bad_json = '''{
   "segments": [
     {
@@ -2204,7 +2401,7 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
         filter_name: 使用者請求的濾鏡名稱
         supported_filters: 支援的濾鏡字典 {name: ffmpeg_filter_string}
     """
-    console.print(f"\n[red]✗ 不支援的濾鏡：{filter_name}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 不支援的濾鏡：{filter_name}[/red]\n")
 
     # 濾鏡的中文名稱和詳細說明
     filter_descriptions = {
@@ -2245,7 +2442,7 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
         },
     }
 
-    console.print("[cyan]💡 支援的濾鏡：[/cyan]\n")
+    console.print("[magenta]💡 支援的濾鏡：[/magenta]\n")
 
     # 顯示所有支援的濾鏡
     for fname in supported_filters.keys():
@@ -2255,11 +2452,11 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
             'use_case': '影片處理'
         })
 
-        console.print(f"[bold green]✅ {fname}[/bold green] - {info['name']}")
+        console.print(f"[bold magenta]✅ {fname}[/bold green] - {info['name']}")
         console.print(f"   說明：{info['desc']}")
         console.print(f"   適用：{info['use_case']}\n")
 
-    console.print("[cyan]⚡ 使用方式：[/cyan]\n")
+    console.print("[magenta]⚡ 使用方式：[/magenta]\n")
 
     # 顯示使用範例
     console.print("[bold]Python API 使用範例：[/bold]\n")
@@ -2273,7 +2470,7 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
         f'    filter_name="{example_filter}",  # ← 使用支援的濾鏡名稱\n'
         f'    quality="high"\n'
         f')',
-        border_style="green",
+        border_style="magenta",
         title="範例代碼",
         padding=(0, 1)
     ))
@@ -2287,7 +2484,7 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
         console.print(f"   {i}. {info['name']}（{fname}）：")
         console.print(Panel(
             f'python gemini_video_effects.py input.mp4 --filter {fname}',
-            border_style="cyan",
+            border_style="magenta",
             padding=(0, 1)
         ))
         console.print()
@@ -2310,20 +2507,20 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
         for fname, similarity in similar_filters[:3]:
             info = filter_descriptions.get(fname, {'name': fname})
             similarity_pct = int(similarity * 100)
-            console.print(f"   • [green]{fname}[/green] ({info['name']}) - 相似度 {similarity_pct}%")
+            console.print(f"   • [magenta]{fname}[/green] ({info['name']}) - 相似度 {similarity_pct}%")
         console.print()
     else:
         console.print("   請從上述支援的濾鏡中選擇一個\n")
 
     # 組合使用提示
-    console.print("[bold cyan]💡 進階技巧：[/bold cyan]")
+    console.print("[bold magenta]💡 進階技巧：[/bold magenta]")
     console.print("   可以使用 ffmpeg 直接組合多個濾鏡效果：")
     console.print(Panel(
         'ffmpeg -i input.mp4 \\\n'
         '       -vf "hue=s=0,eq=contrast=1.2" \\\n'
         '       output.mp4\n'
         '# 黑白 + 高對比',
-        border_style="cyan",
+        border_style="magenta",
         title="組合濾鏡",
         padding=(0, 1)
     ))
@@ -2347,9 +2544,9 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
     """
     stream_name = "音訊" if stream_type == "audio" else "視訊"
     
-    console.print(f"\n[red]✗ 影片檔案不包含有效{stream_name}串流：{file_path}[/red]\n")
+    console.print(f"\n[dim magenta]✗ 影片檔案不包含有效{stream_name}串流：{file_path}[/red]\n")
 
-    console.print("[cyan]💡 診斷與解決方案：[/cyan]\n")
+    console.print("[magenta]💡 診斷與解決方案：[/magenta]\n")
 
     # ==================== 步驟 1：檢查串流資訊 ====================
     console.print(f"[bold]🔍 步驟 1：檢查影片串流資訊[/bold]\n")
@@ -2359,7 +2556,7 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
         f'        -show_entries stream=codec_type,codec_name\n'
         f'        -of default=noprint_wrappers=1\n'
         f'        "{file_path}"',
-        border_style="cyan",
+        border_style="magenta",
         title="檢查串流",
         padding=(0, 1)
     ))
@@ -2369,7 +2566,7 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
         # ==================== 音訊串流缺失的解決方案 ====================
         
         # 方案 1：添加靜音音軌
-        console.print("[bold green]✅ 方案 1：添加靜音音軌（最快，適合無聲影片）[/bold green]\n")
+        console.print("[bold magenta]✅ 方案 1：添加靜音音軌（最快，適合無聲影片）[/bold green]\n")
         console.print("   如果影片本來就無聲，可以添加一個靜音音軌：\n")
         
         file_path_obj = Path(file_path)
@@ -2380,28 +2577,28 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
             f'       -f lavfi -i anullsrc=r=44100:cl=stereo\n'
             f'       -c:v copy -c:a aac -shortest\n'
             f'       "{with_audio}"',
-            border_style="green",
+            border_style="magenta",
             title="添加靜音音軌",
             padding=(0, 1)
         ))
         console.print()
 
         # 方案 2：從其他檔案添加音訊
-        console.print("[bold green]✅ 方案 2：從其他音訊檔案合併（如果有音訊源）[/bold green]\n")
+        console.print("[bold magenta]✅ 方案 2：從其他音訊檔案合併（如果有音訊源）[/bold green]\n")
         console.print("   如果有對應的音訊檔案（如 .mp3, .wav），可以合併：\n")
         console.print(Panel(
             f'ffmpeg -i "{file_path}"\n'
             f'       -i "audio.mp3"\n'
             f'       -c:v copy -c:a aac -shortest\n'
             f'       "{with_audio}"',
-            border_style="green",
+            border_style="magenta",
             title="合併音訊",
             padding=(0, 1)
         ))
         console.print()
 
         # 方案 3：提取音訊（如果確定有音訊但檢測不到）
-        console.print("[bold green]✅ 方案 3：重新封裝影片（可能修復損壞的音訊串流）[/bold green]\n")
+        console.print("[bold magenta]✅ 方案 3：重新封裝影片（可能修復損壞的音訊串流）[/bold green]\n")
         console.print("   有時音訊串流資訊損壞，重新封裝可以修復：\n")
         
         remuxed = f"{file_path_obj.parent}/{file_path_obj.stem}_remuxed{file_path_obj.suffix}"
@@ -2409,14 +2606,14 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
             f'ffmpeg -i "{file_path}"\n'
             f'       -c copy\n'
             f'       "{remuxed}"',
-            border_style="green",
+            border_style="magenta",
             title="重新封裝",
             padding=(0, 1)
         ))
         console.print()
 
         # 方案 4：轉換格式
-        console.print("[bold green]✅ 方案 4：轉換為標準格式[/bold green]\n")
+        console.print("[bold magenta]✅ 方案 4：轉換為標準格式[/bold green]\n")
         console.print("   某些格式可能不包含音訊，轉換為標準 MP4：\n")
         
         converted = f"{file_path_obj.parent}/{file_path_obj.stem}_converted.mp4"
@@ -2424,7 +2621,7 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
             f'ffmpeg -i "{file_path}"\n'
             f'       -c:v libx264 -c:a aac\n'
             f'       "{converted}"',
-            border_style="green",
+            border_style="magenta",
             title="轉換格式",
             padding=(0, 1)
         ))
@@ -2433,13 +2630,13 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
     else:
         # ==================== 視訊串流缺失的解決方案 ====================
         
-        console.print("[bold green]✅ 方案 1：檢查檔案類型[/bold green]\n")
+        console.print("[bold magenta]✅ 方案 1：檢查檔案類型[/bold green]\n")
         console.print("   這可能是純音訊檔案（如 .mp3, .wav）：\n")
         console.print("   執行指令檢查：")
-        console.print(Panel(f'file "{file_path}"', border_style="cyan"))
+        console.print(Panel(f'file "{file_path}"', border_style="magenta"))
         console.print()
 
-        console.print("[bold green]✅ 方案 2：從音訊生成影片（添加靜態影像）[/bold green]\n")
+        console.print("[bold magenta]✅ 方案 2：從音訊生成影片（添加靜態影像）[/bold green]\n")
         console.print("   可以將音訊檔案轉換為影片，添加靜態背景：\n")
         
         file_path_obj = Path(file_path)
@@ -2451,7 +2648,7 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
             f'       -c:v libx264 -c:a aac\n'
             f'       -shortest\n'
             f'       "{video_output}"',
-            border_style="green",
+            border_style="magenta",
             title="音訊轉影片",
             padding=(0, 1)
         ))
@@ -2474,14 +2671,14 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
     console.print()
 
     # ==================== 驗證方案 ====================
-    console.print("[bold cyan]✅ 驗證修復結果：[/bold cyan]")
+    console.print("[bold magenta]✅ 驗證修復結果：[/bold magenta]")
     console.print("   修復後執行以下指令驗證：\n")
     console.print(Panel(
         f'ffprobe -v error\n'
         f'        -show_entries stream=codec_type\n'
         f'        -of default=noprint_wrappers=1\n'
         f'        "[修復後的檔案路徑]"',
-        border_style="cyan",
+        border_style="magenta",
         title="驗證串流",
         padding=(0, 1)
     ))
@@ -2523,10 +2720,10 @@ def suggest_invalid_time_range(
             f"[bold red]❌ 問題：開始時間 ({start_time}s) 不能為負數[/bold red]\n"
         )
 
-    console.print("[bold cyan]💡 修正建議：[/bold cyan]\n")
+    console.print("[bold magenta]💡 修正建議：[/bold magenta]\n")
 
     # 建議 1：調整範圍
-    console.print("[bold green]✅ 方法 1：調整時間範圍到有效範圍內[/bold green]\n")
+    console.print("[bold magenta]✅ 方法 1：調整時間範圍到有效範圍內[/bold green]\n")
     console.print("   推薦參數：")
     console.print(f"   - 開始：0s (影片開頭)")
     console.print(f"   - 結束：{duration}s (影片結尾)\n")
@@ -2540,24 +2737,24 @@ def suggest_invalid_time_range(
         console.print(f"   - 結束：{duration}s\n")
 
     # 建議 2：查看完整資訊
-    console.print("[bold green]✅ 方法 2：查看影片完整資訊[/bold green]")
+    console.print("[bold magenta]✅ 方法 2：查看影片完整資訊[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         f'ffprobe -v quiet -show_format -show_streams\n'
         f'        "{video_path}"',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2)
     ))
 
     # 建議 3：使用百分比（新增）
-    console.print("\n[bold green]✅ 方法 3：使用百分比計算時間點[/bold green]")
+    console.print("\n[bold magenta]✅ 方法 3：使用百分比計算時間點[/bold green]")
     console.print("   示例：")
     console.print(f"   - 前 50%：0s ~ {duration * 0.5:.1f}s")
     console.print(f"   - 後 50%：{duration * 0.5:.1f}s ~ {duration}s")
     console.print(f"   - 中間 50%：{duration * 0.25:.1f}s ~ {duration * 0.75:.1f}s\n")
 
     # 建議 4：常見時間片段（新增）
-    console.print("[bold green]✅ 方法 4：使用常見時間片段[/bold green]")
+    console.print("[bold magenta]✅ 方法 4：使用常見時間片段[/bold green]")
     console.print("   示例：")
 
     # 前 30 秒
@@ -2580,7 +2777,7 @@ def suggest_invalid_time_range(
     console.print()
 
     # 建議 5：自動修正建議（新增）
-    console.print("[bold green]✅ 方法 5：自動修正到最接近的有效範圍[/bold green]")
+    console.print("[bold magenta]✅ 方法 5：自動修正到最接近的有效範圍[/bold green]")
 
     # 計算自動修正後的值
     auto_start = max(0, min(start_time, duration))
@@ -2597,7 +2794,7 @@ def suggest_invalid_time_range(
     console.print(f"   - 片段長度：{auto_end - auto_start}s\n")
 
     # 有效範圍說明
-    console.print(f"[yellow]📝 有效時間範圍：[/yellow]")
+    console.print(f"[magenta]📝 有效時間範圍：[/yellow]")
     console.print(f"   • 開始時間：0 ~ {duration}s")
     console.print(f"   • 結束時間：0 ~ {duration}s")
     console.print(f"   • 結束時間必須大於開始時間\n")
@@ -2619,14 +2816,14 @@ def suggest_watermark_not_found(watermark_path: str) -> None:
     console.print(f"\n[bold red]✗ 浮水印檔案不存在[/bold red]")
     console.print(f"\n[dim]找不到：{watermark_path}[/dim]\n")
 
-    console.print("[bold cyan]💡 解決方案：[/bold cyan]\n")
+    console.print("[bold magenta]💡 解決方案：[/bold magenta]\n")
 
     # ==================== 檢查檔案位置 ====================
     console.print("[bold]📂 檢查檔案位置[/bold]")
     console.print("   請確認浮水印檔案是否存在於指定路徑\n")
 
     # ==================== 支援的格式 ====================
-    console.print("[bold green]✅ 支援的浮水印格式：[/bold green]")
+    console.print("[bold magenta]✅ 支援的浮水印格式：[/bold green]")
     console.print("   • PNG（推薦，支援透明背景）")
     console.print("   • JPG")
     console.print("   • GIF")
@@ -2634,43 +2831,43 @@ def suggest_watermark_not_found(watermark_path: str) -> None:
 
     # ==================== 搜尋檔案 ====================
     directory = os.path.dirname(watermark_path) or '.'
-    console.print("[bold green]⚡ 搜尋浮水印檔案[/bold green]")
+    console.print("[bold magenta]⚡ 搜尋浮水印檔案[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         f'find {directory} -name "*watermark*" -type f',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print()
 
     # ==================== 製作浮水印 ====================
-    console.print("[bold green]🎨 製作簡單文字浮水印[/bold green]")
+    console.print("[bold magenta]🎨 製作簡單文字浮水印[/bold green]")
     console.print("   使用 ImageMagick：")
     console.print(Panel(
         'convert -size 300x100 xc:none\n'
         '        -font Arial -pointsize 30\n'
         '        -fill white -annotate +10+50 "Copyright"\n'
         '        watermark.png',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print()
 
     # ==================== 替代方案：ffmpeg 文字浮水印 ====================
-    console.print("[bold cyan]💡 替代方案：直接用 ffmpeg 添加文字浮水印[/bold cyan]")
+    console.print("[bold magenta]💡 替代方案：直接用 ffmpeg 添加文字浮水印[/bold magenta]")
     console.print("   不需要圖片檔案，直接在影片上加文字：")
     console.print(Panel(
         'ffmpeg -i input.mp4\n'
         '       -vf "drawtext=text=\'Copyright\':fontsize=30:fontcolor=white:x=10:y=10"\n'
         '       output.mp4',
-        border_style="cyan",
+        border_style="magenta",
         title="使用 ffmpeg 繪製文字",
         padding=(0, 2)
     ))
     console.print()
 
     # ==================== 下載範例浮水印 ====================
-    console.print("[bold cyan]📥 下載範例浮水印[/bold cyan]")
+    console.print("[bold magenta]📥 下載範例浮水印[/bold magenta]")
     console.print("   您可以從以下網站下載免費浮水印圖片：")
     console.print("   • Pixabay: https://pixabay.com/ (搜尋 'watermark')")
     console.print("   • Unsplash: https://unsplash.com/ (搜尋 'logo')")
@@ -2697,7 +2894,7 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
     console.print(f"[dim]嘗試載入：{attempted_count} 個圖片檔案[/dim]")
     console.print(f"[dim]成功載入：0 個[/dim]\n")
 
-    console.print("[bold cyan]💡 可能的原因：[/bold cyan]\n")
+    console.print("[bold magenta]💡 可能的原因：[/bold magenta]\n")
 
     # ==================== 原因 1：檔案不存在 ====================
     console.print("[bold]1️⃣ 所有圖片檔案都不存在[/bold]")
@@ -2714,23 +2911,23 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
     console.print("   • 支援格式：JPG, PNG, GIF, BMP, WEBP")
     console.print("   • 使用 file 指令檢查實際格式\n")
 
-    console.print("[bold cyan]⚡ 建議操作：[/bold cyan]\n")
+    console.print("[bold magenta]⚡ 建議操作：[/bold magenta]\n")
 
     # ==================== 選項 1：檢查第一個檔案 ====================
     if file_paths:
         first_file = file_paths[0]
-        console.print("[bold green]🔍 選項 1：檢查第一個檔案[/bold green]")
+        console.print("[bold magenta]🔍 選項 1：檢查第一個檔案[/bold green]")
         console.print("   執行以下指令：")
         console.print(Panel(
             f'file "{first_file}"\n'
             f'ls -lh "{first_file}"',
-            border_style="green",
+            border_style="magenta",
             padding=(0, 2)
         ))
         console.print()
 
     # ==================== 選項 2：批次檢查所有檔案 ====================
-    console.print("[bold green]📋 選項 2：批次檢查所有檔案是否存在[/bold green]")
+    console.print("[bold magenta]📋 選項 2：批次檢查所有檔案是否存在[/bold green]")
     if file_paths and len(file_paths) <= 10:
         console.print("   檢查以下檔案：")
         for i, path in enumerate(file_paths, 1):
@@ -2742,18 +2939,18 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
             directory = os.path.dirname(file_paths[0]) or '.'
             console.print(Panel(
                 f'ls -lh {directory}/*.{{jpg,png,gif,bmp,webp}}',
-                border_style="cyan"
+                border_style="magenta"
             ))
     console.print()
 
     # ==================== 選項 3：使用 ImageMagick 驗證 ====================
-    console.print("[bold green]🔍 選項 3：使用 ImageMagick 驗證圖片完整性[/bold green]")
+    console.print("[bold magenta]🔍 選項 3：使用 ImageMagick 驗證圖片完整性[/bold green]")
     console.print("   執行以下指令：")
     if file_paths and len(file_paths) <= 3:
         for path in file_paths[:3]:
             console.print(Panel(
                 f'identify -verbose "{path}"',
-                border_style="cyan",
+                border_style="magenta",
                 title=f"驗證 {os.path.basename(path)}"
             ))
     else:
@@ -2761,48 +2958,48 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
             'for img in *.jpg *.png; do\n'
             '  identify "$img" 2>&1 | grep -q "identify:" && echo "損壞: $img" || echo "正常: $img"\n'
             'done',
-            border_style="cyan",
+            border_style="magenta",
             title="批次驗證"
         ))
     console.print()
 
     # ==================== 選項 4：批次轉換格式 ====================
-    console.print("[bold green]🔧 選項 4：批次轉換為標準格式（PNG）[/bold green]")
+    console.print("[bold magenta]🔧 選項 4：批次轉換為標準格式（PNG）[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         'for img in *.jpg *.jpeg; do\n'
         '  convert "$img" "${img%.*}.png"\n'
         'done',
-        border_style="green",
+        border_style="magenta",
         padding=(0, 2)
     ))
     console.print()
 
     # ==================== 選項 5：使用 ffmpeg 轉換 ====================
-    console.print("[bold green]⚡ 選項 5：使用 ffmpeg 批次轉換[/bold green]")
+    console.print("[bold magenta]⚡ 選項 5：使用 ffmpeg 批次轉換[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         'for img in *.jpg; do\n'
         '  ffmpeg -i "$img" -q:v 2 "${img%.jpg}_converted.jpg"\n'
         'done',
-        border_style="green",
+        border_style="magenta",
         title="高品質轉換"
     ))
     console.print()
 
     # ==================== 選項 6：檢查檔案權限 ====================
-    console.print("[bold green]🔐 選項 6：檢查檔案權限[/bold green]")
+    console.print("[bold magenta]🔐 選項 6：檢查檔案權限[/bold green]")
     if file_paths:
         console.print("   執行以下指令：")
         console.print(Panel(
             f'chmod 644 {os.path.dirname(file_paths[0]) or "."}/*.{{jpg,png}}',
-            border_style="yellow",
+            border_style="magenta",
             title="添加讀取權限"
         ))
     console.print()
 
     # ==================== 選項 7：重新下載 ====================
-    console.print("[bold cyan]📥 選項 7：如果圖片來自網路，重新下載[/bold cyan]")
+    console.print("[bold magenta]📥 選項 7：如果圖片來自網路，重新下載[/bold magenta]")
     console.print("   • 確認下載連結是否有效")
     console.print("   • 使用可靠的下載工具（wget, curl）")
     console.print("   • 驗證下載完整性（檔案大小、MD5）")
@@ -2836,9 +3033,9 @@ def suggest_no_video_stream(file_path: str) -> None:
         file_path: 檔案路徑
     """
     console.print(f"\n[bold red]❌ 錯誤：找不到影片串流[/bold red]")
-    console.print(f"[red]檔案：{file_path}[/red]\n")
+    console.print(f"[dim magenta]檔案：{file_path}[/red]\n")
 
-    console.print("[yellow]🔍 診斷資訊：[/yellow]")
+    console.print("[magenta]🔍 診斷資訊：[/yellow]")
 
     # 使用 ffprobe 檢查串流
     try:
@@ -2872,24 +3069,24 @@ def suggest_no_video_stream(file_path: str) -> None:
     except Exception as e:
         console.print(f"   ⚠️  無法讀取串流資訊：{e}\n")
 
-    console.print("[cyan]🔧 修復方案：[/cyan]\n")
+    console.print("[magenta]🔧 修復方案：[/magenta]\n")
 
-    console.print("[bold green]⚡ 方案 1：從音訊檔建立影片（添加靜態圖片）[/bold green]")
+    console.print("[bold magenta]⚡ 方案 1：從音訊檔建立影片（添加靜態圖片）[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         f'ffmpeg -loop 1 -i cover.jpg -i "{file_path}" \\\n'
         '  -c:v libx264 -tune stillimage -c:a copy \\\n'
         '  -shortest output.mp4',
-        border_style="green",
+        border_style="magenta",
         title="添加封面圖片"
     ))
     console.print()
 
-    console.print("[bold green]⚡ 方案 2：檢查檔案類型[/bold green]")
+    console.print("[bold magenta]⚡ 方案 2：檢查檔案類型[/bold green]")
     console.print("   確認這是否為正確的影片檔案：")
     console.print(Panel(
         f'file "{file_path}"',
-        border_style="cyan",
+        border_style="magenta",
         title="檢查檔案類型"
     ))
     console.print()
@@ -2909,10 +3106,10 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
         error: 錯誤異常
     """
     console.print(f"\n[bold red]❌ 錯誤：ffprobe 執行失敗[/bold red]")
-    console.print(f"[red]檔案：{file_path}[/red]")
-    console.print(f"[red]錯誤：{error}[/red]\n")
+    console.print(f"[dim magenta]檔案：{file_path}[/red]")
+    console.print(f"[dim magenta]錯誤：{error}[/red]\n")
 
-    console.print("[yellow]🔍 診斷資訊：[/yellow]")
+    console.print("[magenta]🔍 診斷資訊：[/yellow]")
 
     # 檢查 ffprobe 是否存在
     if not _check_command('ffprobe'):
@@ -2933,10 +3130,10 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
     # 檢查檔案權限
     if not os.access(file_path, os.R_OK):
         console.print("   ❌ 沒有讀取權限\n")
-        console.print("[cyan]🔧 修復方案：[/cyan]\n")
+        console.print("[magenta]🔧 修復方案：[/magenta]\n")
         console.print(Panel(
             f'chmod +r "{file_path}"',
-            border_style="green",
+            border_style="magenta",
             title="添加讀取權限"
         ))
         return
@@ -2955,22 +3152,22 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
         pass
 
     console.print()
-    console.print("[cyan]🔧 修復方案：[/cyan]\n")
+    console.print("[magenta]🔧 修復方案：[/magenta]\n")
 
-    console.print("[bold green]⚡ 方案 1：使用更詳細的錯誤輸出[/bold green]")
+    console.print("[bold magenta]⚡ 方案 1：使用更詳細的錯誤輸出[/bold green]")
     console.print("   執行以下指令查看詳細錯誤：")
     console.print(Panel(
         f'ffprobe -v error "{file_path}"',
-        border_style="green",
+        border_style="magenta",
         title="詳細錯誤診斷"
     ))
     console.print()
 
-    console.print("[bold green]⚡ 方案 2：嘗試重新封裝檔案[/bold green]")
+    console.print("[bold magenta]⚡ 方案 2：嘗試重新封裝檔案[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         f'ffmpeg -i "{file_path}" -c copy "{file_path}.fixed.mp4"',
-        border_style="green",
+        border_style="magenta",
         title="重新封裝"
     ))
     console.print()
@@ -2990,19 +3187,19 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
         error: 錯誤異常
     """
     console.print(f"\n[bold red]❌ 錯誤：影片處理失敗[/bold red]")
-    console.print(f"[red]檔案：{file_path}[/red]")
-    console.print(f"[red]錯誤：{error}[/red]\n")
+    console.print(f"[dim magenta]檔案：{file_path}[/red]")
+    console.print(f"[dim magenta]錯誤：{error}[/red]\n")
 
     error_msg = str(error).lower()
 
-    console.print("[yellow]🔍 診斷資訊：[/yellow]")
+    console.print("[magenta]🔍 診斷資訊：[/yellow]")
 
     # 根據錯誤訊息分類
     if 'state' in error_msg or 'processing' in error_msg or 'active' in error_msg:
         console.print("   ℹ️  影片可能仍在處理中，尚未完成")
         console.print("   處理時間通常取決於檔案大小和複雜度\n")
 
-        console.print("[cyan]💡 建議等待時間：[/cyan]")
+        console.print("[magenta]💡 建議等待時間：[/magenta]")
         try:
             file_size_mb = os.path.getsize(file_path) / (1024 * 1024)
             estimated_time = max(1, int(file_size_mb / 10))
@@ -3013,7 +3210,7 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
 
     elif 'timeout' in error_msg:
         console.print("   ❌ 處理超時\n")
-        console.print("[cyan]💡 可能原因：[/cyan]")
+        console.print("[magenta]💡 可能原因：[/magenta]")
         console.print("   1. 檔案過大")
         console.print("   2. 網路連線不穩定")
         console.print("   3. API 伺服器負載過高\n")
@@ -3031,25 +3228,25 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
     else:
         console.print(f"   未知錯誤類型：{error}\n")
 
-    console.print("[cyan]🔧 修復方案：[/cyan]\n")
+    console.print("[magenta]🔧 修復方案：[/magenta]\n")
 
-    console.print("[bold green]⚡ 方案 1：檢查影片檔案[/bold green]")
+    console.print("[bold magenta]⚡ 方案 1：檢查影片檔案[/bold green]")
     console.print("   確認檔案完整性：")
     console.print(Panel(
         f'ffprobe -v error -show_format -show_streams "{file_path}"',
-        border_style="green",
+        border_style="magenta",
         title="檢查影片資訊"
     ))
     console.print()
 
-    console.print("[bold green]⚡ 方案 2：壓縮影片以減小檔案大小[/bold green]")
+    console.print("[bold magenta]⚡ 方案 2：壓縮影片以減小檔案大小[/bold green]")
     console.print("   執行以下指令：")
     console.print(Panel(
         f'ffmpeg -i "{file_path}" \\\n'
         '  -c:v libx264 -crf 28 -preset fast \\\n'
         '  -c:a aac -b:a 128k \\\n'
         f'  "{file_path}.compressed.mp4"',
-        border_style="green",
+        border_style="magenta",
         title="壓縮影片"
     ))
     console.print()
@@ -3060,7 +3257,7 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
     console.print("   • 確認 API 服務正常運作")
     console.print()
 
-    console.print("[bold cyan]⚡ 方案 4：檢查 API 配額[/bold cyan]")
+    console.print("[bold magenta]⚡ 方案 4：檢查 API 配額[/bold magenta]")
     console.print("   前往 Google AI Studio 檢查 API 使用狀況：")
     console.print("   https://aistudio.google.com/app/apikey")
     console.print()
@@ -3068,20 +3265,27 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
 
 class ErrorLogger:
     """
-    錯誤診斷記錄器
+    錯誤診斷記錄器 - 🔧 加入記憶體洩漏修復
 
     記錄所有錯誤和修復建議的歷史，用於分析和統計
+
+    改良：
+    - 限制記憶體中的錯誤記錄數量（最多 1000 條）
+    - 自動輪轉：超過限制時保留最新 500 條，存檔舊的 500 條
     """
 
-    def __init__(self, log_file: str = "error_diagnostics.log"):
+    def __init__(self, log_file: str = "error_diagnostics.log", max_errors: int = 1000):
         """
         初始化錯誤記錄器
 
         Args:
             log_file: 日誌檔案路徑
+            max_errors: 記憶體中最多保留的錯誤數量（預設 1000）
         """
         self.log_file = log_file
         self.errors = []
+        self.max_errors = max_errors
+        self.archived_count = 0  # 已存檔的錯誤數量
 
     def log_error(self, error_type: str, file_path: str, details: Dict[str, Any]) -> None:
         """
@@ -3106,12 +3310,48 @@ class ErrorLogger:
 
         self.errors.append(entry)
 
+        # 🔧 記憶體洩漏修復：檢查是否需要輪轉
+        if len(self.errors) > self.max_errors:
+            self._rotate_errors()
+
         # 寫入日誌檔案
         try:
             with open(self.log_file, 'a', encoding='utf-8') as f:
                 f.write(json.dumps(entry, ensure_ascii=False) + '\n')
         except Exception as e:
             console.print(f"[dim red]警告：無法寫入日誌：{e}[/dim red]")
+
+    def _rotate_errors(self) -> None:
+        """
+        輪轉錯誤記錄：保留最新 500 條，存檔舊的 500 條
+        """
+        import json
+        from datetime import datetime
+
+        keep_count = self.max_errors // 2  # 保留一半
+        archive_count = len(self.errors) - keep_count
+
+        if archive_count <= 0:
+            return
+
+        # 取出要存檔的錯誤
+        to_archive = self.errors[:archive_count]
+
+        # 存檔到輪轉檔案
+        archive_file = f"{self.log_file}.archive_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        try:
+            with open(archive_file, 'w', encoding='utf-8') as f:
+                for error in to_archive:
+                    f.write(json.dumps(error, ensure_ascii=False) + '\n')
+
+            self.archived_count += archive_count
+            console.print(f"[dim yellow]已輪轉 {archive_count} 條錯誤記錄到 {archive_file}[/dim yellow]")
+
+            # 僅保留最新的錯誤
+            self.errors = self.errors[archive_count:]
+
+        except Exception as e:
+            console.print(f"[dim red]警告：無法輪轉日誌：{e}[/dim red]")
 
     def get_statistics(self) -> Dict[str, Any]:
         """
@@ -3146,17 +3386,18 @@ class ErrorLogger:
         stats = self.get_statistics()
 
         if stats['total_errors'] == 0:
-            console.print("\n[green]✓ 沒有記錄到錯誤[/green]\n")
+            console.print("\n[magenta]✓ 沒有記錄到錯誤[/green]\n")
             return
 
-        console.print("\n[bold cyan]📊 錯誤統計[/bold cyan]\n")
+        console.print("\n[bold magenta]📊 錯誤統計[/bold magenta]\n")
         console.print(f"總錯誤數：{stats['total_errors']}\n")
 
         if stats['most_common']:
-            table = Table(title="最常見錯誤（Top 5）", show_header=True, header_style="bold cyan")
-            table.add_column("錯誤類型", style="yellow", width=30)
-            table.add_column("次數", style="red", justify="right", width=10)
-            table.add_column("百分比", style="blue", justify="right", width=10)
+            table = Table(title="最常見錯誤（Top 5）", show_header=True, header_style="bold magenta")
+            console_width = console.width or 120
+            table.add_column("錯誤類型", style="yellow", width=max(25, int(console_width * 0.50)))
+            table.add_column("次數", style="red", justify="right", width=max(8, int(console_width * 0.10)))
+            table.add_column("百分比", style="bright_magenta", justify="right", width=max(8, int(console_width * 0.10)))
 
             total = stats['total_errors']
             for error_type, count in stats['most_common']:
@@ -3178,9 +3419,9 @@ class ErrorLogger:
         try:
             if os.path.exists(self.log_file):
                 os.remove(self.log_file)
-            console.print(f"[green]✓ 已清除日誌：{self.log_file}[/green]")
+            console.print(f"[magenta]✓ 已清除日誌：{self.log_file}[/green]")
         except Exception as e:
-            console.print(f"[red]✗ 無法清除日誌：{e}[/red]")
+            console.print(f"[dim magenta]✗ 無法清除日誌：{e}[/red]")
 
     def export_report(self, output_file: str = "error_report.json") -> None:
         """
@@ -3200,9 +3441,48 @@ class ErrorLogger:
         try:
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(report, f, ensure_ascii=False, indent=2)
-            console.print(f"[green]✓ 報告已匯出：{output_file}[/green]")
+            console.print(f"[magenta]✓ 報告已匯出：{output_file}[/green]")
         except Exception as e:
-            console.print(f"[red]✗ 無法匯出報告：{e}[/red]")
+            console.print(f"[dim magenta]✗ 無法匯出報告：{e}[/red]")
+
+
+# ========================================
+# 🔧 ErrorLogger 公開 API（記憶體洩漏修復）
+# ========================================
+
+def get_error_statistics() -> Dict[str, Any]:
+    """
+    獲取錯誤統計資訊
+
+    Returns:
+        包含統計資訊的字典:
+        - total_errors: 總錯誤數量
+        - error_types: 錯誤類型分布
+        - most_common: 最常見錯誤（Top 5）
+        - platforms: 平台分布
+        - archived_count: 已封存的錯誤數量
+    """
+    logger = _get_error_logger()
+    stats = logger.get_statistics()
+    stats['archived_count'] = logger.archived_count
+    stats['active_errors'] = len(logger.errors)
+    stats['max_errors'] = logger.max_errors
+    return stats
+
+
+def print_error_statistics() -> None:
+    """顯示錯誤統計資訊（格式化輸出）"""
+    _get_error_logger().print_statistics()
+
+
+def export_error_diagnostics(output_file: str = None) -> None:
+    """
+    匯出錯誤診斷報告到檔案
+
+    Args:
+        output_file: 輸出檔案路徑（預設：Diagnostics/error_report_YYYYMMDD_HHMMSS.json）
+    """
+    _get_error_logger().export_report(output_file)
 
 
 if __name__ == "__main__":

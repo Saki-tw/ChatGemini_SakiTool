@@ -114,18 +114,18 @@ class WebFetcher:
         Returns:
             Optional[FetchedPage]: 抓取的網頁，失敗返回 None
         """
-        console.print(f"\n[cyan]🌐 抓取網頁：{url}[/cyan]")
+        console.print(f"\n[magenta]🌐 抓取網頁：{url}[/magenta]")
 
         # 檢查快取
         if use_cache:
             cached_page = self._get_from_cache(url)
             if cached_page:
-                console.print(f"[green]✓ 從快取讀取[/green]")
+                console.print(f"[bright_magenta]✓ 從快取讀取[/green]")
                 return cached_page
 
         # 驗證 URL
         if not self._is_valid_url(url):
-            console.print(f"[red]✗ 無效的 URL：{url}[/red]")
+            console.print(f"[dim magenta]✗ 無效的 URL：{url}[/red]")
             return None
 
         # 執行抓取
@@ -137,13 +137,13 @@ class WebFetcher:
 
             # 檢查狀態碼
             if response.status_code != 200:
-                console.print(f"[yellow]⚠️  HTTP {response.status_code}[/yellow]")
+                console.print(f"[magenta]⚠️  HTTP {response.status_code}[/yellow]")
 
             # 提取重定向資訊
             redirected_from = None
             if response.history:
                 redirected_from = response.history[0].url
-                console.print(f"[yellow]↪️  重定向自：{redirected_from}[/yellow]")
+                console.print(f"[magenta]↪️  重定向自：{redirected_from}[/yellow]")
 
             # 轉換 HTML 為 Markdown
             html_content = response.text
@@ -171,14 +171,14 @@ class WebFetcher:
             if use_cache:
                 self._save_to_cache(url, page)
 
-            console.print(f"[green]✓ 抓取成功[/green]")
+            console.print(f"[bright_magenta]✓ 抓取成功[/green]")
             console.print(f"  標題：{title}")
             console.print(f"  字數：{page.word_count}")
 
             return page
 
         except Exception as e:
-            console.print(f"[red]✗ 抓取失敗：{e}[/red]")
+            console.print(f"[dim magenta]✗ 抓取失敗：{e}[/red]")
             return None
 
     def _make_request(
@@ -207,7 +207,7 @@ class WebFetcher:
                 return response
 
             except requests.exceptions.Timeout:
-                console.print(f"[yellow]⚠️  請求超時（嘗試 {attempt + 1}/{self.max_retries}）[/yellow]")
+                console.print(f"[magenta]⚠️  請求超時（嘗試 {attempt + 1}/{self.max_retries}）[/yellow]")
                 if attempt < self.max_retries - 1:
                     time.sleep(2 ** attempt)  # 指數退避
                     continue
@@ -215,7 +215,7 @@ class WebFetcher:
                     return None
 
             except requests.exceptions.RequestException as e:
-                console.print(f"[red]✗ 請求錯誤：{e}[/red]")
+                console.print(f"[dim magenta]✗ 請求錯誤：{e}[/red]")
                 return None
 
         return None
@@ -235,7 +235,7 @@ class WebFetcher:
             return markdown
 
         except Exception as e:
-            console.print(f"[yellow]⚠️  Markdown 轉換錯誤：{e}[/yellow]")
+            console.print(f"[magenta]⚠️  Markdown 轉換錯誤：{e}[/yellow]")
             # 回退到純文字
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
@@ -319,7 +319,7 @@ class WebFetcher:
     def clear_cache(self) -> None:
         """清空快取"""
         self.cache.clear()
-        console.print("[green]✓ 快取已清空[/green]")
+        console.print("[bright_magenta]✓ 快取已清空[/green]")
 
     def get_cache_stats(self) -> Dict[str, Any]:
         """取得快取統計"""
@@ -337,7 +337,7 @@ def main():
     """Web Fetch 命令列工具"""
     import sys
 
-    console.print("\n[bold cyan]CodeGemini Web Fetch Tool[/bold cyan]\n")
+    console.print("\n[bold magenta]CodeGemini Web Fetch Tool[/bold magenta]\n")
 
     if len(sys.argv) < 2:
         console.print("用法：")
@@ -368,13 +368,13 @@ def main():
     if page:
         # 顯示結果
         console.print(f"\n[bold]📄 網頁內容：[/bold]\n")
-        console.print(f"[bold cyan]標題：[/bold cyan]{page.title}")
-        console.print(f"[bold cyan]URL：[/bold cyan]{page.url}")
-        console.print(f"[bold cyan]字數：[/bold cyan]{page.word_count}")
-        console.print(f"[bold cyan]狀態碼：[/bold cyan]{page.status_code}")
+        console.print(f"[bold magenta]標題：[/bold magenta]{page.title}")
+        console.print(f"[bold magenta]URL：[/bold magenta]{page.url}")
+        console.print(f"[bold magenta]字數：[/bold magenta]{page.word_count}")
+        console.print(f"[bold magenta]狀態碼：[/bold magenta]{page.status_code}")
 
         if page.is_redirect:
-            console.print(f"[bold cyan]重定向自：[/bold cyan]{page.redirected_from}")
+            console.print(f"[bold magenta]重定向自：[/bold magenta]{page.redirected_from}")
 
         console.print(f"\n[dim]--- Markdown 內容（前 500 字） ---[/dim]")
         console.print(page.content[:500] + "..." if len(page.content) > 500 else page.content)
@@ -388,9 +388,9 @@ def main():
                 f.write("---\n\n")
                 f.write(page.content)
 
-            console.print(f"\n[green]✓ 已儲存到：{output_file}[/green]")
+            console.print(f"\n[bright_magenta]✓ 已儲存到：{output_file}[/green]")
     else:
-        console.print("[red]✗ 抓取失敗[/red]")
+        console.print("[dim magenta]✗ 抓取失敗[/red]")
 
 
 if __name__ == "__main__":

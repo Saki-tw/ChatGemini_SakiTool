@@ -83,13 +83,13 @@ def validate_email(email):
 
 def test_context_builder_init():
     """測試 ContextBuilder 初始化"""
-    console.print("\n[bold cyan]測試 1：ContextBuilder 初始化[/bold cyan]")
+    console.print("\n[bold magenta]測試 1：ContextBuilder 初始化[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
 
         builder = ContextBuilder(temp_dir, token_budget=10000)
-        console.print("[green]✓ ContextBuilder 初始化成功[/green]")
+        console.print("[bright_magenta]✓ ContextBuilder 初始化成功[/green]")
         console.print(f"  專案路徑：{builder.project_path}")
         console.print(f"  Token 預算：{builder.token_budget}")
 
@@ -100,7 +100,7 @@ def test_context_builder_init():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -108,7 +108,7 @@ def test_context_builder_init():
 
 def test_keyword_extraction():
     """測試關鍵字提取"""
-    console.print("\n[bold cyan]測試 2：關鍵字提取[/bold cyan]")
+    console.print("\n[bold magenta]測試 2：關鍵字提取[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -117,12 +117,12 @@ def test_keyword_extraction():
         # 測試中文
         keywords_zh = builder._extract_keywords("新增使用者登入功能")
         assert len(keywords_zh) > 0, "未提取到關鍵字"
-        console.print(f"[green]✓ 中文關鍵字提取成功：{keywords_zh[:5]}[/green]")
+        console.print(f"[bright_magenta]✓ 中文關鍵字提取成功：{keywords_zh[:5]}[/green]")
 
         # 測試英文
         keywords_en = builder._extract_keywords("Add user authentication feature")
         assert len(keywords_en) > 0, "未提取到英文關鍵字"
-        console.print(f"[green]✓ 英文關鍵字提取成功：{keywords_en[:5]}[/green]")
+        console.print(f"[bright_magenta]✓ 英文關鍵字提取成功：{keywords_en[:5]}[/green]")
 
         # 清理
         import shutil
@@ -131,7 +131,7 @@ def test_keyword_extraction():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -139,7 +139,7 @@ def test_keyword_extraction():
 
 def test_file_relevance():
     """測試檔案相關性計算"""
-    console.print("\n[bold cyan]測試 3：檔案相關性計算[/bold cyan]")
+    console.print("\n[bold magenta]測試 3：檔案相關性計算[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -151,12 +151,12 @@ def test_file_relevance():
         # 計算 auth.py 的相關性（應該很高）
         score_auth = builder._calculate_file_relevance("auth.py", task_desc, keywords)
         assert score_auth > 0.5, "auth.py 相關性分數過低"
-        console.print(f"[green]✓ auth.py 相關性：{score_auth:.2f}[/green]")
+        console.print(f"[bright_magenta]✓ auth.py 相關性：{score_auth:.2f}[/green]")
 
         # 計算 utils.py 的相關性（應該較低）
         score_utils = builder._calculate_file_relevance("utils.py", task_desc, keywords)
         assert score_utils < score_auth, "utils.py 相關性應低於 auth.py"
-        console.print(f"[green]✓ utils.py 相關性：{score_utils:.2f}[/green]")
+        console.print(f"[bright_magenta]✓ utils.py 相關性：{score_utils:.2f}[/green]")
 
         # 清理
         import shutil
@@ -165,7 +165,7 @@ def test_file_relevance():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -173,7 +173,7 @@ def test_file_relevance():
 
 def test_file_prioritization():
     """測試檔案優先級排序"""
-    console.print("\n[bold cyan]測試 4：檔案優先級排序[/bold cyan]")
+    console.print("\n[bold magenta]測試 4：檔案優先級排序[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -192,12 +192,12 @@ def test_file_prioritization():
         )
 
         assert len(prioritized) > 0, "未排序任何檔案"
-        console.print(f"[green]✓ 檔案排序成功：{len(prioritized)} 個檔案[/green]")
+        console.print(f"[bright_magenta]✓ 檔案排序成功：{len(prioritized)} 個檔案[/green]")
 
         # 驗證 auth.py 應該排在前面
         auth_index = next((i for i, f in enumerate(prioritized) if "auth" in f), None)
         assert auth_index is not None and auth_index < len(prioritized) // 2, "auth.py 排序不正確"
-        console.print(f"[green]✓ auth.py 排序正確（第 {auth_index + 1} 位）[/green]")
+        console.print(f"[bright_magenta]✓ auth.py 排序正確（第 {auth_index + 1} 位）[/green]")
 
         # 清理
         import shutil
@@ -206,7 +206,7 @@ def test_file_prioritization():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -214,7 +214,7 @@ def test_file_prioritization():
 
 def test_code_snippet_extraction():
     """測試程式碼片段提取"""
-    console.print("\n[bold cyan]測試 5：程式碼片段提取[/bold cyan]")
+    console.print("\n[bold magenta]測試 5：程式碼片段提取[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -225,7 +225,7 @@ def test_code_snippet_extraction():
         snippets = builder.extract_relevant_code("auth.py", keywords, max_snippets=3)
 
         assert len(snippets) > 0, "未提取到程式碼片段"
-        console.print(f"[green]✓ 提取到 {len(snippets)} 個程式碼片段[/green]")
+        console.print(f"[bright_magenta]✓ 提取到 {len(snippets)} 個程式碼片段[/green]")
 
         # 驗證片段內容
         for snippet in snippets:
@@ -241,7 +241,7 @@ def test_code_snippet_extraction():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -249,7 +249,7 @@ def test_code_snippet_extraction():
 
 def test_context_building():
     """測試完整上下文建立"""
-    console.print("\n[bold cyan]測試 6：完整上下文建立[/bold cyan]")
+    console.print("\n[bold magenta]測試 6：完整上下文建立[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -268,7 +268,7 @@ def test_context_building():
         assert context.included_files > 0, "未包含任何檔案"
         assert context.total_tokens > 0, "未計算 token 數"
         assert context.total_tokens <= context.token_budget, "超出 token 預算"
-        console.print(f"[green]✓ 上下文建立成功[/green]")
+        console.print(f"[bright_magenta]✓ 上下文建立成功[/green]")
         console.print(f"  包含檔案：{context.included_files}")
         console.print(f"  預估 tokens：{context.total_tokens:,}")
         console.print(f"  預算使用率：{context.total_tokens / context.token_budget * 100:.1f}%")
@@ -279,7 +279,7 @@ def test_context_building():
             assert fc.file_path, "檔案路徑為空"
             assert fc.relevance_score >= 0, "相關性分數無效"
 
-        console.print(f"[green]✓ 所有驗證通過[/green]")
+        console.print(f"[bright_magenta]✓ 所有驗證通過[/green]")
 
         # 清理
         import shutil
@@ -288,7 +288,7 @@ def test_context_building():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -296,7 +296,7 @@ def test_context_building():
 
 def test_context_compression():
     """測試上下文壓縮"""
-    console.print("\n[bold cyan]測試 7：上下文壓縮[/bold cyan]")
+    console.print("\n[bold magenta]測試 7：上下文壓縮[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -310,7 +310,7 @@ def test_context_compression():
         compressed = builder.compress_context(context, target_reduction=0.5)
 
         assert compressed.total_tokens < original_tokens, "壓縮未減少 tokens"
-        console.print(f"[green]✓ 上下文壓縮成功[/green]")
+        console.print(f"[bright_magenta]✓ 上下文壓縮成功[/green]")
         console.print(f"  原始：{original_tokens:,} tokens")
         console.print(f"  壓縮後：{compressed.total_tokens:,} tokens")
         console.print(f"  減少：{(1 - compressed.total_tokens / original_tokens) * 100:.0f}%")
@@ -322,7 +322,7 @@ def test_context_compression():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -330,7 +330,7 @@ def test_context_compression():
 
 def test_token_estimation():
     """測試 Token 估算"""
-    console.print("\n[bold cyan]測試 8：Token 估算[/bold cyan]")
+    console.print("\n[bold magenta]測試 8：Token 估算[/bold magenta]")
 
     try:
         temp_dir = create_test_project()
@@ -344,7 +344,7 @@ def test_token_estimation():
 
         assert estimated > 0, "Token 估算為 0"
         assert estimated == context.total_tokens, "Token 估算不一致"
-        console.print(f"[green]✓ Token 估算成功：{estimated:,} tokens[/green]")
+        console.print(f"[bright_magenta]✓ Token 估算成功：{estimated:,} tokens[/green]")
 
         # 清理
         import shutil
@@ -353,7 +353,7 @@ def test_token_estimation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -362,7 +362,7 @@ def test_token_estimation():
 def main():
     """執行所有測試"""
     console.print("\n" + "=" * 70)
-    console.print("[bold cyan]CodeGemini Context Builder - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini Context Builder - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -383,14 +383,14 @@ def main():
 
     # 測試總結
     console.print("\n" + "=" * 70)
-    console.print("[bold cyan]測試總結[/bold cyan]")
+    console.print("[bold magenta]測試總結[/bold magenta]")
     console.print("=" * 70)
 
     passed = sum(1 for _, result in results if result)
     total = len(results)
 
     for name, result in results:
-        status = "[green]✅ 通過[/green]" if result else "[red]❌ 失敗[/red]"
+        status = "[bright_magenta]✅ 通過[/green]" if result else "[dim magenta]❌ 失敗[/red]"
         console.print(f"  {name}: {status}")
 
     console.print("\n" + "-" * 70)

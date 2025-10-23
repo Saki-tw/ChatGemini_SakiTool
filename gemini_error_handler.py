@@ -185,25 +185,25 @@ class ErrorFormatter:
         # === 第 1 部分：錯誤類型與基本訊息 ===
         error_type = error.__class__.__name__
         lines.append(f"[bold red]❌ {error_type}[/bold red]")
-        lines.append(f"[red]{str(error)}[/red]")
+        lines.append(f"[dim magenta]{str(error)}[/red]")
 
         # === 第 2 部分：自訂錯誤的額外資訊 ===
         # 只有繼承自 GeminiVideoError 的異常才有這些屬性
         if isinstance(error, GeminiVideoError):
             # 顯示嚴重程度（LOW/MEDIUM/HIGH/CRITICAL）
-            lines.append(f"\n[yellow]嚴重程度：{error.severity.value}[/yellow]")
+            lines.append(f"\n[magenta]嚴重程度：{error.severity.value}[/yellow]")
             # 顯示錯誤發生時間
             lines.append(f"[dim]時間：{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
 
             # 上下文資訊（檔案路徑、API 名稱、命令等）
             if error.context:
-                lines.append("\n[cyan]上下文資訊：[/cyan]")
+                lines.append("\n[magenta]上下文資訊：[/magenta]")
                 for key, value in error.context.items():
                     lines.append(f"  • {key}: {value}")
 
             # 修復建議列表
             if show_suggestions and error.suggestions:
-                lines.append("\n[green]建議的解決方案：[/green]")
+                lines.append("\n[bright_magenta]建議的解決方案：[/green]")
                 for i, suggestion in enumerate(error.suggestions, 1):
                     lines.append(f"  {i}. {suggestion}")
 
@@ -296,7 +296,7 @@ def retry_on_error(
                             on_retry(e, attempt + 1)
                         else:
                             console.print(
-                                f"[yellow]⚠️  嘗試 {attempt + 1}/{max_retries} 失敗，"
+                                f"[magenta]⚠️  嘗試 {attempt + 1}/{max_retries} 失敗，"
                                 f"{current_delay:.1f} 秒後重試...[/yellow]"
                             )
                             console.print(f"[dim]錯誤：{str(e)}[/dim]")
@@ -307,7 +307,7 @@ def retry_on_error(
                     else:
                         # 最後一次嘗試失敗
                         console.print(
-                            f"[red]❌ 已達到最大重試次數 ({max_retries})，操作失敗[/red]"
+                            f"[dim magenta]❌ 已達到最大重試次數 ({max_retries})，操作失敗[/red]"
                         )
                         raise
 
@@ -357,16 +357,15 @@ class RecoveryManager:
         初始化恢復管理器
 
         Args:
-            recovery_dir: 恢復檔案目錄，預設為 ~/gemini_videos/.recovery
+            recovery_dir: 恢復檔案目錄（預設使用統一診斷目錄）
         """
         if recovery_dir is None:
-            recovery_dir = os.path.join(
-                os.path.expanduser("~"),
-                "gemini_videos",
-                ".recovery"
-            )
-        self.recovery_dir = Path(recovery_dir)
-        self.recovery_dir.mkdir(parents=True, exist_ok=True)
+            # 使用統一診斷目錄
+            from utils.path_manager import get_diagnostics_dir
+            self.recovery_dir = get_diagnostics_dir('recovery')
+        else:
+            self.recovery_dir = Path(recovery_dir)
+            self.recovery_dir.mkdir(parents=True, exist_ok=True)
 
     def save_checkpoint(
         self,
@@ -409,7 +408,7 @@ class RecoveryManager:
         with open(checkpoint_path, 'w', encoding='utf-8') as f:
             json.dump(asdict(checkpoint), f, ensure_ascii=False, indent=2)
 
-        console.print(f"[cyan]💾 已保存恢復檢查點：{checkpoint_path.name}[/cyan]")
+        console.print(f"[magenta]💾 已保存恢復檢查點：{checkpoint_path.name}[/magenta]")
         return str(checkpoint_path)
 
     def load_checkpoint(self, task_id: str) -> Optional[RecoveryCheckpoint]:
@@ -435,11 +434,11 @@ class RecoveryManager:
 
             # 將字典還原為 RecoveryCheckpoint 物件
             checkpoint = RecoveryCheckpoint(**data)
-            console.print(f"[cyan]📂 已載入恢復檢查點：{checkpoint_path.name}[/cyan]")
+            console.print(f"[magenta]📂 已載入恢復檢查點：{checkpoint_path.name}[/magenta]")
             return checkpoint
 
         except Exception as e:
-            console.print(f"[red]載入檢查點失敗：{e}[/red]")
+            console.print(f"[dim magenta]載入檢查點失敗：{e}[/red]")
             return None
 
     def delete_checkpoint(self, task_id: str) -> bool:
@@ -456,7 +455,7 @@ class RecoveryManager:
 
         if checkpoint_path.exists():
             checkpoint_path.unlink()
-            console.print(f"[green]🗑️  已刪除恢復檢查點：{checkpoint_path.name}[/green]")
+            console.print(f"[bright_magenta]🗑️  已刪除恢復檢查點：{checkpoint_path.name}[/green]")
             return True
         return False
 
@@ -470,7 +469,7 @@ class RecoveryManager:
                     data = json.load(f)
                 checkpoints.append(RecoveryCheckpoint(**data))
             except Exception as e:
-                console.print(f"[yellow]警告：無法讀取檢查點 {checkpoint_file.name}: {e}[/yellow]")
+                console.print(f"[magenta]警告：無法讀取檢查點 {checkpoint_file.name}: {e}[/yellow]")
 
         return checkpoints
 
@@ -479,11 +478,11 @@ class RecoveryManager:
         checkpoints = self.list_checkpoints()
 
         if not checkpoints:
-            console.print("[yellow]沒有可恢復的檢查點[/yellow]")
+            console.print("[magenta]沒有可恢復的檢查點[/yellow]")
             return
 
         table = Table(title="可恢復的檢查點")
-        table.add_column("任務 ID", style="cyan")
+        table.add_column("任務 ID", style="bright_magenta")
         table.add_column("類型", style="green")
         table.add_column("進度", style="yellow")
         table.add_column("時間", style="dim")
@@ -518,7 +517,7 @@ class RecoveryManager:
                 deleted += 1
 
         if deleted > 0:
-            console.print(f"[green]已清理 {deleted} 個舊的恢復檢查點[/green]")
+            console.print(f"[bright_magenta]已清理 {deleted} 個舊的恢復檢查點[/green]")
 
 
 # ============================================================================
@@ -544,16 +543,15 @@ class ErrorLogger:
         初始化錯誤記錄器
 
         Args:
-            log_dir: 日誌目錄，預設為 ~/gemini_videos/.logs
+            log_dir: 日誌目錄（預設使用統一診斷目錄）
         """
         if log_dir is None:
-            log_dir = os.path.join(
-                os.path.expanduser("~"),
-                "gemini_videos",
-                ".logs"
-            )
-        self.log_dir = Path(log_dir)
-        self.log_dir.mkdir(parents=True, exist_ok=True)
+            # 使用統一診斷目錄
+            from utils.path_manager import get_diagnostics_dir
+            self.log_dir = get_diagnostics_dir('error_logs')
+        else:
+            self.log_dir = Path(log_dir)
+            self.log_dir.mkdir(parents=True, exist_ok=True)
 
         self.error_log_path = self.log_dir / "errors.jsonl"
 
@@ -641,16 +639,16 @@ class ErrorLogger:
         """顯示錯誤統計"""
         stats = self.get_error_stats(days)
 
-        console.print(f"\n[bold cyan]📊 錯誤統計（最近 {days} 天）[/bold cyan]\n")
+        console.print(f"\n[bold magenta]📊 錯誤統計（最近 {days} 天）[/bold magenta]\n")
         console.print(f"總錯誤數：{stats['total']}")
 
         if stats['by_type']:
-            console.print("\n[yellow]錯誤類型分佈：[/yellow]")
+            console.print("\n[magenta]錯誤類型分佈：[/yellow]")
             for error_type, count in sorted(stats['by_type'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {error_type}: {count}")
 
         if stats['by_severity']:
-            console.print("\n[yellow]嚴重程度分佈：[/yellow]")
+            console.print("\n[magenta]嚴重程度分佈：[/yellow]")
             for severity, count in sorted(stats['by_severity'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {severity}: {count}")
 

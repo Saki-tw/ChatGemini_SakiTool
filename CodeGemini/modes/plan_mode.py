@@ -120,8 +120,8 @@ class PlanMode:
         Returns:
             Plan: 生成的計畫
         """
-        console.print("\n[bold cyan]🎯 進入規劃模式...[/bold cyan]")
-        console.print(f"[yellow]任務：{task}[/yellow]\n")
+        console.print("\n[bold magenta]🎯 進入規劃模式...[/bold magenta]")
+        console.print(f"[magenta]任務：{task}[/yellow]\n")
 
         self.mode_active = True
 
@@ -129,7 +129,7 @@ class PlanMode:
         plan = self._analyze_and_plan(task, context or {})
         self.current_plan = plan
 
-        console.print("[green]✓ 計畫生成完成[/green]")
+        console.print("[bright_magenta]✓ 計畫生成完成[/green]")
 
         return plan
 
@@ -145,11 +145,11 @@ class PlanMode:
             Optional[Plan]: 如果批准則返回計畫，否則返回 None
         """
         if not self.mode_active:
-            console.print("[yellow]⚠️  未在規劃模式中[/yellow]")
+            console.print("[magenta]⚠️  未在規劃模式中[/yellow]")
             return None
 
         if not self.current_plan:
-            console.print("[red]✗ 無有效計畫[/red]")
+            console.print("[dim magenta]✗ 無有效計畫[/red]")
             return None
 
         self.mode_active = False
@@ -192,7 +192,7 @@ class PlanMode:
         if not self.current_plan:
             raise ValueError("無有效計畫可更新")
 
-        console.print(f"\n[cyan]📝 根據反饋更新計畫...[/cyan]")
+        console.print(f"\n[magenta]📝 根據反饋更新計畫...[/magenta]")
         console.print(f"反饋：{feedback}\n")
 
         self.current_plan.feedback.append(feedback)
@@ -201,7 +201,7 @@ class PlanMode:
         # 目前僅記錄反饋
         self.current_plan.updated_at = datetime.now()
 
-        console.print("[green]✓ 計畫已更新[/green]")
+        console.print("[bright_magenta]✓ 計畫已更新[/green]")
 
         return self.current_plan
 
@@ -215,24 +215,24 @@ class PlanMode:
         display_plan = plan or self.current_plan
 
         if not display_plan:
-            console.print("[yellow]⚠️  無計畫可展示[/yellow]")
+            console.print("[magenta]⚠️  無計畫可展示[/yellow]")
             return
 
         # 標題
-        console.print(f"\n[bold cyan]{'=' * 70}[/bold cyan]")
+        console.print(f"\n[bold magenta]{'=' * 70}[/bold magenta]")
         console.print(f"[bold white]📋 實作計畫[/bold white]")
-        console.print(f"[bold cyan]{'=' * 70}[/bold cyan]\n")
+        console.print(f"[bold magenta]{'=' * 70}[/bold magenta]\n")
 
-        # 任務描述
+        # 任務描述（使用 Markdown 渲染）
         console.print(Panel(
-            display_plan.task_description,
+            Markdown(display_plan.task_description),
             title="[bold]任務描述[/bold]",
-            border_style="cyan"
+            border_style="magenta"
         ))
 
         # 基本資訊
         info_table = Table(show_header=False, box=None)
-        info_table.add_column("項目", style="cyan")
+        info_table.add_column("項目", style="magenta")
         info_table.add_column("值", style="white")
 
         info_table.add_row("總步驟數", str(len(display_plan.steps)))
@@ -240,9 +240,9 @@ class PlanMode:
         info_table.add_row("建立時間", display_plan.created_at.strftime("%Y-%m-%d %H:%M:%S"))
 
         if display_plan.approved:
-            info_table.add_row("狀態", "[green]✅ 已批准[/green]")
+            info_table.add_row("狀態", "[bright_magenta]✅ 已批准[/green]")
         else:
-            info_table.add_row("狀態", "[yellow]⏳ 待批准[/yellow]")
+            info_table.add_row("狀態", "[magenta]⏳ 待批准[/yellow]")
 
         console.print(info_table)
         console.print()
@@ -259,7 +259,7 @@ class PlanMode:
             for i, fb in enumerate(display_plan.feedback, 1):
                 console.print(f"  {i}. {fb}")
 
-        console.print(f"\n[bold cyan]{'=' * 70}[/bold cyan]\n")
+        console.print(f"\n[bold magenta]{'=' * 70}[/bold magenta]\n")
 
     def _display_step(self, step: PlanStep) -> None:
         """展示單個步驟"""
@@ -499,7 +499,7 @@ class PlanMode:
 
 def main():
     """Plan Mode 命令列工具"""
-    console.print("\n[bold cyan]CodeGemini Plan Mode Demo[/bold cyan]\n")
+    console.print("\n[bold magenta]CodeGemini Plan Mode Demo[/bold magenta]\n")
 
     # 建立 PlanMode 實例
     pm = PlanMode()
@@ -514,14 +514,14 @@ def main():
     pm.display_plan()
 
     # 模擬用戶批准
-    console.print("[yellow]➜ 用戶審查計畫...[/yellow]")
+    console.print("[magenta]➜ 用戶審查計畫...[/yellow]")
     console.input("\n按 Enter 鍵批准計畫...")
 
     # 退出規劃模式
     approved_plan = pm.exit_plan_mode(approved=True, feedback="計畫清楚完整")
 
     if approved_plan:
-        console.print("\n[green]✓ 計畫已批准，可以開始執行[/green]")
+        console.print("\n[bright_magenta]✓ 計畫已批准，可以開始執行[/green]")
 
         # 展示進度
         progress = approved_plan.get_progress()

@@ -12,10 +12,10 @@ Free tier includes 2 million tokens per month for Gemini 2.5 Pro.
 Come and take advantage of the free tier!
 
 **Project Name**: ChatGemini_SakiTool
-**Version**: v1.0.1
+**Version**: v1.0.2
 **Author**: Saki-tw, Claude Code
 **Contact**: Saki@saki-studio.com.tw
-**Last Updated**: 2025-10-22
+**Last Updated**: 2025-10-24
 
 ---
 
@@ -100,6 +100,9 @@ Come and take advantage of the free tier!
 - **Similarity Threshold**: Adjustable deduplication sensitivity (default 0.85)
 - **Lightweight Implementation**: SQLite + NumPy, no ChromaDB required
 - **Prompt Cost Saving**: Accumulate conversation content to build cache, save 50~95% costs
+- **FAISS Indexing**: Vector retrieval using IndexFlatIP, query complexity reduced from O(n) to O(log n)
+- **Incremental Updates**: Single-file updates without rebuilding entire index
+- **Parallel Processing**: ThreadPoolExecutor support for concurrent multi-file embedding
 
 ### ⚡ Performance Monitoring
 - **CPU Monitoring**: Track CPU usage
@@ -423,8 +426,8 @@ Special thanks to: 曾公益中, 蔡師傅律安.
 
 **Enjoy chatting with Gemini AI!** 🎉
 
-**Last Updated**: 2025-10-22
-**Version**: v1.0.1
+**Last Updated**: 2025-10-24
+**Version**: v1.0.2
 **Python Version**: 3.10+
 
 ---

@@ -58,7 +58,7 @@ def test_client_initialization():
         client = MCPClient(config_path)
 
         assert len(client.servers) > 0, "未載入任何伺服器"
-        console.print(f"[green]✓ Client 初始化成功[/green]")
+        console.print(f"[bright_magenta]✓ Client 初始化成功[/green]")
         console.print(f"  配置路徑：{config_path}")
         console.print(f"  伺服器數：{len(client.servers)}")
 
@@ -69,7 +69,7 @@ def test_client_initialization():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -88,7 +88,7 @@ def test_server_listing():
         assert len(servers) == 2, f"伺服器數量錯誤：{len(servers)}"
         assert any(s.name == "filesystem" for s in servers), "缺少 filesystem 伺服器"
 
-        console.print(f"[green]✓ 伺服器列表正確[/green]")
+        console.print(f"[bright_magenta]✓ 伺服器列表正確[/green]")
         for server in servers:
             console.print(f"  - {server.name}: {server.description}")
 
@@ -99,7 +99,7 @@ def test_server_listing():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -119,7 +119,7 @@ def test_server_status():
         assert status["status"] == "stopped", "初始狀態應為 stopped"
         assert status["name"] == "test-server", "伺服器名稱錯誤"
 
-        console.print(f"[green]✓ 狀態查詢成功[/green]")
+        console.print(f"[bright_magenta]✓ 狀態查詢成功[/green]")
         console.print(f"  伺服器：{status['name']}")
         console.print(f"  狀態：{status['status']}")
         console.print(f"  能力：{status['capabilities']}")
@@ -131,7 +131,7 @@ def test_server_status():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -152,7 +152,7 @@ def test_tool_discovery():
         # 列出工具
         tools = client.list_tools("test-server")
 
-        console.print(f"[green]✓ 工具發現功能正常[/green]")
+        console.print(f"[bright_magenta]✓ 工具發現功能正常[/green]")
         console.print(f"  發現工具：{len(tools)} 個")
 
         for tool in tools:
@@ -166,7 +166,7 @@ def test_tool_discovery():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -194,7 +194,7 @@ def test_config_validation():
         for field in required_fields:
             assert field in server, f"伺服器配置缺少 {field} 欄位"
 
-        console.print(f"[green]✓ 配置格式驗證通過[/green]")
+        console.print(f"[bright_magenta]✓ 配置格式驗證通過[/green]")
         console.print(f"  伺服器數：{len(config['servers'])}")
 
         # 清理
@@ -204,7 +204,7 @@ def test_config_validation():
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -239,14 +239,14 @@ def test_mcp_data_structures():
         assert tool.name == "read_file", "MCPTool name 錯誤"
         assert tool.server_name == "filesystem", "MCPTool server_name 錯誤"
 
-        console.print(f"[green]✓ 資料結構測試通過[/green]")
+        console.print(f"[bright_magenta]✓ 資料結構測試通過[/green]")
         console.print(f"  MCPServer: {server.name}")
         console.print(f"  MCPTool: {tool.name}")
 
         return True
 
     except Exception as e:
-        console.print(f"[red]✗ 失敗：{e}[/red]")
+        console.print(f"[dim magenta]✗ 失敗：{e}[/red]")
         import traceback
         traceback.print_exc()
         return False
@@ -257,7 +257,7 @@ def test_mcp_data_structures():
 def main():
     """執行所有測試"""
     console.print("=" * 70)
-    console.print("[bold cyan]CodeGemini MCP Client - 測試套件[/bold cyan]")
+    console.print("[bold magenta]CodeGemini MCP Client - 測試套件[/bold magenta]")
     console.print("=" * 70)
 
     tests = [
@@ -276,7 +276,7 @@ def main():
             result = test_func()
             results[test_name] = "✅ 通過" if result else "❌ 失敗"
         except Exception as e:
-            console.print(f"[red]測試異常：{e}[/red]")
+            console.print(f"[dim magenta]測試異常：{e}[/red]")
             results[test_name] = "❌ 失敗"
 
     # 顯示測試總結
@@ -295,9 +295,9 @@ def main():
     console.print(f"[bold]總計：{passed}/{total} 測試通過[/bold]")
 
     if passed < total:
-        console.print(f"\n[yellow]⚠️  {total - passed} 個測試失敗[/yellow]")
+        console.print(f"\n[magenta]⚠️  {total - passed} 個測試失敗[/yellow]")
     else:
-        console.print("\n[green]🎉 所有測試通過！MCP Client 準備就緒。[/green]")
+        console.print("\n[bright_magenta]🎉 所有測試通過！MCP Client 準備就緒。[/green]")
 
 
 if __name__ == "__main__":

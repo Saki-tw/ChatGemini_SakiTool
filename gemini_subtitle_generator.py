@@ -40,6 +40,13 @@ try:
 except ImportError:
     AUDIO_PROCESSOR_AVAILABLE = False
 
+# 🔧 任務 1.3：導入上傳輔助模組（整合重試、超時、錯誤處理）
+try:
+    from gemini_upload_helper import upload_file
+    UPLOAD_HELPER_AVAILABLE = True
+except ImportError:
+    UPLOAD_HELPER_AVAILABLE = False
+
 # 導入統一的錯誤修復建議系統
 try:
     from error_fix_suggestions import (
@@ -57,7 +64,7 @@ except ImportError:
 
 # 導入 API 重試機制
 try:
-    from api_retry_wrapper import with_retry
+    from utils.api_retry import with_retry
     API_RETRY_ENABLED = True
 except ImportError:
     # 如果未安裝，提供空裝飾器
@@ -122,22 +129,18 @@ class SubtitleGenerator:
             self.audio_processor = AudioProcessor()
         else:
             self.audio_processor = None
-            console.print("[yellow]警告：gemini_audio_processor 不可用，音訊提取功能受限[/yellow]")
+            console.print("[magenta]警告：gemini_audio_processor 不可用，音訊提取功能受限[/yellow]")
 
         # 初始化翻譯器
         if TRANSLATOR_AVAILABLE:
             self.translator = get_translator()
         else:
             self.translator = None
-            console.print("[yellow]警告：gemini_translator 不可用，翻譯功能已停用[/yellow]")
+            console.print("[magenta]警告：gemini_translator 不可用，翻譯功能已停用[/yellow]")
 
-        # 輸出目錄
-        self.output_dir = os.path.join(
-            os.path.expanduser("~"),
-            "gemini_videos",
-            "subtitles"
-        )
-        os.makedirs(self.output_dir, exist_ok=True)
+        # 輸出目錄 - 使用統一配置
+        from utils.path_manager import get_video_dir
+        self.output_dir = str(get_video_dir('subtitles'))
 
         # 驗證依賴
         self._check_dependencies()
@@ -153,7 +156,7 @@ class SubtitleGenerator:
                 check=True
             )
         except (subprocess.CalledProcessError, FileNotFoundError):
-            console.print("[yellow]警告：未找到 ffmpeg，部分功能可能受限[/yellow]")
+            console.print("[magenta]警告：未找到 ffmpeg，部分功能可能受限[/yellow]")
 
     def generate_subtitles(
         self,
@@ -188,14 +191,14 @@ class SubtitleGenerator:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
                 # 如果沒有修復建議模組，直接拋出錯誤
                 raise FileNotFoundError(f"找不到影片檔案：{video_path}")
 
-        console.print(f"\n[cyan]📝 生成字幕...[/cyan]")
+        console.print(f"\n[magenta]📝 生成字幕...[/magenta]")
         console.print(f"  影片：{os.path.basename(video_path)}")
         console.print(f"  格式：{format.upper()}")
         console.print(f"  翻譯：{'是 (' + target_language + ')' if translate else '否'}")
@@ -226,12 +229,12 @@ class SubtitleGenerator:
         if os.path.exists(audio_path):
             os.remove(audio_path)
 
-        console.print(f"[green]✓ 字幕已生成：{output_path}[/green]")
+        console.print(f"[bright_magenta]✓ 字幕已生成：{output_path}[/green]")
         return output_path
 
     def _extract_audio(self, video_path: str) -> str:
         """提取影片音訊"""
-        console.print("\n[cyan]🎵 步驟 1/4: 提取音訊...[/cyan]")
+        console.print("\n[magenta]🎵 步驟 1/4: 提取音訊...[/magenta]")
 
         if self.audio_processor:
             # 使用 AudioProcessor
@@ -266,7 +269,7 @@ class SubtitleGenerator:
                     stderr=subprocess.PIPE,
                     check=True
                 )
-                console.print(f"[green]✓ 音訊已提取[/green]")
+                console.print(f"[bright_magenta]✓ 音訊已提取[/green]")
                 return audio_path
             except subprocess.CalledProcessError as e:
                 stderr = e.stderr.decode() if isinstance(e.stderr, bytes) else str(e.stderr)
@@ -338,25 +341,33 @@ ffmpeg 錯誤碼：{e.returncode}
         Returns:
             List[SubtitleSegment]: 字幕片段列表
         """
-        console.print("\n[cyan]🎤 步驟 2/4: 語音辨識...[/cyan]")
+        console.print("\n[magenta]🎤 步驟 2/4: 語音辨識...[/magenta]")
 
-        # 上傳音訊檔案
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
-            task = progress.add_task("上傳音訊...", total=None)
+        # 🔧 任務 1.3：使用優化的上傳輔助模組（含重試、超時、進度顯示）
+        if UPLOAD_HELPER_AVAILABLE:
+            # 使用整合的上傳輔助工具
+            uploaded_file = upload_file(
+                client=self.client,
+                file_path=audio_path,
+                display_name=os.path.basename(audio_path),
+                max_retries=3  # 音訊檔案通常較小，3 次重試足夠
+            )
+        else:
+            # 降級：使用原始上傳方式
+            with Progress(
+                SpinnerColumn(),
+                TextColumn("[progress.description]{task.description}"),
+                console=console,
+            ) as progress:
+                task = progress.add_task("上傳音訊...", total=None)
+                uploaded_file = self.client.files.upload(path=audio_path)
+                progress.update(task, completed=100, description="[bright_magenta]✓ 上傳完成[/green]")
 
-            uploaded_file = self.client.files.upload(path=audio_path)
-
-            # 等待處理完成
-            while uploaded_file.state.name == "PROCESSING":
-                import time
-                time.sleep(2)
-                uploaded_file = self.client.files.get(name=uploaded_file.name)
-
-            progress.update(task, completed=100, description="[green]✓ 上傳完成[/green]")
+        # 等待處理完成
+        while uploaded_file.state.name == "PROCESSING":
+            import time
+            time.sleep(2)
+            uploaded_file = self.client.files.get(name=uploaded_file.name)
 
         # 使用 Gemini 進行語音辨識並生成時間軸
         prompt = """請將這段音訊轉錄為文字，並提供準確的時間戳記。
@@ -411,7 +422,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 ]
             )
 
-            progress.update(task, completed=100, description="[green]✓ 辨識完成[/green]")
+            progress.update(task, completed=100, description="[bright_magenta]✓ 辨識完成[/green]")
 
         # 顯示成本（在解析結果之前）
         if hasattr(response, 'usage_metadata'):
@@ -454,7 +465,7 @@ ffmpeg 錯誤碼：{e.returncode}
                     text=seg["text"].strip()
                 ))
 
-            console.print(f"[green]✓ 共識別 {len(segments)} 個片段[/green]")
+            console.print(f"[bright_magenta]✓ 共識別 {len(segments)} 個片段[/green]")
 
             # 刪除上傳的檔案
             self.client.files.delete(name=uploaded_file.name)
@@ -486,7 +497,7 @@ ffmpeg 錯誤碼：{e.returncode}
                                 text=seg.get("text", "").strip()
                             ))
 
-                        console.print(f"[green]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/green]")
+                        console.print(f"[bright_magenta]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/green]")
 
                         # 刪除上傳的檔案
                         if 'uploaded_file' in locals():
@@ -494,12 +505,12 @@ ffmpeg 錯誤碼：{e.returncode}
 
                         return segments
                     except Exception as parse_error:
-                        console.print(f"[red]✗ 修復後的 JSON 仍無法解析：{parse_error}[/red]")
+                        console.print(f"[dim magenta]✗ 修復後的 JSON 仍無法解析：{parse_error}[/red]")
 
             except ImportError:
                 # 降級到舊版錯誤顯示
-                console.print(f"[red]JSON 解析錯誤：{e}[/red]")
-                console.print(f"[yellow]原始回應：{result_text}[/yellow]")
+                console.print(f"[dim magenta]JSON 解析錯誤：{e}[/red]")
+                console.print(f"[magenta]原始回應：{result_text}[/yellow]")
 
             raise RuntimeError("語音辨識結果解析失敗，請參考上述修復建議")
 
@@ -509,10 +520,10 @@ ffmpeg 錯誤碼：{e.returncode}
         target_language: str
     ) -> List[SubtitleSegment]:
         """翻譯字幕片段"""
-        console.print(f"\n[cyan]🌐 步驟 3/4: 翻譯字幕（目標：{target_language}）...[/cyan]")
+        console.print(f"\n[magenta]🌐 步驟 3/4: 翻譯字幕（目標：{target_language}）...[/magenta]")
 
         if not self.translator:
-            console.print("[yellow]警告：翻譯功能不可用，跳過翻譯步驟[/yellow]")
+            console.print("[magenta]警告：翻譯功能不可用，跳過翻譯步驟[/yellow]")
             return segments
 
         with Progress(
@@ -533,7 +544,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 segment.translation = translated
                 progress.advance(task)
 
-        console.print(f"[green]✓ 翻譯完成[/green]")
+        console.print(f"[bright_magenta]✓ 翻譯完成[/green]")
         return segments
 
     def _write_subtitle_file(
@@ -543,7 +554,7 @@ ffmpeg 錯誤碼：{e.returncode}
         format: str
     ):
         """寫入字幕檔案"""
-        console.print(f"\n[cyan]💾 步驟 4/4: 生成 {format.upper()} 檔案...[/cyan]")
+        console.print(f"\n[magenta]💾 步驟 4/4: 生成 {format.upper()} 檔案...[/magenta]")
 
         format = format.lower()
         if format == "srt":
@@ -559,7 +570,7 @@ ffmpeg 錯誤碼：{e.returncode}
 
             raise ValueError(f"不支援的字幕格式：{format}，請參考上述支援格式")
 
-        console.print(f"[green]✓ 檔案已生成[/green]")
+        console.print(f"[bright_magenta]✓ 檔案已生成[/green]")
 
     def _write_srt(self, segments: List[SubtitleSegment], output_path: str):
         """生成 SRT 格式字幕"""
@@ -648,7 +659,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
@@ -663,14 +674,14 @@ ffmpeg 錯誤碼：{e.returncode}
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     subtitle_path = alternative_path
-                    console.print(f"[green]✅ 已切換至：{subtitle_path}[/green]\n")
+                    console.print(f"[bright_magenta]✅ 已切換至：{subtitle_path}[/green]\n")
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
                 # 如果沒有修復建議模組，直接拋出錯誤
                 raise FileNotFoundError(f"找不到字幕檔案：{subtitle_path}")
 
-        console.print(f"\n[cyan]🔥 燒錄字幕...[/cyan]")
+        console.print(f"\n[magenta]🔥 燒錄字幕...[/magenta]")
         console.print(f"  影片：{os.path.basename(video_path)}")
         console.print(f"  字幕：{os.path.basename(subtitle_path)}")
 
@@ -714,9 +725,9 @@ ffmpeg 錯誤碼：{e.returncode}
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 處理完成[/green]")
 
-            console.print(f"[green]✓ 字幕已燒錄：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 字幕已燒錄：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -774,14 +785,14 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print("  python gemini_subtitle_generator.py <影片路徑> [選項]")
-        console.print("\n[cyan]選項：[/cyan]")
+        console.print("\n[magenta]選項：[/magenta]")
         console.print("  --translate       啟用翻譯")
         console.print("  --lang <語言>     目標語言（預設 zh-TW）")
         console.print("  --format <格式>   字幕格式 srt/vtt（預設 srt）")
         console.print("  --burn            燒錄字幕到影片")
-        console.print("\n[cyan]範例：[/cyan]")
+        console.print("\n[magenta]範例：[/magenta]")
         console.print("  python gemini_subtitle_generator.py video.mp4")
         console.print("  python gemini_subtitle_generator.py video.mp4 --translate --lang zh-TW")
         console.print("  python gemini_subtitle_generator.py video.mp4 --translate --burn")
@@ -816,15 +827,15 @@ def main():
             target_language=target_lang
         )
 
-        console.print(f"\n[green]✓ 字幕檔案：{subtitle_path}[/green]")
+        console.print(f"\n[bright_magenta]✓ 字幕檔案：{subtitle_path}[/green]")
 
         # 燒錄字幕（如果需要）
         if burn:
             video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
-            console.print(f"\n[green]✓ 燒錄影片：{video_with_subs}[/green]")
+            console.print(f"\n[bright_magenta]✓ 燒錄影片：{video_with_subs}[/green]")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

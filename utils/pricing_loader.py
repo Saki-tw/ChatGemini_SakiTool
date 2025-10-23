@@ -19,7 +19,7 @@ except ImportError:
 def _print_warning(message: str) -> None:
     """輸出警告訊息（根據環境選擇格式）"""
     if RICH_AVAILABLE and _console:
-        _console.print(f"[yellow]{message}[/yellow]")
+        _console.print(f"[magenta]{message}[/yellow]")
     else:
         print(f"⚠️  {message}", file=sys.stderr)
 
@@ -27,7 +27,7 @@ def _print_warning(message: str) -> None:
 def _print_info(message: str) -> None:
     """輸出資訊訊息（根據環境選擇格式）"""
     if RICH_AVAILABLE and _console:
-        _console.print(f"[blue]{message}[/blue]")
+        _console.print(f"[bright_magenta]{message}[/bright_magenta]")
     else:
         print(f"ℹ️  {message}")
 

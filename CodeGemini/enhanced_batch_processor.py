@@ -273,12 +273,19 @@ class EnhancedBatchProcessor:
 
         Args:
             max_concurrent: 最大並行任務數
-            storage_dir: 任務存儲目錄
+            storage_dir: 任務存儲目錄（預設使用統一診斷目錄）
             console: Rich Console 實例（可選）
         """
         self.max_concurrent = max_concurrent
-        self.storage_dir = Path(storage_dir) if storage_dir else Path.home() / ".batch_processor"
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        if storage_dir is None:
+            # 使用統一診斷目錄
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from utils.path_manager import get_diagnostics_dir
+            self.storage_dir = get_diagnostics_dir('batch')
+        else:
+            self.storage_dir = Path(storage_dir)
+            self.storage_dir.mkdir(parents=True, exist_ok=True)
 
         # Console 設定
         if RICH_AVAILABLE:
@@ -322,9 +329,9 @@ class EnhancedBatchProcessor:
                         task = EnhancedBatchTask(**task_data)
                         self.tasks[task.task_id] = task
 
-                self._print(f"[cyan]📂 載入了 {len(self.tasks)} 個任務[/cyan]")
+                self._print(f"[magenta]📂 載入了 {len(self.tasks)} 個任務[/magenta]")
             except Exception as e:
-                self._print(f"[yellow]載入任務失敗：{e}[/yellow]")
+                self._print(f"[magenta]載入任務失敗：{e}[/yellow]")
 
         # 載入群組
         groups_file = self.storage_dir / "groups.json"
@@ -339,9 +346,9 @@ class EnhancedBatchProcessor:
                         group = TaskGroup(**group_data)
                         self.groups[group.group_id] = group
 
-                self._print(f"[cyan]📂 載入了 {len(self.groups)} 個任務群組[/cyan]")
+                self._print(f"[magenta]📂 載入了 {len(self.groups)} 個任務群組[/magenta]")
             except Exception as e:
-                self._print(f"[yellow]載入群組失敗：{e}[/yellow]")
+                self._print(f"[magenta]載入群組失敗：{e}[/yellow]")
 
     def _save_state(self):
         """保存任務與群組到檔案"""
@@ -362,7 +369,7 @@ class EnhancedBatchProcessor:
             with open(tasks_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            self._print(f"[red]保存任務失敗：{e}[/red]")
+            self._print(f"[dim magenta]保存任務失敗：{e}[/red]")
 
         # 保存群組
         groups_file = self.storage_dir / "groups.json"
@@ -380,7 +387,7 @@ class EnhancedBatchProcessor:
             with open(groups_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            self._print(f"[red]保存群組失敗：{e}[/red]")
+            self._print(f"[dim magenta]保存群組失敗：{e}[/red]")
 
     def _print(self, message: str):
         """統一的輸出方法"""
@@ -403,7 +410,7 @@ class EnhancedBatchProcessor:
             handler: 處理函數，接收參數並返回結果
         """
         self.task_handlers[task_type] = handler
-        self._print(f"[green]✓ 註冊任務處理器：{task_type}[/green]")
+        self._print(f"[bright_magenta]✓ 註冊任務處理器：{task_type}[/green]")
 
     # ==================== 任務管理 ====================
 
@@ -469,7 +476,7 @@ class EnhancedBatchProcessor:
             self.groups[group_id].task_ids.append(task_id)
 
         self._save_state()
-        self._print(f"[green]✓ 已添加任務：{task_id}[/green]")
+        self._print(f"[bright_magenta]✓ 已添加任務：{task_id}[/green]")
 
         return task_id
 
@@ -500,7 +507,7 @@ class EnhancedBatchProcessor:
             )
             task_ids.append(task_id)
 
-        self._print(f"[green]✓ 已批次添加 {len(task_ids)} 個任務[/green]")
+        self._print(f"[bright_magenta]✓ 已批次添加 {len(task_ids)} 個任務[/green]")
         return task_ids
 
     # ==================== 任務分組管理 ====================
@@ -543,7 +550,7 @@ class EnhancedBatchProcessor:
         self.groups[group_id] = group
         self._save_state()
 
-        self._print(f"[green]✓ 已建立任務群組：{group_id}[/green]")
+        self._print(f"[bright_magenta]✓ 已建立任務群組：{group_id}[/green]")
         return group_id
 
     def add_task_to_group(self, task_id: str, group_id: str):
@@ -558,7 +565,7 @@ class EnhancedBatchProcessor:
             self.groups[group_id].task_ids.append(task_id)
 
         self._save_state()
-        self._print(f"[green]✓ 已將任務 {task_id} 添加到群組 {group_id}[/green]")
+        self._print(f"[bright_magenta]✓ 已將任務 {task_id} 添加到群組 {group_id}[/green]")
 
     def get_group_tasks(self, group_id: str) -> List[EnhancedBatchTask]:
         """獲取群組內的所有任務"""
@@ -584,7 +591,7 @@ class EnhancedBatchProcessor:
 
         self.groups[group_id].status = TaskStatus.PAUSED
         self._save_state()
-        self._print(f"[yellow]⏸️  已暫停群組：{group_id}[/yellow]")
+        self._print(f"[magenta]⏸️  已暫停群組：{group_id}[/yellow]")
 
     def resume_group(self, group_id: str):
         """恢復群組內的所有任務"""
@@ -603,7 +610,7 @@ class EnhancedBatchProcessor:
 
         self.groups[group_id].status = TaskStatus.PENDING
         self._save_state()
-        self._print(f"[green]▶️  已恢復群組：{group_id}[/green]")
+        self._print(f"[bright_magenta]▶️  已恢復群組：{group_id}[/green]")
 
     def cancel_group(self, group_id: str):
         """取消群組內的所有任務"""
@@ -617,7 +624,7 @@ class EnhancedBatchProcessor:
 
         self.groups[group_id].status = TaskStatus.CANCELLED
         self._save_state()
-        self._print(f"[red]🚫 已取消群組 {group_id}（{cancelled_count} 個任務）[/red]")
+        self._print(f"[dim magenta]🚫 已取消群組 {group_id}（{cancelled_count} 個任務）[/red]")
 
     # ==================== 依賴管理 ====================
 
@@ -644,7 +651,7 @@ class EnhancedBatchProcessor:
             if dependent and dependent.status == TaskStatus.WAITING_DEPENDENCIES:
                 if self._check_dependencies_satisfied(dependent):
                     dependent.status = TaskStatus.PENDING
-                    self._print(f"[cyan]🔓 任務 {dependent_id} 的依賴已滿足，設為待處理[/cyan]")
+                    self._print(f"[magenta]🔓 任務 {dependent_id} 的依賴已滿足，設為待處理[/magenta]")
 
     def get_dependency_graph(self) -> Dict[str, List[str]]:
         """獲取任務依賴圖"""
@@ -696,7 +703,7 @@ class EnhancedBatchProcessor:
                 raise ValueError(f"未找到任務處理器：{task.task_type}")
 
             # 執行任務
-            self._print(f"\n[cyan]▶️  開始執行任務：{task.task_id}[/cyan]")
+            self._print(f"\n[magenta]▶️  開始執行任務：{task.task_id}[/magenta]")
             result = handler(**task.parameters)
 
             # 標記完成
@@ -704,20 +711,20 @@ class EnhancedBatchProcessor:
             task.completed_at = datetime.now().isoformat()
             task.result = result if isinstance(result, dict) else {'output': str(result)}
 
-            self._print(f"[green]✅ 任務完成：{task.task_id}[/green]")
+            self._print(f"[bright_magenta]✅ 任務完成：{task.task_id}[/green]")
 
             # 更新依賴此任務的其他任務
             self._update_dependent_tasks(task.task_id)
 
         except Exception as e:
-            self._print(f"[red]❌ 任務失敗：{task.task_id} - {e}[/red]")
+            self._print(f"[dim magenta]❌ 任務失敗：{task.task_id} - {e}[/red]")
 
             # 使用重試策略判斷是否重試
             if task.retry_strategy.should_retry(task.retry_count + 1, task.max_retries, e):
                 task.retry_count += 1
                 delay = task.retry_strategy.get_delay(task.retry_count)
 
-                self._print(f"[yellow]🔄 將在 {delay:.1f} 秒後重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/yellow]")
+                self._print(f"[magenta]🔄 將在 {delay:.1f} 秒後重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/yellow]")
 
                 # 延遲後設回待處理
                 time.sleep(delay)
@@ -740,7 +747,7 @@ class EnhancedBatchProcessor:
         Args:
             blocking: 是否阻塞直到所有任務完成
         """
-        self._print(f"\n[bold cyan]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold cyan]\n")
+        self._print(f"\n[bold magenta]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold magenta]\n")
 
         if blocking:
             self._run_blocking()
@@ -757,7 +764,7 @@ class EnhancedBatchProcessor:
         total_tasks = len(pending_tasks)
 
         if total_tasks == 0:
-            self._print("[yellow]沒有待處理的任務[/yellow]")
+            self._print("[magenta]沒有待處理的任務[/yellow]")
             return
 
         completed = 0
@@ -828,34 +835,34 @@ class EnhancedBatchProcessor:
     def pause(self):
         """暫停批次處理（不影響正在執行的任務）"""
         self._paused = True
-        self._print("[yellow]⏸️  批次處理已暫停[/yellow]")
+        self._print("[magenta]⏸️  批次處理已暫停[/yellow]")
 
     def resume(self):
         """恢復批次處理"""
         self._paused = False
-        self._print("[green]▶️  批次處理已恢復[/green]")
+        self._print("[bright_magenta]▶️  批次處理已恢復[/green]")
 
     def stop(self):
         """停止批次處理"""
         self._stop_requested = True
-        self._print("[red]⏹️  批次處理已停止[/red]")
+        self._print("[dim magenta]⏹️  批次處理已停止[/red]")
 
     def cancel_task(self, task_id: str) -> bool:
         """取消任務"""
         task = self.tasks.get(task_id)
         if not task:
-            self._print(f"[red]未找到任務：{task_id}[/red]")
+            self._print(f"[dim magenta]未找到任務：{task_id}[/red]")
             return False
 
         if task.status == TaskStatus.RUNNING:
-            self._print(f"[yellow]無法取消正在執行的任務：{task_id}[/yellow]")
+            self._print(f"[magenta]無法取消正在執行的任務：{task_id}[/yellow]")
             return False
 
         task.status = TaskStatus.CANCELLED
         task.completed_at = datetime.now().isoformat()
         self._save_state()
 
-        self._print(f"[green]✓ 已取消任務：{task_id}[/green]")
+        self._print(f"[bright_magenta]✓ 已取消任務：{task_id}[/green]")
         return True
 
     # ==================== 查詢與顯示 ====================
@@ -894,16 +901,16 @@ class EnhancedBatchProcessor:
         tasks = self.list_tasks(status=status, task_type=task_type, group_id=group_id)
 
         if not tasks:
-            self._print("[yellow]沒有符合條件的任務[/yellow]")
+            self._print("[magenta]沒有符合條件的任務[/yellow]")
             return
 
         if RICH_AVAILABLE and self.console:
             table = Table(title=f"批次任務列表（共 {len(tasks)} 個）")
-            table.add_column("任務 ID", style="cyan", no_wrap=True)
+            table.add_column("任務 ID", style="bright_magenta", no_wrap=True)
             table.add_column("類型", style="green")
             table.add_column("狀態", style="yellow")
             table.add_column("優先級", style="magenta")
-            table.add_column("群組", style="blue")
+            table.add_column("群組", style="magenta")
             table.add_column("依賴", style="dim")
             table.add_column("重試", style="red")
 
@@ -946,17 +953,17 @@ class EnhancedBatchProcessor:
     def display_groups(self):
         """顯示任務群組列表"""
         if not self.groups:
-            self._print("[yellow]沒有任務群組[/yellow]")
+            self._print("[magenta]沒有任務群組[/yellow]")
             return
 
         if RICH_AVAILABLE and self.console:
             table = Table(title=f"任務群組列表（共 {len(self.groups)} 個）")
-            table.add_column("群組 ID", style="cyan")
+            table.add_column("群組 ID", style="bright_magenta")
             table.add_column("名稱", style="green")
             table.add_column("描述", style="dim")
             table.add_column("任務數", style="yellow")
             table.add_column("狀態", style="magenta")
-            table.add_column("優先級", style="blue")
+            table.add_column("優先級", style="magenta")
 
             for group in self.groups.values():
                 table.add_row(
@@ -988,7 +995,7 @@ class EnhancedBatchProcessor:
             stats[task.status] = stats.get(task.status, 0) + 1
 
         summary_text = f"""
-[bold cyan]批次任務統計[/bold cyan]
+[bold magenta]批次任務統計[/bold magenta]
 
   總任務數：{len(self.tasks)}
   ✅ 已完成：{stats[TaskStatus.COMPLETED]}
@@ -1003,7 +1010,7 @@ class EnhancedBatchProcessor:
         """
 
         if RICH_AVAILABLE and self.console:
-            self.console.print(Panel(summary_text, border_style="cyan"))
+            self.console.print(Panel(summary_text, border_style="bright_magenta"))
         else:
             print(summary_text)
 
@@ -1018,7 +1025,7 @@ class EnhancedBatchProcessor:
             del self.tasks[task_id]
 
         self._save_state()
-        self._print(f"[green]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]")
+        self._print(f"[bright_magenta]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]")
 
 
 # ==================== 工具函數 ====================

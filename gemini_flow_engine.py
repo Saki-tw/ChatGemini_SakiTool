@@ -19,6 +19,14 @@ from google.genai import types
 from utils.api_client import get_gemini_client, get_api_key
 from utils.pricing_loader import get_pricing_calculator, PRICING_ENABLED
 
+# 導入記憶體管理模組
+from gemini_memory_manager import (
+    process_video_chunked,
+    get_video_duration,
+    MemoryPoolManager,
+    ParallelProcessor
+)
+
 # 導入相關模組
 from gemini_video_preprocessor import VideoPreprocessor
 from gemini_video_compositor import VideoCompositor
@@ -126,13 +134,9 @@ class FlowEngine:
         self.resolution = resolution
         self.aspect_ratio = aspect_ratio
 
-        # 輸出目錄
-        self.output_dir = os.path.join(
-            os.path.expanduser("~"),
-            "gemini_videos",
-            "flow"
-        )
-        os.makedirs(self.output_dir, exist_ok=True)
+        # 輸出目錄 - 使用統一配置
+        from utils.path_manager import get_video_dir
+        self.output_dir = str(get_video_dir('flow'))
 
     def natural_language_to_segments(
         self,
@@ -151,7 +155,7 @@ class FlowEngine:
         Returns:
             List[SegmentPlan]: 分段計畫列表
         """
-        console.print(f"\n[cyan]🤖 分析使用者描述...[/cyan]")
+        console.print(f"\n[magenta]🤖 分析使用者描述...[/magenta]")
         console.print(f"  描述：{user_description}")
         console.print(f"  目標時長：{target_duration}秒")
 
@@ -218,11 +222,11 @@ class FlowEngine:
                 )
                 segments.append(segment)
 
-            console.print(f"[green]✓ 已生成 {len(segments)} 個片段計畫[/green]")
+            console.print(f"[bright_magenta]✓ 已生成 {len(segments)} 個片段計畫[/green]")
 
             # 顯示計畫
             for i, seg in enumerate(segments, 1):
-                console.print(f"\n[cyan]片段 {i} ({seg.scene_id})：[/cyan]")
+                console.print(f"\n[magenta]片段 {i} ({seg.scene_id})：[/magenta]")
                 console.print(f"  {seg.prompt[:80]}...")
 
             return segments
@@ -247,7 +251,7 @@ class FlowEngine:
             self.error_logger.log_error(error)
             ErrorFormatter.display_error(error, show_traceback=False)
 
-            console.print("[yellow]使用備案分段策略繼續執行...[/yellow]")
+            console.print("[magenta]使用備案分段策略繼續執行...[/yellow]")
             # 返回備案：簡單等分
             return self._create_fallback_segments(
                 user_description,
@@ -262,7 +266,7 @@ class FlowEngine:
         segment_duration: int
     ) -> List[SegmentPlan]:
         """創建備案分段（當 API 失敗時）"""
-        console.print("[yellow]使用備案分段策略...[/yellow]")
+        console.print("[magenta]使用備案分段策略...[/yellow]")
 
         segments = []
         for i in range(num_segments):
@@ -295,13 +299,13 @@ class FlowEngine:
         Returns:
             str: 最終影片路徑
         """
-        console.print(f"\n[cyan]🎬 開始生成影片...[/cyan]")
+        console.print(f"\n[magenta]🎬 開始生成影片...[/magenta]")
         console.print(f"  片段數量：{len(segments)}")
         console.print(f"  Veo 模型：{veo_model}")
 
         # 🔍 飛行前檢查（預防失敗）
         if VALIDATION_AVAILABLE:
-            console.print("\n[yellow]🔍 執行飛行前檢查...[/yellow]")
+            console.print("\n[magenta]🔍 執行飛行前檢查...[/yellow]")
             preflight_results = PreflightChecker.run_full_check()
 
             # 檢查是否有錯誤
@@ -309,21 +313,21 @@ class FlowEngine:
             warnings = [r for r in preflight_results if r.level == ValidationLevel.WARNING]
 
             if errors:
-                console.print("[red]❌ 飛行前檢查失敗，無法繼續執行：[/red]")
+                console.print("[dim magenta]❌ 飛行前檢查失敗，無法繼續執行：[/red]")
                 for err in errors:
                     console.print(f"  ❌ {err.message}")
                     if err.suggestions:
-                        console.print("     [yellow]建議：[/yellow]")
+                        console.print("     [magenta]建議：[/yellow]")
                         for sug in err.suggestions:
                             console.print(f"       → {sug}")
                 raise RuntimeError("飛行前檢查失敗，請修復上述問題後重試")
 
             if warnings:
-                console.print("[yellow]⚠️  發現警告（可繼續執行）：[/yellow]")
+                console.print("[magenta]⚠️  發現警告（可繼續執行）：[/yellow]")
                 for warn in warnings:
                     console.print(f"  ⚠️  {warn.message}")
 
-            console.print("[green]✅ 飛行前檢查通過[/green]\n")
+            console.print("[bright_magenta]✅ 飛行前檢查通過[/green]\n")
 
         # 創建任務 ID 用於恢復
         task_id = f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -356,12 +360,12 @@ class FlowEngine:
                 console=console,
             ) as progress:
                 task = progress.add_task(
-                    f"[cyan]生成 {len(segments)} 個片段...",
+                    f"[magenta]生成 {len(segments)} 個片段...",
                     total=len(segments)
                 )
 
                 for i, segment in enumerate(segments):
-                    console.print(f"\n[cyan]生成片段 {i+1}/{len(segments)}：{segment.scene_id}[/cyan]")
+                    console.print(f"\n[magenta]生成片段 {i+1}/{len(segments)}：{segment.scene_id}[/magenta]")
                     console.print(f"  提示詞：{segment.prompt[:60]}...")
 
                     # 調用 Veo API 生成影片
@@ -375,7 +379,7 @@ class FlowEngine:
                         )
 
                         segment_paths.append(segment_path)
-                        console.print(f"  [green]✓ 生成完成[/green]")
+                        console.print(f"  [bright_magenta]✓ 生成完成[/green]")
 
                         # 更新檢查點
                         self.recovery_manager.save_checkpoint(
@@ -429,7 +433,7 @@ class FlowEngine:
                     progress.update(task, advance=1)
 
             # 合併所有片段
-            console.print(f"\n[cyan]🎞️  合併 {len(segment_paths)} 個片段...[/cyan]")
+            console.print(f"\n[magenta]🎞️  合併 {len(segment_paths)} 個片段...[/magenta]")
 
             if output_filename is None:
                 output_filename = f"flow_video_{len(segments)}segments.mp4"
@@ -442,7 +446,7 @@ class FlowEngine:
                 transition="none"  # 固定使用無損合併（禁止過渡效果）
             )
 
-            console.print(f"\n[green]✅ 影片生成完成！[/green]")
+            console.print(f"\n[bright_magenta]✅ 影片生成完成！[/green]")
             console.print(f"  總時長：{len(segments) * segments[0].duration} 秒")
             console.print(f"  儲存路徑：{final_video}")
 
@@ -488,7 +492,7 @@ class FlowEngine:
                         cause=e
                     )
                     self.error_logger.log_error(cleanup_error)
-                    console.print(f"[yellow]警告：無法清理臨時檔案 {temp_dir}，請手動刪除[/yellow]")
+                    console.print(f"[magenta]警告：無法清理臨時檔案 {temp_dir}，請手動刪除[/yellow]")
 
     @retry_on_error(
         max_retries=3,
@@ -624,14 +628,14 @@ class FlowEngine:
             str: 最終影片路徑
         """
         console.print("\n" + "="*60)
-        console.print("[bold cyan]Gemini Flow Engine - 自然語言影片生成[/bold cyan]")
+        console.print("[bold magenta]Gemini Flow Engine - 自然語言影片生成[/bold magenta]")
         console.print("="*60)
-        console.print(f"[cyan]影片配置：{self.resolution} @ {self.aspect_ratio} (24fps)[/cyan]")
+        console.print(f"[magenta]影片配置：{self.resolution} @ {self.aspect_ratio} (24fps)[/magenta]")
 
         # 顯示費用預估
         if self.pricing and show_cost:
             estimate = self.pricing.estimate_flow_cost(target_duration)
-            console.print(f"\n[yellow]💰 費用預估：[/yellow]")
+            console.print(f"\n[magenta]💰 費用預估：[/yellow]")
             console.print(f"  目標時長：{estimate['target_duration']} 秒")
             console.print(f"  實際時長：{estimate['actual_duration']} 秒（{estimate['num_segments']} 段）")
             console.print(f"  Gemini 分段計畫：{estimate['breakdown']['planning']}")
@@ -642,7 +646,7 @@ class FlowEngine:
             # 詢問是否繼續
             user_confirm = input("是否繼續生成？(y/n): ").strip().lower()
             if user_confirm != 'y':
-                console.print("[yellow]已取消生成[/yellow]")
+                console.print("[magenta]已取消生成[/yellow]")
                 return None
 
         # 第一步：生成分段計畫
@@ -673,9 +677,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print('  python gemini_flow_engine.py "影片描述" [時長]')
-        console.print("\n[cyan]範例：[/cyan]")
+        console.print("\n[magenta]範例：[/magenta]")
         console.print('  python gemini_flow_engine.py "一個人走進森林，發現寶藏" 30')
         sys.exit(1)
 
@@ -693,7 +697,7 @@ def main():
         console.print(f"   {output}")
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

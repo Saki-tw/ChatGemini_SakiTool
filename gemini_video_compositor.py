@@ -25,11 +25,9 @@ class VideoCompositor:
             output_dir: 輸出目錄，預設為 ~/gemini_videos/composed
         """
         if output_dir is None:
-            output_dir = os.path.join(
-                os.path.expanduser("~"),
-                "gemini_videos",
-                "composed"
-            )
+            # 使用統一輸出目錄配置
+            from utils.path_manager import get_video_dir
+            output_dir = str(get_video_dir('composed'))
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
 
@@ -46,8 +44,8 @@ class VideoCompositor:
                 check=True
             )
         except (subprocess.CalledProcessError, FileNotFoundError):
-            console.print("[red]錯誤：未找到 ffmpeg[/red]")
-            console.print("[yellow]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
+            console.print("[dim magenta]錯誤：未找到 ffmpeg[/red]")
+            console.print("[magenta]請安裝 ffmpeg：brew install ffmpeg (macOS)[/yellow]")
             raise RuntimeError("ffmpeg 未安裝")
 
     def concat_segments(
@@ -88,13 +86,13 @@ class VideoCompositor:
                 f"merged_{timestamp}.mp4"
             )
 
-        console.print(f"\n[cyan]🎬 合併影片...[/cyan]")
+        console.print(f"\n[magenta]🎬 合併影片...[/magenta]")
         console.print(f"  片段數量：{len(video_paths)}")
         console.print(f"  過渡效果：{transition}")
 
         # 禁止有損過渡效果
         if transition != "none":
-            console.print(f"\n[red]✗ 錯誤：過渡效果已禁用[/red]")
+            console.print(f"\n[dim magenta]✗ 錯誤：過渡效果已禁用[/red]")
             console.print(f"  系統禁止有損編碼以保持影片品質")
             console.print(f"  過渡效果需要重新編碼影片，會造成品質損失")
             raise ValueError(
@@ -144,9 +142,9 @@ class VideoCompositor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 合併完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 合併完成[/green]")
 
-            console.print(f"[green]✓ 影片已合併：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 影片已合併：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -164,7 +162,7 @@ class VideoCompositor:
         transition_duration: float = 0.5
     ) -> str:
         """使用 filter_complex 合併（支援過渡效果）"""
-        console.print(f"[yellow]注意：過渡效果需要重新編碼，耗時較長[/yellow]")
+        console.print(f"[magenta]注意：過渡效果需要重新編碼，耗時較長[/yellow]")
 
         # 構建 filter_complex
         filter_parts = []
@@ -231,9 +229,9 @@ class VideoCompositor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[green]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[bright_magenta]✓ 處理完成[/green]")
 
-            console.print(f"[green]✓ 影片已合併（含過渡效果）：{output_path}[/green]")
+            console.print(f"[bright_magenta]✓ 影片已合併（含過渡效果）：{output_path}[/green]")
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -263,7 +261,7 @@ class VideoCompositor:
         if not os.path.isfile(new_segment):
             raise FileNotFoundError(f"找不到新片段檔案：{new_segment}")
 
-        console.print(f"\n[cyan]✂️  替換影片片段...[/cyan]")
+        console.print(f"\n[magenta]✂️  替換影片片段...[/magenta]")
         console.print(f"  原始影片：{os.path.basename(base_video)}")
         console.print(f"  新片段：{os.path.basename(new_segment)}")
         console.print(f"  替換位置：{start_time}s")
@@ -360,7 +358,7 @@ class VideoCompositor:
         Raises:
             RuntimeError: 功能已禁用
         """
-        console.print(f"\n[red]✗ 錯誤：過渡效果功能已禁用[/red]")
+        console.print(f"\n[dim magenta]✗ 錯誤：過渡效果功能已禁用[/red]")
         console.print(f"  過渡效果需要重新編碼影片（libx264），會造成品質損失")
         console.print(f"  系統禁止有損編碼以保持影片原始品質")
 
@@ -375,9 +373,9 @@ def main():
     import sys
 
     if len(sys.argv) < 3:
-        console.print("[cyan]用法：[/cyan]")
+        console.print("[magenta]用法：[/magenta]")
         console.print("  python gemini_video_compositor.py <command> <args>")
-        console.print("\n[cyan]命令：[/cyan]")
+        console.print("\n[magenta]命令：[/magenta]")
         console.print("  concat <video1> <video2> [video3...] - 合併影片")
         console.print("  replace <base> <new_segment> <start_time> - 替換片段")
         sys.exit(1)
@@ -389,11 +387,11 @@ def main():
         if command == "concat":
             video_paths = sys.argv[2:]
             output = compositor.concat_segments(video_paths)
-            console.print(f"\n[green]✓ 合併完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 合併完成：{output}[/green]")
 
         elif command == "replace":
             if len(sys.argv) < 5:
-                console.print("[red]錯誤：replace 需要 3 個參數[/red]")
+                console.print("[dim magenta]錯誤：replace 需要 3 個參數[/red]")
                 sys.exit(1)
 
             base_video = sys.argv[2]
@@ -401,14 +399,14 @@ def main():
             start_time = float(sys.argv[4])
 
             output = compositor.replace_segment(base_video, new_segment, start_time)
-            console.print(f"\n[green]✓ 替換完成：{output}[/green]")
+            console.print(f"\n[bright_magenta]✓ 替換完成：{output}[/green]")
 
         else:
-            console.print(f"[red]未知命令：{command}[/red]")
+            console.print(f"[dim magenta]未知命令：{command}[/red]")
             sys.exit(1)
 
     except Exception as e:
-        console.print(f"\n[red]錯誤：{e}[/red]")
+        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
         sys.exit(1)

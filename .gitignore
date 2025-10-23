@@ -1,29 +1,24 @@
-# ==========================================
 # Gemini Tools - Git Ignore Configuration
-# 維護者: Saki_tw (with Claude)
-# 更新: 2025-10-20
-# ==========================================
 
-# 🔐 敏感資訊 - 絕對不可提交
+# Sensitive files
 .env
 .env.local
 .env.*.local
 *.key
 *.pem
+*_credentials.*
+*_token.*
 
-# ✅ 允許範例檔案（不包含真實資料）
+# Allow example files
 !.env.example
 
-# 🔒 內部開發資訊 - 絕對不可推送至開源版
+# Development files
 CLAUDE_SESSION_SUMMARY.md
 CHATGEMINI_FRAMEWORK.md
 *_INTERNAL.md
 *_PRIVATE.md
 *.murmur
 *.personal
-
-# ⚠️ 提醒：雖然 ~/.zshrc 在專案外，但請勿手動複製到專案內
-# 如需備份配置，使用文檔記錄而非實際檔案
 
 # 🐍 Python
 __pycache__/
@@ -35,6 +30,7 @@ __pycache__/
 
 # 📦 虛擬環境
 venv/
+venv_py314/
 .venv/
 env/
 ENV/
@@ -83,14 +79,36 @@ htmlcov/
 ehthumbs.db
 Thumbs.db
 
-# 📁 專案輸出
+# Project outputs
 gemini_conversations/
 error_logs/
 *.log
 *.bak
+*.backup
+*.backup_*
 *_backup.*
-
-# 🗑️ 臨時檔案
+*.original
 *.tmp
-*.temp
+*.tmp*
 .cache/
+Cache/
+.checkpoints/
+.embeddings/
+output/
+ChatLogs/
+Diagnostics/
+MediaOutputs/
+
+# Internal reports
+*_VIOLATIONS_REPORT.md
+*_REPORT_*.md
+DEPRECATION.md
+REFACTOR_SUMMARY.md
+PERFORMANCE_IMPROVEMENTS_*.md
+快速開始指南.md
+專案架構完整說明.md
+依賴性分析報告.md
+
+# Deprecated and experimental code
+deprecated/
+experimental/

@@ -4,7 +4,7 @@ CodeGemini Configuration Manager
 配置管理模組 - 管理所有可配置的參數
 
 功能：
-1. 資料庫配置（正交模式、相似度閾值）
+1. 資料庫配置（正交模式、向量相關係數閾值）
 2. 持久化配置到 JSON 檔案
 3. 互動式配置介面
 """
@@ -22,17 +22,46 @@ logger = logging.getLogger(__name__)
 class CodebaseEmbeddingConfig:
     """Codebase Embedding 配置"""
     enabled: bool = False
-    vector_db_path: str = ".embeddings"
+    vector_db_path: str = "embeddings"  # 相對於 Cache 目錄
     orthogonal_mode: bool = False
     similarity_threshold: float = 0.85
     collection_name: str = "codebase"
 
 
 @dataclass
+class SystemConfig:
+    """系統級配置（可由使用者覆寫 config.py 預設值）"""
+    # 模型設定
+    default_model: str = "gemini-2.5-flash"
+    max_conversation_history: int = 100
+    unlimited_memory_mode: bool = False
+
+    # 快取設定
+    auto_cache_enabled: bool = True
+    auto_cache_threshold: int = 5000
+
+    # 翻譯設定
+    translation_on_startup: bool = True
+
+    # 計價設定
+    usd_to_twd: float = 31.0
+
+    # 記憶體管理
+    memory_warning_threshold_gb: float = 1.5
+    memory_auto_cleanup: bool = True
+
+
+@dataclass
 class CodeGeminiConfig:
-    """CodeGemini 完整配置"""
+    """CodeGemini 完整配置（Tier 2: 使用者級）"""
     # Codebase Embedding 配置
     codebase_embedding: CodebaseEmbeddingConfig = field(default_factory=CodebaseEmbeddingConfig)
+
+    # 系統配置覆寫
+    system: SystemConfig = field(default_factory=SystemConfig)
+
+    # UI 設定
+    last_menu_choice: str = "1"  # 記憶上次選單選擇
 
     # 未來可擴展其他配置
     # auto_model_selection: AutoModelConfig = ...
@@ -48,7 +77,11 @@ class ConfigManager:
     - 配置驗證
     """
 
-    DEFAULT_CONFIG_PATH = Path.home() / ".codegemini" / "config.json"
+    # 使用統一快取目錄
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from utils.path_manager import get_cache_dir
+    DEFAULT_CONFIG_PATH = get_cache_dir('codegemini') / "config.json"
 
     def __init__(self, config_path: Optional[Path] = None):
         """初始化配置管理器
@@ -64,7 +97,7 @@ class ConfigManager:
         logger.info(f"✓ ConfigManager 已初始化: {self.config_path}")
 
     def load_config(self) -> CodeGeminiConfig:
-        """載入配置檔案
+        """載入配置檔案（Tier 2: 使用者級配置）
 
         Returns:
             CodeGeminiConfig 實例
@@ -77,11 +110,22 @@ class ConfigManager:
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 data = json.load(f)
 
-            # 解析配置
+            # 解析 Codebase Embedding 配置
             codebase_emb_data = data.get('codebase_embedding', {})
             codebase_emb_config = CodebaseEmbeddingConfig(**codebase_emb_data)
 
-            config = CodeGeminiConfig(codebase_embedding=codebase_emb_config)
+            # 解析系統配置覆寫
+            system_data = data.get('system', {})
+            system_config = SystemConfig(**system_data)
+
+            # 載入 UI 設定
+            last_menu_choice = data.get('last_menu_choice', "1")
+
+            config = CodeGeminiConfig(
+                codebase_embedding=codebase_emb_config,
+                system=system_config,
+                last_menu_choice=last_menu_choice
+            )
             logger.info("✓ 配置檔案已載入")
             return config
 
@@ -91,7 +135,7 @@ class ConfigManager:
             return CodeGeminiConfig()
 
     def save_config(self) -> bool:
-        """儲存配置到檔案
+        """儲存配置到檔案（Tier 2: 使用者級配置）
 
         Returns:
             是否成功
@@ -99,7 +143,9 @@ class ConfigManager:
         try:
             # 轉換為字典
             config_dict = {
-                'codebase_embedding': asdict(self.config.codebase_embedding)
+                'codebase_embedding': asdict(self.config.codebase_embedding),
+                'system': asdict(self.config.system),
+                'last_menu_choice': self.config.last_menu_choice
             }
 
             # 儲存到 JSON
@@ -107,6 +153,17 @@ class ConfigManager:
                 json.dump(config_dict, f, indent=2, ensure_ascii=False)
 
             logger.info(f"✓ 配置已儲存: {self.config_path}")
+
+            # 同步到 UnifiedConfig（如果可用）
+            try:
+                import sys
+                sys.path.insert(0, str(Path(__file__).parent.parent))
+                from config import get_config
+                unified_config = get_config()
+                unified_config.reload()
+            except:
+                pass  # UnifiedConfig 不可用，跳過同步
+
             return True
 
         except Exception as e:
@@ -135,8 +192,8 @@ class ConfigManager:
             enabled: 是否啟用
             vector_db_path: 向量資料庫路徑
             orthogonal_mode: 正交模式
-            similarity_threshold: 相似度閾值
-            collection_name: Collection 名稱
+            similarity_threshold: 向量相關係數閾值
+            collection_name: 向量資料庫集合名稱（ChromaDB collection 識別碼）
 
         Returns:
             是否成功
@@ -172,6 +229,26 @@ class ConfigManager:
         logger.info("✓ 配置已重置為預設值")
         return self.save_config()
 
+    def get_last_menu_choice(self) -> str:
+        """獲取上次選單選擇
+
+        Returns:
+            上次選擇的選項（預設為 "1"）
+        """
+        return self.config.last_menu_choice
+
+    def save_last_menu_choice(self, choice: str) -> bool:
+        """儲存選單選擇
+
+        Args:
+            choice: 選擇的選項
+
+        Returns:
+            是否成功
+        """
+        self.config.last_menu_choice = choice
+        return self.save_config()
+
     def get_config_summary(self) -> Dict[str, Any]:
         """獲取配置摘要（用於顯示）
 
@@ -179,17 +256,120 @@ class ConfigManager:
             配置摘要字典
         """
         emb_config = self.config.codebase_embedding
+        sys_config = self.config.system
 
         return {
             'config_path': str(self.config_path),
+            'tier': 'Tier 2 (使用者級配置)',
             'codebase_embedding': {
                 'enabled': emb_config.enabled,
                 'vector_db_path': emb_config.vector_db_path,
                 'orthogonal_mode': emb_config.orthogonal_mode,
                 'similarity_threshold': emb_config.similarity_threshold,
                 'collection_name': emb_config.collection_name
+            },
+            'system_overrides': {
+                'default_model': sys_config.default_model,
+                'max_conversation_history': sys_config.max_conversation_history,
+                'unlimited_memory_mode': sys_config.unlimited_memory_mode,
+                'auto_cache_enabled': sys_config.auto_cache_enabled,
+                'auto_cache_threshold': sys_config.auto_cache_threshold,
+                'translation_on_startup': sys_config.translation_on_startup,
+                'usd_to_twd': sys_config.usd_to_twd,
+                'memory_warning_threshold_gb': sys_config.memory_warning_threshold_gb,
+                'memory_auto_cleanup': sys_config.memory_auto_cleanup
             }
         }
+
+
+# 路徑驗證與建議輔助函數
+def _validate_and_suggest_path(
+    path_input: str,
+    base_dir: Optional[Path] = None,
+    create_if_missing: bool = True
+) -> tuple[str, bool]:
+    """
+    驗證路徑輸入並提供建議（✅ V-7: 路徑輸入驗證與建議）
+
+    Args:
+        path_input: 使用者輸入的路徑
+        base_dir: 基礎目錄（用於相對路徑，預設為 Cache 目錄）
+        create_if_missing: 如果路徑不存在，是否詢問創建
+
+    Returns:
+        tuple[str, bool]: (驗證後的路徑, 是否有效)
+    """
+    from rich.console import Console
+    from rich.prompt import Confirm
+    import os
+
+    console = Console()
+
+    # 處理空輸入
+    if not path_input or path_input.strip() == "":
+        console.print("[yellow]⚠ 路徑不能為空[/yellow]")
+        return (path_input, False)
+
+    # 移除首尾空白
+    path_input = path_input.strip()
+
+    # 檢查是否為相對路徑
+    path_obj = Path(path_input)
+    if not path_obj.is_absolute():
+        # 相對路徑，相對於 base_dir 或 Cache 目錄
+        if base_dir is None:
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent.parent))
+            from utils.path_manager import get_cache_dir
+            base_dir = get_cache_dir('codegemini')
+
+        path_obj = base_dir / path_input
+
+    # 驗證路徑
+    console.print(f"\n[dim]完整路徑: {path_obj}[/dim]")
+
+    # 檢查父目錄是否存在
+    parent_dir = path_obj.parent
+    if not parent_dir.exists():
+        console.print(f"[yellow]⚠ 父目錄不存在: {parent_dir}[/yellow]")
+
+        if create_if_missing:
+            if Confirm.ask("是否創建父目錄？", default=True):
+                try:
+                    parent_dir.mkdir(parents=True, exist_ok=True)
+                    console.print(f"[green]✓ 已創建父目錄[/green]")
+                except Exception as e:
+                    console.print(f"[red]✗ 創建父目錄失敗: {e}[/red]")
+                    return (path_input, False)
+            else:
+                console.print("[yellow]已取消，路徑可能無法使用[/yellow]")
+                return (path_input, False)
+
+    # 檢查路徑是否已存在
+    if path_obj.exists():
+        if path_obj.is_file():
+            console.print(f"[yellow]⚠ 此路徑指向檔案，而非目錄: {path_obj}[/yellow]")
+            console.print("[dim]建議: 向量資料庫路徑應為目錄[/dim]")
+            if not Confirm.ask("確定要使用此路徑？", default=False):
+                return (path_input, False)
+        else:
+            console.print(f"[green]✓ 路徑有效（目錄已存在）[/green]")
+    else:
+        console.print(f"[dim]路徑尚未建立，將在首次使用時自動創建[/dim]")
+
+    # 檢查寫入權限
+    try:
+        # 嘗試在父目錄創建測試檔案
+        test_file = parent_dir / ".write_test"
+        test_file.touch()
+        test_file.unlink()
+        console.print("[green]✓ 目錄可寫入[/green]")
+    except Exception as e:
+        console.print(f"[red]✗ 無寫入權限: {e}[/red]")
+        console.print("[dim]建議: 選擇有寫入權限的目錄[/dim]")
+        return (path_input, False)
+
+    return (path_input, True)
 
 
 # 互動式配置介面（使用 Rich）
@@ -209,17 +389,18 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
     while True:
         console.clear()
         console.print(Panel.fit(
-            "[bold cyan]CodeGemini 配置管理[/bold cyan]",
-            border_style="cyan"
+            "[bold magenta]CodeGemini 配置管理[/bold magenta]",
+            border_style="magenta"
         ))
 
         # 顯示當前配置
         emb_config = config_manager.config.codebase_embedding
 
         table = Table(title="[bold]Codebase Embedding 配置[/bold]", show_header=True)
-        table.add_column("設定項", style="cyan", width=25)
-        table.add_column("當前值", style="green", width=30)
-        table.add_column("說明", style="dim", width=40)
+        console_width = console.width or 120
+        table.add_column("設定項", style="magenta", width=max(20, int(console_width * 0.25)))
+        table.add_column("當前值", style="green", width=max(25, int(console_width * 0.30)))
+        table.add_column("說明", style="dim", width=max(30, int(console_width * 0.35)))
 
         table.add_row(
             "1. 啟用狀態",
@@ -237,14 +418,14 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
             "自動去重，保持內容線性獨立"
         )
         table.add_row(
-            "4. 相似度閾值",
+            "4. 向量相關係數閾值",
             f"{emb_config.similarity_threshold:.2f}",
-            "正交模式下的去重閾值 (0.0-1.0)"
+            "正交模式下的向量相關係數閾值 (0.0-1.0，值越高越相似)"
         )
         table.add_row(
-            "5. Collection 名稱",
+            "5. 向量資料庫集合名稱",
             emb_config.collection_name,
-            "向量資料庫 collection 名稱"
+            "ChromaDB 中唯一識別此程式碼庫的集合名稱"
         )
 
         console.print(table)
@@ -253,11 +434,19 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
         console.print("  7. 查看配置檔案路徑")
         console.print("  0. 返回主選單")
 
+        # ✅ V-5 修復：記憶上次選擇
+        last_choice = config_manager.get_last_menu_choice()
+
         choice = Prompt.ask(
-            "\n[bold cyan]請選擇要修改的設定[/bold cyan]",
+            "\n[bold magenta]請選擇要修改的設定[/bold magenta]",
             choices=["0", "1", "2", "3", "4", "5", "6", "7"],
-            default="0"
+            default=last_choice,
+            show_default=True
         )
+
+        # 儲存選擇（除了「返回」選項）
+        if choice != "0":
+            config_manager.save_last_menu_choice(choice)
 
         if choice == "0":
             break
@@ -269,17 +458,38 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 default=emb_config.enabled
             )
             config_manager.update_codebase_embedding_config(enabled=new_enabled)
-            console.print("[green]✓ 已更新啟用狀態[/green]")
+            console.print("[bright_magenta]✓ 已更新啟用狀態[/green]")
             console.input("\n按 Enter 繼續...")
 
         elif choice == "2":
-            # 修改向量資料庫路徑
-            new_path = Prompt.ask(
-                "請輸入新的向量資料庫路徑",
-                default=emb_config.vector_db_path
-            )
-            config_manager.update_codebase_embedding_config(vector_db_path=new_path)
-            console.print("[green]✓ 已更新向量資料庫路徑[/green]")
+            # 修改向量資料庫路徑（✅ V-7: 路徑輸入驗證與建議）
+            console.print("\n[plum]📁 向量資料庫路徑配置[/plum]")
+            console.print("[dim]· 用途: 儲存程式碼向量 embedding 資料[/dim]")
+            console.print("[dim]· 格式: 可使用相對路徑（相對於 Cache 目錄）或絕對路徑[/dim]")
+            console.print("[dim]· 當前路徑: {}[/dim]\n".format(emb_config.vector_db_path))
+
+            while True:
+                new_path = Prompt.ask(
+                    "[plum]請輸入新的向量資料庫路徑[/plum]",
+                    default=emb_config.vector_db_path
+                )
+
+                # 驗證路徑（✅ V-7 新增）
+                validated_path, is_valid = _validate_and_suggest_path(
+                    new_path,
+                    create_if_missing=True
+                )
+
+                if is_valid:
+                    config_manager.update_codebase_embedding_config(vector_db_path=validated_path)
+                    console.print("\n[bright_magenta]✓ 已更新向量資料庫路徑[/green]")
+                    break
+                else:
+                    console.print("\n[yellow]路徑驗證失敗，請重新輸入[/yellow]")
+                    if not Confirm.ask("是否重新輸入？", default=True):
+                        console.print("[dim]已取消，保留原路徑[/dim]")
+                        break
+
             console.input("\n按 Enter 繼續...")
 
         elif choice == "3":
@@ -289,53 +499,105 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 default=emb_config.orthogonal_mode
             )
             config_manager.update_codebase_embedding_config(orthogonal_mode=new_orthogonal)
-            console.print("[green]✓ 已更新正交模式[/green]")
+            console.print("[bright_magenta]✓ 已更新正交模式[/green]")
             console.input("\n按 Enter 繼續...")
 
         elif choice == "4":
-            # 修改相似度閾值
-            console.print("\n[yellow]相似度閾值說明：[/yellow]")
+            # 修改向量相關係數閾值
+            console.print("\n[plum]向量相關係數閾值說明：[/plum]")
             console.print("  - 0.95: 非常嚴格（只過濾幾乎完全相同的內容）")
             console.print("  - 0.85: 建議值（過濾高度相似的內容）")
             console.print("  - 0.75: 寬鬆（過濾明顯相似的內容）")
 
-            new_threshold_str = Prompt.ask(
-                "\n請輸入新的相似度閾值 (0.0-1.0)",
-                default=str(emb_config.similarity_threshold)
-            )
+            # ✅ M3 修復：使用選項而非自由輸入
+            console.print("\n[plum]向量相關係數閾值選項：[/plum]")
 
-            try:
-                new_threshold = float(new_threshold_str)
-                if config_manager.update_codebase_embedding_config(similarity_threshold=new_threshold):
-                    console.print("[green]✓ 已更新相似度閾值[/green]")
-                else:
-                    console.print("[red]✗ 更新失敗（閾值應在 0.0-1.0 之間）[/red]")
-            except ValueError:
-                console.print("[red]✗ 無效的數值[/red]")
+            options = {
+                "1": ("非常嚴格", 0.95),
+                "2": ("建議值", 0.85),
+                "3": ("寬鬆", 0.75),
+                "4": ("自訂", None)
+            }
+
+            for key, (desc, val) in options.items():
+                marker = "✓" if val == emb_config.similarity_threshold else " "
+                console.print(f"  {key}. [{marker}] {desc} ({val if val else '自訂'})")
+
+            choice_threshold = Prompt.ask("請選擇", choices=list(options.keys()), default="2")
+
+            if choice_threshold == "4":
+                # 僅在選擇「自訂」時才要求輸入
+                new_threshold_str = Prompt.ask(
+                    "請輸入向量相關係數閾值 (0.0-1.0)",
+                    default=str(emb_config.similarity_threshold)
+                )
+                try:
+                    new_threshold = float(new_threshold_str)
+                except ValueError:
+                    console.print("[dim magenta]✗ 無效的數值[/red]")
+                    console.input("\n按 Enter 繼續...")
+                    continue
+            else:
+                _, new_threshold = options[choice_threshold]
+
+            if config_manager.update_codebase_embedding_config(similarity_threshold=new_threshold):
+                console.print("[plum]✓ 已更新向量相關係數閾值[/plum]")
+            else:
+                console.print("[yellow]✗ 更新失敗（向量相關係數閾值應在 0.0-1.0 之間）[/yellow]")
 
             console.input("\n按 Enter 繼續...")
 
         elif choice == "5":
-            # 修改 Collection 名稱
-            new_collection = Prompt.ask(
-                "請輸入新的 Collection 名稱",
-                default=emb_config.collection_name
+            # 修改向量資料庫集合名稱（✅ M2: 中文命名明確性改善）
+            console.print("\n[plum]📋 向量資料庫集合名稱配置[/plum]")
+            console.print("[dim]· 用途說明: 在 ChromaDB 中唯一識別此程式碼庫的向量集合[/dim]")
+            console.print("[dim]· 格式限制: 僅限英文字母 (a-z, A-Z)、數字 (0-9)、底線 (_)[/dim]")
+            console.print("[dim]· 禁止內容: 空格、連字號 (-) 等特殊符號、中文字元[/dim]")
+            console.print("[dim]· 建議長度: 3-32 字元[/dim]")
+            console.print("\n[plum]✓ 有效範例:[/plum]")
+            console.print("  [orchid1]codebase_main[/orchid1] (基礎命名)")
+            console.print("  [orchid1]project_v2_embeddings[/orchid1] (含版本號)")
+            console.print("  [orchid1]ChatGemini_SakiTool[/orchid1] (專案名稱)")
+            console.print("\n[yellow]✗ 無效範例 (會被拒絕):[/yellow]")
+            console.print("  [dim]my-project[/dim] → 含連字號 (-)")
+            console.print("  [dim]code base[/dim] → 含空格")
+            console.print("  [dim]專案名稱[/dim] → 含中文字元\n")
+
+            import re
+            while True:
+                new_collection_name = Prompt.ask(
+                    "[plum]請輸入向量資料庫集合名稱 (限英數底線)[/plum]",
+                    default=emb_config.collection_name
+                )
+
+                # 格式驗證
+                if re.match(r'^[a-zA-Z0-9_]+$', new_collection_name):
+                    console.print(f"\n[plum]✓ 格式驗證通過: {new_collection_name}[/plum]")
+                    break
+                else:
+                    console.print("\n[yellow]❌ 名稱格式不符合規則[/yellow]")
+                    console.print("[dim]· 原因: 包含不允許的字元[/dim]")
+                    console.print("[dim]· 允許: 英文字母 (a-zA-Z)、數字 (0-9)、底線 (_)[/dim]")
+                    console.print("[dim]· 請參考上方有效範例重新輸入[/dim]\n")
+
+            # 更新配置
+            config_manager.update_codebase_embedding_config(
+                collection_name=new_collection_name
             )
-            config_manager.update_codebase_embedding_config(collection_name=new_collection)
-            console.print("[green]✓ 已更新 Collection 名稱[/green]")
+            console.print("[plum]✓ 已更新向量資料庫集合名稱[/plum]")
             console.input("\n按 Enter 繼續...")
 
         elif choice == "6":
             # 重置為預設配置
             if Confirm.ask("[bold red]確定要重置所有配置為預設值嗎？[/bold red]", default=False):
                 config_manager.reset_to_defaults()
-                console.print("[green]✓ 配置已重置為預設值[/green]")
+                console.print("[bright_magenta]✓ 配置已重置為預設值[/green]")
             console.input("\n按 Enter 繼續...")
 
         elif choice == "7":
             # 查看配置檔案路徑
-            console.print(f"\n[cyan]配置檔案路徑：[/cyan] {config_manager.config_path}")
-            console.print(f"[cyan]檔案存在：[/cyan] {'是' if config_manager.config_path.exists() else '否'}")
+            console.print(f"\n[magenta]配置檔案路徑：[/magenta] {config_manager.config_path}")
+            console.print(f"[magenta]檔案存在：[/magenta] {'是' if config_manager.config_path.exists() else '否'}")
             console.input("\n按 Enter 繼續...")
 
 

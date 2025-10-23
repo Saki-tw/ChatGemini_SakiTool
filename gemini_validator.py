@@ -56,12 +56,12 @@ class PreflightReport:
         status_icon = "✅" if self.overall_passed else "❌"
         status_text = "通過" if self.overall_passed else "失敗"
 
-        console.print(f"\n[bold cyan]🔍 飛行前檢查報告 {status_icon} {status_text}[/bold cyan]\n")
+        console.print(f"\n[bold magenta]🔍 飛行前檢查報告 {status_icon} {status_text}[/bold magenta]\n")
 
         # 統計
-        console.print(f"[cyan]總檢查項目：[/cyan] {len(self.checks)}")
-        console.print(f"[yellow]警告：[/yellow] {self.warnings}")
-        console.print(f"[red]錯誤：[/red] {self.errors}")
+        console.print(f"[magenta]總檢查項目：[/magenta] {len(self.checks)}")
+        console.print(f"[magenta]警告：[/yellow] {self.warnings}")
+        console.print(f"[dim magenta]錯誤：[/red] {self.errors}")
         console.print()
 
         # 詳細結果
@@ -563,35 +563,35 @@ class PreflightChecker:
         checks = []
 
         # 1. API 健康檢查
-        console.print("[cyan]🔍 檢查 API 狀態...[/cyan]")
+        console.print("[magenta]🔍 檢查 API 狀態...[/magenta]")
         checks.append(self.api_health.check_api_key())
         checks.append(self.api_health.check_network())
         checks.append(self.api_health.check_api_connectivity())
 
         # 2. 依賴檢查
-        console.print("[cyan]🔍 檢查依賴工具...[/cyan]")
+        console.print("[magenta]🔍 檢查依賴工具...[/magenta]")
         checks.append(self.dependency_checker.check_ffmpeg())
         checks.append(self.dependency_checker.check_python_packages())
 
         # 3. 參數驗證
-        console.print("[cyan]🔍 驗證參數...[/cyan]")
+        console.print("[magenta]🔍 驗證參數...[/magenta]")
         checks.extend(self.param_validator.validate_veo_parameters(
             prompt, duration, resolution, aspect_ratio
         ))
 
         # 4. 內容政策檢查
-        console.print("[cyan]🔍 檢查內容政策...[/cyan]")
+        console.print("[magenta]🔍 檢查內容政策...[/magenta]")
         checks.append(self.content_checker.check_prompt_safety(prompt))
 
         # 5. 檔案檢查
         if reference_image:
-            console.print("[cyan]🔍 檢查參考圖片...[/cyan]")
+            console.print("[magenta]🔍 檢查參考圖片...[/magenta]")
             checks.append(self.param_validator.validate_file(
                 reference_image, file_type="image"
             ))
 
         if video_to_extend:
-            console.print("[cyan]🔍 檢查延伸影片...[/cyan]")
+            console.print("[magenta]🔍 檢查延伸影片...[/magenta]")
             checks.append(self.param_validator.validate_file(
                 video_to_extend, file_type="video"
             ))
@@ -751,14 +751,14 @@ def main():
     args = parser.parse_args()
 
     # 顯示標題
-    console.print("\n[bold cyan]🔍 Gemini 預防性驗證系統[/bold cyan]\n")
+    console.print("\n[bold magenta]🔍 Gemini 預防性驗證系統[/bold magenta]\n")
 
     checker = PreflightChecker()
 
     # 執行對應的檢查
     if args.full_check:
         # 完整系統檢查
-        console.print("[yellow]執行完整系統檢查...[/yellow]\n")
+        console.print("[magenta]執行完整系統檢查...[/yellow]\n")
         report = checker.run_full_check()
         report.display()
 
@@ -784,56 +784,112 @@ def main():
 
             # 1. 安裝缺少的套件
             if missing_packages:
-                console.print(f"[yellow]發現缺少的套件：[/yellow] {', '.join(missing_packages)}")
+                console.print(f"[magenta]發現缺少的套件：[/yellow] {', '.join(missing_packages)}")
                 if Confirm.ask("是否立即安裝？", default=True):
                     import subprocess
                     try:
-                        console.print("\n[cyan]執行：[/cyan] pip install " + " ".join(missing_packages))
+                        console.print("\n[magenta]執行：[/magenta] pip install " + " ".join(missing_packages))
                         subprocess.run(
                             ["pip", "install"] + missing_packages,
                             check=True
                         )
-                        console.print("[green]✅ 套件安裝成功！[/green]\n")
+                        console.print("[bright_magenta]✅ 套件安裝成功！[/green]\n")
                     except subprocess.CalledProcessError as e:
-                        console.print(f"[red]❌ 安裝失敗：{e}[/red]\n")
+                        console.print(f"[dim magenta]❌ 安裝失敗：{e}[/red]\n")
 
             # 2. 設定 API 金鑰
             if api_key_missing:
-                console.print("[yellow]API 金鑰未設定[/yellow]")
+                console.print("[magenta]API 金鑰未設定[/yellow]")
+
+                # 顯示申請資訊
+                console.print("\n[dim]💡 申請 API 金鑰：https://aistudio.google.com/app/apikey[/dim]\n")
+
                 if Confirm.ask("是否現在設定？", default=True):
-                    from rich.prompt import Prompt
-                    api_key = Prompt.ask(
-                        "\n請輸入您的 Gemini API 金鑰",
-                        password=True
-                    )
+                    from rich.prompt import Prompt, IntPrompt
+                    from rich.table import Table
 
-                    # 提供設定選項
-                    console.print("\n[cyan]請選擇設定方式：[/cyan]")
-                    console.print("  1. 儲存到 .env 檔案（推薦）")
-                    console.print("  2. 設定環境變數（本次會話）")
-                    console.print("  3. 僅顯示設定指令")
+                    # 統一配置介面
+                    console.print("[bold bright_magenta]API 金鑰配置方式[/bold bright_magenta]")
 
-                    from rich.prompt import IntPrompt
-                    choice = IntPrompt.ask("請選擇", default=1)
+                    config_table = Table(show_header=False, box=None, padding=(0, 2))
+                    console_width = console.width or 120
+                    config_table.add_column("", style="bright_magenta", width=max(4, int(console_width * 0.03)))
+                    config_table.add_column("", style="white")
 
-                    if choice == 1:
-                        # 寫入 .env
-                        env_path = os.path.join(os.getcwd(), ".env")
-                        with open(env_path, "a") as f:
-                            f.write(f"\nGEMINI_API_KEY={api_key}\n")
-                        console.print(f"\n[green]✅ API 金鑰已儲存到：[/green] {env_path}")
-                        console.print("[yellow]提示：請重新啟動程式以載入新的 .env 設定[/yellow]")
-                    elif choice == 2:
-                        os.environ["GEMINI_API_KEY"] = api_key
-                        console.print("\n[green]✅ API 金鑰已設定（本次會話有效）[/green]")
-                    else:
-                        console.print(f"\n[cyan]請執行：[/cyan]")
-                        console.print(f"export GEMINI_API_KEY='{api_key}'")
+                    config_table.add_row("1", "直接輸入 API 金鑰")
+                    config_table.add_row("2", "從 .env 檔案載入")
+                    config_table.add_row("3", "從環境變數載入")
+
+                    console.print(config_table)
+
+                    config_choice = IntPrompt.ask("\n請選擇", choices=["1", "2", "3"], default="1", show_default=True)
+
+                    api_key = None
+
+                    if config_choice == 1:
+                        # 方式 1: 直接輸入
+                        api_key = Prompt.ask("請輸入 API 金鑰", password=True)
+
+                        # 儲存選項
+                        console.print("\n[bright_magenta]儲存位置：[/bright_magenta]")
+                        console.print("  1. .env 檔案（推薦）")
+                        console.print("  2. 環境變數（本次會話）")
+                        console.print("  3. 僅顯示設定指令")
+
+                        save_choice = IntPrompt.ask("請選擇", default=1)
+
+                        if save_choice == 1:
+                            env_path = os.path.join(os.getcwd(), ".env")
+                            with open(env_path, "a") as f:
+                                f.write(f"\nGEMINI_API_KEY={api_key}\n")
+                            console.print(f"\n[bright_magenta]✅ 已儲存到 {env_path}[/bright_magenta]")
+                            console.print("[magenta]提示：請重新啟動程式以載入設定[/yellow]")
+                        elif save_choice == 2:
+                            os.environ["GEMINI_API_KEY"] = api_key
+                            console.print("\n[bright_magenta]✅ 已設定（本次會話有效）[/bright_magenta]")
+                        else:
+                            console.print(f"\n[bright_magenta]請執行：[/bright_magenta]")
+                            console.print(f"export GEMINI_API_KEY='{api_key}'")
+
+                    elif config_choice == 2:
+                        # 方式 2: 從檔案載入
+                        default_env_path = os.path.join(os.getcwd(), ".env")
+                        env_file_path = Prompt.ask("請輸入 .env 檔案路徑", default=default_env_path)
+                        env_file_path = os.path.expanduser(env_file_path)
+
+                        if os.path.exists(env_file_path):
+                            try:
+                                with open(env_file_path, 'r') as f:
+                                    for line in f:
+                                        if line.strip().startswith('GEMINI_API_KEY='):
+                                            api_key = line.strip().split('=', 1)[1].strip('\'"')
+                                            os.environ["GEMINI_API_KEY"] = api_key
+                                            console.print(f"\n[bright_magenta]✅ 已從 {env_file_path} 載入[/bright_magenta]")
+                                            break
+                                if not api_key:
+                                    console.print(f"[magenta]⚠ 檔案中未找到 GEMINI_API_KEY[/yellow]")
+                            except Exception as e:
+                                console.print(f"[red]❌ 讀取失敗：{e}[/red]")
+                        else:
+                            console.print(f"[red]❌ 檔案不存在：{env_file_path}[/red]")
+
+                    elif config_choice == 3:
+                        # 方式 3: 從環境變數載入
+                        env_var_name = Prompt.ask("請輸入環境變數名稱", default="GEMINI_API_KEY")
+                        api_key = os.getenv(env_var_name)
+
+                        if api_key:
+                            os.environ["GEMINI_API_KEY"] = api_key
+                            console.print(f"\n[bright_magenta]✅ 已從環境變數 {env_var_name} 載入[/bright_magenta]")
+                        else:
+                            console.print(f"[magenta]⚠ 環境變數 {env_var_name} 未設定[/yellow]")
+                            console.print(f"\n[bright_magenta]請先執行：[/bright_magenta]")
+                            console.print(f"export {env_var_name}='your_api_key_here'")
 
             # 3. 安裝 ffmpeg
             if ffmpeg_missing:
-                console.print("[yellow]ffmpeg 未安裝[/yellow]")
-                console.print("\n[cyan]安裝指令（依平台選擇）：[/cyan]")
+                console.print("[magenta]ffmpeg 未安裝[/yellow]")
+                console.print("\n[magenta]安裝指令（依平台選擇）：[/magenta]")
                 console.print("  macOS:   brew install ffmpeg")
                 console.print("  Ubuntu:  sudo apt install ffmpeg")
                 console.print("  Windows: choco install ffmpeg")
@@ -844,15 +900,15 @@ def main():
 
             # 重新檢查
             if missing_packages or api_key_missing:
-                console.print("\n[cyan]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/cyan]")
+                console.print("\n[magenta]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/magenta]")
                 if Confirm.ask("是否重新執行檢查？", default=True):
-                    console.print("\n[yellow]重新執行系統檢查...[/yellow]\n")
+                    console.print("\n[magenta]重新執行系統檢查...[/yellow]\n")
                     report = checker.run_full_check()
                     report.display()
 
     elif args.check_veo:
         # Veo 參數檢查
-        console.print(f"[yellow]檢查 Veo 影片生成參數...[/yellow]\n")
+        console.print(f"[magenta]檢查 Veo 影片生成參數...[/yellow]\n")
         console.print(f"  提示詞: {args.check_veo}")
         console.print(f"  時長: {args.duration} 秒")
         console.print(f"  解析度: {args.resolution}")
@@ -875,12 +931,13 @@ def main():
 
         if duration_error and args.duration > 8:
             console.print("\n[bold yellow]💡 智能建議[/bold yellow]")
-            console.print(f"[cyan]您想要生成 {args.duration} 秒的影片，但 Veo 3.1 限制為 8 秒。[/cyan]")
-            console.print(f"[cyan]我可以幫您使用 Flow Engine 自動分段生成！[/cyan]\n")
+            console.print(f"[magenta]您想要生成 {args.duration} 秒的影片，但 Veo 3.1 限制為 8 秒。[/magenta]")
+            console.print(f"[magenta]我可以幫您使用 Flow Engine 自動分段生成！[/magenta]\n")
 
             from rich.prompt import Confirm
-            if Confirm.ask("是否使用 Flow Engine 生成長影片？", default=True):
-                console.print("\n[green]✅ 正在啟動 Flow Engine...[/green]\n")
+            # ✅ M1 修復：合併為單次確認，移除後續的「立即執行」重複確認
+            if Confirm.ask("是否使用 Flow Engine 立即生成長影片？", default=True):
+                console.print("\n[bright_magenta]✅ 正在啟動 Flow Engine...[/green]\n")
 
                 # 計算分段數量
                 num_segments = (args.duration + 7) // 8  # 向上取整
@@ -888,40 +945,37 @@ def main():
                 # 生成 Flow Engine 指令
                 flow_command = f"python3 gemini_flow_demo.py --prompt \"{args.check_veo}\" --duration {args.duration}"
 
-                console.print(f"[cyan]執行指令：[/cyan]")
+                console.print(f"[magenta]執行指令：[/magenta]")
                 console.print(f"[bold]{flow_command}[/bold]\n")
 
-                from rich.prompt import Confirm
-                if Confirm.ask("立即執行？", default=True):
-                    import subprocess
-                    try:
-                        console.print("[yellow]啟動 Flow Engine...[/yellow]\n")
-                        result = subprocess.run(
-                            flow_command.split(),
-                            check=True,
-                            capture_output=False
-                        )
-                        console.print("\n[green]✅ Flow Engine 執行完成！[/green]")
-                        return 0
-                    except FileNotFoundError:
-                        console.print("\n[red]❌ gemini_flow_demo.py 不存在[/red]")
-                        console.print("[yellow]請手動執行上述指令[/yellow]")
-                    except subprocess.CalledProcessError as e:
-                        console.print(f"\n[red]❌ 執行失敗：{e}[/red]")
-                else:
-                    console.print("\n[yellow]您可以稍後手動執行上述指令[/yellow]")
+                # ✅ M1 修復：移除重複確認，直接執行（已在上方確認過）
+                import subprocess
+                try:
+                    console.print("[magenta]啟動 Flow Engine...[/yellow]\n")
+                    result = subprocess.run(
+                        flow_command.split(),
+                        check=True,
+                        capture_output=False
+                    )
+                    console.print("\n[bright_magenta]✅ Flow Engine 執行完成！[/green]")
+                    return 0
+                except FileNotFoundError:
+                    console.print("\n[dim magenta]❌ gemini_flow_demo.py 不存在[/red]")
+                    console.print("[magenta]請手動執行上述指令[/yellow]")
+                except subprocess.CalledProcessError as e:
+                    console.print(f"\n[dim magenta]❌ 執行失敗：{e}[/red]")
             else:
-                console.print("\n[yellow]好的，請調整參數後重試[/yellow]")
+                console.print("\n[magenta]好的，請調整參數後重試[/yellow]")
 
     elif args.check_prompt:
         # 提示詞檢查
-        console.print(f"[yellow]檢查提示詞內容政策...[/yellow]\n")
+        console.print(f"[magenta]檢查提示詞內容政策...[/yellow]\n")
         results = ContentPolicyChecker.check_prompt(args.check_prompt)
 
         has_error = False
         for result in results:
             if result.passed:
-                console.print(f"[green]✅ {result.message}[/green]")
+                console.print(f"[bright_magenta]✅ {result.message}[/green]")
             else:
                 has_error = True
                 level_color = {
@@ -939,8 +993,8 @@ def main():
         if has_error:
             console.print("\n[bold yellow]💡 智能建議[/bold yellow]")
             if len(args.check_prompt) < 10:
-                console.print("[cyan]您的提示詞太短，我可以幫您擴展！[/cyan]\n")
-                console.print(f"[yellow]原始提示詞：[/yellow] {args.check_prompt}")
+                console.print("[magenta]您的提示詞太短，我可以幫您擴展！[/magenta]\n")
+                console.print(f"[magenta]原始提示詞：[/yellow] {args.check_prompt}")
 
                 examples = [
                     f"{args.check_prompt}, cinematic lighting, high quality, 4K",
@@ -948,7 +1002,7 @@ def main():
                     f"{args.check_prompt}, professional photography, stunning visuals"
                 ]
 
-                console.print("\n[cyan]建議的擴展版本：[/cyan]")
+                console.print("\n[magenta]建議的擴展版本：[/magenta]")
                 for i, ex in enumerate(examples, 1):
                     console.print(f"  {i}. {ex}")
 
@@ -957,8 +1011,8 @@ def main():
 
                 if choice in [1, 2, 3]:
                     selected = examples[choice - 1]
-                    console.print(f"\n[green]✅ 已選擇：[/green] {selected}")
-                    console.print("\n[cyan]重新執行驗證...[/cyan]\n")
+                    console.print(f"\n[bright_magenta]✅ 已選擇：[/green] {selected}")
+                    console.print("\n[magenta]重新執行驗證...[/magenta]\n")
 
                     # 重新驗證
                     import sys
@@ -967,21 +1021,21 @@ def main():
                 elif choice == 0:
                     from rich.prompt import Prompt
                     new_prompt = Prompt.ask("\n請輸入新的提示詞")
-                    console.print("\n[cyan]重新執行驗證...[/cyan]\n")
+                    console.print("\n[magenta]重新執行驗證...[/magenta]\n")
                     import sys
                     sys.argv = ["gemini_validator.py", "--check-prompt", new_prompt]
                     return main()
 
     elif args.check_file:
         # 檔案檢查
-        console.print(f"[yellow]檢查檔案...[/yellow]\n")
+        console.print(f"[magenta]檢查檔案...[/yellow]\n")
         results = ParameterValidator.validate_file(args.check_file)
 
         for result in results:
             if result.passed:
-                console.print(f"[green]✅ {result.message}[/green]")
+                console.print(f"[bright_magenta]✅ {result.message}[/green]")
             else:
-                console.print(f"[red]❌ {result.message}[/red]")
+                console.print(f"[dim magenta]❌ {result.message}[/red]")
                 if result.suggestions:
                     console.print("   建議：")
                     for sug in result.suggestions:
@@ -989,14 +1043,14 @@ def main():
 
     elif args.check_api:
         # API 檢查
-        console.print("[yellow]檢查 API 連接狀態...[/yellow]\n")
+        console.print("[magenta]檢查 API 連接狀態...[/yellow]\n")
         api_checks = APIHealthChecker.check_api_status()
 
         for check in api_checks:
             if check.passed:
-                console.print(f"[green]✅ {check.message}[/green]")
+                console.print(f"[bright_magenta]✅ {check.message}[/green]")
             else:
-                console.print(f"[red]❌ {check.message}[/red]")
+                console.print(f"[dim magenta]❌ {check.message}[/red]")
                 if check.suggestions:
                     console.print("   建議：")
                     for sug in check.suggestions:
@@ -1004,7 +1058,7 @@ def main():
 
     else:
         # 沒有指定任何選項，執行簡單測試
-        console.print("[yellow]執行基本測試...[/yellow]\n")
+        console.print("[magenta]執行基本測試...[/yellow]\n")
         console.print("[dim]提示：使用 --help 查看所有選項[/dim]\n")
 
         report = checker.check_veo_generation(
