@@ -253,12 +253,18 @@ class SceneDetector:
                 input_tokens = getattr(response.usage_metadata, 'prompt_tokens', 0)
                 output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
 
-                cost, _ = global_pricing_calculator.calculate_text_cost(
+                cost, details = global_pricing_calculator.calculate_text_cost(
                     self.model_name,
                     input_tokens,
                     output_tokens,
                     thinking_tokens
                 )
+
+                # 顯示成本資訊
+                if cost > 0:
+                    console.print(f"[dim]💰 場景檢測成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
+                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+                    console.print(f"[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f} USD)[/dim]")
 
             return response.text.strip()
 

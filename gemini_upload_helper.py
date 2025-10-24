@@ -759,14 +759,20 @@ def upload_file(
     file_size = os.path.getsize(file_path)
     file_size_mb = file_size / (1024 ** 2)
 
-    # 永遠使用分塊上傳器（支援斷點續傳）
+    # 永遠使用分塊上傳器(支援斷點續傳)
     try:
         uploader = ChunkedUploader(client)
-        return uploader.upload_with_resume(
+        uploaded_file = uploader.upload_with_resume(
             file_path=file_path,
             display_name=display_name,
             mime_type=mime_type
         )
+
+        # 顯示檔案上傳成功提示和成本警告
+        console.print(f"[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]")
+        console.print(f"[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]")
+
+        return uploaded_file
     except Exception as e:
         console.print(f"\n[dim magenta]✗ 上傳失敗：{e}[/red]\n")
 
@@ -782,11 +788,17 @@ def upload_file(
             # 使用推薦配置：更小的分塊 + 更多重試
             uploader_retry = ChunkedUploader(client)
             uploader_retry.CHUNK_SIZE = 2 * 1024 * 1024  # 降為 2MB
-            return uploader_retry.upload_with_resume(
+            uploaded_file_retry = uploader_retry.upload_with_resume(
                 file_path=file_path,
                 display_name=display_name,
                 mime_type=mime_type
             )
+
+            # 顯示檔案上傳成功提示和成本警告
+            console.print(f"[dim]📁 檔案已上傳: {uploaded_file_retry.name}[/dim]")
+            console.print(f"[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]")
+
+            return uploaded_file_retry
         else:
             console.print("[yellow]已取消上傳[/yellow]")
             raise

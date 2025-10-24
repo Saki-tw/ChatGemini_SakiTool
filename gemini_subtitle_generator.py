@@ -363,6 +363,10 @@ ffmpeg 錯誤碼：{e.returncode}
                 uploaded_file = self.client.files.upload(path=audio_path)
                 progress.update(task, completed=100, description="[bright_magenta]✓ 上傳完成[/green]")
 
+        # 顯示成本警告
+        console.print(f"[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]")
+        console.print(f"[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]")
+
         # 等待處理完成
         while uploaded_file.state.name == "PROCESSING":
             import time

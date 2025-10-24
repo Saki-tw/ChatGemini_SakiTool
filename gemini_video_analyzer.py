@@ -203,6 +203,9 @@ class VideoAnalyzer:
 
         console.print(f"[bright_magenta]✓ 檔案名稱：{video_file.name}[/green]")
 
+        # 顯示成本警告
+        console.print(f"[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]")
+
         # 等待處理完成
         video_file = self._wait_for_processing(video_file)
 

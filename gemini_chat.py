@@ -697,6 +697,47 @@ def extract_thinking_process(response) -> Optional[str]:
 
 
 
+def format_long_input_display(text: str, threshold_lines: int = 10, threshold_chars: int = 500) -> tuple:
+    """
+    檢測長文本並返回簡潔顯示格式（類似 Claude）
+
+    Args:
+        text: 用戶輸入的文本
+        threshold_lines: 行數閾值，超過此值視為長文本（預設 10 行）
+        threshold_chars: 單行字符閾值，超過此值視為長文本（預設 500 字符）
+
+    Returns:
+        tuple: (是否為長文本, 顯示文本, 原始文本)
+    """
+    if not text:
+        return (False, text, text)
+
+    lines = text.split('\n')
+    line_count = len(lines)
+    char_count = len(text)
+
+    # 檢查是否為長文本
+    is_long = line_count > threshold_lines or (line_count == 1 and char_count > threshold_chars)
+
+    if is_long:
+        # 生成簡潔顯示格式
+        if line_count > 1:
+            # 多行文本
+            extra_lines = line_count - 1
+            # 顯示第一行的前 50 個字符
+            first_line_preview = lines[0][:50] + ("..." if len(lines[0]) > 50 else "")
+            display_text = f"[📋 已貼上文本 +{extra_lines} 行] {first_line_preview}"
+        else:
+            # 單行超長文本
+            preview = text[:50] + "..."
+            display_text = f"[📋 已貼上長文本 ({char_count} 字元)] {preview}"
+
+        return (True, display_text, text)
+    else:
+        # 正常長度文本，直接返回
+        return (False, text, text)
+
+
 def get_user_input(prompt_text: str = "你: ") -> str:
     """
     獲取使用者輸入（支援 prompt_toolkit 增強功能）
@@ -2868,6 +2909,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 continue
 
             # 一般對話訊息 - 完整處理流程
+            # 0. 檢測長文本輸入並顯示簡潔格式（保存原始內容用於 API）
+            is_long_text, display_text, original_input = format_long_input_display(user_input)
+            if is_long_text:
+                # 顯示簡潔格式給用戶
+                console.print(f"\n[dim]{display_text}[/dim]\n")
+                # 保存原始完整文本用於 API 調用
+                # user_input 保持不變，繼續使用原始內容
+
             # 1. 解析快取即時控制
             user_input, cache_action = module_loader.get("cache").parse_cache_control(user_input, auto_cache_mgr)
 
