@@ -20,6 +20,10 @@ from rich.table import Table
 from rich.panel import Panel
 from google import genai
 
+# 導入價格模組
+from utils.pricing_loader import get_pricing_calculator, PRICING_ENABLED
+from gemini_pricing import USD_TO_TWD
+
 console = Console()
 
 
@@ -113,6 +117,9 @@ class TaskPlanner:
         self.client = genai.Client(api_key=self.api_key)
         self.model = 'gemini-2.0-flash-exp'  # 使用最新的 Flash 模型
 
+        # 初始化計價器
+        self.pricing = get_pricing_calculator(silent=True)
+
     def analyze_request(self, user_request: str) -> TaskAnalysis:
         """
         分析使用者請求
@@ -146,6 +153,25 @@ class TaskPlanner:
                 model=self.model,
                 contents=prompt
             )
+
+            # 提取並計算成本
+            if PRICING_ENABLED and self.pricing:
+                thinking_tokens = getattr(response.usage_metadata, 'thinking_tokens', 0)
+                input_tokens = getattr(response.usage_metadata, 'prompt_tokens', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
+
+                cost, details = self.pricing.calculate_text_cost(
+                    self.model,
+                    input_tokens,
+                    output_tokens,
+                    thinking_tokens
+                )
+
+                # 顯示成本資訊
+                if cost > 0:
+                    console.print(f"[dim]💰 請求分析成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
+                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+                    console.print(f"[dim]   累計成本: NT${self.pricing.total_cost * USD_TO_TWD:.2f} (${self.pricing.total_cost:.6f} USD)[/dim]")
 
             # 解析回應
             response_text = response.text.strip()
@@ -330,6 +356,25 @@ class TaskPlanner:
                 model=self.model,
                 contents=prompt
             )
+
+            # 提取並計算成本
+            if PRICING_ENABLED and self.pricing:
+                thinking_tokens = getattr(response.usage_metadata, 'thinking_tokens', 0)
+                input_tokens = getattr(response.usage_metadata, 'prompt_tokens', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
+
+                cost, details = self.pricing.calculate_text_cost(
+                    self.model,
+                    input_tokens,
+                    output_tokens,
+                    thinking_tokens
+                )
+
+                # 顯示成本資訊
+                if cost > 0:
+                    console.print(f"[dim]💰 執行計畫生成成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
+                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+                    console.print(f"[dim]   累計成本: NT${self.pricing.total_cost * USD_TO_TWD:.2f} (${self.pricing.total_cost:.6f} USD)[/dim]")
 
             # 解析回應
             response_text = response.text.strip()

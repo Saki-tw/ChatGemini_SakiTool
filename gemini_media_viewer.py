@@ -26,7 +26,14 @@ try:
 except ImportError:
     GENAI_AVAILABLE = False
 
+# 導入價格模組
+from utils.pricing_loader import get_pricing_calculator, PRICING_ENABLED
+from gemini_pricing import USD_TO_TWD
+
 console = Console()
+
+# 初始化價格計算器
+global_pricing_calculator = get_pricing_calculator(silent=True)
 
 # 支援的檔案格式
 IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg', '.ico'}
@@ -339,6 +346,25 @@ class MediaViewer:
                 model='gemini-2.0-flash-exp',
                 contents=[uploaded_file, prompt]
             )
+
+            # 提取並計算成本
+            if PRICING_ENABLED and global_pricing_calculator:
+                thinking_tokens = getattr(response.usage_metadata, 'thinking_tokens', 0)
+                input_tokens = getattr(response.usage_metadata, 'prompt_tokens', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
+
+                cost, details = global_pricing_calculator.calculate_text_cost(
+                    'gemini-2.0-flash-exp',
+                    input_tokens,
+                    output_tokens,
+                    thinking_tokens
+                )
+
+                # 顯示成本資訊
+                if cost > 0:
+                    self.console.print(f"[dim]💰 分析成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
+                    self.console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+                    self.console.print(f"[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f} USD)[/dim]")
 
             # 顯示結果
             self.console.print(Panel(
