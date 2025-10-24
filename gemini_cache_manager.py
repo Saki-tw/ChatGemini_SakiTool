@@ -195,6 +195,41 @@ class CacheManager:
                 )
             )
 
+            # 提取並計算成本（含快取折扣）
+            if PRICING_ENABLED and global_pricing_calculator:
+                cached_tokens = getattr(response.usage_metadata, 'cached_content_token_count', 0)
+                thinking_tokens = getattr(response.usage_metadata, 'thinking_tokens', 0)
+                input_tokens = getattr(response.usage_metadata, 'prompt_tokens', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
+
+                # 計算成本
+                cost, details = global_pricing_calculator.calculate_text_cost(
+                    cache.model,
+                    input_tokens,
+                    output_tokens,
+                    thinking_tokens
+                )
+
+                # 顯示成本資訊（含快取折扣說明）
+                if cost > 0 or cached_tokens > 0:
+                    console.print(f"\n[dim]💰 查詢成本 (使用快取): NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
+                    console.print(f"[dim]   快取 tokens: {cached_tokens:,} (90% 折扣)[/dim]")
+                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+
+                    # 計算如果不使用快取的成本
+                    if cached_tokens > 0:
+                        full_cost, _ = global_pricing_calculator.calculate_text_cost(
+                            cache.model,
+                            input_tokens + cached_tokens,  # 不使用快取需要全額付費
+                            output_tokens,
+                            thinking_tokens
+                        )
+                        savings = full_cost - cost
+                        savings_percent = (savings / full_cost * 100) if full_cost > 0 else 0
+                        console.print(f"[dim]   💸 節省成本: NT${savings * USD_TO_TWD:.2f} (約 {savings_percent:.0f}%)[/dim]")
+
+                    console.print(f"[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f} USD)[/dim]\n")
+
             console.print("[magenta]Gemini (使用快取)：[/magenta]")
             console.print(response.text)
 

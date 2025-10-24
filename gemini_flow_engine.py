@@ -18,6 +18,7 @@ from google.genai import types
 # 共用工具模組
 from utils.api_client import get_gemini_client, get_api_key
 from utils.pricing_loader import get_pricing_calculator, PRICING_ENABLED
+from gemini_pricing import USD_TO_TWD
 
 # 導入記憶體管理模組
 from gemini_memory_manager import (
@@ -56,6 +57,10 @@ except ImportError:
         def __init__(self):
             pass
     def retry_on_error(*args, **kwargs):
+        """Stub decorator when error handling is not available"""
+        def decorator(func):
+            return func
+        return decorator
 
 # 導入預防性驗證模組
 try:
@@ -76,14 +81,10 @@ except ImportError:
         @staticmethod
         def validate_veo_parameters(*args, **kwargs):
             return []
-        """Stub decorator when error handling is not available"""
-        def decorator(func):
-            return func
-        # 如果第一個參數是函數，直接返回（無參數裝飾器）
-        if args and callable(args[0]):
-            return args[0]
-        # 否則返回裝飾器（有參數裝飾器）
-        return decorator
+    class ContentPolicyChecker:
+        @staticmethod
+        def check_compliance(*args, **kwargs):
+            return []
 
 # Console
 console = Console()
@@ -194,6 +195,25 @@ class FlowEngine:
                 model='gemini-2.0-flash-exp',
                 contents=prompt
             )
+
+            # 提取並計算成本
+            if PRICING_ENABLED and self.pricing:
+                thinking_tokens = getattr(response.usage_metadata, 'thinking_tokens', 0)
+                input_tokens = getattr(response.usage_metadata, 'prompt_tokens', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
+
+                cost, details = self.pricing.calculate_text_cost(
+                    'gemini-2.0-flash-exp',
+                    input_tokens,
+                    output_tokens,
+                    thinking_tokens
+                )
+
+                # 顯示成本資訊
+                if cost > 0:
+                    console.print(f"[dim]💰 分段計畫生成成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
+                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+                    console.print(f"[dim]   累計成本: NT${self.pricing.total_cost * USD_TO_TWD:.2f} (${self.pricing.total_cost:.6f} USD)[/dim]")
 
             # 解析回應
             response_text = response.text.strip()

@@ -1,44 +1,202 @@
 # ChatGemini_SakiTool
-Complete Gemini AI Toolkit
+**Save 90% API Costs! Lightweight Vector Database! MCP Integration! One-Command Complete Gemini AI Toolkit**
 
 > **⚠️ IMPORTANT NOTICE**
 > **This is a Taiwan-made software. The user interface is in Traditional Chinese ONLY.**
 > **English interface is NOT supported. This README is provided for reference purposes only.**
 > **本軟體為台灣製作，介面僅支援繁體中文，不支援英文介面。**
 
-This is a powerful Google Gemini AI toolkit featuring conversation, image analysis, video analysis, video generation, cache management, and more.
-Requires Gemini API Key.
-Free tier includes 2 million tokens per month for Gemini 2.5 Pro.
-Come and take advantage of the free tier!
+---
 
-**Project Name**: ChatGemini_SakiTool  
-**Version**: v1.0.2  
-**Author**: Saki-tw, Claude Code  
-**Contact**: Saki@saki-studio.com.tw  
-**Last Updated**: 2025-10-24  
+## 💡 Why Use This Tool?
+
+> **"I just wanted to save some API costs, and ended up building a complete toolkit"**
+> —— Saki-Tw (Saki@saki-studio.com.tw with Claude)
+
+This project started as my personal tool to **reduce Gemini API costs**. Through continuous optimization, I added features like auto-caching, vector databases, and smart triggers, eventually becoming a fully-featured, user-friendly AI toolkit.
+
+Since it works so well, I decided to open-source it for everyone!
+
+### 🎯 Core Highlights
+
+#### 💰 Auto Save 75-90% Costs
+- **Context Caching**: Automatically accumulates conversation content to build cache
+- **Flash model saves 90%**, Pro model saves 75%
+- 5000 tokens cache costs only NT$0.16, saves NT$0.36 per subsequent query
+- **Break-even after 1 query**, completely effortless savings
+
+#### 🗄️ Lightweight Vector Database
+- **SQLite + NumPy + FAISS** implementation, no ChromaDB needed
+- Automatic vectorization and indexing of code/conversation history
+- **FAISS IndexFlatIP**: Query speed reduced from O(n) to O(log n)
+- Incremental updates (single-file updates) + parallel processing
+- Orthogonal deduplication mode (similarity threshold 0.85)
+
+#### 🔌 MCP Server System
+- **Model Context Protocol** integration
+- Smart detection and auto-loading
+- Seamless AI functionality extension
+
+#### ⚡ One-Line Install, Instant Use
+```bash
+git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_SakiTool && sh INSTALL.sh --auto
+```
+- Fully automated, no interaction required
+- Auto-detects OS (macOS/Linux)
+- After installation, type `ChatGemini` from **anywhere** to launch
+
+---
+
+## 📦 Project Information
+
+**Project Name**: ChatGemini_SakiTool
+**Version**: v1.0.3
+**Author**: Saki-tw, Claude Code
+**Contact**: Saki@saki-studio.com.tw
+**Last Updated**: 2025-10-24
+
+**Apply for API Key**: https://aistudio.google.com/app/apikey
+**Free Monthly Quota**: Gemini 2.5 Pro offers 2 million tokens (≈1500 pages of A4 documents)
 
 ---
 
 ---
 
-## ✨ Main Features
+## 🔥 Version History
 
-### 💬 Conversation (gemini_chat.py)
+### 📅 v1.0.3 (2025-10-24) — Latest Version
 
-#### 🆕 v1.0.1 New Features
-- **✨ Advanced Text Interface**: Integrated prompt-toolkit with arrow key history, Tab completion, auto-suggestions
-- **🧠 Dynamic Thinking Mode**: Real-time AI thinking depth control `[think:5000]` `[no-think]` `[think:auto]`
-- **📎 Smart File Attachment**: Auto-detect text files (direct read) vs media files (upload API)
-- **💾 Auto Cache Management**: Save 75-90% API costs with smart triggering and cost analysis
-- **📖 Interactive Help System**: Built-in 6 topic menus, no external documentation needed
+#### ⚙️ System Architecture Optimization
+- **Unified Configuration System**: Three-tier architecture (system defaults → user config → env variables)
+- **Memory Management Optimization**: Auto-archive conversation history, keep latest 50 active conversations
+- **Smart Path Management**: Unified output path management, auto-create necessary directories
 
-#### Core Features
-- **Streaming Output**: Real-time AI response display, no waiting for full generation
-- **Large Text Support**: Paste thousands of lines of code or long text, no character limit (2 million tokens)
-- **Perfect Chinese Support**: Correctly handles Traditional Chinese punctuation and encoding
+#### 🛡️ Enhanced Error Handling
+- **Smart Error Diagnosis**: Auto-analyze error causes, provide solution suggestions
+- **Preventive Validation System**: "Pre-flight check" mechanism, validate API status, dependencies, parameters
+- **Auto-fix Suggestions**: Guide API key setup, provide installation commands for missing tools
+
+#### 🤖 CodeGemini Code Assistant
+- **Vector Database Search**: Quick query of conversation history and code snippets
+- **Multi-file Editing**: Smart cross-file editing operations
+- **MCP Server Integration**: Model Context Protocol support
+
+---
+
+### 🎉 v1.0.1 — Major Feature Update
+
+#### 💬 Advanced Interactive Experience
+- **Advanced Text Interface**: Arrow key history navigation, Tab completion, auto-suggestions
+- **Dynamic Thinking Mode**: Control AI thinking depth (`[think:5000]` fixed, `[think:auto]` automatic, `[no-think]` disable)
+- **Smart File Attachment**: Auto-detect text files (30+ formats) vs media files (API upload)
+
+#### 💰 Auto Cost-Saving System
+- **Auto Cache Management**: Auto-create cache when threshold reached (default 5000 tokens)
+- **Cost Analysis**: Display savings percentage and break-even point
+- **Manual Control**: Support `[cache:now]`, `[cache:off]`, `[no-cache]` commands
+
+#### 🎯 User Experience Improvements
+- **Interactive Help System**: Built-in 6-topic menu, type `help` in conversation
+- **TWD Pricing**: Real-time cost display in NT$ (New Taiwan Dollars)
+
+---
+
+### 🌟 v1.0.0 — Core Features (Initial Release)
+
+#### 💬 Smart Conversation
+- **Streaming Output**: Real-time AI response display
+- **Large Text Support**: Paste thousands of lines of code (2 million tokens limit)
+- **Perfect Chinese Support**: Correct handling of Traditional Chinese
 - **Multi-model Support**: Gemini 2.5 Pro, 2.5 Flash, 2.5 Flash-8B, 2.0 Flash
-- **Conversation Log Management**: Auto-save conversations to JSON files, load history support
-- **TWD Pricing**: Real-time cost display in New Taiwan Dollars
+- **Conversation Logging**: Auto-save to JSON, load history
+
+#### 📷 Image Understanding
+- **Image Description**: Detailed scene and atmosphere description
+- **OCR**: Multi-language text extraction
+- **Object Detection**: Identify and locate objects
+- **Image Comparison**: Analyze differences
+- **Visual Q&A**: Answer questions about images
+- **Batch Processing**: Analyze multiple images
+- **Interactive Mode**: Multi-turn Q&A
+
+#### 📹 Video Understanding
+- **Video Analysis**: Upload and analyze video content
+- **Format Support**: mp4, mov, avi, webm, etc.
+- **Smart Processing**: Auto-wait for processing completion
+- **Interactive Dialogue**: Multi-turn Q&A about videos
+- **Long Video Support**: Up to 2 hours (Gemini 2.5 Pro)
+
+#### 🎬 Video Generation (Veo 3.1)
+- **Text-to-Video**: Generate 8-second 720p/1080p videos
+- **Native Audio**: Auto-generate dialogue, sound effects, background music
+- **Aspect Ratios**: Support 16:9, 9:16, 1:1
+- **Reference Images**: Use up to 3 images to guide generation
+- **Video Extension**: Extend generated videos
+
+#### 🎞️ Natural Language Video Editing (Flow Engine)
+- **Processing**: 1080p 24fps
+- **Scene Detection**: Auto-identify scene changes
+- **Smart Cropping**: Crop segments by description
+- **Filters**: B&W, vintage, sharpen, blur, etc.
+- **Speed Adjustment**: Slow motion (0.5x), fast forward (2x)
+- **Watermark**: Custom position and transparency
+
+#### 🎵 Audio Processing
+- **Audio Extraction**: Extract audio from videos
+- **Audio Merging**: Merge multiple audio files
+- **Volume Adjustment**: Normalization, gain control
+- **Fade In/Out**: Smooth transitions
+- **Background Music**: Add and mix background music
+
+#### 📝 Subtitle Generation
+- **Speech Recognition**: Auto-generate subtitles (multi-language)
+- **Translation**: Support multiple languages
+- **Formats**: SRT, VTT
+- **Subtitle Burning**: Embed subtitles into videos
+
+#### 🖼️ Image Generation (Imagen)
+- **Text-to-Image**: Generate images from descriptions
+- **Image Editing**: Edit existing images
+- **Upscaling**: Enhance resolution
+- **Aspect Ratios**: 1:1, 16:9, 9:16
+- **Batch Generation**: Generate multiple images
+
+---
+
+## ✨ Complete Feature List
+
+### 📊 Vector Database System (Codebase Embedding)
+- **Code Indexing**: Build code vector database
+- **Conversation Search**: Search conversation history
+- **Orthogonal Deduplication**: Ensure linear independence
+- **Similarity Threshold**: Adjustable (default 0.85)
+- **FAISS High-speed Index**: Query complexity from O(n) to O(log n)
+- **Incremental Updates**: Single-file updates without full rebuild
+- **Parallel Processing**: ThreadPoolExecutor for multi-file processing
+
+### ⚡ Performance Monitoring
+- **CPU Monitoring**: Track CPU usage
+- **Memory Monitoring**: Track memory usage
+- **Operation Timing**: Record execution times
+- **Bottleneck Analysis**: Identify performance issues
+- **Report Export**: JSON format reports
+
+### 🛡️ Error Handling
+- **Auto-retry**: Configurable retry count, delay, exponential backoff
+- **Detailed Error Messages**: Rich-formatted with suggested solutions
+- **Failure Recovery**: Checkpoint mechanism, save/load/recover
+- **Error Logging**: JSONL format logs, statistics
+- **Severity Levels**: LOW, MEDIUM, HIGH, CRITICAL
+
+### 🚀 Advanced Features (Experimental)
+
+**AI Clip Advisor**: Auto-identify highlights, engagement scoring, editing suggestions
+**Smart Video Summary**: Multi-level summaries, chapter markers, key topic extraction
+**Batch Processing**: Task scheduling, parallel processing (up to 3 tasks), progress tracking
+**Smart Triggers**: Intent detection, auto function triggering
+**Related Conversation Suggestions**: History search, smart top-3 recommendations
+**Media Viewer**: Metadata viewing, AI analysis integration
+**Performance Optimization**: LRU cache, parallel processing, memory management
 
 ### 📷 Image Understanding (gemini_image_analyzer.py)
 - **Image Description**: Detailed description of image content, scenes, atmosphere
@@ -172,28 +330,31 @@ Copy and paste this command into your terminal:
 git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_SakiTool && sh INSTALL.sh --auto
 ```
 
-**Fully Automated Installation**:
+**Fully Automated Installation (Full Version, ~550 MB)**:
 - Auto-detect OS (macOS/Linux)
-- Auto-install basic version (~500MB)
+- Auto-install **ChatGemini + CodeGemini** (Full Version)
 - No interaction or authorization required
 
 After installation:
 1. Restart terminal (or run `source ~/.zshrc` / `source ~/.bashrc`)
 2. Type `ChatGemini` from **any location** to launch
 
-**Auto-installed Components**:
-- Python 3.10+, pip, ffmpeg
-- google-genai, google-generativeai, python-dotenv
-- rich, prompt-toolkit, Pillow, deep-translator
-- google-cloud-translate, ffmpeg-python, numpy
-- psutil, requests, pyyaml, html2text
-- beautifulsoup4, cachetools
+**Included Features**:
+- ✅ **ChatGemini**: Conversation, image/video analysis & generation, auto-caching
+- ✅ **CodeGemini**: Code assistant, vector database search, MCP integration
+
+**Installed Packages**:
+- **Python Environment**: Python 3.10+, pip, ffmpeg
+- **AI Packages**: google-genai, google-generativeai, python-dotenv
+- **UI Packages**: rich, prompt-toolkit, Pillow, deep-translator
+- **Utility Packages**: ffmpeg-python, numpy, psutil, requests, pyyaml
+- **CodeGemini Packages**: Node.js 18+, npm, Google Cloud SDK, @google/generative-ai
 
 ---
 
-### Interactive Installation (Advanced Users)
+### Interactive Installation (Custom Scope)
 
-For custom installation scope (full version includes Node.js, Google Cloud SDK):
+To choose installation scope (Basic vs Full):
 
 ```bash
 git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git
@@ -201,7 +362,18 @@ cd ChatGemini_SakiTool
 sh INSTALL.sh
 ```
 
-Installation process will guide you to select scope (basic 500MB / full 550MB)
+Installation process will guide you to choose:
+
+**[1] Basic Version (~500 MB)**
+- ChatGemini conversation tool
+- Image/video analysis & generation
+- Auto-caching system
+
+**[2] Full Version (~550 MB, Recommended)**
+- All Basic version features
+- CodeGemini code assistant
+- Vector database search
+- MCP Server integration
 
 ### Method 2: Manual Installation
 
@@ -236,7 +408,7 @@ pip install -r requirements.txt
 - `google-genai>=1.45.0` - New SDK
 - `python-dotenv>=1.0.0` - Environment variable management
 - `rich>=13.0.0` - Terminal beautification
-- `prompt-toolkit>=3.0.0` - Advanced input features (v2.1 added)
+- `prompt-toolkit>=3.0.0` - Advanced input features (v1.0.1 added)
 - `Pillow>=10.0.0` - Image processing
 
 4. **Set API Key**
@@ -427,7 +599,7 @@ Special thanks to: 曾公益中, 蔡師傅律安.
 **Enjoy chatting with Gemini AI!** 🎉
 
 **Last Updated**: 2025-10-24
-**Version**: v1.0.2
+**Version**: v1.0.3
 **Python Version**: 3.10+
 
 ---

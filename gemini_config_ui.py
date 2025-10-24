@@ -10,6 +10,27 @@ from datetime import datetime
 from rich.console import Console
 from rich.panel import Panel
 
+# 檢查 prompt_toolkit 可用性
+try:
+    from prompt_toolkit import prompt
+    from prompt_toolkit.completion import WordCompleter, Completer, Completion
+    from prompt_toolkit.history import InMemoryHistory
+    from prompt_toolkit.styles import Style
+    from prompt_toolkit.key_binding import KeyBindings
+    PROMPT_TOOLKIT_AVAILABLE = True
+except ImportError:
+    PROMPT_TOOLKIT_AVAILABLE = False
+
+# 檢查 CodeGemini 可用性
+try:
+    from CodeGemini import CodeGemini
+    CODEGEMINI_ENABLED = True
+except ImportError:
+    CODEGEMINI_ENABLED = False
+
+# 檢查 Codebase Embedding 可用性（預設為 False）
+CODEBASE_EMBEDDING_ENABLED = False
+
 # 從 gemini_chat.py 導入必要的常量
 RECOMMENDED_MODELS = {
     "1": ("gemini-2.5-pro", "最強大模型，適合複雜任務"),

@@ -8,7 +8,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
-PROJECT_VERSION="2.2.0"
+PROJECT_VERSION="1.0.3"
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 VENV_DIR="${SCRIPT_DIR}/venv_py314"
 DETECTED_OS=""
@@ -61,9 +61,9 @@ select_os() {
 }
 
 select_installation() {
-    # 自動模式：預設安裝基礎版
+    # 自動模式：預設安裝完整版（含 CodeGemini）
     if [[ "$AUTO_MODE" == true ]]; then
-        INSTALL_CODEGEMINI=false
+        INSTALL_CODEGEMINI=true
         return
     fi
 
@@ -75,23 +75,33 @@ select_installation() {
     echo -e "${CYAN}╚════════════════════════════════════════╝${NC}"
     echo ""
 
-    echo -e "${BOLD}[1] 基礎版${NC} ${BLUE}(約 500 MB)${NC}"
+    echo -e "${BOLD}[1] 基礎版 (ChatGemini)${NC} ${BLUE}(約 500 MB)${NC}"
     echo ""
     echo "將安裝："
-    echo "  • Homebrew, Python 3.10+, pip, ffmpeg"
-    echo "  • google-genai, google-generativeai, python-dotenv"
-    echo "  • rich, prompt-toolkit, Pillow, deep-translator"
-    echo "  • google-cloud-translate, ffmpeg-python, numpy"
-    echo "  • psutil, requests, pyyaml, html2text"
-    echo "  • beautifulsoup4, cachetools"
+    echo "  • ChatGemini 對話工具"
+    echo "  • 圖像/影片分析與生成"
+    echo "  • 自動快取系統"
+    echo ""
+    echo "包含套件："
+    echo "  • Python 3.10+, pip, ffmpeg"
+    echo "  • google-genai, rich, prompt-toolkit"
+    echo "  • Pillow, numpy, requests 等"
     echo ""
 
-    echo -e "${BOLD}[2] 完整版${NC} ${BLUE}(約 550 MB)${NC}"
+    echo -e "${BOLD}[2] 完整版 (ChatGemini + CodeGemini)${NC} ${BLUE}(約 550 MB，推薦)${NC}"
     echo ""
     echo "將安裝："
-    echo "  • 基礎版所有元件"
-    echo "  • Node.js 18+, npm, Google Cloud SDK"
+    echo "  • 基礎版所有功能"
+    echo "  • CodeGemini 程式碼助手"
+    echo "  • 向量資料庫搜尋（Codebase Embedding）"
+    echo "  • MCP Server 整合"
+    echo ""
+    echo "額外套件："
+    echo "  • Node.js 18+, npm"
+    echo "  • Google Cloud SDK"
     echo "  • @google/generative-ai"
+    echo ""
+    echo -e "${GREEN}推薦選擇完整版，只多 50 MB 但功能更強大${NC}"
     echo ""
 
     read -p "選擇 [1/2]: " -n 1 -r INSTALL_CHOICE
