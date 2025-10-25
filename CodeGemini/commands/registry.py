@@ -100,7 +100,7 @@ class CommandRegistry:
         """
         # 驗證名稱
         if not name or not isinstance(name, str):
-            console.print(f"[dim magenta]錯誤：命令名稱無效[/red]")
+            console.print(f"[dim magenta]錯誤：命令名稱無效[/dim magenta]")
             return False
 
         # 檢查是否已存在
@@ -110,7 +110,7 @@ class CommandRegistry:
         # 註冊命令
         self.commands[name] = template
 
-        console.print(f"[bright_magenta]✓ 已註冊命令：{name}[/green]")
+        console.print(f"[bright_magenta]✓ 已註冊命令：{name}[/bright_magenta]")
 
         # 儲存到配置檔
         if save_to_config:
@@ -129,16 +129,16 @@ class CommandRegistry:
             bool: 是否成功取消註冊
         """
         if name not in self.commands:
-            console.print(f"[dim magenta]錯誤：命令 '{name}' 不存在[/red]")
+            console.print(f"[dim magenta]錯誤：命令 '{name}' 不存在[/dim magenta]")
             return False
 
         # 檢查是否為內建命令
         if self.commands[name].command_type == CommandType.BUILTIN:
-            console.print(f"[dim magenta]錯誤：無法取消註冊內建命令[/red]")
+            console.print(f"[dim magenta]錯誤：無法取消註冊內建命令[/dim magenta]")
             return False
 
         del self.commands[name]
-        console.print(f"[bright_magenta]✓ 已取消註冊命令：{name}[/green]")
+        console.print(f"[bright_magenta]✓ 已取消註冊命令：{name}[/bright_magenta]")
 
         # 儲存到配置檔
         self._save_commands()
@@ -193,7 +193,7 @@ class CommandRegistry:
                 args
             )
 
-            console.print(f"[bright_magenta]✓ 命令已渲染[/green]")
+            console.print(f"[bright_magenta]✓ 命令已渲染[/bright_magenta]")
 
             # 記錄歷史
             self._add_to_history(name, args, rendered)
@@ -216,7 +216,7 @@ class CommandRegistry:
             )
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：{e}[/red]")
+            console.print(f"[dim magenta]錯誤：{e}[/dim magenta]")
             return CommandResult(
                 success=False,
                 output="",
@@ -276,7 +276,7 @@ class CommandRegistry:
             int: 成功導入的命令數量
         """
         if not os.path.exists(config_file):
-            console.print(f"[dim magenta]錯誤：配置檔不存在：{config_file}[/red]")
+            console.print(f"[dim magenta]錯誤：配置檔不存在：{config_file}[/dim magenta]")
             return 0
 
         console.print(f"\n[magenta]📥 導入命令：{config_file}[/magenta]")
@@ -289,7 +289,7 @@ class CommandRegistry:
                 elif config_file.endswith('.json'):
                     data = json.load(f)
                 else:
-                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/red]")
+                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/dim magenta]")
                     return 0
 
             # 解析命令
@@ -322,11 +322,11 @@ class CommandRegistry:
             if count > 0:
                 self._save_commands()
 
-            console.print(f"[bright_magenta]✓ 成功導入 {count} 個命令[/green]")
+            console.print(f"[bright_magenta]✓ 成功導入 {count} 個命令[/bright_magenta]")
             return count
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：導入失敗 - {e}[/red]")
+            console.print(f"[dim magenta]錯誤：導入失敗 - {e}[/dim magenta]")
             return 0
 
     def export_commands(self, output_file: str) -> bool:
@@ -370,14 +370,14 @@ class CommandRegistry:
                 elif output_file.endswith('.json'):
                     json.dump(data, f, ensure_ascii=False, indent=2)
                 else:
-                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/red]")
+                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/dim magenta]")
                     return False
 
-            console.print(f"[bright_magenta]✓ 成功匯出 {len(commands_data)} 個命令[/green]")
+            console.print(f"[bright_magenta]✓ 成功匯出 {len(commands_data)} 個命令[/bright_magenta]")
             return True
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：匯出失敗 - {e}[/red]")
+            console.print(f"[dim magenta]錯誤：匯出失敗 - {e}[/dim magenta]")
             return False
 
     def show_command_details(self, name: str):
@@ -385,7 +385,7 @@ class CommandRegistry:
         command = self.get_command(name)
 
         if not command:
-            console.print(f"[dim magenta]命令 '{name}' 不存在[/red]")
+            console.print(f"[dim magenta]命令 '{name}' 不存在[/dim magenta]")
             return
 
         # 建立詳情面板

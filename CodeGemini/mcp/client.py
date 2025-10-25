@@ -19,17 +19,20 @@ import os
 import json
 import subprocess
 import asyncio
-from typing import Optional, Dict, List, Any
+import shutil
+from typing import Optional, Dict, List, Any, Tuple
 from dataclasses import dataclass
 from pathlib import Path
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
-# 匯入智慧偵測器
+# 匯入智慧偵測器和 Registry 客戶端
 try:
     from .detector import MCPServerDetector
+    from .registry import MCPRegistry
 except ImportError:
     from detector import MCPServerDetector
+    from registry import MCPRegistry
 
 console = Console()
 
@@ -99,6 +102,194 @@ class MCPClient:
         home_config = Path.home() / ".codegemini" / "mcp-config.json"
         return str(home_config)
 
+    def _should_auto_enable_google_drive(self) -> Tuple[bool, str]:
+        """
+        偵測是否應自動啟用 Google Drive MCP Server
+
+        檢查項目：
+        1. Google Cloud SDK (gcloud) 是否安裝
+        2. Google 認證檔案是否存在
+        3. GOOGLE_APPLICATION_CREDENTIALS 環境變數
+        4. OAuth 認證檔案
+
+        Returns:
+            Tuple[bool, str]: (是否啟用, 偵測原因)
+        """
+        # 檢查 gcloud CLI
+        if shutil.which('gcloud'):
+            # 檢查是否已登入
+            gcloud_config = Path.home() / ".config" / "gcloud"
+            if gcloud_config.exists():
+                return (True, "偵測到 Google Cloud SDK 且已設定")
+
+        # 檢查 Google 應用程式認證
+        if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
+            cred_path = Path(os.environ['GOOGLE_APPLICATION_CREDENTIALS'])
+            if cred_path.exists():
+                return (True, "偵測到 GOOGLE_APPLICATION_CREDENTIALS")
+
+        # 檢查常見的 Google 認證位置
+        common_cred_paths = [
+            Path.home() / ".config" / "gcloud" / "application_default_credentials.json",
+            Path.home() / ".credentials" / "drive-python-quickstart.json",
+            Path.home() / ".google" / "credentials.json"
+        ]
+
+        for cred_path in common_cred_paths:
+            if cred_path.exists():
+                return (True, f"偵測到 Google 認證檔案：{cred_path.name}")
+
+        # 檢查 Google Drive 相關環境變數
+        if os.environ.get('GDRIVE_CLIENT_ID') or os.environ.get('GOOGLE_CLIENT_ID'):
+            return (True, "偵測到 Google Drive 環境變數")
+
+        return (False, "未偵測到 Google 認證")
+
+    def _should_auto_enable_slack(self) -> Tuple[bool, str]:
+        """
+        偵測是否應自動啟用 Slack MCP Server
+
+        檢查項目：
+        1. SLACK_BOT_TOKEN 環境變數
+        2. SLACK_TEAM_ID 環境變數
+        3. ~/.slack/ 配置目錄
+
+        Returns:
+            Tuple[bool, str]: (是否啟用, 偵測原因)
+        """
+        # 檢查環境變數
+        if os.environ.get('SLACK_BOT_TOKEN'):
+            return (True, "偵測到 SLACK_BOT_TOKEN 環境變數")
+
+        if os.environ.get('SLACK_API_TOKEN'):
+            return (True, "偵測到 SLACK_API_TOKEN 環境變數")
+
+        # 檢查 Slack 配置目錄
+        slack_config = Path.home() / ".slack"
+        if slack_config.exists() and any(slack_config.iterdir()):
+            return (True, "偵測到 ~/.slack/ 配置")
+
+        return (False, "未偵測到 Slack 設定")
+
+    def _should_auto_enable_postgres(self) -> Tuple[bool, str]:
+        """
+        偵測是否應自動啟用 PostgreSQL MCP Server
+
+        檢查項目：
+        1. psql 指令是否可用
+        2. PostgreSQL 連線字串環境變數
+        3. ~/.pgpass 檔案
+        4. 本地 PostgreSQL 是否運行
+
+        Returns:
+            Tuple[bool, str]: (是否啟用, 偵測原因)
+        """
+        # 檢查 psql 是否安裝
+        if not shutil.which('psql'):
+            return (False, "未安裝 PostgreSQL 客戶端")
+
+        # 檢查連線字串環境變數
+        pg_env_vars = [
+            'DATABASE_URL',
+            'POSTGRES_CONNECTION_STRING',
+            'POSTGRESQL_URL',
+            'PG_CONNECTION_STRING'
+        ]
+
+        for env_var in pg_env_vars:
+            if os.environ.get(env_var):
+                return (True, f"偵測到 {env_var} 環境變數")
+
+        # 檢查 .pgpass 檔案
+        pgpass = Path.home() / ".pgpass"
+        if pgpass.exists():
+            return (True, "偵測到 ~/.pgpass 認證檔案")
+
+        # 檢查本地 PostgreSQL 是否運行（簡單測試）
+        try:
+            result = subprocess.run(
+                ['psql', '-U', 'postgres', '-c', 'SELECT 1', '-t'],
+                capture_output=True,
+                timeout=2
+            )
+            if result.returncode == 0:
+                return (True, "偵測到本地 PostgreSQL 運行中")
+        except:
+            pass
+
+        # psql 已安裝但無明確配置，保守不啟用
+        return (False, "已安裝 psql 但未偵測到資料庫設定")
+
+    def _should_auto_enable_puppeteer(self) -> Tuple[bool, str]:
+        """
+        偵測是否應自動啟用 Puppeteer MCP Server
+
+        檢查項目：
+        1. Chrome/Chromium 是否安裝
+        2. 專案中是否有網頁相關檔案
+
+        Returns:
+            Tuple[bool, str]: (是否啟用, 偵測原因)
+        """
+        # 檢查 Chrome/Chromium
+        browsers = ['google-chrome', 'chromium', 'chromium-browser', 'chrome']
+        for browser in browsers:
+            if shutil.which(browser):
+                return (True, f"偵測到瀏覽器：{browser}")
+
+        # 檢查 macOS Chrome
+        mac_chrome = Path("/Applications/Google Chrome.app")
+        if mac_chrome.exists():
+            return (True, "偵測到 Google Chrome (macOS)")
+
+        # Puppeteer 比較通用，預設不啟用
+        return (False, "未偵測到 Chrome/Chromium")
+
+    def _auto_enable_disabled_servers(self, config: Dict) -> List[str]:
+        """
+        智慧偵測並自動啟用 disabled servers
+
+        Args:
+            config: MCP 配置字典
+
+        Returns:
+            List[str]: 自動啟用的 server 名稱列表
+        """
+        auto_enabled = []
+
+        # 偵測規則對應表
+        detection_rules = {
+            'google-drive': self._should_auto_enable_google_drive,
+            'slack': self._should_auto_enable_slack,
+            'postgres': self._should_auto_enable_postgres,
+            'puppeteer': self._should_auto_enable_puppeteer
+        }
+
+        # 處理 mcpServers 字典格式（官方格式）
+        mcp_servers = config.get('mcpServers', {})
+
+        for server_name, server_config in mcp_servers.items():
+            # 只處理 disabled 的 server
+            if not server_config.get('disabled', False):
+                continue
+
+            # 檢查是否有偵測規則
+            if server_name not in detection_rules:
+                continue
+
+            # 執行偵測
+            should_enable, reason = detection_rules[server_name]()
+
+            if should_enable:
+                # 自動啟用
+                server_config['disabled'] = False
+                auto_enabled.append(server_name)
+
+                console.print(f"[dim magenta]🔍 智慧啟用：{server_name}[/dim magenta]")
+                console.print(f"[dim]   原因：{reason}[/dim]")
+
+        return auto_enabled
+
     def load_config(self) -> None:
         """從配置檔載入 MCP 伺服器"""
         console.print(f"\n[magenta]📡 載入 MCP 配置：{self.config_path}[/magenta]")
@@ -107,10 +298,22 @@ class MCPClient:
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 config = json.load(f)
 
-            # 載入伺服器配置
-            for server_config in config.get('servers', []):
+            # 智慧偵測並自動啟用 disabled servers
+            auto_enabled = self._auto_enable_disabled_servers(config)
+            if auto_enabled:
+                console.print(f"[dim magenta]✨ 自動啟用 {len(auto_enabled)} 個 Server[/dim magenta]\n")
+
+            # 載入伺服器配置（處理 mcpServers 字典格式）
+            enabled_servers = []
+            mcp_servers = config.get('mcpServers', {})
+
+            for server_name, server_config in mcp_servers.items():
+                # 跳過仍為 disabled 的伺服器
+                if server_config.get('disabled', False):
+                    continue
+
                 server = MCPServer(
-                    name=server_config['name'],
+                    name=server_name,
                     command=server_config['command'],
                     args=server_config.get('args', []),
                     env=server_config.get('env'),
@@ -118,8 +321,12 @@ class MCPClient:
                     capabilities=server_config.get('capabilities', [])
                 )
                 self.servers[server.name] = server
+                enabled_servers.append(server.name)
 
-            console.print(f"[bright_magenta]✓ 載入 {len(self.servers)} 個 MCP 伺服器[/green]")
+            console.print(f"[bright_magenta]✓ 載入 {len(self.servers)} 個 MCP 伺服器[/bright_magenta]")
+
+            # 動態檢查環境變數需求（非阻塞）
+            self._check_env_requirements(enabled_servers)
 
         except FileNotFoundError:
             console.print(f"[magenta]⚠️  配置檔不存在：{self.config_path}[/yellow]")
@@ -127,6 +334,43 @@ class MCPClient:
             console.print(f"[dim magenta]✗ 配置檔格式錯誤：{e}[/red]")
         except Exception as e:
             console.print(f"[dim magenta]✗ 載入配置失敗：{e}[/red]")
+
+    def _check_env_requirements(self, server_names: List[str]) -> None:
+        """
+        檢查伺服器環境變數需求（非阻塞）
+
+        Args:
+            server_names: 要檢查的伺服器名稱列表
+        """
+        servers_with_missing_vars = []
+
+        for server_name in server_names:
+            check_result = MCPRegistry.check_env_vars(server_name)
+
+            # 只提示有缺失環境變數的伺服器
+            if check_result['missing']:
+                servers_with_missing_vars.append({
+                    'name': server_name,
+                    'missing': check_result['missing'],
+                    'required': check_result['required']
+                })
+
+        # 如果有伺服器缺少環境變數，顯示友善提示
+        if servers_with_missing_vars:
+            console.print(f"\n[yellow]💡 環境變數提示[/yellow]")
+            console.print(f"[dim]以下 MCP Server 需要環境變數才能完整運作：[/dim]\n")
+
+            for server_info in servers_with_missing_vars:
+                console.print(f"[yellow]• {server_info['name']}[/yellow]")
+                for var in server_info['missing']:
+                    desc = server_info['required'].get(var, '無說明')
+                    console.print(f"  [dim]✗ {var}[/dim]")
+                    console.print(f"    [dim]{desc}[/dim]")
+
+            console.print(f"\n[dim]💡 設定方式：[/dim]")
+            console.print(f"[dim]  export VARIABLE_NAME=\"your_value\"[/dim]")
+            console.print(f"[dim]或在 ~/.bashrc / ~/.zshrc 中永久設定[/dim]")
+            console.print(f"[dim]未設定環境變數的 Server 仍可載入，但部分功能可能受限[/dim]\n")
 
     def list_servers(self) -> List[MCPServer]:
         """列出所有已配置的伺服器"""
@@ -171,7 +415,7 @@ class MCPClient:
             )
 
             self.processes[server_name] = process
-            console.print(f"[bright_magenta]✓ 伺服器已啟動（PID: {process.pid}）[/green]")
+            console.print(f"[bright_magenta]✓ 伺服器已啟動（PID: {process.pid}）[/bright_magenta]")
 
             # 發現工具
             self._discover_tools(server_name)
@@ -211,7 +455,7 @@ class MCPClient:
                 process.wait()
 
             del self.processes[server_name]
-            console.print(f"[bright_magenta]✓ 伺服器已停止[/green]")
+            console.print(f"[bright_magenta]✓ 伺服器已停止[/bright_magenta]")
             return True
 
         except Exception as e:
@@ -225,7 +469,7 @@ class MCPClient:
         for server_name in list(self.processes.keys()):
             self.stop_server(server_name)
 
-        console.print(f"[bright_magenta]✓ 所有伺服器已停止[/green]")
+        console.print(f"[bright_magenta]✓ 所有伺服器已停止[/bright_magenta]")
 
     def _discover_tools(self, server_name: str) -> None:
         """
@@ -364,7 +608,7 @@ class MCPClient:
             # 發送請求（這裡是模擬，實際應透過 stdio 通訊）
             # 實際實作需要使用 MCP SDK 或實作完整的 JSON-RPC 通訊
 
-            console.print(f"[bright_magenta]✓ 工具調用成功[/green]")
+            console.print(f"[bright_magenta]✓ 工具調用成功[/bright_magenta]")
 
             # 模擬回應
             return {

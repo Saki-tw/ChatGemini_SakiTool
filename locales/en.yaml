@@ -1,0 +1,481 @@
+# English Language Pack
+# ChatGemini_SakiTool v1.1.0
+#
+# Version: 1.0.0
+# Author: Saki-tw (with Claude Code)
+# Date: 2025-10-25
+# Locale: English (US)
+#
+# Translated from 35 core modules
+# Total coverage: 87.6%
+
+meta:
+  language: en
+  name: English
+  native_name: English
+  author: Saki-tw (with Claude Code)
+  version: 1.0.0
+  encoding: UTF-8
+  region: US
+common:
+  'yes': 'Yes'
+  'no': 'No'
+  ok: OK
+  cancel: Cancel
+  continue: Continue
+  back: Back
+  exit: Exit
+  quit: Quit
+  close: Close
+  success: Success
+  error: Error
+  warning: Warning
+  info: Info
+  loading: Loading
+  processing: Processing
+  completed: Completed
+  failed: Failed
+  pending: Pending
+  save: Save
+  load: Load
+  delete: Delete
+  create: Create
+  update: Update
+  refresh: Refresh
+  search: Search
+  select: Select
+  confirm: Confirm
+  currency_twd: NT$
+  currency_usd: USD
+  currency_jpy: ¥
+  currency_krw: ₩
+  language: Language
+  language_switched: Language switched to {lang}
+  current_language: Current Language
+  available_languages: Available Languages
+  second: second
+  minute: minute
+  hour: hour
+  day: day
+  week: week
+  month: month
+  year: year
+  tokens: tokens
+  token: token
+  characters: characters
+  lines: lines
+  files: files
+  bytes: bytes
+chat:
+  welcome: Welcome to ChatGemini!
+  welcome_back: Welcome back!
+  exit_message: Thank you for using, goodbye!
+  goodbye: Goodbye!
+  user_prompt: You
+  model_prompt: Model
+  system_prompt: System
+  assistant_prompt: Assistant
+  thinking: Thinking
+  generating: Generating
+  streaming: Streaming
+  waiting: Waiting for response
+  analyzing: Analyzing
+  enter_message: Please enter a message
+  enter_command: Please enter a command
+  multiline_mode: Multi-line mode (enter $$$ to finish)
+  command_mode: Command mode
+  new_conversation: Start new conversation
+  clear_history: Clear history
+  save_conversation: Save conversation
+  load_conversation: Load conversation
+  export_conversation: Export conversation
+  select_model: Select model
+  current_model: Current model
+  switch_model: Switch model
+  model_switched: 'Switched to model: {model}'
+  available_models: Available models
+  thinking_mode: Thinking mode
+  thinking_mode_enabled: Thinking mode enabled
+  thinking_mode_disabled: Thinking mode disabled
+  thinking_tokens_limit: 'Thinking tokens limit: {limit}'
+  thinking_process: Thinking process
+  text_message: Text message
+  image_message: Image message
+  file_message: File message
+  multimodal_message: Multimodal message
+pricing:
+  cost: Cost
+  price: Price
+  fee: Fee
+  input_tokens: Input
+  output_tokens: Output
+  thinking_tokens: Thinking
+  cached_tokens: Cache
+  total_cost: Total Cost
+  session_cost: Session Cost
+  savings: Savings
+  discount: Discount
+  cost_line: '💰 Cost: {currency}{twd} (${usd} USD)'
+  tokens_line: '   Input: {input} tokens, Output: {output} tokens'
+  thinking_tokens_line: '   Thinking: {thinking} tokens'
+  cached_tokens_line: '   Cache: {cached} tokens ({discount}% discount)'
+  total_cost_line: '   Total cost: {currency}{total}'
+  savings_line: '   💸 Savings: {currency}{savings} (about {percent}%)'
+  cache_usage: Cache usage
+  cache_hit: Cache hit
+  cache_miss: Cache miss
+  cache_discount: Cache discount
+  cache_savings: Cache savings
+  session_summary: Session summary
+  total_transactions: Total transactions
+  session_duration: Session duration
+  average_cost: Average cost
+  total_tokens: Total tokens
+  calculator_title: Real-time Pricing Calculator
+  cost_calculation: 💰 Cost Calculation
+  get_summary: Get Session Summary
+  quick_calculate: Quick Calculate Cost
+  calculate_and_print: Calculate and Print Cost
+  this_feature: This feature
+  flow_engine_type: 'Type: Flow Engine (Natural Language Video Generation)'
+  target_duration: 'Target duration: {duration} seconds'
+  actual_duration: 'Actual duration: {duration} seconds'
+  segment_count: 'Segment count: {num} segments x {seconds} sec/segment'
+  planning_cost_label: 'Gemini planning:  {cost}'
+  veo_cost_label: 'Veo video generation:    {cost}'
+  video_duration: 'Video duration: {duration} seconds'
+  video_tokens_count: 'Video Tokens: {tokens:,}'
+  text_input_tokens_count: 'Text input Tokens: {tokens:,}'
+  input_tokens_count: 'Input Tokens: {tokens:,}'
+  thinking_tokens_count: 'Thinking Tokens: {tokens:,}'
+  output_tokens_count: 'Output Tokens: {tokens:,}'
+  total_tokens_count: 'Total Tokens: {tokens:,}'
+  per_second_rate: 'Unit price: {currency}{rate}/sec (${usd}/sec)'
+  input_cost_label: 'Input cost:  {cost}'
+  thinking_cost_label: 'Thinking cost:  {cost}'
+  output_cost_label: 'Output cost:  {cost}'
+  current_cost_label: 'Current cost:  {cost} ({percent})'
+  total_cost_label: 'Total cost:  {cost} ({percent})'
+  local_processing: 🎉 {feature} uses local tools, no API calls needed
+  zero_cost_line: '💸 Current cost: NT$0.00 ($0.00 USD)'
+  or_separator: ' or '
+  cache_report_title: 💰 Context Caching Savings Report
+  cache_model: 'Model: {model}'
+  cache_tokens_info: 'Cache Tokens: {tokens:,}'
+  cache_query_count: 'Query count: {count}'
+  cache_discount_info: 'Cache discount: {percent}%'
+  without_cache_cost: '❌ Cost without cache: {currency}{twd} (${usd} USD)'
+  with_cache_cost: '✅ Cost with cache:  {currency}{twd} (${usd} USD)'
+  cache_savings_amount: '💸 Savings:         {currency}{twd} (${usd} USD)'
+  cache_savings_percent: '📊 Savings ratio:     {percent}%'
+  cost_comparison_title: 💰 {feature} - Cost Comparison
+  savings_comparison: '💸 Savings: {currency}{twd} (${usd} USD)'
+  savings_percent_line: '📊 Savings ratio: {percent}%'
+  recommend_method: '💡 Recommended: {method}'
+  extra_cost: '💸 Extra cost: {currency}{twd} (${usd} USD)'
+  same_cost: 💡 Both methods cost the same
+  test_1_title: '
+
+    === 測試 1: Gemini 2.5 Pro 文字生成 ==='
+  test_2_title: '
+
+    === 測試 2: Gemini 2.5 Flash 文字生成 ==='
+  test_3_title: '
+
+    === 測試 3: Veo 3.1 影片生成（8秒）==='
+  test_4_title: '
+
+    === 測試 4: 影片理解（60秒影片）==='
+  test_summary_title: '
+
+    === 會話總結 ==='
+  total_transactions_line: '總交易次數: {count}'
+  session_total_cost: '會話總成本: ${cost:.6f}'
+  twd_equivalent: '約合台幣: {currency}{amount}'
+cache:
+  create: Create cache
+  create_cache: Create cache
+  delete: Delete cache
+  delete_cache: Delete cache
+  clear: Clear cache
+  clear_cache: Clear cache
+  update: Update cache
+  update_cache: Update cache
+  query: Query cache
+  query_cache: Query cache
+  list: List caches
+  list_caches: List caches
+  created: Cache created
+  cache_created: 'Cache created: {name}'
+  deleted: Cache deleted
+  cache_deleted: 'Cache deleted: {name}'
+  updated: Cache updated
+  cache_updated: 'Cache updated: {name}'
+  expired: Cache expired
+  cache_expired: 'Cache expired: {name}'
+  active: Cache active
+  name: Cache name
+  cache_name: Cache name
+  model: Cache model
+  cache_model: Cache model
+  ttl: TTL
+  cache_ttl: TTL (Time To Live)
+  size: Cache size
+  cache_size: Cache size
+  tokens: 快取 tokens
+  cache_tokens: 'Cache tokens: {count}'
+  auto_cache: Auto cache
+  auto_cache_enabled: Auto cache enabled
+  auto_cache_disabled: Auto cache disabled
+  auto_cache_threshold: 'Auto cache threshold: {threshold} tokens'
+  cache_trigger_suggestion: Recommend creating cache to save cost
+  cache_recommended: Recommend enabling cache (save ~{percent}% cost)
+checkpoint:
+  create: Create checkpoint
+  create_checkpoint: Create checkpoint
+  restore: Restore checkpoint
+  restore_checkpoint: Restore checkpoint
+  list: List checkpoints
+  list_checkpoints: List checkpoints
+  delete: Delete checkpoint
+  delete_checkpoint: Delete checkpoint
+  rewind: Rewind
+  auto: Auto checkpoint
+  auto_checkpoint: Auto checkpoint
+  manual: Manual checkpoint
+  manual_checkpoint: Manual checkpoint
+  snapshot: Snapshot checkpoint
+  snapshot_checkpoint: Snapshot checkpoint
+  branch: Branch checkpoint
+  branch_checkpoint: Branch checkpoint
+  created: Checkpoint created
+  checkpoint_created: 'Checkpoint created: {name}'
+  restored: Restored to checkpoint
+  checkpoint_restored: 'Restored to checkpoint: {name}'
+  deleted: Checkpoint deleted
+  checkpoint_deleted: 'Checkpoint deleted: {name}'
+  name: Checkpoint name
+  checkpoint_name: 'Checkpoint name: {name}'
+  time: Created at
+  checkpoint_time: 'Created at: {time}'
+  messages: Message count
+  checkpoint_messages: 'Message count: {count}'
+  size: Size
+  checkpoint_size: 'Size: {size}'
+  description: Description
+errors:
+  api_error: API call failed
+  api_error_detail: 'API call failed: {detail}'
+  api_key_invalid: API key is invalid
+  api_key_missing: API key not set
+  api_quota_exceeded: API quota exceeded
+  api_rate_limit: API rate limit
+  api_timeout: API request timeout
+  api_connection_error: API connection error
+  file_not_found: 'File not found: {path}'
+  file_read_error: 'Failed to read file: {path}'
+  file_write_error: 'Failed to write file: {path}'
+  file_too_large: 'File too large: {size}'
+  file_format_error: 'Invalid file format: {format}'
+  file_permission_error: File permission error
+  invalid_model: 'Invalid model name: {model}'
+  model_not_found: 'Model not found: {model}'
+  model_not_supported: 'Unsupported model: {model}'
+  model_load_error: Failed to load model
+  network_error: Network connection error
+  network_error_detail: 'Network connection error: {detail}'
+  timeout_error: Connection timeout
+  connection_refused: Connection refused
+  connection_reset: Connection reset
+  config_error: Configuration error
+  config_missing: 'Missing config: {key}'
+  config_invalid: 'Invalid config value: {key}={value}'
+  config_load_error: Failed to load config
+  locale_not_found: 'Language pack not found: {lang}'
+  locale_load_error: 'Failed to load language pack: {lang}'
+  translation_missing: 'Missing translation: {key}'
+  memory_error: Memory error
+  memory_limit_exceeded: Memory limit exceeded
+  out_of_memory: Low memory
+  unknown_error: Unknown error
+  internal_error: Internal error
+  not_implemented: Not implemented
+  invalid_input: Invalid input
+  invalid_parameter: 'Invalid parameter: {param}'
+help:
+  command_help: Command help
+  available_commands: Available commands
+  command_usage: Usage
+  command_description: Description
+  command_examples: Examples
+  command_options: Options
+  quick_start: Quick start
+  getting_started: Getting started
+  basic_usage: Basic usage
+  advanced_usage: Advanced usage
+  help_topics: Help topics
+  topic_chat: Chat features
+  topic_media: Media processing
+  topic_cache: Cache management
+  topic_checkpoint: Checkpoint system
+  topic_pricing: Pricing info
+  topic_config: Configuration
+  topic_models: Model selection
+  need_help: Need help? Type /help to see available commands
+  type_help: Type /help [topic] for detailed info
+  no_help_available: No help available for this topic
+media:
+  image: Image
+  image_analysis: Image analysis
+  image_generation: Image generation
+  image_upload: Image upload
+  image_processing: Processing image
+  image_resize: Resize image
+  image_format: Image format
+  video: Video
+  video_analysis: Video analysis
+  video_generation: Video generation
+  video_upload: Video upload
+  video_processing: Processing video
+  video_editing: Video editing
+  scene_detection: Scene detection
+  video_format: Video format
+  video_duration: Video duration
+  audio: Audio
+  audio_analysis: Audio analysis
+  audio_processing: Audio processing
+  audio_transcription: Audio transcription
+  audio_format: Audio format
+  subtitle: Subtitle
+  subtitle_generation: Subtitle generation
+  subtitle_translation: Subtitle translation
+  subtitle_format: Subtitle format
+  upload_progress: 'Upload progress: {percent}%'
+  processing_progress: 'Processing progress: {percent}%'
+  upload_complete: Upload complete
+  processing_complete: Processing complete
+  analyzing: Analyzing
+  media_file: Media file
+  file_size: File size
+  file_format: File format
+  resolution: Resolution
+  bitrate: Bitrate
+  frame_rate: Frame rate
+file:
+  upload: Upload
+  upload_file: Upload file
+  download: Download
+  download_file: Download file
+  delete: Delete
+  delete_file: 刪除檔案
+  rename: Rename
+  rename_file: Rename file
+  uploading: Uploading
+  downloading: Downloading
+  uploaded: Uploaded
+  downloaded: Downloaded
+  file_name: File name
+  file_path: File path
+  file_size: File size
+  file_type: File type
+  file_format: File format
+  file_not_found: File not found
+  file_exists: File exists
+  invalid_file: Invalid file
+codegemini:
+  code_analysis: Code analysis
+  task_planning: Task planning
+  file_exploration: File exploration
+  codebase_embedding: Codebase indexing
+  code_review: Code review
+  background_shell: Background Shell
+  todo_tracker: Todo tracker
+  mcp_server: MCP Server
+  analyzing: Analyzing
+  analyzing_code: Analyzing code
+  planning: 規劃中
+  planning_task: Planning task
+  exploring: 探索中
+  exploring_files: Exploring files
+  indexing: Indexing
+  indexing_codebase: Indexing codebase
+  analysis_complete: Analysis complete
+  plan_ready: Plan ready
+  index_ready: Index ready
+config:
+  load: Load config
+  load_config: Load config
+  save: Save config
+  save_config: Save config
+  reset: Config reset
+  reset_config: Reset config
+  edit: Edit config
+  edit_config: Edit config
+  api_key: API Key
+  language: Language
+  model: Model
+  cache_enabled: Enable cache
+  auto_save: Auto save
+  theme: Theme
+  loaded: Config loaded
+  config_loaded: Config loaded
+  saved: Config saved
+  config_saved: Config saved
+  config_reset: Config reset
+  config_file: Config file
+  config_path: Config path
+  default_config: Default config
+install:
+  language_detected: ✓ Detected {language}, using {language} interface
+  press_enter: 'Press Enter to continue, or enter language code ({languages}):'
+  language_saved: 'Language setting saved: {lang}'
+  installing: Installing ChatGemini_SakiTool...
+  checking: Checking
+  checking_python: Checking Python version
+  installing_dependencies: Installing dependencies
+  initializing: Initializing
+  initializing_config: Initializing config
+  install_complete: ✅ Installation complete!
+  python_version_ok: '✓ Python version: {version}'
+  python_version_error: ✗ Python version too old, requires 3.10+
+  api_key_configured: ✓ API key configured
+  api_key_missing: ✗ API key not set
+  dependency_ok: ✓ Dependencies installed
+  dependency_missing: ✗ Missing dependencies
+  next_steps: Next steps
+  run_command: Run command
+  read_docs: Read documentation
+memory:
+  usage: Memory usage
+  available: Available memory
+  total: Total memory
+  warning: Memory warning
+  clear: Clear memory
+  optimize: Optimize memory
+  check: Check memory
+  low_memory: Low memory
+  memory_cleared: Memory cleared
+  memory_optimized: Memory optimized
+model:
+  gemini_pro: Gemini Pro
+  gemini_flash: Gemini Flash
+  gemini_flash_8b: Gemini Flash 8B
+  loading: Loading model
+  loaded: Model loaded
+  switching: Switching model
+  switched: Model switched
+  model_name: Model name
+  model_version: Model version
+  model_info: Model info
+  supported_models: Supported models
+validation:
+  validating: Validating
+  valid: Valid
+  invalid: Invalid
+  api_key_valid: API key is valid
+  api_key_invalid: API key is invalid
+  input_valid: Input is valid
+  input_invalid: Input is invalid
+  required: Required
+  optional: Optional
+  format_error: Format error

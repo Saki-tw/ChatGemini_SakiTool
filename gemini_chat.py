@@ -39,6 +39,19 @@ from gemini_module_loader import ModuleLoader
 module_loader = ModuleLoader()
 
 # ==========================================
+# 自動化工具管理器
+# ==========================================
+try:
+    from gemini_tools import (
+        auto_tool_manager,
+        prepare_tools_for_input,
+        cleanup_tools
+    )
+    TOOLS_MANAGER_AVAILABLE = True
+except ImportError:
+    TOOLS_MANAGER_AVAILABLE = False
+
+# ==========================================
 # 載入配置檔案（可選）
 # ==========================================
 # 統一配置管理（三層架構）
@@ -107,6 +120,17 @@ try:
 except ImportError:
     CHECKPOINT_ENABLED = False
     print("⚠️  檢查點系統未找到（gemini_checkpoint.py）")
+
+# ==========================================
+# 互動式語言切換
+# ==========================================
+try:
+    from interactive_language_menu import show_language_menu
+    INTERACTIVE_LANG_MENU_AVAILABLE = True
+    print("✅ 互動式語言選單已啟用")
+except ImportError:
+    INTERACTIVE_LANG_MENU_AVAILABLE = False
+    print("ℹ️  互動式語言選單不可用（可使用 gemini_lang.py）")
 
 # ==========================================
 # 根據 config.py 動態導入模組
@@ -528,7 +552,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
     class SmartCompleter(Completer):
         """智能自動補全器：支援指令、語法、檔案路徑"""
         def __init__(self):
-            self.commands = ['cache', 'media', 'video', 'veo', 'model', 'clear', 'exit', 'help', 'debug', 'test']
+            self.commands = ['cache', 'media', 'video', 'veo', 'model', 'clear', 'exit', 'help', 'debug', 'test', 'lang', 'language']
             if CODEGEMINI_ENABLED:
                 self.commands.extend(['cli', 'gemini-cli'])
             if CODEBASE_EMBEDDING_ENABLED:
@@ -1229,6 +1253,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
     console.print("  [#DA70D6]exit, quit[/#DA70D6] - 退出")
     console.print("  [#DA70D6]model[/#DA70D6] - 切換模型")
     console.print("  [#DA70D6]clear[/#DA70D6] - 清除對話")
+    console.print("  [#DA70D6]lang, language[/#DA70D6] - 切換語言（zh-TW/en/ja/ko）🆕")
     console.print("  [#DA70D6]cache[/#DA70D6] - 快取管理（節省成本 75-90%）")
     console.print("  [#DA70D6]config[/#DA70D6] - 配置管理（資料庫設定）")
     console.print("  [#DA70D6]media[/#DA70D6] - 影音功能選單（Flow/Veo/分析）")
@@ -1284,7 +1309,28 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
             if user_input.lower() in ['exit', 'quit', '退出']:
                 print("\n再見！")
                 chat_logger.save_session()
+                # 清理工具
+                if TOOLS_MANAGER_AVAILABLE:
+                    try:
+                        cleanup_tools()
+                        logger.debug("✓ 工具已清理")
+                    except Exception as e:
+                        logger.debug(f"工具清理失敗: {e}")
                 break
+
+            elif user_input.lower() in ['lang', 'language', '語言']:
+                # 語言切換命令
+                if INTERACTIVE_LANG_MENU_AVAILABLE:
+                    try:
+                        show_language_menu(save_to_env=True)
+                        console.print("[dim]💡 語言設定已更新，新訊息將使用選擇的語言[/dim]\n")
+                    except Exception as e:
+                        console.print(f"[red]❌ 語言切換失敗: {e}[/red]")
+                else:
+                    console.print("[yellow]⚠️  互動式語言選單不可用[/yellow]")
+                    console.print("[cyan]💡 請使用: python3 gemini_lang.py --set <語言代碼>[/cyan]")
+                    console.print("[dim]   可用語言: zh-TW, en, ja, ko[/dim]\n")
+                continue
 
             elif user_input.lower() == 'help':
                 # 顯示主幫助選單
@@ -1478,6 +1524,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     print("=" * 60)
                     print("基本指令：")
                     print("  help        - 顯示幫助系統")
+                    print("  lang        - 切換語言（zh-TW/en/ja/ko）🆕")
                     print("  cache       - 快取管理選單")
                     print("  media       - 影音功能選單（Flow/Veo/分析/處理）")
                     if CODEGEMINI_ENABLED:
@@ -2689,6 +2736,11 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     console.print("  [8] 查看瓶頸分析報告")
                     console.print("  [9] 匯出性能報告")
 
+                    if TOOLS_MANAGER_AVAILABLE:
+                        console.print("\n[bright_magenta]工具管理：[/bright_magenta]")
+                        console.print("  [10] 工具調用統計")
+                        console.print("  [11] 工具調用詳細報告")
+
                     console.print("\n  [0] 返回主選單\n")
 
                     debug_choice = input("請選擇: ").strip()
@@ -2902,6 +2954,24 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                         input("\n按 Enter 繼續...")
 
+                    elif debug_choice == '10' and TOOLS_MANAGER_AVAILABLE:
+                        # 工具調用統計
+                        try:
+                            auto_tool_manager.print_stats(detailed=False)
+                        except Exception as e:
+                            console.print(f"[dim magenta]✗ 獲取工具統計失敗：{e}[/red]")
+
+                        input("\n按 Enter 繼續...")
+
+                    elif debug_choice == '11' and TOOLS_MANAGER_AVAILABLE:
+                        # 工具調用詳細報告
+                        try:
+                            auto_tool_manager.print_stats(detailed=True)
+                        except Exception as e:
+                            console.print(f"[dim magenta]✗ 獲取工具詳細報告失敗：{e}[/red]")
+
+                        input("\n按 Enter 繼續...")
+
                     else:
                         console.print("\n[magenta]無效選項[/magenta]")
                         input("\n按 Enter 繼續...")
@@ -2954,6 +3024,16 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                 except Exception as e:
                     logger.warning(f"智能觸發器執行失敗: {e}")
+                    # 靜默失敗，不影響正常對話
+
+            # 4.6. 工具自動偵測與準備（AutoToolManager）
+            if TOOLS_MANAGER_AVAILABLE:
+                try:
+                    prepared_tools = prepare_tools_for_input(user_input)
+                    if prepared_tools:
+                        logger.debug(f"已準備工具: {', '.join(prepared_tools)}")
+                except Exception as e:
+                    logger.warning(f"工具自動偵測失敗: {e}")
                     # 靜默失敗，不影響正常對話
 
             # 5. 發送訊息
@@ -3010,6 +3090,13 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
         except KeyboardInterrupt:
             print("\n\n再見！")
             chat_logger.save_session()
+            # 清理工具
+            if TOOLS_MANAGER_AVAILABLE:
+                try:
+                    cleanup_tools()
+                    logger.debug("✓ 工具已清理")
+                except Exception as e:
+                    logger.debug(f"工具清理失敗: {e}")
             break
         except Exception as e:
             print(f"\n錯誤：{e}")

@@ -50,7 +50,7 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 ## 📦 Project Information
 
 **Project Name**: ChatGemini_SakiTool
-**Version**: v1.0.3
+**Version**: v1.0.4
 **Author**: Saki-tw, Claude Code
 **Contact**: Saki@saki-studio.com.tw
 **Last Updated**: 2025-10-24

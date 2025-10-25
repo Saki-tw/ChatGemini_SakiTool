@@ -10,7 +10,7 @@ English page: https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_EN
 > **「我只是想省點 API 費用，沒想到順手做了一個完整的工具套件」**
 > —— Saki-Tw (Saki@saki-studio.com.tw with Claude)
 
-這個專案最初是我個人為了**節省 Gemini API 費用**而開發的工具。在使用過程中不斷最佳化，加入了自動快取、向量資料庫、智能觸發等功能，最終變成一個功能完整、好用的 AI 工具套件。
+這個專案最初是我個人為了**節省 Gemini API 費用**而開發的工具。在使用過程中不斷優化，加入了自動快取、向量資料庫、智能觸發等功能，最終變成一個功能完整、好用的 AI 工具套件。
 
 因為真的很好用，所以決定開源分享給大家！
 
@@ -47,7 +47,7 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 ## 📦 專案資訊
 
 **專案名稱**: ChatGemini_SakiTool
-**版本**: v1.0.3  
+**版本**: v1.0.4  
 **作者**: Saki-tw with Claude Code  
 **聯絡**: Saki@saki-studio.com.tw  
 **最後更新**: 2025-10-24
@@ -59,11 +59,11 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 
 ## 🔥 版本更新歷程
 
-### 📅 v1.0.3（2025-10-24）— 最新版本
+### 📅 v1.0.2（2025-10-24）— 最新版本
 
-#### ⚙️ 系統架構最佳化
+#### ⚙️ 系統架構優化
 - **統一配置管理系統**：三層架構設計（系統預設 → 使用者配置 → 環境變數），優先權清晰明確
-- **記憶體管理最佳化**：對話歷史自動存檔，保留最新 50 條活躍對話，舊對話自動歸檔到磁碟
+- **記憶體管理優化**：對話歷史自動存檔，保留最新 50 條活躍對話，舊對話自動歸檔到磁碟
 - **智能路徑管理**：統一管理所有輸出路徑（對話記錄、媒體輸出等），自動建立必要目錄
 
 #### 🛡️ 錯誤處理大幅強化
@@ -191,7 +191,7 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 **智能觸發器**：意圖檢測、功能自動觸發
 **相關對話建議**：歷史搜尋、智能推薦前 3 個最相關對話
 **媒體查看器**：元數據查看、AI 分析整合
-**性能最佳化模組**：LRU 快取、並行處理、記憶體最佳化
+**性能優化模組**：LRU 快取、並行處理、記憶體優化
 
 ---
 
@@ -453,14 +453,19 @@ python gemini_veo_generator.py "A golden retriever playing in a sunny garden"
 }
 ```
 
+### 兩種輸出模式
+
+- **Gemini**（大寫）: 存到 `~/Saki_Studio/gemini_conversations/`
+- **gemini**（小寫）: 存到 `~/Saki_Studio/Claude/gemini_conversations/`
+
 ---
 
 ## 🎯 完整使用範例
 
-### 範例 1：程式碼分析 + 快取最佳化
+### 範例 1：程式碼分析 + 快取優化
 
 ```bash
-$ ChatGemini
+$ Gemini
 
 # 啟動時選擇快速設定
 啟用自動快取？[y]: ← Enter
@@ -612,7 +617,7 @@ A: 在對話中輸入 `help`，會顯示 6 大主題選單：
 - **動態載入**：按需載入功能模組，降低啟動時間
 - **配置分層**：系統預設 → 使用者配置 → 環境變數
 - **錯誤恢復**：檢查點機制，失敗自動恢復
-- **性能最佳化**：LRU 快取、並行處理、記憶體管理
+- **性能優化**：LRU 快取、並行處理、記憶體管理
 
 ### 測試覆蓋
 - **單元測試**：核心功能完整測試
@@ -665,4 +670,3 @@ Ongoing research explores the fundamental cognitive limits and conceptual integr
 That time I got reincarnated as an end-user, but the LLM's safety breaks on its own?
 為啥只是正常寫寫提示詞，巨型模型的安全模組就全毀？
 附上一些能公開的案例，其他因為公眾安全的理由實在不知道要馬賽克到什麼程度才能放。
-### 
