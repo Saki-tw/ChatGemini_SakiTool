@@ -20,22 +20,28 @@ Since it works so well, I decided to open-source it for everyone!
 ### 🎯 Core Highlights
 
 #### 💰 Auto Save 75-90% Costs
-- **Context Caching**: Automatically accumulates conversation content to build cache
+- **Smart Caching System**: Automatically accumulates conversation content to build cache
 - **Flash model saves 90%**, Pro model saves 75%
 - 5000 tokens cache costs only NT$0.16, saves NT$0.36 per subsequent query
 - **Break-even after 1 query**, completely effortless savings
 
 #### 🗄️ Lightweight Vector Database
-- **SQLite + NumPy + FAISS** implementation, no ChromaDB needed
-- Automatic vectorization and indexing of code/conversation history
-- **FAISS IndexFlatIP**: Query speed reduced from O(n) to O(log n)
-- Incremental updates (single-file updates) + parallel processing
-- Orthogonal deduplication mode (similarity threshold 0.85)
+- No need to install large databases, ready to use instantly
+- Automatic indexing of code and conversation history
+- Ultra-fast semantic search, find relevant content instantly
+- Smart deduplication to avoid storing duplicate data
+- Incremental updates without rebuilding entire database
+
+#### 🌍 Multi-Language Interface 🆕
+- Support for **繁體中文, English, 日本語, 한국어**
+- Switch interface language with one command, no restart needed
+- All prompts and error messages fully translated
+- Auto-detect system language on first launch
 
 #### 🔌 MCP Server System
-- **Model Context Protocol** integration
-- Smart detection and auto-loading
-- Seamless AI functionality extension
+- Smart detection and auto-loading of extensions
+- Seamless integration with third-party tools and services
+- Easily extend AI assistant capabilities
 
 #### ⚡ One-Line Install, Instant Use
 ```bash
