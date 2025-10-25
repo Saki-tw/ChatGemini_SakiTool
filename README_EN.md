@@ -70,7 +70,22 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 
 ## 🔥 Version History
 
-### 📅 v1.0.3 (2025-10-24) — Latest Version
+### 📅 v1.0.4 (2025-10-25) — Latest Version
+
+#### 🌍 Multi-Language Interface System
+- **Four Language Support**: Full support for 繁體中文, English, 日本語, 한국어
+- **One-Click Switch**: Type `lang` in conversation to switch interface language
+- **Auto-Detection**: Automatically detects system language on first launch
+- **Complete Translation**: All prompts, error messages, and menu interfaces fully multilingual
+
+#### ⚡ Performance Optimization
+- **Batch Processing**: Process multiple requests simultaneously for better performance
+- **Smart Cache Preloading**: Automatically preload frequently used data
+- **Memory Optimization**: More efficient data management, reduced memory footprint
+
+---
+
+### 📅 v1.0.3 (2025-10-24)
 
 #### ⚙️ System Architecture Optimization
 - **Unified Configuration System**: Three-tier architecture (system defaults → user config → env variables)
