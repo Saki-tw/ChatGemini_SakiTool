@@ -23,12 +23,14 @@ Version: 2.0 (全自動化版本)
 import os
 import re
 import time
+import logging
 from typing import Dict, Optional, Any, List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from rich.console import Console
 
 console = Console()
+logger = logging.getLogger(__name__)
 
 
 # ==========================================
@@ -43,16 +45,56 @@ class ToolLoadRecord:
     last_used: datetime
     use_count: int = 0
     instance: Any = None
+    error_count: int = 0
+    last_error: Optional[str] = None
+    total_call_time: float = 0.0  # 總調用時間（秒）
+    call_history: List[Dict] = field(default_factory=list)  # 調用歷史
 
-    def mark_used(self):
-        """標記為已使用"""
+    def mark_used(self, success: bool = True, call_time: float = 0.0, error: Optional[str] = None):
+        """
+        標記為已使用
+
+        Args:
+            success: 調用是否成功
+            call_time: 調用耗時（秒）
+            error: 錯誤訊息（如果有）
+        """
         self.last_used = datetime.now()
         self.use_count += 1
+        self.total_call_time += call_time
+
+        if not success:
+            self.error_count += 1
+            self.last_error = error
+
+        # 記錄調用歷史（最多保留 100 筆）
+        self.call_history.append({
+            'timestamp': self.last_used.isoformat(),
+            'success': success,
+            'call_time': call_time,
+            'error': error
+        })
+        if len(self.call_history) > 100:
+            self.call_history.pop(0)
 
     @property
     def idle_time(self) -> float:
         """閒置時間（秒）"""
         return (datetime.now() - self.last_used).total_seconds()
+
+    @property
+    def avg_call_time(self) -> float:
+        """平均調用時間（秒）"""
+        if self.use_count == 0:
+            return 0.0
+        return self.total_call_time / self.use_count
+
+    @property
+    def success_rate(self) -> float:
+        """成功率（%）"""
+        if self.use_count == 0:
+            return 100.0
+        return ((self.use_count - self.error_count) / self.use_count) * 100
 
 
 # ==========================================
@@ -201,10 +243,19 @@ class AutoToolManager:
             if self._show_load_message:
                 console.print(f"[dim]✓ {tool_name} 已載入[/dim]")
 
+            logger.info(f"工具 {tool_name} 已成功載入")
             return True
 
+        except ImportError as e:
+            error_msg = f"模組不可用: {str(e)}"
+            logger.error(f"工具 {tool_name} 載入失敗 - {error_msg}")
+            console.print(f"[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]")
+            return False
+
         except Exception as e:
-            console.print(f"[dim]⚠️ {tool_name} 載入失敗：{e}[/dim]")
+            error_msg = str(e)
+            logger.error(f"工具 {tool_name} 載入失敗 - {error_msg}")
+            console.print(f"[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]")
             return False
 
     def get_tool(self, tool_name: str) -> Optional[Any]:
@@ -249,56 +300,152 @@ class AutoToolManager:
         """強制卸載所有工具（用於程序結束）"""
         self._loaded_tools.clear()
 
-    def get_stats(self) -> Dict[str, Any]:
-        """取得統計資訊（用於調試）"""
-        return {
+    def get_stats(self, detailed: bool = False) -> Dict[str, Any]:
+        """
+        取得統計資訊
+
+        Args:
+            detailed: 是否包含詳細資訊
+
+        Returns:
+            Dict[str, Any]: 統計資訊
+        """
+        stats = {
             'loaded_count': len(self._loaded_tools),
-            'tools': {
-                name: {
-                    'use_count': record.use_count,
-                    'idle_time': f"{record.idle_time:.1f}s"
-                }
-                for name, record in self._loaded_tools.items()
-            }
+            'total_calls': sum(r.use_count for r in self._loaded_tools.values()),
+            'total_errors': sum(r.error_count for r in self._loaded_tools.values()),
+            'tools': {}
         }
+
+        for name, record in self._loaded_tools.items():
+            tool_stats = {
+                'use_count': record.use_count,
+                'error_count': record.error_count,
+                'success_rate': f"{record.success_rate:.1f}%",
+                'avg_call_time': f"{record.avg_call_time:.3f}s",
+                'idle_time': f"{record.idle_time:.1f}s",
+                'loaded_at': record.loaded_at.strftime('%Y-%m-%d %H:%M:%S')
+            }
+
+            if detailed:
+                tool_stats['last_error'] = record.last_error
+                tool_stats['total_call_time'] = f"{record.total_call_time:.3f}s"
+                tool_stats['call_history'] = record.call_history[-10:]  # 最近 10 筆
+
+            stats['tools'][name] = tool_stats
+
+        return stats
+
+    def print_stats(self, detailed: bool = False):
+        """
+        打印統計資訊（美化輸出）
+
+        Args:
+            detailed: 是否包含詳細資訊
+        """
+        stats = self.get_stats(detailed)
+
+        console.print("\n[bold bright_magenta]🔧 工具調用統計[/bold bright_magenta]\n")
+
+        if stats['loaded_count'] == 0:
+            console.print("[dim]目前沒有已載入的工具[/dim]\n")
+            return
+
+        console.print(f"[bright_magenta]已載入工具數：[/bright_magenta]{stats['loaded_count']}")
+        console.print(f"[bright_magenta]總調用次數：[/bright_magenta]{stats['total_calls']}")
+        console.print(f"[bright_magenta]總錯誤次數：[/bright_magenta]{stats['total_errors']}")
+
+        if stats['total_calls'] > 0:
+            overall_success_rate = ((stats['total_calls'] - stats['total_errors']) / stats['total_calls']) * 100
+            console.print(f"[bright_magenta]整體成功率：[/bright_magenta]{overall_success_rate:.1f}%")
+
+        console.print("\n[bold bright_magenta]各工具詳細資訊：[/bold bright_magenta]\n")
+
+        from rich.table import Table
+        table = Table(show_header=True, header_style="bold magenta")
+        table.add_column("工具名稱", style="cyan")
+        table.add_column("調用次數", justify="right")
+        table.add_column("錯誤次數", justify="right")
+        table.add_column("成功率", justify="right")
+        table.add_column("平均耗時", justify="right")
+        table.add_column("閒置時間", justify="right")
+
+        for tool_name, tool_stats in stats['tools'].items():
+            table.add_row(
+                tool_name,
+                str(tool_stats['use_count']),
+                str(tool_stats['error_count']),
+                tool_stats['success_rate'],
+                tool_stats['avg_call_time'],
+                tool_stats['idle_time']
+            )
+
+        console.print(table)
+
+        if detailed:
+            console.print("\n[bold bright_magenta]詳細錯誤資訊：[/bold bright_magenta]\n")
+            for tool_name, tool_stats in stats['tools'].items():
+                if tool_stats.get('last_error'):
+                    console.print(f"[dim]{tool_name}:[/dim] {tool_stats['last_error']}")
+
+        console.print()
 
     # ==========================================
     # 工具載入器（惰性載入實作）
     # ==========================================
 
     def _load_web_search(self):
-        """載入 WebSearch 工具"""
-        from CodeGemini.tools.web_search import WebSearch, SearchEngine
-
-        # 根據配置選擇搜尋引擎
+        """載入 WebSearch 工具（統一錯誤處理）"""
         try:
-            from config import SEARCH_ENGINE
-            engine = SearchEngine(SEARCH_ENGINE) if hasattr(SearchEngine, SEARCH_ENGINE.upper()) else SearchEngine.DUCKDUCKGO
-        except:
-            engine = SearchEngine.DUCKDUCKGO
+            from CodeGemini.tools.web_search import WebSearch, SearchEngine
 
-        return WebSearch(engine=engine)
+            # 根據配置選擇搜尋引擎
+            try:
+                from config import SEARCH_ENGINE
+                engine = SearchEngine(SEARCH_ENGINE) if hasattr(SearchEngine, SEARCH_ENGINE.upper()) else SearchEngine.DUCKDUCKGO
+            except Exception as e:
+                logger.debug(f"無法載入 SEARCH_ENGINE 配置，使用預設值: {e}")
+                engine = SearchEngine.DUCKDUCKGO
+
+            return WebSearch(engine=engine)
+
+        except ImportError as e:
+            raise ImportError(f"WebSearch 模組不可用: {e}")
+        except Exception as e:
+            raise RuntimeError(f"WebSearch 初始化失敗: {e}")
 
     def _load_web_fetch(self):
-        """載入 WebFetch 工具"""
-        from CodeGemini.tools.web_fetch import WebFetcher
-
-        # 根據配置設定參數
+        """載入 WebFetch 工具（統一錯誤處理）"""
         try:
-            from config import WEB_FETCH_TIMEOUT, WEB_FETCH_CACHE_TTL
-            timeout = WEB_FETCH_TIMEOUT
-            cache_ttl = WEB_FETCH_CACHE_TTL
-        except:
-            timeout = 30
-            cache_ttl = 900
+            from CodeGemini.tools.web_fetch import WebFetcher
 
-        return WebFetcher(timeout=timeout, cache_ttl=cache_ttl)
+            # 根據配置設定參數
+            try:
+                from config import WEB_FETCH_TIMEOUT, WEB_FETCH_CACHE_TTL
+                timeout = WEB_FETCH_TIMEOUT
+                cache_ttl = WEB_FETCH_CACHE_TTL
+            except Exception as e:
+                logger.debug(f"無法載入 WebFetch 配置，使用預設值: {e}")
+                timeout = 30
+                cache_ttl = 900
+
+            return WebFetcher(timeout=timeout, cache_ttl=cache_ttl)
+
+        except ImportError as e:
+            raise ImportError(f"WebFetcher 模組不可用: {e}")
+        except Exception as e:
+            raise RuntimeError(f"WebFetcher 初始化失敗: {e}")
 
     def _load_background_shell(self):
-        """載入 BackgroundShell 工具"""
-        from CodeGemini.tools.background_shell import BackgroundShellManager
+        """載入 BackgroundShell 工具（統一錯誤處理）"""
+        try:
+            from CodeGemini.tools.background_shell import BackgroundShellManager
+            return BackgroundShellManager()
 
-        return BackgroundShellManager()
+        except ImportError as e:
+            raise ImportError(f"BackgroundShellManager 模組不可用: {e}")
+        except Exception as e:
+            raise RuntimeError(f"BackgroundShellManager 初始化失敗: {e}")
 
 
 # ==========================================

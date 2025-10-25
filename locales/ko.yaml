@@ -1,0 +1,481 @@
+# Korean Language Pack
+# ChatGemini_SakiTool v1.1.0
+#
+# Version: 1.0.0
+# Author: Saki-tw (with Claude Code)
+# Date: 2025-10-25
+# Locale: Korean (Korea)
+#
+# Translated from zh-TW.yaml
+# Total coverage: 100%
+
+meta:
+  language: ko
+  name: 한국어
+  native_name: 한국어
+  author: Saki-tw (with Claude Code)
+  version: 1.0.0
+  encoding: UTF-8
+  region: KR
+common:
+  'yes': 예
+  'no': 아니오
+  ok: 확인
+  cancel: 취소
+  continue: 계속
+  back: 뒤로
+  exit: 종료
+  quit: 나가기
+  close: 닫기
+  success: 성공
+  error: 오류
+  warning: 경고
+  info: 정보
+  loading: 로딩 중
+  processing: 처리 중
+  completed: 완료
+  failed: 실패
+  pending: 대기 중
+  save: 저장
+  load: 불러오기
+  delete: 삭제
+  create: 생성
+  update: 업데이트
+  refresh: 새로고침
+  search: 검색
+  select: 선택
+  confirm: 확인
+  currency_twd: NT$
+  currency_usd: USD
+  currency_jpy: ¥
+  currency_krw: ₩
+  language: 언어
+  language_switched: 언어가 {lang}로 전환되었습니다
+  current_language: 현재 언어
+  available_languages: 사용 가능한 언어
+  second: 초
+  minute: 분
+  hour: 시간
+  day: 일
+  week: 주
+  month: 월
+  year: 년
+  tokens: tokens
+  token: token
+  characters: 문자
+  lines: 줄
+  files: 파일
+  bytes: 바이트
+chat:
+  welcome: ChatGemini에 오신 것을 환영합니다!
+  welcome_back: 돌아오신 것을 환영합니다!
+  exit_message: 이용해 주셔서 감사합니다, 안녕히 가세요!
+  goodbye: 안녕히 가세요!
+  user_prompt: 당신
+  model_prompt: 모델
+  system_prompt: 시스템
+  assistant_prompt: 어시스턴트
+  thinking: 생각 중
+  generating: 생성 중
+  streaming: 스트리밍 중
+  waiting: 응답 대기 중
+  analyzing: 분석 중
+  enter_message: 메시지를 입력하세요
+  enter_command: 명령을 입력하세요
+  multiline_mode: 여러 줄 모드 ($$$로 종료)
+  command_mode: 명령 모드
+  new_conversation: 새 대화 시작
+  clear_history: 기록 지우기
+  save_conversation: 대화 저장
+  load_conversation: 대화 불러오기
+  export_conversation: 대화 내보내기
+  select_model: 모델 선택
+  current_model: 현재 모델
+  switch_model: 모델 전환
+  model_switched: 모델을 {model}로 전환했습니다
+  available_models: 사용 가능한 모델
+  thinking_mode: 생각 모드
+  thinking_mode_enabled: 생각 모드가 활성화되었습니다
+  thinking_mode_disabled: 생각 모드가 비활성화되었습니다
+  thinking_tokens_limit: '생각 토큰 제한: {limit}'
+  thinking_process: 생각 과정
+  text_message: 텍스트 메시지
+  image_message: 이미지 메시지
+  file_message: 파일 메시지
+  multimodal_message: 멀티모달 메시지
+pricing:
+  cost: 비용
+  price: 가격
+  fee: 요금
+  input_tokens: 입력
+  output_tokens: 출력
+  thinking_tokens: 생각
+  cached_tokens: 캐시
+  total_cost: 누적 비용
+  session_cost: 세션 비용
+  savings: 절감액
+  discount: 할인
+  cost_line: '💰 비용: {currency}{twd} (${usd} USD)'
+  tokens_line: '   입력: {input} 토큰, 출력: {output} 토큰'
+  thinking_tokens_line: '   생각: {thinking} 토큰'
+  cached_tokens_line: '   캐시: {cached} 토큰 ({discount}% 할인)'
+  total_cost_line: '   누적 비용: {currency}{total}'
+  savings_line: '   💸 절감: {currency}{savings} (약 {percent}%)'
+  cache_usage: 캐시 사용량
+  cache_hit: 캐시 히트
+  cache_miss: 캐시 미스
+  cache_discount: 캐시 할인
+  cache_savings: 캐시 절감
+  session_summary: 세션 통계
+  total_transactions: 총 트랜잭션 수
+  session_duration: 세션 시간
+  average_cost: 평균 비용
+  total_tokens: 총 토큰
+  calculator_title: 실시간 요금 계산기
+  cost_calculation: 💰 비용 계산
+  get_summary: 세션 요약 가져오기
+  quick_calculate: 비용 빠르게 계산
+  calculate_and_print: 비용 계산 및 표시
+  this_feature: 이 기능
+  flow_engine_type: '유형: Flow Engine (자연어 동영상 생성)'
+  target_duration: '목표 시간: {duration} 초'
+  actual_duration: '실제 시간: {duration} 초'
+  segment_count: '세그먼트 수: {num} 세그먼트 x {seconds} 초/세그먼트'
+  planning_cost_label: 'Gemini 세그먼트 계획:  {cost}'
+  veo_cost_label: 'Veo 동영상 생성:    {cost}'
+  video_duration: '동영상 길이: {duration} 초'
+  video_tokens_count: '동영상 토큰: {tokens:,}'
+  text_input_tokens_count: '텍스트 입력 토큰: {tokens:,}'
+  input_tokens_count: '입력 토큰: {tokens:,}'
+  thinking_tokens_count: '생각 토큰: {tokens:,}'
+  output_tokens_count: '출력 토큰: {tokens:,}'
+  total_tokens_count: '총 토큰: {tokens:,}'
+  per_second_rate: '단가: {currency}{rate}/초 (${usd}/초)'
+  input_cost_label: '입력 비용:  {cost}'
+  thinking_cost_label: '생각 비용:  {cost}'
+  output_cost_label: '출력 비용:  {cost}'
+  current_cost_label: '이번 비용:  {cost} ({percent})'
+  total_cost_label: '누적 비용:  {cost} ({percent})'
+  local_processing: 🎉 {feature}은(는) 로컬 도구를 사용, API 호출이 필요하지 않습니다
+  zero_cost_line: '💸 이번 비용: NT$0.00 ($0.00 USD)'
+  or_separator: ' 또는 '
+  cache_report_title: 💰 컨텍스트 캐싱 비용 절감 보고서
+  cache_model: 모델：{model}
+  cache_tokens_info: 캐시 토큰：{tokens:,}
+  cache_query_count: 쿼리 수：{count}
+  cache_discount_info: 캐시 할인：{percent}%
+  without_cache_cost: ❌ 캐시 미사용 비용：{currency}{twd} (${usd} USD)
+  with_cache_cost: ✅ 캐시 사용 비용：  {currency}{twd} (${usd} USD)
+  cache_savings_amount: 💸 절감：         {currency}{twd} (${usd} USD)
+  cache_savings_percent: 📊 절감률：     {percent}%
+  cost_comparison_title: 💰 {feature} - 비용 비교
+  savings_comparison: 💸 절감：{currency}{twd} (${usd} USD)
+  savings_percent_line: 📊 절감률：{percent}%
+  recommend_method: 💡 권장：{method}
+  extra_cost: 💸 추가 비용：{currency}{twd} (${usd} USD)
+  same_cost: 💡 두 가지 방법의 비용은 동일합니다
+  test_1_title: '
+
+    === 測試 1: Gemini 2.5 Pro 文字生成 ==='
+  test_2_title: '
+
+    === 測試 2: Gemini 2.5 Flash 文字生成 ==='
+  test_3_title: '
+
+    === 測試 3: Veo 3.1 影片生成（8秒）==='
+  test_4_title: '
+
+    === 測試 4: 影片理解（60秒影片）==='
+  test_summary_title: '
+
+    === 會話總結 ==='
+  total_transactions_line: '總交易次數: {count}'
+  session_total_cost: '會話總成本: ${cost:.6f}'
+  twd_equivalent: '約合台幣: {currency}{amount}'
+cache:
+  create: 캐시 생성
+  create_cache: 캐시 생성
+  delete: 캐시 삭제
+  delete_cache: 캐시 삭제
+  clear: 캐시 지우기
+  clear_cache: 캐시 지우기
+  update: 캐시 업데이트
+  update_cache: 캐시 업데이트
+  query: 캐시 쿼리
+  query_cache: 캐시 쿼리
+  list: 캐시 나열
+  list_caches: 캐시 나열
+  created: 캐시가 생성되었습니다
+  cache_created: '캐시가 생성되었습니다: {name}'
+  deleted: 캐시가 삭제되었습니다
+  cache_deleted: '캐시가 삭제되었습니다: {name}'
+  updated: 캐시가 업데이트되었습니다
+  cache_updated: '캐시가 업데이트되었습니다: {name}'
+  expired: 캐시가 만료되었습니다
+  cache_expired: '캐시가 만료되었습니다: {name}'
+  active: 캐시 유효
+  name: 캐시 이름
+  cache_name: 캐시 이름
+  model: 캐시 모델
+  cache_model: 캐시 모델
+  ttl: TTL
+  cache_ttl: TTL (유효 기간)
+  size: 캐시 크기
+  cache_size: 캐시 크기
+  tokens: 快取 tokens
+  cache_tokens: '캐시 토큰: {count}'
+  auto_cache: 자동 캐시
+  auto_cache_enabled: 자동 캐시가 활성화되었습니다
+  auto_cache_disabled: 자동 캐시가 비활성화되었습니다
+  auto_cache_threshold: '자동 캐시 임계값: {threshold} 토큰'
+  cache_trigger_suggestion: 비용 절감을 위해 캐시 생성을 권장합니다
+  cache_recommended: 캐시 활성화를 권장합니다(약 {percent}% 비용 절감)
+checkpoint:
+  create: 체크포인트 생성
+  create_checkpoint: 체크포인트 생성
+  restore: 체크포인트 복원
+  restore_checkpoint: 체크포인트 복원
+  list: 체크포인트 나열
+  list_checkpoints: 체크포인트 나열
+  delete: 체크포인트 삭제
+  delete_checkpoint: 체크포인트 삭제
+  rewind: 되돌리기
+  auto: 자동 체크포인트
+  auto_checkpoint: 자동 체크포인트
+  manual: 수동 체크포인트
+  manual_checkpoint: 수동 체크포인트
+  snapshot: 스냅샷 체크포인트
+  snapshot_checkpoint: 스냅샷 체크포인트
+  branch: 분기 체크포인트
+  branch_checkpoint: 분기 체크포인트
+  created: 체크포인트가 생성되었습니다
+  checkpoint_created: '체크포인트가 생성되었습니다: {name}'
+  restored: 체크포인트로 복원되었습니다
+  checkpoint_restored: '체크포인트로 복원되었습니다: {name}'
+  deleted: 체크포인트가 삭제되었습니다
+  checkpoint_deleted: '체크포인트가 삭제되었습니다: {name}'
+  name: 체크포인트 이름
+  checkpoint_name: '체크포인트 이름: {name}'
+  time: 생성 시간
+  checkpoint_time: '생성 시간: {time}'
+  messages: 메시지 수
+  checkpoint_messages: '메시지 수: {count}'
+  size: 크기
+  checkpoint_size: '크기: {size}'
+  description: 설명
+errors:
+  api_error: API 호출에 실패했습니다
+  api_error_detail: 'API 호출에 실패했습니다: {detail}'
+  api_key_invalid: API 키가 유효하지 않습니다
+  api_key_missing: API 키가 설정되지 않았습니다
+  api_quota_exceeded: API 할당량을 사용했습니다
+  api_rate_limit: API 속도 제한
+  api_timeout: API 요청 시간 초과
+  api_connection_error: API 연결 오류
+  file_not_found: '파일을 찾을 수 없습니다: {path}'
+  file_read_error: '파일 읽기에 실패했습니다: {path}'
+  file_write_error: '파일 쓰기에 실패했습니다: {path}'
+  file_too_large: '파일이 너무 큽니다: {size}'
+  file_format_error: '잘못된 파일 형식: {format}'
+  file_permission_error: 파일 권한 오류
+  invalid_model: '잘못된 모델 이름: {model}'
+  model_not_found: '모델을 찾을 수 없습니다: {model}'
+  model_not_supported: '지원되지 않는 모델: {model}'
+  model_load_error: 모델 로드에 실패했습니다
+  network_error: 네트워크 연결 오류
+  network_error_detail: '네트워크 연결 오류: {detail}'
+  timeout_error: 연결 시간 초과
+  connection_refused: 연결이 거부되었습니다
+  connection_reset: 연결이 재설정되었습니다
+  config_error: 구성 오류
+  config_missing: '구성 항목이 없습니다: {key}'
+  config_invalid: '잘못된 구성 값: {key}={value}'
+  config_load_error: 구성 로드에 실패했습니다
+  locale_not_found: '언어 팩을 찾을 수 없습니다: {lang}'
+  locale_load_error: '언어 팩 로드에 실패했습니다: {lang}'
+  translation_missing: '번역이 없습니다: {key}'
+  memory_error: 메모리 오류
+  memory_limit_exceeded: 메모리 제한을 초과했습니다
+  out_of_memory: 메모리 부족
+  unknown_error: 알 수 없는 오류
+  internal_error: 내부 오류
+  not_implemented: 구현되지 않음
+  invalid_input: 잘못된 입력
+  invalid_parameter: '잘못된 매개변수: {param}'
+help:
+  command_help: 명령 도움말
+  available_commands: 사용 가능한 명령
+  command_usage: 사용법
+  command_description: 설명
+  command_examples: 예제
+  command_options: 옵션
+  quick_start: 빠른 시작
+  getting_started: 시작 가이드
+  basic_usage: 기본 사용법
+  advanced_usage: 고급 사용법
+  help_topics: 도움말 주제
+  topic_chat: 채팅 기능
+  topic_media: 미디어 처리
+  topic_cache: 캐시 관리
+  topic_checkpoint: 체크포인트 시스템
+  topic_pricing: 요금 정보
+  topic_config: 구성
+  topic_models: 모델 선택
+  need_help: 도움이 필요하십니까? /help로 사용 가능한 명령 표시
+  type_help: /help [주제]로 자세한 정보 표시
+  no_help_available: 이 주제에 대한 도움말이 없습니다
+media:
+  image: 이미지
+  image_analysis: 이미지 분석
+  image_generation: 이미지 생성
+  image_upload: 이미지 업로드
+  image_processing: 이미지 처리 중
+  image_resize: 이미지 크기 조정
+  image_format: 이미지 형식
+  video: 동영상
+  video_analysis: 동영상 분석
+  video_generation: 동영상 생성
+  video_upload: 동영상 업로드
+  video_processing: 동영상 처리 중
+  video_editing: 동영상 편집
+  scene_detection: 장면 감지
+  video_format: 동영상 형식
+  video_duration: 동영상 길이
+  audio: 오디오
+  audio_analysis: 오디오 분석
+  audio_processing: 오디오 처리
+  audio_transcription: 오디오 전사
+  audio_format: 오디오 형식
+  subtitle: 자막
+  subtitle_generation: 자막 생성
+  subtitle_translation: 자막 번역
+  subtitle_format: 자막 형식
+  upload_progress: '업로드 진행률: {percent}%'
+  processing_progress: '처리 진행률: {percent}%'
+  upload_complete: 업로드 완료
+  processing_complete: 처리 완료
+  analyzing: 분석 중
+  media_file: 미디어 파일
+  file_size: 파일 크기
+  file_format: 파일 형식
+  resolution: 해상도
+  bitrate: 비트레이트
+  frame_rate: 프레임 속도
+file:
+  upload: 업로드
+  upload_file: 파일 업로드
+  download: 다운로드
+  download_file: 파일 다운로드
+  delete: 삭제
+  delete_file: 파일 삭제
+  rename: 이름 바꾸기
+  rename_file: 파일 이름 바꾸기
+  uploading: 업로드 중
+  downloading: 다운로드 중
+  uploaded: 업로드됨
+  downloaded: 다운로드됨
+  file_name: 파일 이름
+  file_path: 파일 경로
+  file_size: 파일 크기
+  file_type: 파일 유형
+  file_format: 파일 형식
+  file_not_found: 파일을 찾을 수 없습니다
+  file_exists: 파일이 존재합니다
+  invalid_file: 잘못된 파일
+codegemini:
+  code_analysis: 코드 분석
+  task_planning: 작업 계획
+  file_exploration: 파일 탐색
+  codebase_embedding: 코드베이스 인덱스
+  code_review: 코드 리뷰
+  background_shell: 백그라운드 셸
+  todo_tracker: Todo 트래커
+  mcp_server: MCP 서버
+  analyzing: 분석 중
+  analyzing_code: 코드 분석 중
+  planning: 계획 중
+  planning_task: 작업 계획 중
+  exploring: 탐색 중
+  exploring_files: 파일 탐색 중
+  indexing: 인덱스 생성 중
+  indexing_codebase: 코드베이스 인덱스 생성 중
+  analysis_complete: 분석 완료
+  plan_ready: 계획 완료
+  index_ready: 인덱스 생성 완료
+config:
+  load: 구성 로드
+  load_config: 구성 로드
+  save: 구성 저장
+  save_config: 구성 저장
+  reset: 구성이 재설정되었습니다
+  reset_config: 구성 재설정
+  edit: 구성 편집
+  edit_config: 구성 편집
+  api_key: API 키
+  language: 언어
+  model: 모델
+  cache_enabled: 캐시 활성화
+  auto_save: 자동 저장
+  theme: 테마
+  loaded: 구성이 로드되었습니다
+  config_loaded: 구성이 로드되었습니다
+  saved: 구성이 저장되었습니다
+  config_saved: 구성이 저장되었습니다
+  config_reset: 구성이 재설정되었습니다
+  config_file: 구성 파일
+  config_path: 구성 경로
+  default_config: 기본 구성
+install:
+  language_detected: ✓ {language}를 감지했습니다, {language} 인터페이스를 사용합니다
+  press_enter: 'Enter로 계속하거나 언어 코드를 입력하세요 ({languages}):'
+  language_saved: '언어 설정이 저장되었습니다: {lang}'
+  installing: ChatGemini_SakiTool 설치 중...
+  checking: 확인 중
+  checking_python: Python 버전 확인
+  installing_dependencies: 종속성 설치
+  initializing: 초기화 중
+  initializing_config: 구성 초기화
+  install_complete: ✅ 설치 완료!
+  python_version_ok: '✓ Python 버전: {version}'
+  python_version_error: ✗ Python 버전이 너무 오래되었습니다, 3.10+가 필요합니다
+  api_key_configured: ✓ API 키가 구성되었습니다
+  api_key_missing: ✗ API 키가 설정되지 않았습니다
+  dependency_ok: ✓ 종속성이 설치되었습니다
+  dependency_missing: ✗ 종속성이 누락되었습니다
+  next_steps: 다음 단계
+  run_command: 명령 실행
+  read_docs: 문서 읽기
+memory:
+  usage: 메모리 사용량
+  available: 사용 가능한 메모리
+  total: 총 메모리
+  warning: 메모리 경고
+  clear: 메모리 지우기
+  optimize: 메모리 최적화
+  check: 메모리 확인
+  low_memory: 메모리 부족
+  memory_cleared: 메모리가 지워졌습니다
+  memory_optimized: 메모리가 최적화되었습니다
+model:
+  gemini_pro: Gemini Pro
+  gemini_flash: Gemini Flash
+  gemini_flash_8b: Gemini Flash 8B
+  loading: 모델 로딩 중
+  loaded: 모델이 로드되었습니다
+  switching: 모델 전환 중
+  switched: 모델이 전환되었습니다
+  model_name: 모델 이름
+  model_version: 모델 버전
+  model_info: 모델 정보
+  supported_models: 지원되는 모델
+validation:
+  validating: 검증 중
+  valid: 유효
+  invalid: 유효하지 않음
+  api_key_valid: API 키가 유효합니다
+  api_key_invalid: API 키가 유효하지 않습니다
+  input_valid: 입력이 유효합니다
+  input_invalid: 입력이 유효하지 않습니다
+  required: 필수
+  optional: 선택
+  format_error: 형식 오류

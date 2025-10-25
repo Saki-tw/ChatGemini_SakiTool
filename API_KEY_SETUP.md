@@ -305,4 +305,4 @@ source ~/.zshrc  # 或 ~/.bashrc
 
 **作者**: Saki-TW (Saki@saki-studio.com.tw) with Claude
 **最後更新**: 2025-10-24
-**版本**: v1.0.2
+**版本**: v1.0.3

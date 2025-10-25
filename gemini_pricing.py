@@ -6,6 +6,7 @@ Gemini API 即時計價模組
 """
 from typing import Dict, Tuple, Optional
 from datetime import datetime
+from utils.i18n import t, _
 
 # 美元兌新台幣匯率（2025年10月）
 # 若匯率有較大變動，請更新此值
@@ -603,51 +604,57 @@ class PricingCalculator:
             show_breakdown: 是否顯示詳細分解
         """
         print("\n" + "=" * 60)
-        print("💰 成本計算")
+        print(t("pricing.cost_calculation"))
         print("=" * 60)
 
         if details.get('type') == 'flow_engine':
             # Flow Engine
-            print(f"類型: Flow Engine（自然語言影片生成）")
-            print(f"目標時長: {details['target_duration']} 秒")
-            print(f"實際時長: {details['actual_duration']} 秒")
-            print(f"片段數量: {details['num_segments']} 段 x {details['segment_duration']} 秒")
+            print(t("pricing.flow_engine_type"))
+            print(t("pricing.target_duration", duration=details['target_duration']))
+            print(t("pricing.actual_duration", duration=details['actual_duration']))
+            print(t("pricing.segment_count", num=details['num_segments'], seconds=details['segment_duration']))
             print("-" * 60)
             if show_breakdown:
-                print(f"Gemini 分段計畫:  {self.format_cost(details['planning_cost'])} ({self.format_cost(details['planning_cost'], 'USD')}) - {details['planning_model']}")
-                print(f"Veo 影片生成:    {self.format_cost(details['veo_cost'])} ({self.format_cost(details['veo_cost'], 'USD')}) - {details['num_segments']} 段")
+                cost_str = f"{self.format_cost(details['planning_cost'])} ({self.format_cost(details['planning_cost'], 'USD')}) - {details['planning_model']}"
+                print(t("pricing.planning_cost_label", cost=cost_str))
+                veo_str = f"{self.format_cost(details['veo_cost'])} ({self.format_cost(details['veo_cost'], 'USD')}) - {details['num_segments']} 段"
+                print(t("pricing.veo_cost_label", cost=veo_str))
                 print("-" * 60)
         elif 'video_duration_seconds' in details:
             # 影片理解
-            print(f"影片長度: {details['video_duration_seconds']} 秒")
-            print(f"影片 Tokens: {details['video_tokens']:,}")
+            print(t("pricing.video_duration", duration=details['video_duration_seconds']))
+            print(t("pricing.video_tokens_count", tokens=details['video_tokens']))
             if details.get('text_input_tokens', 0) > 0:
-                print(f"文字輸入 Tokens: {details['text_input_tokens']:,}")
+                print(t("pricing.text_input_tokens_count", tokens=details['text_input_tokens']))
         elif 'duration_seconds' in details:
             # 影片生成 (Veo)
-            print(f"影片長度: {details['duration_seconds']} 秒")
-            print(f"單價: NT${details['per_second_rate'] * USD_TO_TWD:.2f}/秒 (${details['per_second_rate']:.2f} USD/秒)")
+            print(t("pricing.video_duration", duration=details['duration_seconds']))
+            rate_twd = details['per_second_rate'] * USD_TO_TWD
+            rate_usd = details['per_second_rate']
+            print(t("pricing.per_second_rate", currency="NT$", rate=f"{rate_twd:.2f}", usd=f"{rate_usd:.2f}"))
         else:
             # 純文字
             if show_breakdown:
-                print(f"輸入 Tokens: {details['input_tokens']:,}")
+                print(t("pricing.input_tokens_count", tokens=details['input_tokens']))
                 if details.get('thinking_tokens', 0) > 0:
-                    print(f"思考 Tokens: {details['thinking_tokens']:,}")
-                print(f"輸出 Tokens: {details['output_tokens']:,}")
-                print(f"總 Tokens: {details['total_tokens']:,}")
+                    print(t("pricing.thinking_tokens_count", tokens=details['thinking_tokens']))
+                print(t("pricing.output_tokens_count", tokens=details['output_tokens']))
+                print(t("pricing.total_tokens_count", tokens=details['total_tokens']))
 
         if details.get('type') != 'flow_engine':
             print("-" * 60)
 
         if 'input_cost' in details and show_breakdown and details.get('type') != 'flow_engine':
-            print(f"輸入成本:  {self.format_cost(details['input_cost'])}")
+            print(t("pricing.input_cost_label", cost=self.format_cost(details['input_cost'])))
             if details.get('thinking_cost', 0) > 0:
-                print(f"思考成本:  {self.format_cost(details['thinking_cost'])}")
-            print(f"輸出成本:  {self.format_cost(details['output_cost'])}")
+                print(t("pricing.thinking_cost_label", cost=self.format_cost(details['thinking_cost'])))
+            print(t("pricing.output_cost_label", cost=self.format_cost(details['output_cost'])))
             print("-" * 60)
 
-        print(f"本次成本:  {self.format_cost(details['total_cost'])} ({self.format_cost(details['total_cost'], 'USD')})")
-        print(f"累計成本:  {self.format_cost(self.total_cost)} ({self.format_cost(self.total_cost, 'USD')})")
+        current_cost = f"{self.format_cost(details['total_cost'])} ({self.format_cost(details['total_cost'], 'USD')})"
+        print(t("pricing.current_cost_label", cost=current_cost, percent=""))
+        total_cost = f"{self.format_cost(self.total_cost)} ({self.format_cost(self.total_cost, 'USD')})"
+        print(t("pricing.total_cost_label", cost=total_cost, percent=""))
         print("=" * 60 + "\n")
 
 
@@ -671,18 +678,20 @@ def print_cost(model_name: str, input_tokens: int, output_tokens: int):
 
 # ==================== 新增：省錢功能 ====================
 
-def print_zero_cost_message(feature_name: str = "此功能"):
+def print_zero_cost_message(feature_name: str = None):
     """
     顯示零成本訊息（本地處理功能）
 
     Args:
         feature_name: 功能名稱
     """
+    if feature_name is None:
+        feature_name = t("pricing.this_feature")
     print("\n" + "=" * 60)
-    print("💰 成本計算")
+    print(t("pricing.cost_calculation"))
     print("=" * 60)
-    print(f"🎉 {feature_name}使用本地工具處理，無需調用 API")
-    print(f"💸 本次成本: NT$0.00 ($0.00 USD)")
+    print(t("pricing.local_processing", feature=feature_name))
+    print(t("pricing.zero_cost_line"))
     print("=" * 60 + "\n")
 
 
@@ -764,17 +773,17 @@ def print_savings_summary(
     result = calculate_cache_savings(model_name, cached_tokens, query_count, discount)
 
     print("\n" + "=" * 60)
-    print("💰 Context Caching 成本節省報告")
+    print(t("pricing.cache_report_title"))
     print("=" * 60)
-    print(f"模型：{result['model']}")
-    print(f"快取 Tokens：{result['cached_tokens']:,}")
-    print(f"查詢次數：{result['query_count']}")
-    print(f"快取折扣：{result['discount_percent']}%")
+    print(t("pricing.cache_model", model=result['model']))
+    print(t("pricing.cache_tokens_info", tokens=result['cached_tokens']))
+    print(t("pricing.cache_query_count", count=result['query_count']))
+    print(t("pricing.cache_discount_info", percent=result['discount_percent']))
     print("-" * 60)
-    print(f"❌ 不使用快取成本：NT${result['without_cache_twd']:.2f} (${result['without_cache']:.6f})")
-    print(f"✅ 使用快取成本：  NT${result['with_cache_twd']:.2f} (${result['with_cache']:.6f})")
-    print(f"💸 節省：         NT${result['savings_twd']:.2f} (${result['savings']:.6f})")
-    print(f"📊 節省比例：     {result['savings_percent']:.1f}%")
+    print(t("pricing.without_cache_cost", currency="NT$", twd=f"{result['without_cache_twd']:.2f}", usd=f"{result['without_cache']:.6f}"))
+    print(t("pricing.with_cache_cost", currency="NT$", twd=f"{result['with_cache_twd']:.2f}", usd=f"{result['with_cache']:.6f}"))
+    print(t("pricing.cache_savings_amount", currency="NT$", twd=f"{result['savings_twd']:.2f}", usd=f"{result['savings']:.6f}"))
+    print(t("pricing.cache_savings_percent", percent=f"{result['savings_percent']:.1f}"))
     print("=" * 60 + "\n")
 
 
@@ -799,20 +808,20 @@ def print_cost_comparison(
     savings_percent = (savings / method1_cost * 100) if method1_cost > 0 else 0
 
     print("\n" + "=" * 60)
-    print(f"💰 {feature_name} - 成本比較")
+    print(t("pricing.cost_comparison_title", feature=feature_name))
     print("=" * 60)
     print(f"❌ {method1_name}：NT${method1_cost * USD_TO_TWD:.2f} (${method1_cost:.6f})")
     print(f"✅ {method2_name}：NT${method2_cost * USD_TO_TWD:.2f} (${method2_cost:.6f})")
     print("-" * 60)
     if savings > 0:
-        print(f"💸 節省：NT${savings * USD_TO_TWD:.2f} (${savings:.6f})")
-        print(f"📊 節省比例：{savings_percent:.1f}%")
-        print(f"💡 建議使用：{method2_name}")
+        print(t("pricing.savings_comparison", currency="NT$", twd=f"{savings * USD_TO_TWD:.2f}", usd=f"{savings:.6f}"))
+        print(t("pricing.savings_percent_line", percent=f"{savings_percent:.1f}"))
+        print(t("pricing.recommend_method", method=method2_name))
     elif savings < 0:
-        print(f"💸 額外成本：NT${abs(savings) * USD_TO_TWD:.2f} (${abs(savings):.6f})")
-        print(f"💡 建議使用：{method1_name}")
+        print(t("pricing.extra_cost", currency="NT$", twd=f"{abs(savings) * USD_TO_TWD:.2f}", usd=f"{abs(savings):.6f}"))
+        print(t("pricing.recommend_method", method=method1_name))
     else:
-        print(f"💡 兩種方法成本相同")
+        print(t("pricing.same_cost"))
     print("=" * 60 + "\n")
 
 

@@ -117,7 +117,12 @@ class MemoryPoolManager:
 # ============================================================================
 
 class ConversationManager:
-    """對話歷史管理器 - 支援分頁與自動存檔"""
+    """對話歷史管理器 - 支援分頁與自動存檔
+
+    .. deprecated:: v1.0.3
+        建議使用 gemini_conversation.ConversationManager，該版本提供更完整的功能。
+        此版本將在 v2.0 移除。
+    """
 
     def __init__(
         self,

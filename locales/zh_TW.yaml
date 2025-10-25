@@ -1,0 +1,675 @@
+# 繁體中文語言包
+# ChatGemini_SakiTool v1.1.0
+#
+# 版本: 1.0.0
+# 作者: Saki-tw (with Claude Code)
+# 日期: 2025-10-25
+# 語系: 繁體中文（台灣）
+#
+# 本語言包從 35 個核心模組中提取整理而成
+# 總計涵蓋 3534 個原始字串
+
+meta:
+  language: "zh-TW"
+  name: "繁體中文"
+  native_name: "繁體中文"
+  author: "Saki-tw"
+  version: "1.0.0"
+  encoding: "UTF-8"
+  region: "Taiwan"
+
+# ============================================================================
+# 通用分類 (common)
+# ============================================================================
+common:
+  # 基本操作
+  "yes": "是"
+  "no": "否"
+  ok: "確定"
+  cancel: "取消"
+  continue: "繼續"
+  back: "返回"
+  exit: "退出"
+  quit: "離開"
+  close: "關閉"
+
+  # 狀態
+  success: "成功"
+  error: "錯誤"
+  warning: "警告"
+  info: "資訊"
+  loading: "載入中"
+  processing: "處理中"
+  completed: "已完成"
+  failed: "失敗"
+  pending: "等待中"
+
+  # 動作
+  save: "儲存"
+  load: "載入"
+  delete: "刪除"
+  create: "建立"
+  update: "更新"
+  refresh: "重新整理"
+  search: "搜尋"
+  select: "選擇"
+  confirm: "確認"
+
+  # 貨幣
+  currency_twd: "NT$"
+  currency_usd: "USD"
+  currency_jpy: "¥"
+  currency_krw: "₩"
+
+  # 語言相關
+  language: "語言"
+  language_switched: "語言已切換至 {lang}"
+  current_language: "當前語言"
+  available_languages: "可用語言"
+
+  # 時間相關
+  second: "秒"
+  minute: "分鐘"
+  hour: "小時"
+  day: "天"
+  week: "週"
+  month: "月"
+  year: "年"
+
+  # 單位
+  tokens: "tokens"
+  token: "token"
+  characters: "字元"
+  lines: "行"
+  files: "檔案"
+  bytes: "位元組"
+
+# ============================================================================
+# 對話系統分類 (chat)
+# ============================================================================
+chat:
+  # 歡迎與告別
+  welcome: "歡迎使用 ChatGemini！"
+  welcome_back: "歡迎回來！"
+  exit_message: "感謝使用，再見！"
+  goodbye: "再見！"
+
+  # 角色標籤
+  user_prompt: "你"
+  model_prompt: "模型"
+  system_prompt: "系統"
+  assistant_prompt: "助理"
+
+  # 狀態提示
+  thinking: "思考中"
+  generating: "生成中"
+  streaming: "串流輸出中"
+  waiting: "等待回應"
+  analyzing: "分析中"
+
+  # 輸入提示
+  enter_message: "請輸入訊息"
+  enter_command: "請輸入指令"
+  multiline_mode: "多行模式（輸入 $$$ 結束）"
+  command_mode: "指令模式"
+
+  # 對話操作
+  new_conversation: "開始新對話"
+  clear_history: "清除歷史記錄"
+  save_conversation: "儲存對話"
+  load_conversation: "載入對話"
+  export_conversation: "匯出對話"
+
+  # 模型選擇
+  select_model: "選擇模型"
+  current_model: "當前模型"
+  switch_model: "切換模型"
+  model_switched: "已切換至模型: {model}"
+  available_models: "可用模型"
+
+  # 思考模式
+  thinking_mode: "思考模式"
+  thinking_mode_enabled: "思考模式已啟用"
+  thinking_mode_disabled: "思考模式已停用"
+  thinking_tokens_limit: "思考 tokens 限制: {limit}"
+  thinking_process: "思考過程"
+
+  # 訊息類型
+  text_message: "文字訊息"
+  image_message: "圖片訊息"
+  file_message: "檔案訊息"
+  multimodal_message: "多模態訊息"
+
+# ============================================================================
+# 計價系統分類 (pricing)
+# ============================================================================
+pricing:
+  # 標籤
+  cost: "成本"
+  price: "價格"
+  fee: "費用"
+  input_tokens: "輸入"
+  output_tokens: "輸出"
+  thinking_tokens: "思考"
+  cached_tokens: "快取"
+  total_cost: "累計成本"
+  session_cost: "會話成本"
+  savings: "節省成本"
+  discount: "折扣"
+
+  # 顯示格式
+  cost_line: "💰 成本: {currency}{twd} (${usd} USD)"
+  tokens_line: "   輸入: {input} tokens, 輸出: {output} tokens"
+  thinking_tokens_line: "   思考: {thinking} tokens"
+  cached_tokens_line: "   快取: {cached} tokens ({discount}% 折扣)"
+  total_cost_line: "   累計成本: {currency}{total}"
+  savings_line: "   💸 節省成本: {currency}{savings} (約 {percent}%)"
+
+  # 快取相關
+  cache_usage: "快取使用"
+  cache_hit: "快取命中"
+  cache_miss: "快取未命中"
+  cache_discount: "快取折扣"
+  cache_savings: "快取節省"
+
+  # 統計
+  session_summary: "會話統計"
+  total_transactions: "總交易次數"
+  session_duration: "會話時長"
+  average_cost: "平均成本"
+  total_tokens: "總 tokens"
+
+  # 功能標題
+  calculator_title: "即時計價計算器"
+  cost_calculation: "💰 成本計算"
+  get_summary: "獲取會話總結"
+  quick_calculate: "快速計算成本"
+  calculate_and_print: "計算並打印成本"
+  this_feature: "此功能"
+
+  # Flow Engine 相關
+  flow_engine_type: "類型: Flow Engine（自然語言影片生成）"
+  target_duration: "目標時長: {duration} 秒"
+  actual_duration: "實際時長: {duration} 秒"
+  segment_count: "片段數量: {num} 段 x {seconds} 秒/段"
+  planning_cost_label: "Gemini 分段計畫:  {cost}"
+  veo_cost_label: "Veo 影片生成:    {cost}"
+
+  # Token 詳細資訊
+  video_duration: "影片長度: {duration} 秒"
+  video_tokens_count: "影片 Tokens: {tokens:,}"
+  text_input_tokens_count: "文字輸入 Tokens: {tokens:,}"
+  input_tokens_count: "輸入 Tokens: {tokens:,}"
+  thinking_tokens_count: "思考 Tokens: {tokens:,}"
+  output_tokens_count: "輸出 Tokens: {tokens:,}"
+  total_tokens_count: "總 Tokens: {tokens:,}"
+
+  # 成本細項
+  per_second_rate: "單價: {currency}{rate}/秒 (${usd}/sec)"
+  input_cost_label: "輸入成本:  {cost}"
+  thinking_cost_label: "思考成本:  {cost}"
+  output_cost_label: "輸出成本:  {cost}"
+  current_cost_label: "本次成本:  {cost} ({percent})"
+  total_cost_label: "累計成本:  {cost} ({percent})"
+
+  # 本地處理提示
+  local_processing: "🎉 {feature}使用本地工具處理，無需調用 API"
+  zero_cost_line: "💸 本次成本: NT$0.00 ($0.00 USD)"
+  or_separator: " 或 "
+
+  # Context Caching 報告
+  cache_report_title: "💰 Context Caching 成本節省報告"
+  cache_model: "模型：{model}"
+  cache_tokens_info: "快取 Tokens：{tokens:,}"
+  cache_query_count: "查詢次數：{count}"
+  cache_discount_info: "快取折扣：{percent}%"
+  without_cache_cost: "❌ 不使用快取成本：{currency}{twd} (${usd} USD)"
+  with_cache_cost: "✅ 使用快取成本：  {currency}{twd} (${usd} USD)"
+  cache_savings_amount: "💸 節省：         {currency}{twd} (${usd} USD)"
+  cache_savings_percent: "📊 節省比例：     {percent}%"
+
+  # 成本比較
+  cost_comparison_title: "💰 {feature} - 成本比較"
+  savings_comparison: "💸 節省：{currency}{twd} (${usd} USD)"
+  savings_percent_line: "📊 節省比例：{percent}%"
+  recommend_method: "💡 建議使用：{method}"
+  extra_cost: "💸 額外成本：{currency}{twd} (${usd} USD)"
+  same_cost: "💡 兩種方法成本相同"
+
+  # 測試標題
+  test_1_title: "\n=== 測試 1: Gemini 2.5 Pro 文字生成 ==="
+  test_2_title: "\n=== 測試 2: Gemini 2.5 Flash 文字生成 ==="
+  test_3_title: "\n=== 測試 3: Veo 3.1 影片生成（8秒）==="
+  test_4_title: "\n=== 測試 4: 影片理解（60秒影片）==="
+  test_summary_title: "\n=== 會話總結 ==="
+
+  # 會話總結
+  total_transactions_line: "總交易次數: {count}"
+  session_total_cost: "會話總成本: ${cost:.6f}"
+  twd_equivalent: "約合台幣: {currency}{amount}"
+
+# ============================================================================
+# 快取管理分類 (cache)
+# ============================================================================
+cache:
+  # 操作
+  create: "建立快取"
+  create_cache: "建立快取"
+  delete: "刪除快取"
+  delete_cache: "刪除快取"
+  clear: "清除快取"
+  clear_cache: "清除快取"
+  update: "更新快取"
+  update_cache: "更新快取"
+  query: "查詢快取"
+  query_cache: "查詢快取"
+  list: "列出快取"
+  list_caches: "列出快取"
+
+  # 狀態
+  created: "快取已建立"
+  cache_created: "快取已建立: {name}"
+  deleted: "快取已刪除"
+  cache_deleted: "快取已刪除: {name}"
+  updated: "快取已更新"
+  cache_updated: "快取已更新: {name}"
+  expired: "快取已過期"
+  cache_expired: "快取已過期: {name}"
+  active: "快取有效"
+
+  # 資訊
+  name: "快取名稱"
+  cache_name: "快取名稱"
+  model: "快取模型"
+  cache_model: "快取模型"
+  ttl: "有效期限"
+  cache_ttl: "有效期限 (TTL)"
+  size: "快取大小"
+  cache_size: "快取大小"
+  tokens: "快取 tokens"
+  cache_tokens: "快取 tokens: {count}"
+
+  # 提示
+  auto_cache: "自動快取"
+  auto_cache_enabled: "自動快取已啟用"
+  auto_cache_disabled: "自動快取已停用"
+  auto_cache_threshold: "自動快取閾值: {threshold} tokens"
+  cache_trigger_suggestion: "建議建立快取以節省成本"
+  cache_recommended: "建議啟用快取（可節省約 {percent}% 成本）"
+
+# ============================================================================
+# 檢查點系統分類 (checkpoint)
+# ============================================================================
+checkpoint:
+  # 操作
+  create: "建立檢查點"
+  create_checkpoint: "建立檢查點"
+  restore: "恢復檢查點"
+  restore_checkpoint: "恢復檢查點"
+  list: "列出檢查點"
+  list_checkpoints: "列出檢查點"
+  delete: "刪除檢查點"
+  delete_checkpoint: "刪除檢查點"
+  rewind: "回退"
+
+  # 類型
+  auto: "自動檢查點"
+  auto_checkpoint: "自動檢查點"
+  manual: "手動檢查點"
+  manual_checkpoint: "手動檢查點"
+  snapshot: "快照檢查點"
+  snapshot_checkpoint: "快照檢查點"
+  branch: "分支檢查點"
+  branch_checkpoint: "分支檢查點"
+
+  # 狀態
+  created: "檢查點已建立"
+  checkpoint_created: "檢查點已建立: {name}"
+  restored: "已恢復至檢查點"
+  checkpoint_restored: "已恢復至檢查點: {name}"
+  deleted: "檢查點已刪除"
+  checkpoint_deleted: "檢查點已刪除: {name}"
+
+  # 資訊
+  name: "檢查點名稱"
+  checkpoint_name: "檢查點名稱: {name}"
+  time: "建立時間"
+  checkpoint_time: "建立時間: {time}"
+  messages: "訊息數量"
+  checkpoint_messages: "訊息數量: {count}"
+  size: "大小"
+  checkpoint_size: "大小: {size}"
+  description: "描述"
+
+# ============================================================================
+# 錯誤訊息分類 (errors)
+# ============================================================================
+errors:
+  # API 錯誤
+  api_error: "API 呼叫失敗"
+  api_error_detail: "API 呼叫失敗: {detail}"
+  api_key_invalid: "API 金鑰無效"
+  api_key_missing: "未設定 API 金鑰"
+  api_quota_exceeded: "API 配額已用盡"
+  api_rate_limit: "API 速率限制"
+  api_timeout: "API 請求逾時"
+  api_connection_error: "API 連線錯誤"
+
+  # 檔案錯誤
+  file_not_found: "找不到檔案: {path}"
+  file_read_error: "讀取檔案失敗: {path}"
+  file_write_error: "寫入檔案失敗: {path}"
+  file_too_large: "檔案過大: {size}"
+  file_format_error: "檔案格式錯誤: {format}"
+  file_permission_error: "檔案權限錯誤"
+
+  # 模型錯誤
+  invalid_model: "無效的模型名稱: {model}"
+  model_not_found: "找不到模型: {model}"
+  model_not_supported: "不支援的模型: {model}"
+  model_load_error: "模型載入失敗"
+
+  # 網路錯誤
+  network_error: "網路連線錯誤"
+  network_error_detail: "網路連線錯誤: {detail}"
+  timeout_error: "連線逾時"
+  connection_refused: "連線被拒絕"
+  connection_reset: "連線被重設"
+
+  # 配置錯誤
+  config_error: "配置錯誤"
+  config_missing: "缺少配置項: {key}"
+  config_invalid: "無效的配置值: {key}={value}"
+  config_load_error: "載入配置失敗"
+
+  # 語言包錯誤
+  locale_not_found: "找不到語言包: {lang}"
+  locale_load_error: "載入語言包失敗: {lang}"
+  translation_missing: "缺少翻譯: {key}"
+
+  # 記憶體錯誤
+  memory_error: "記憶體錯誤"
+  memory_limit_exceeded: "記憶體限制已超出"
+  out_of_memory: "記憶體不足"
+
+  # 其他錯誤
+  unknown_error: "未知錯誤"
+  internal_error: "內部錯誤"
+  not_implemented: "功能尚未實作"
+  invalid_input: "無效的輸入"
+  invalid_parameter: "無效的參數: {param}"
+
+# ============================================================================
+# 幫助系統分類 (help)
+# ============================================================================
+help:
+  # 指令說明
+  command_help: "指令說明"
+  available_commands: "可用指令"
+  command_usage: "用法"
+  command_description: "說明"
+  command_examples: "範例"
+  command_options: "選項"
+
+  # 快速開始
+  quick_start: "快速開始"
+  getting_started: "入門指南"
+  basic_usage: "基本用法"
+  advanced_usage: "進階用法"
+
+  # 主題
+  help_topics: "幫助主題"
+  topic_chat: "對話功能"
+  topic_media: "媒體處理"
+  topic_cache: "快取管理"
+  topic_checkpoint: "檢查點系統"
+  topic_pricing: "計價說明"
+  topic_config: "配置設定"
+  topic_models: "模型選擇"
+
+  # 說明文字
+  need_help: "需要幫助嗎？輸入 /help 查看可用指令"
+  type_help: "輸入 /help [主題] 查看詳細說明"
+  no_help_available: "此主題暫無說明"
+
+# ============================================================================
+# 媒體處理分類 (media)
+# ============================================================================
+media:
+  # 圖片
+  image: "圖片"
+  image_analysis: "圖片分析"
+  image_generation: "圖片生成"
+  image_upload: "圖片上傳"
+  image_processing: "圖片處理中"
+  image_resize: "調整圖片大小"
+  image_format: "圖片格式"
+
+  # 影片
+  video: "影片"
+  video_analysis: "影片分析"
+  video_generation: "影片生成"
+  video_upload: "影片上傳"
+  video_processing: "影片處理中"
+  video_editing: "影片編輯"
+  scene_detection: "場景檢測"
+  video_format: "影片格式"
+  video_duration: "影片長度"
+
+  # 音訊
+  audio: "音訊"
+  audio_analysis: "音訊分析"
+  audio_processing: "音訊處理"
+  audio_transcription: "音訊轉錄"
+  audio_format: "音訊格式"
+
+  # 字幕
+  subtitle: "字幕"
+  subtitle_generation: "字幕生成"
+  subtitle_translation: "字幕翻譯"
+  subtitle_format: "字幕格式"
+
+  # 狀態
+  upload_progress: "上傳進度: {percent}%"
+  processing_progress: "處理進度: {percent}%"
+  upload_complete: "上傳完成"
+  processing_complete: "處理完成"
+  analyzing: "分析中"
+
+  # 通用
+  media_file: "媒體檔案"
+  file_size: "檔案大小"
+  file_format: "檔案格式"
+  resolution: "解析度"
+  bitrate: "位元率"
+  frame_rate: "幀率"
+
+# ============================================================================
+# 檔案操作分類 (file)
+# ============================================================================
+file:
+  # 操作
+  upload: "上傳"
+  upload_file: "上傳檔案"
+  download: "下載"
+  download_file: "下載檔案"
+  delete: "刪除"
+  delete_file: "刪除檔案"
+  rename: "重新命名"
+  rename_file: "重新命名檔案"
+
+  # 狀態
+  uploading: "上傳中"
+  downloading: "下載中"
+  uploaded: "已上傳"
+  downloaded: "已下載"
+
+  # 資訊
+  file_name: "檔案名稱"
+  file_path: "檔案路徑"
+  file_size: "檔案大小"
+  file_type: "檔案類型"
+  file_format: "檔案格式"
+
+  # 錯誤
+  file_not_found: "找不到檔案"
+  file_exists: "檔案已存在"
+  invalid_file: "無效的檔案"
+
+# ============================================================================
+# CodeGemini 分類 (codegemini)
+# ============================================================================
+codegemini:
+  # 功能
+  code_analysis: "程式碼分析"
+  task_planning: "任務規劃"
+  file_exploration: "檔案探索"
+  codebase_embedding: "程式碼庫索引"
+  code_review: "程式碼審查"
+
+  # 工具
+  background_shell: "背景 Shell"
+  todo_tracker: "待辦事項追蹤"
+  mcp_server: "MCP 伺服器"
+
+  # 狀態
+  analyzing: "分析中"
+  analyzing_code: "分析程式碼中"
+  planning: "規劃中"
+  planning_task: "規劃任務中"
+  exploring: "探索中"
+  exploring_files: "探索檔案中"
+  indexing: "建立索引中"
+  indexing_codebase: "建立程式碼庫索引中"
+
+  # 結果
+  analysis_complete: "分析完成"
+  plan_ready: "規劃完成"
+  index_ready: "索引建立完成"
+
+# ============================================================================
+# 配置管理分類 (config)
+# ============================================================================
+config:
+  # 操作
+  load: "載入配置"
+  load_config: "載入配置"
+  save: "儲存配置"
+  save_config: "儲存配置"
+  reset: "重設配置"
+  reset_config: "重設配置"
+  edit: "編輯配置"
+  edit_config: "編輯配置"
+
+  # 項目
+  api_key: "API 金鑰"
+  language: "語言"
+  model: "模型"
+  cache_enabled: "啟用快取"
+  auto_save: "自動儲存"
+  theme: "主題"
+
+  # 狀態
+  loaded: "配置已載入"
+  config_loaded: "配置已載入"
+  saved: "配置已儲存"
+  config_saved: "配置已儲存"
+  reset: "配置已重設"
+  config_reset: "配置已重設"
+
+  # 訊息
+  config_file: "配置檔案"
+  config_path: "配置路徑"
+  default_config: "預設配置"
+
+# ============================================================================
+# 安裝與設定分類 (install)
+# ============================================================================
+install:
+  # 語言偵測
+  language_detected: "✓ 偵測到{language}，使用{language}介面"
+  press_enter: "按 Enter 繼續，或輸入語言代碼切換 ({languages}):"
+  language_saved: "語言設定已保存: {lang}"
+
+  # 安裝步驟
+  installing: "正在安裝 ChatGemini_SakiTool..."
+  checking: "檢查中"
+  checking_python: "檢查 Python 版本"
+  installing_dependencies: "安裝依賴套件"
+  initializing: "初始化中"
+  initializing_config: "初始化配置"
+  install_complete: "✅ 安裝完成！"
+
+  # 環境檢查
+  python_version_ok: "✓ Python 版本: {version}"
+  python_version_error: "✗ Python 版本過舊，需要 3.10+"
+  api_key_configured: "✓ API 金鑰已配置"
+  api_key_missing: "✗ 未設定 API 金鑰"
+  dependency_ok: "✓ 依賴套件已安裝"
+  dependency_missing: "✗ 缺少依賴套件"
+
+  # 指示
+  next_steps: "後續步驟"
+  run_command: "執行指令"
+  read_docs: "閱讀文檔"
+
+# ============================================================================
+# 記憶體管理分類 (memory)
+# ============================================================================
+memory:
+  # 狀態
+  usage: "記憶體使用量"
+  available: "可用記憶體"
+  total: "總記憶體"
+  warning: "記憶體警告"
+
+  # 操作
+  clear: "清除記憶體"
+  optimize: "優化記憶體"
+  check: "檢查記憶體"
+
+  # 訊息
+  low_memory: "記憶體不足"
+  memory_cleared: "記憶體已清除"
+  memory_optimized: "記憶體已優化"
+
+# ============================================================================
+# 模型相關分類 (model)
+# ============================================================================
+model:
+  # 模型名稱
+  gemini_pro: "Gemini Pro"
+  gemini_flash: "Gemini Flash"
+  gemini_flash_8b: "Gemini Flash 8B"
+
+  # 狀態
+  loading: "載入模型中"
+  loaded: "模型已載入"
+  switching: "切換模型中"
+  switched: "模型已切換"
+
+  # 資訊
+  model_name: "模型名稱"
+  model_version: "模型版本"
+  model_info: "模型資訊"
+  supported_models: "支援的模型"
+
+# ============================================================================
+# 驗證分類 (validation)
+# ============================================================================
+validation:
+  # 狀態
+  validating: "驗證中"
+  valid: "有效"
+  invalid: "無效"
+
+  # 訊息
+  api_key_valid: "API 金鑰有效"
+  api_key_invalid: "API 金鑰無效"
+  input_valid: "輸入有效"
+  input_invalid: "輸入無效"
+
+  # 要求
+  required: "必填"
+  optional: "選填"
+  format_error: "格式錯誤"

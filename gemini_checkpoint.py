@@ -33,6 +33,7 @@ from datetime import datetime
 from enum import Enum
 import difflib
 import uuid
+import re
 
 from rich.console import Console
 from rich.table import Table
@@ -166,71 +167,186 @@ class SnapshotEngine:
             filename: 檔案名稱（用於 diff 標頭）
 
         Returns:
-            unified diff 字串
+            unified diff 字串（標準 unified diff 格式）
         """
         lines_before = content_before.splitlines(keepends=True)
         lines_after = content_after.splitlines(keepends=True)
 
-        diff = difflib.unified_diff(
+        # 處理空文件或無換行結尾的情況
+        if content_before and not content_before.endswith('\n'):
+            if lines_before:
+                lines_before[-1] = lines_before[-1] + '\n'
+
+        if content_after and not content_after.endswith('\n'):
+            if lines_after:
+                lines_after[-1] = lines_after[-1] + '\n'
+
+        diff_lines = difflib.unified_diff(
             lines_before,
             lines_after,
             fromfile=f"a/{filename}",
             tofile=f"b/{filename}",
-            lineterm=''
+            lineterm='\n'
         )
 
-        return ''.join(diff)
+        # 移除每行末尾多餘的 '\n\n'（因為 lineterm='\n' 會加上額外的換行）
+        result = []
+        for line in diff_lines:
+            if line.endswith('\n'):
+                result.append(line)
+            else:
+                result.append(line + '\n')
+
+        return ''.join(result)
 
     @staticmethod
     def apply_diff(content_before: str, diff: str) -> str:
         """
-        應用 diff 以恢復內容
+        應用 unified diff 以恢復內容
+
+        使用狀態機模式解析並應用 unified diff，支援完整的 diff 格式。
+        演算法複雜度：O(n + m)，其中 n 為原始行數，m 為 diff 行數。
 
         Args:
             content_before: 原始內容
-            diff: unified diff
+            diff: unified diff 格式字串
 
         Returns:
             應用 diff 後的內容
+
+        Raises:
+            ValueError: 當 diff 格式無效時
+
+        Algorithm:
+            1. 解析 diff 為 hunks（變更區塊）
+            2. 按順序處理每個 hunk：
+               - 複製 hunk 前的未變更行
+               - 應用 hunk 內的變更（-/+/ 操作）
+            3. 複製剩餘的未變更行
+
+        Example:
+            >>> original = "line1\\nline2\\nline3\\n"
+            >>> diff = "@@ -1,3 +1,3 @@\\n line1\\n-line2\\n+modified\\n line3\\n"
+            >>> result = SnapshotEngine.apply_diff(original, diff)
+            >>> print(result)
+            line1
+            modified
+            line3
         """
-        # 解析 unified diff
+        if not diff or not diff.strip():
+            return content_before
+
+        # 將內容分割為行（保留換行符）
         lines_before = content_before.splitlines(keepends=True)
+        # 處理空文件或無換行結尾的情況
+        if content_before and not content_before.endswith('\n'):
+            if lines_before:
+                lines_before[-1] = lines_before[-1] + '\n'
 
-        # 使用 difflib 的內部方法應用 diff
-        # 注意：這是簡化版本，完整實作需要解析 diff 格式
-        # TODO: 實作完整的 diff 應用邏輯
-
-        # 暫時使用簡單的行替換邏輯
+        result_lines = []
         diff_lines = diff.splitlines()
-        result_lines = lines_before.copy()
 
-        line_num = 0
-        for diff_line in diff_lines:
-            if diff_line.startswith('@@'):
-                # 解析行號範圍
-                # 格式: @@ -start,count +start,count @@
-                parts = diff_line.split()
-                if len(parts) >= 3:
-                    try:
-                        new_range = parts[2][1:]  # 移除 '+'
-                        line_num = int(new_range.split(',')[0]) - 1
-                    except (ValueError, IndexError):
+        original_idx = 0  # 當前在原始內容中的位置（從 0 開始）
+        i = 0  # diff 行索引
+
+        while i < len(diff_lines):
+            line = diff_lines[i]
+
+            # 跳過 diff 標頭行（--- 和 +++）
+            if line.startswith('---') or line.startswith('+++'):
+                i += 1
+                continue
+
+            # 解析 hunk 標頭：@@ -old_start,old_count +new_start,new_count @@
+            if line.startswith('@@'):
+                match = re.match(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@', line)
+                if not match:
+                    # 無效的 hunk 標頭，跳過
+                    i += 1
+                    continue
+
+                # 提取行號（diff 使用 1-based 索引）
+                old_start = int(match.group(1))
+                old_count = int(match.group(2)) if match.group(2) else 1
+                new_start = int(match.group(3))
+                new_count = int(match.group(4)) if match.group(4) else 1
+
+                # 複製 hunk 前的所有未變更行
+                while original_idx < old_start - 1:
+                    if original_idx < len(lines_before):
+                        result_lines.append(lines_before[original_idx])
+                    original_idx += 1
+
+                # 處理 hunk 內容
+                i += 1
+                hunk_old_processed = 0
+                hunk_new_processed = 0
+
+                while i < len(diff_lines):
+                    hunk_line = diff_lines[i]
+
+                    # 遇到下一個 hunk 或檔案標頭，結束當前 hunk
+                    if hunk_line.startswith('@@') or hunk_line.startswith('---') or hunk_line.startswith('+++'):
+                        break
+
+                    # 空行可能是 diff 格式的一部分
+                    if not hunk_line:
+                        i += 1
                         continue
-            elif diff_line.startswith('-'):
-                # 刪除行
-                if line_num < len(result_lines):
-                    result_lines.pop(line_num)
-            elif diff_line.startswith('+'):
-                # 新增行
-                new_line = diff_line[1:] + '\n'
-                if line_num <= len(result_lines):
-                    result_lines.insert(line_num, new_line)
-                    line_num += 1
-            elif diff_line.startswith(' '):
-                # 未變更行
-                line_num += 1
 
-        return ''.join(result_lines)
+                    first_char = hunk_line[0]
+                    content = hunk_line[1:] if len(hunk_line) > 1 else ''
+
+                    if first_char == ' ':
+                        # 上下文行（未變更）- 從原始內容複製
+                        if original_idx < len(lines_before):
+                            result_lines.append(lines_before[original_idx])
+                        original_idx += 1
+                        hunk_old_processed += 1
+                        hunk_new_processed += 1
+
+                    elif first_char == '-':
+                        # 刪除行 - 跳過原始內容中的這一行
+                        original_idx += 1
+                        hunk_old_processed += 1
+
+                    elif first_char == '+':
+                        # 新增行 - 加入結果
+                        # 確保行末有換行符（除非是最後一行且原始內容也沒有）
+                        if content and not content.endswith('\n'):
+                            content += '\n'
+                        result_lines.append(content)
+                        hunk_new_processed += 1
+
+                    elif first_char == '\\':
+                        # 特殊標記行（如 "\ No newline at end of file"）
+                        # 移除最後一行的換行符
+                        if hunk_line.strip() == '\\ No newline at end of file':
+                            if result_lines and result_lines[-1].endswith('\n'):
+                                result_lines[-1] = result_lines[-1][:-1]
+
+                    i += 1
+
+                    # 檢查是否已處理完整個 hunk
+                    if hunk_old_processed >= old_count and hunk_new_processed >= new_count:
+                        break
+
+                continue
+
+            i += 1
+
+        # 複製剩餘的未變更行
+        while original_idx < len(lines_before):
+            result_lines.append(lines_before[original_idx])
+            original_idx += 1
+
+        result = ''.join(result_lines)
+
+        # 處理檔案結尾換行符
+        if content_before and not content_before.endswith('\n'):
+            result = result.rstrip('\n')
+
+        return result
 
     @staticmethod
     def compress(content: str) -> bytes:
