@@ -337,16 +337,38 @@ def get_translator() -> ThinkingTranslator:
 
 def translate_thinking(text: str) -> str:
     """
-    便捷函數：翻譯思考過程（英文 → 繁體中文）
+    便捷函數：翻譯思考過程（英文 → 當前 i18n 語言）
 
     Args:
         text: 英文思考過程文字
 
     Returns:
-        繁體中文翻譯，失敗則返回原文
+        翻譯後的文字（根據當前 i18n 語言），失敗則返回原文
     """
+    # 獲取當前 i18n 語言設定
+    target_lang = 'zh-TW'  # 預設為繁體中文
+    try:
+        from utils import get_current_language
+        current_lang = get_current_language()
+
+        # 將 i18n 語言代碼轉換為翻譯引擎語言代碼
+        lang_mapping = {
+            'zh-TW': 'zh-TW',  # 繁體中文
+            'en': 'en',        # 英文（不需要翻譯）
+            'ja': 'ja',        # 日文
+            'ko': 'ko'         # 韓文
+        }
+        target_lang = lang_mapping.get(current_lang, 'zh-TW')
+
+        # 如果目標語言是英文，直接返回原文（不需要翻譯）
+        if target_lang == 'en':
+            return text
+
+    except Exception as e:
+        logger.debug(f"無法獲取 i18n 語言，使用預設 zh-TW: {e}")
+
     translator = get_translator()
-    return translator.translate(text, source_lang='en', target_lang='zh-TW')
+    return translator.translate(text, source_lang='en', target_lang=target_lang)
 
 
 # ============================================================
