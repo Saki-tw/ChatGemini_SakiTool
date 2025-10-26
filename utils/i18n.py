@@ -271,17 +271,23 @@ def t(key: str, **kwargs) -> str:
 _ = t
 
 
-def switch_language(lang: str) -> bool:
+def switch_language(lang: str, save_to_env: bool = False) -> bool:
     """
     切換語言（全域函數）
 
     Args:
         lang: 語言代碼
+        save_to_env: 是否將設定保存到 .env 檔案
 
     Returns:
         是否成功切換
     """
-    return get_i18n().switch_language(lang)
+    success = get_i18n().switch_language(lang)
+
+    if success and save_to_env:
+        _save_language_to_env(lang)
+
+    return success
 
 
 def get_current_language() -> str:
@@ -307,6 +313,56 @@ def get_available_languages() -> list:
 # ============================================================================
 # 工具函數
 # ============================================================================
+
+def _save_language_to_env(lang: str) -> bool:
+    """
+    保存語言設定到 .env 檔案
+
+    Args:
+        lang: 語言代碼
+
+    Returns:
+        是否成功保存
+    """
+    try:
+        # 定位 .env 檔案
+        project_root = Path(__file__).parent.parent
+        env_file = project_root / '.env'
+
+        # 讀取現有內容
+        if env_file.exists():
+            with open(env_file, 'r', encoding='utf-8') as f:
+                lines = f.readlines()
+        else:
+            lines = []
+
+        # 更新或添加 GEMINI_LANG
+        lang_line = f'GEMINI_LANG={lang}\n'
+        updated = False
+
+        for i, line in enumerate(lines):
+            if line.startswith('GEMINI_LANG='):
+                lines[i] = lang_line
+                updated = True
+                break
+
+        if not updated:
+            # 如果沒有找到，添加到最後
+            # 確保檔案結尾有換行
+            if lines and not lines[-1].endswith('\n'):
+                lines[-1] += '\n'
+            lines.append(lang_line)
+
+        # 寫回檔案
+        with open(env_file, 'w', encoding='utf-8') as f:
+            f.writelines(lines)
+
+        return True
+
+    except Exception as e:
+        print(f"⚠️  保存語言設定到 .env 失敗: {e}")
+        return False
+
 
 def is_language_available(lang: str) -> bool:
     """
