@@ -84,11 +84,15 @@ class ModuleLoader:
         # Phase 3: 函數抽離
         'file_manager': 'gemini_file_manager',
         'model_selector': 'gemini_model_selector',
+
+        # i18n 國際化系統
+        'i18n': 'utils.i18n',
     }
 
     # 預載入模組（啟動時載入）
     PRELOAD_MODULES = [
         'logger',
+        'i18n',  # i18n 應該在啟動時就載入
     ]
 
     # 閒置卸載時間（秒）

@@ -192,12 +192,13 @@ class I18n:
 _i18n_instance: Optional[I18n] = None
 
 
-def init_i18n(lang: str = None) -> I18n:
+def init_i18n(lang: str = None, inject_builtins: bool = True) -> I18n:
     """
     初始化 i18n 系統
 
     Args:
         lang: 語言代碼（None 表示自動偵測）
+        inject_builtins: 是否將 t() 函數注入到 builtins 中（預設 True）
 
     Returns:
         I18n 實例
@@ -210,6 +211,19 @@ def init_i18n(lang: str = None) -> I18n:
     global _i18n_instance
 
     if lang is None:
+        # 先確保 .env 已載入
+        try:
+            from pathlib import Path
+            from dotenv import load_dotenv
+            import os
+
+            project_root = Path(__file__).parent.parent
+            env_file = project_root / '.env'
+            if env_file.exists():
+                load_dotenv(env_file, override=False)  # 不覆蓋已存在的環境變數
+        except Exception:
+            pass  # 如果載入失敗，繼續執行
+
         # 嘗試從 config.py 讀取語言設定
         try:
             import sys
@@ -227,6 +241,13 @@ def init_i18n(lang: str = None) -> I18n:
             lang = detect_system_language()
 
     _i18n_instance = I18n(default_lang=lang)
+
+    # 將 t() 函數注入到 builtins，讓所有模組都可以直接使用
+    if inject_builtins:
+        import builtins
+        builtins.t = t
+        builtins._ = _
+
     return _i18n_instance
 
 
@@ -284,8 +305,16 @@ def switch_language(lang: str, save_to_env: bool = False) -> bool:
     """
     success = get_i18n().switch_language(lang)
 
-    if success and save_to_env:
-        _save_language_to_env(lang)
+    if success:
+        # 重新注入 builtins，確保所有模組使用新語言
+        import builtins
+        if hasattr(builtins, 't'):
+            builtins.t = t
+            builtins._ = _
+
+        # 保存到 .env
+        if save_to_env:
+            _save_language_to_env(lang)
 
     return success
 
