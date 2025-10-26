@@ -192,6 +192,37 @@ pricing:
   total_transactions_line: '總交易次數: {count}'
   session_total_cost: '會話總成本: ${cost:.6f}'
   twd_equivalent: '約合台幣: {currency}{amount}'
+  gemini_planning: "Gemini Planning"
+  veo_segments: "{num} segments x {sec} sec"
+
+translator:
+  engine_ready: "✅ deep-translator ready (main engine, completely free)"
+  engine_loaded: "✓ Translation engine loaded: deep-translator"
+  toggle_status: "Translation feature {status}"
+  cache_cleared: "✓ Translation cache cleared"
+  translating: "🌐 Translating..."
+  translation_complete: "✓ Translation complete"
+  translation_failed: "❌ Translation failed: {error}"
+  test_original: "Original"
+  test_translated: "Translated"
+  bilingual_display: "Bilingual Display"
+
+thinking:
+  signature_loaded: "Loaded thinking signature state (function calling enabled)"
+  signature_disabled: "Thinking signature state: function calling disabled"
+  signature_saved: "Saved thinking signature (with parts)"
+  signature_cleared: "Cleared thinking signature"
+  state_saved: "Thinking signature state saved"
+  load_failed: "Failed to load thinking signature state: {error}"
+  save_failed: "Failed to save thinking signature: {error}"
+  state_save_failed: "Failed to save thinking signature state: {error}"
+  no_disable_warning: "⚠️  {model} does not support disabling thinking, will use dynamic mode"
+  no_disable_adjusted: "⚠️  {model} does not support disabling thinking (0 tokens), adjusted to minimum {min_tokens} tokens"
+  budget_below_min: "⚠️  Thinking budget below minimum {min_tokens} tokens, adjusted"
+  budget_above_max: "⚠️  Thinking budget exceeds maximum {max_tokens:,} tokens, adjusted to max"
+  response_min_warning: "⚠️  Response tokens must be at least 1, adjusted"
+  response_max_warning: "⚠️  Response tokens exceed maximum 8192, adjusted to max"
+
 cache:
   create: Create cache
   create_cache: Create cache

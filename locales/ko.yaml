@@ -192,6 +192,37 @@ pricing:
   total_transactions_line: '總交易次數: {count}'
   session_total_cost: '會話總成本: ${cost:.6f}'
   twd_equivalent: '約合台幣: {currency}{amount}'
+  gemini_planning: "Gemini 계획 생성"
+  veo_segments: "{num}개 세그먼트 x {sec}초"
+
+translator:
+  engine_ready: "✅ deep-translator 준비 완료 (메인 엔진, 완전 무료)"
+  engine_loaded: "✓ 번역 엔진 로드됨: deep-translator"
+  toggle_status: "번역 기능 {status}"
+  cache_cleared: "✓ 번역 캐시 지워짐"
+  translating: "🌐 번역 중..."
+  translation_complete: "✓ 번역 완료"
+  translation_failed: "❌ 번역 실패: {error}"
+  test_original: "원문"
+  test_translated: "번역문"
+  bilingual_display: "이중 언어 표시"
+
+thinking:
+  signature_loaded: "씽킹 시그니처 상태 로드됨 (함수 호출 활성화)"
+  signature_disabled: "씽킹 시그니처 상태: 함수 호출 비활성화"
+  signature_saved: "씽킹 시그니처 저장됨 (parts 포함)"
+  signature_cleared: "씽킹 시그니처 지워짐"
+  state_saved: "씽킹 시그니처 상태 저장됨"
+  load_failed: "씽킹 시그니처 상태 로드 실패: {error}"
+  save_failed: "씽킹 시그니처 저장 실패: {error}"
+  state_save_failed: "씽킹 시그니처 상태 저장 실패: {error}"
+  no_disable_warning: "⚠️  {model}은(는) 씽킹 비활성화를 지원하지 않습니다, 동적 모드를 사용합니다"
+  no_disable_adjusted: "⚠️  {model}은(는) 씽킹 비활성화를 지원하지 않습니다 (0 토큰), 최소값 {min_tokens} 토큰으로 조정됨"
+  budget_below_min: "⚠️  씽킹 예산이 최소값 {min_tokens} 토큰 미만입니다, 조정됨"
+  budget_above_max: "⚠️  씽킹 예산이 최대값 {max_tokens:,} 토큰을 초과합니다, 최대값으로 조정됨"
+  response_min_warning: "⚠️  응답 토큰은 최소 1이어야 합니다, 조정됨"
+  response_max_warning: "⚠️  응답 토큰이 최대값 8192를 초과합니다, 최대값으로 조정됨"
+
 cache:
   create: 캐시 생성
   create_cache: 캐시 생성

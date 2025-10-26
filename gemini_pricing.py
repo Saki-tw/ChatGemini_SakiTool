@@ -8,6 +8,20 @@ from typing import Dict, Tuple, Optional
 from datetime import datetime
 from utils.i18n import t, _
 
+# 安全翻譯函數（支援降級運行）
+try:
+    from utils import safe_t
+except ImportError:
+    # 降級：使用基本 fallback 函數
+    def safe_t(key: str, fallback: str = None, **kwargs):
+        """降級版本的 safe_t"""
+        if fallback is None:
+            fallback = key.split('.')[-1].replace('_', ' ').title()
+        try:
+            return fallback.format(**kwargs) if kwargs else fallback
+        except (KeyError, ValueError):
+            return fallback
+
 # 美元兌新台幣匯率（2025年10月）
 # 若匯率有較大變動，請更新此值
 USD_TO_TWD = 31.0
@@ -558,8 +572,8 @@ class PricingCalculator:
             'total_cost': total_cost,
             'total_cost_twd': total_cost * USD_TO_TWD,
             'breakdown': {
-                'planning': f"NT${planning_cost * USD_TO_TWD:.2f} (${planning_cost:.4f} USD) - Gemini 分段計畫",
-                'veo': f"NT${veo_cost * USD_TO_TWD:.2f} (${veo_cost:.4f} USD) - {num_segments} 段 x {segment_duration} 秒",
+                'planning': f"NT${planning_cost * USD_TO_TWD:.2f} (${planning_cost:.4f} USD) - {safe_t('pricing.gemini_planning', fallback='Gemini 分段計畫')}",
+                'veo': f"NT${veo_cost * USD_TO_TWD:.2f} (${veo_cost:.4f} USD) - {safe_t('pricing.veo_segments', fallback='{num} 段 x {sec} 秒', num=num_segments, sec=segment_duration)}",
                 'total': f"NT${total_cost * USD_TO_TWD:.2f} (${total_cost:.4f} USD)"
             }
         }
@@ -829,7 +843,7 @@ if __name__ == "__main__":
     # 測試範例
     calc = PricingCalculator()
 
-    print("\n=== 測試 1: Gemini 2.5 Pro 文字生成 ===")
+    print(safe_t('pricing.test_1_title', fallback="\n\n    === 測試 1: Gemini 2.5 Pro 文字生成 ==="))
     cost, details = calc.calculate_text_cost(
         'gemini-2.5-pro',
         input_tokens=1000,
@@ -837,7 +851,7 @@ if __name__ == "__main__":
     )
     calc.print_cost_summary(details)
 
-    print("\n=== 測試 2: Gemini 2.5 Flash 文字生成 ===")
+    print(safe_t('pricing.test_2_title', fallback="\n\n    === 測試 2: Gemini 2.5 Flash 文字生成 ==="))
     cost, details = calc.calculate_text_cost(
         'gemini-2.5-flash',
         input_tokens=10000,
@@ -845,14 +859,14 @@ if __name__ == "__main__":
     )
     calc.print_cost_summary(details)
 
-    print("\n=== 測試 3: Veo 3.1 影片生成（8秒）===")
+    print(safe_t('pricing.test_3_title', fallback="\n\n    === 測試 3: Veo 3.1 影片生成（8秒）==="))
     cost, details = calc.calculate_video_generation_cost(
         'veo-3.1-generate-preview',
         duration_seconds=8
     )
     calc.print_cost_summary(details)
 
-    print("\n=== 測試 4: 影片理解（60秒影片）===")
+    print(safe_t('pricing.test_4_title', fallback="\n\n    === 測試 4: 影片理解（60秒影片）==="))
     cost, details = calc.calculate_video_understanding_cost(
         'gemini-2.5-pro',
         video_duration_seconds=60,
@@ -861,8 +875,8 @@ if __name__ == "__main__":
     )
     calc.print_cost_summary(details)
 
-    print("\n=== 會話總結 ===")
+    print(safe_t('pricing.test_summary_title', fallback="\n\n    === 會話總結 ==="))
     summary = calc.get_session_summary()
-    print(f"總交易次數: {summary['total_transactions']}")
-    print(f"會話總成本: ${summary['total_cost']:.6f}")
-    print(f"約合台幣: NT${summary['total_cost'] * 31:.2f}")
+    print(safe_t('pricing.total_transactions_line', fallback="總交易次數: {count}", count=summary['total_transactions']))
+    print(safe_t('pricing.session_total_cost', fallback="會話總成本: ${cost:.6f}", cost=summary['total_cost']))
+    print(safe_t('pricing.twd_equivalent', fallback="約合台幣: {currency}{amount}", currency="NT$", amount=f"{summary['total_cost'] * 31:.2f}"))

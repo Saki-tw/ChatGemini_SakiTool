@@ -194,6 +194,8 @@ pricing:
   segment_count: "片段數量: {num} 段 x {seconds} 秒/段"
   planning_cost_label: "Gemini 分段計畫:  {cost}"
   veo_cost_label: "Veo 影片生成:    {cost}"
+  gemini_planning: "Gemini 分段計畫"
+  veo_segments: "{num} 段 x {sec} 秒"
 
   # Token 詳細資訊
   video_duration: "影片長度: {duration} 秒"
@@ -247,6 +249,54 @@ pricing:
   total_transactions_line: "總交易次數: {count}"
   session_total_cost: "會話總成本: ${cost:.6f}"
   twd_equivalent: "約合台幣: {currency}{amount}"
+
+# ============================================================================
+# 翻譯系統分類 (translator)
+# ============================================================================
+translator:
+  # 引擎狀態
+  engine_ready: "✅ deep-translator 已就緒（主引擎，完全免費）"
+  engine_loaded: "✓ 翻譯引擎已載入：deep-translator"
+
+  # 功能狀態
+  toggle_status: "翻譯功能已{status}"
+  cache_cleared: "✓ 翻譯快取已清除"
+
+  # 翻譯過程
+  translating: "🌐 翻譯中..."
+  translation_complete: "✓ 翻譯完成"
+  translation_failed: "❌ 翻譯失敗: {error}"
+
+  # 測試與顯示
+  test_original: "原文"
+  test_translated: "譯文"
+  bilingual_display: "雙語顯示"
+
+# ============================================================================
+# 思考模式分類 (thinking)
+# ============================================================================
+thinking:
+  # 思考簽名管理
+  signature_loaded: "已載入思考簽名狀態（函數呼叫已啟用）"
+  signature_disabled: "思考簽名狀態：函數呼叫未啟用"
+  signature_saved: "已保存思考簽名（含 parts）"
+  signature_cleared: "已清除思考簽名"
+
+  # 狀態儲存
+  state_saved: "思考簽名狀態已保存"
+
+  # 錯誤訊息
+  load_failed: "載入思考簽名狀態失敗：{error}"
+  save_failed: "保存思考簽名失敗：{error}"
+  state_save_failed: "保存思考簽名狀態失敗：{error}"
+
+  # 預算驗證警告
+  no_disable_warning: "⚠️  {model} 不支援停用思考，將使用動態模式"
+  no_disable_adjusted: "⚠️  {model} 不支援停用思考（0 tokens），已調整為最小值 {min_tokens} tokens"
+  budget_below_min: "⚠️  思考預算低於最小值 {min_tokens} tokens，已調整"
+  budget_above_max: "⚠️  思考預算超過上限 {max_tokens:,} tokens，已調整為最大值"
+  response_min_warning: "⚠️  回應 tokens 至少為 1，已調整"
+  response_max_warning: "⚠️  回應 tokens 超過上限 8192，已調整為最大值"
 
 # ============================================================================
 # 快取管理分類 (cache)

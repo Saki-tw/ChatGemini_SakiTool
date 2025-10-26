@@ -31,6 +31,19 @@ from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.markdown import Markdown
 from rich import print as rprint
 
+# i18n 國際化支援
+try:
+    from utils import safe_t
+except ImportError:
+    # 降級：提供簡單的 fallback 函數
+    def safe_t(key: str, fallback: str = None, **kwargs):
+        if fallback is None:
+            fallback = key.split('.')[-1]
+        try:
+            return fallback.format(**kwargs)
+        except:
+            return fallback
+
 # 設定日誌
 logger = logging.getLogger(__name__)
 
@@ -91,29 +104,29 @@ class ThinkingTranslator:
             GoogleTranslator(source='en', target='zh-TW')
             self.deep_translator_available = True
             self.current_engine = "deep-translator"
-            self.engine_status['deep_translator'] = "✅ 主引擎（免費）"
-            logger.info("✅ deep-translator 已就緒（主引擎，完全免費）")
-            console.print("[dim green]✓ 翻譯引擎已載入：deep-translator[/dim green]")
+            self.engine_status['deep_translator'] = safe_t('translator.engine_status_main', fallback="✅ 主引擎（免費）")
+            logger.info(safe_t('translator.engine_ready', fallback="✅ deep-translator 已就緒（主引擎，完全免費）"))
+            console.print(f"[dim green]{safe_t('translator.engine_loaded', fallback='✓ 翻譯引擎已載入：deep-translator')}[/dim green]")
         except ImportError:
-            self.engine_status['deep_translator'] = "❌ 未安裝 deep-translator"
-            logger.warning("❌ 未安裝 deep-translator，請執行：pip install deep-translator")
+            self.engine_status['deep_translator'] = safe_t('translator.engine_not_installed', fallback="❌ 未安裝 deep-translator")
+            logger.warning(safe_t('translator.install_prompt', fallback="❌ 未安裝 deep-translator，請執行：pip install deep-translator"))
 
             # 使用 Rich UI 顯示錯誤
-            console.print("[magenta]⚠️  翻譯引擎未安裝[/yellow]")
+            console.print(f"[magenta]{safe_t('translator.engine_missing', fallback='⚠️  翻譯引擎未安裝')}[/yellow]")
 
             # 顯示依賴缺失的修復建議
             if ERROR_FIX_ENABLED:
                 suggest_dependency_missing('deep-translator', 'pip install deep-translator')
         except Exception as e:
-            self.engine_status['deep_translator'] = f"❌ 測試失敗: {e}"
-            logger.warning(f"deep-translator 測試失敗: {e}")
-            console.print(f"[dim magenta]❌ 翻譯引擎載入失敗: {e}[/red]")
+            self.engine_status['deep_translator'] = safe_t('translator.test_failed', fallback="❌ 測試失敗: {error}", error=str(e))
+            logger.warning(safe_t('translator.test_failed', fallback="deep-translator 測試失敗: {error}", error=str(e)))
+            console.print(f"[dim magenta]{safe_t('translator.load_failed', fallback='❌ 翻譯引擎載入失敗: {error}', error=str(e))}[/red]")
 
         # === 備用：返回原文（始終可用）===
-        self.engine_status['fallback'] = "✅ 備用方案"
+        self.engine_status['fallback'] = safe_t('translator.fallback_ready', fallback="✅ 備用方案")
         if not self.deep_translator_available:
-            self.current_engine = "原文顯示（無翻譯）"
-            logger.warning("⚠️  無可用翻譯引擎，將顯示英文原文")
+            self.current_engine = safe_t('translator.no_translation', fallback="原文顯示（無翻譯）")
+            logger.warning(safe_t('translator.no_engine', fallback="⚠️  無可用翻譯引擎，將顯示英文原文"))
 
     def toggle_translation(self) -> bool:
         """
@@ -123,8 +136,9 @@ class ThinkingTranslator:
             切換後的狀態（True=啟用，False=停用）
         """
         self.translation_enabled = not self.translation_enabled
-        status = "啟用" if self.translation_enabled else "停用"
-        logger.info(f"翻譯功能已{status}")
+        status = safe_t('common.enabled' if self.translation_enabled else 'common.disabled',
+                       fallback="啟用" if self.translation_enabled else "停用")
+        logger.info(safe_t('translator.toggle_status', fallback="翻譯功能已{status}", status=status))
         return self.translation_enabled
 
     def set_translation(self, enabled: bool):
@@ -135,8 +149,9 @@ class ThinkingTranslator:
             enabled: True=啟用，False=停用
         """
         self.translation_enabled = enabled
-        status = "啟用" if enabled else "停用"
-        logger.info(f"翻譯功能已{status}")
+        status = safe_t('common.enabled' if enabled else 'common.disabled',
+                       fallback="啟用" if enabled else "停用")
+        logger.info(safe_t('translator.set_status', fallback="翻譯功能已{status}", status=status))
 
     def clear_current_prompt_cache(self):
         """
@@ -147,7 +162,9 @@ class ThinkingTranslator:
         if self.current_prompt_cache:
             cache_count = len(self.current_prompt_cache)
             self.current_prompt_cache.clear()
-            logger.debug(f"已清除當前 Prompt 快取（{cache_count} 個項目）")
+            logger.debug(safe_t('translator.cache_cleared',
+                              fallback="已清除當前 Prompt 快取（{count} 個項目）",
+                              count=cache_count))
 
     def translate(self, text: str, source_lang: str = 'en', target_lang: str = 'zh-TW') -> str:
         """
@@ -163,7 +180,8 @@ class ThinkingTranslator:
         """
         # 檢查是否啟用翻譯
         if not self.translation_enabled:
-            logger.debug("翻譯功能已停用，返回原文")
+            logger.debug(safe_t('translator.disabled_return_original',
+                              fallback="翻譯功能已停用，返回原文"))
             return text
 
         if not text or not text.strip():
@@ -174,7 +192,8 @@ class ThinkingTranslator:
 
         # 檢查單次快取
         if cache_key in self.current_prompt_cache:
-            logger.debug("✅ 使用當前 Prompt 快取（節省翻譯時間）")
+            logger.debug(safe_t('translator.use_cache',
+                              fallback="✅ 使用當前 Prompt 快取（節省翻譯時間）"))
             return self.current_prompt_cache[cache_key]
 
         # === 嘗試主引擎：deep-translator ===
@@ -183,13 +202,17 @@ class ThinkingTranslator:
             if result:
                 self.current_prompt_cache[cache_key] = result  # 儲存到單次快取
                 self.translation_count += len(text)
-                logger.debug(f"✅ 翻譯成功並快取 ({len(text)} 字元)")
+                logger.debug(safe_t('translator.translate_cached',
+                                  fallback="✅ 翻譯成功並快取 ({chars} 字元)",
+                                  chars=len(text)))
                 return result
             else:
-                logger.warning("deep-translator 失敗，使用備用方案（原文）")
+                logger.warning(safe_t('translator.fallback_original',
+                                    fallback="deep-translator 失敗，使用備用方案（原文）"))
 
         # === 備用：返回原文 ===
-        logger.info("翻譯引擎失敗，返回英文原文")
+        logger.info(safe_t('translator.engine_failed',
+                          fallback="翻譯引擎失敗，返回英文原文"))
         return text  # 返回原文而非 None
 
     def _translate_with_deep_translator(self, text: str, source_lang: str, target_lang: str) -> Optional[str]:
@@ -201,13 +224,19 @@ class ThinkingTranslator:
             translator = GoogleTranslator(source=source_lang, target=target_lang)
             translated_text = translator.translate(text)
 
-            logger.debug(f"✅ deep-translator 翻譯成功 ({len(text)} 字元)")
+            logger.debug(safe_t('translator.success',
+                              fallback="✅ deep-translator 翻譯成功 ({chars} 字元)",
+                              chars=len(text)))
 
             return translated_text
 
         except Exception as e:
-            logger.error(f"❌ deep-translator 錯誤: {e}")
-            self.engine_status['deep_translator'] = f"❌ 運行錯誤: {e}"
+            logger.error(safe_t('translator.error',
+                              fallback="❌ deep-translator 錯誤: {error}",
+                              error=str(e)))
+            self.engine_status['deep_translator'] = safe_t('translator.runtime_error',
+                                                           fallback="❌ 運行錯誤: {error}",
+                                                           error=str(e))
             return None
 
     def get_status(self) -> Dict:
@@ -365,7 +394,9 @@ def translate_thinking(text: str) -> str:
             return text
 
     except Exception as e:
-        logger.debug(f"無法獲取 i18n 語言，使用預設 zh-TW: {e}")
+        logger.debug(safe_t('translator.i18n_fallback',
+                          fallback="無法獲取 i18n 語言，使用預設 zh-TW: {error}",
+                          error=str(e)))
 
     translator = get_translator()
     return translator.translate(text, source_lang='en', target_lang=target_lang)
@@ -410,8 +441,8 @@ if __name__ == "__main__":
     ]
 
     for i, test_text in enumerate(test_cases, 1):
-        console.print(f"\n[bold magenta]測試 {i}:[/bold magenta]")
-        console.print(f"[dim]原文：[/dim] {test_text}")
+        console.print(f"\n[bold magenta]{safe_t('translator.test_num', fallback='測試 {num}:', num=i)}[/bold magenta]")
+        console.print(f"[dim]{safe_t('translator.original', fallback='原文')}：[/dim] {test_text}")
 
         # 使用帶進度提示的翻譯
         result = translator.translate_with_progress(test_text)

@@ -14,6 +14,20 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+# 安全翻譯函數（支援降級運行）
+try:
+    from utils import safe_t
+except ImportError:
+    # 降級：使用基本 fallback 函數
+    def safe_t(key: str, fallback: str = None, **kwargs):
+        """降級版本的 safe_t"""
+        if fallback is None:
+            fallback = key.split('.')[-1].replace('_', ' ').title()
+        try:
+            return fallback.format(**kwargs) if kwargs else fallback
+        except (KeyError, ValueError):
+            return fallback
+
 # 預設日誌目錄
 DEFAULT_LOG_DIR = str(Path(__file__).parent / "ChatLogs")
 
@@ -44,11 +58,15 @@ class ThinkingSignatureManager:
                     self.has_function_calling = data.get('has_function_calling', False)
                     # 注意：response parts 無法直接序列化，這裡只記錄狀態
                     if self.has_function_calling:
-                        logger.info("已載入思考簽名狀態（函數呼叫已啟用）")
+                        logger.info(safe_t('thinking.signature_loaded',
+                                         fallback="已載入思考簽名狀態（函數呼叫已啟用）"))
                     else:
-                        logger.debug("思考簽名狀態：函數呼叫未啟用")
+                        logger.debug(safe_t('thinking.signature_disabled',
+                                          fallback="思考簽名狀態：函數呼叫未啟用"))
         except Exception as e:
-            logger.warning(f"載入思考簽名狀態失敗：{e}")
+            logger.warning(safe_t('thinking.load_failed',
+                                fallback="載入思考簽名狀態失敗：{error}",
+                                error=str(e)))
 
     def save_response(self, response, has_function_calling: bool = False):
         """保存完整的 response（包含思考簽名）
@@ -67,9 +85,12 @@ class ThinkingSignatureManager:
                     candidate = response.candidates[0]
                     if hasattr(candidate, 'content') and hasattr(candidate.content, 'parts'):
                         self.last_response_parts = candidate.content.parts
-                        logger.debug("已保存思考簽名（含 parts）")
+                        logger.debug(safe_t('thinking.signature_saved',
+                                          fallback="已保存思考簽名（含 parts）"))
             except Exception as e:
-                logger.warning(f"保存思考簽名失敗：{e}")
+                logger.warning(safe_t('thinking.save_failed',
+                                    fallback="保存思考簽名失敗：{error}",
+                                    error=str(e)))
 
         # 保存狀態到檔案
         self._save_state()
@@ -82,9 +103,12 @@ class ThinkingSignatureManager:
                     'has_function_calling': self.has_function_calling,
                     'last_updated': datetime.now().isoformat()
                 }, f, ensure_ascii=False, indent=2)
-            logger.debug("思考簽名狀態已保存")
+            logger.debug(safe_t('thinking.state_saved',
+                              fallback="思考簽名狀態已保存"))
         except Exception as e:
-            logger.warning(f"保存思考簽名狀態失敗：{e}")
+            logger.warning(safe_t('thinking.state_save_failed',
+                                fallback="保存思考簽名狀態失敗：{error}",
+                                error=str(e)))
 
     def get_last_response_parts(self):
         """獲取最後保存的 response parts（用於下次請求）
@@ -99,7 +123,8 @@ class ThinkingSignatureManager:
         self.last_response_parts = None
         self.has_function_calling = False
         self._save_state()
-        logger.info("已清除思考簽名")
+        logger.info(safe_t('thinking.signature_cleared',
+                         fallback="已清除思考簽名"))
 
 
 def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
@@ -153,7 +178,9 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
     no_think_pattern = r'\[no-think\]'
     if re.search(no_think_pattern, user_input, re.IGNORECASE):
         if not ALLOW_DISABLE:
-            print(f"⚠️  {model_name} 不支援停用思考，將使用動態模式")
+            print(safe_t('thinking.no_disable_warning',
+                        fallback="⚠️  {model} 不支援停用思考，將使用動態模式",
+                        model=model_name))
             thinking_budget = -1
         else:
             thinking_budget = 0
@@ -176,23 +203,31 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
             # 驗證思考預算範圍
             if thinking_budget == 0:
                 if not ALLOW_DISABLE:
-                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens")
+                    print(safe_t('thinking.no_disable_adjusted',
+                                fallback="⚠️  {model} 不支援停用思考（0 tokens），已調整為最小值 {min_tokens} tokens",
+                                model=model_name, min_tokens=MIN_TOKENS))
                     thinking_budget = MIN_TOKENS
             elif thinking_budget == -1:
                 pass  # 保持 -1
             elif thinking_budget < MIN_TOKENS:
-                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整")
+                print(safe_t('thinking.budget_below_min',
+                            fallback="⚠️  思考預算低於最小值 {min_tokens} tokens，已調整",
+                            min_tokens=MIN_TOKENS))
                 thinking_budget = MIN_TOKENS
             elif thinking_budget > MAX_TOKENS:
-                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值")
+                print(safe_t('thinking.budget_above_max',
+                            fallback="⚠️  思考預算超過上限 {max_tokens:,} tokens，已調整為最大值",
+                            max_tokens=MAX_TOKENS))
                 thinking_budget = MAX_TOKENS
 
         # 設定輸出 tokens（最大 8192）
         if response_tokens < 1:
-            print(f"⚠️  回應 tokens 至少為 1，已調整")
+            print(safe_t('thinking.response_min_warning',
+                        fallback="⚠️  回應 tokens 至少為 1，已調整"))
             max_output_tokens = 1
         elif response_tokens > 8192:
-            print(f"⚠️  回應 tokens 超過上限 8192，已調整為最大值")
+            print(safe_t('thinking.response_max_warning',
+                        fallback="⚠️  回應 tokens 超過上限 8192，已調整為最大值"))
             max_output_tokens = 8192
         else:
             max_output_tokens = response_tokens
@@ -213,7 +248,9 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
             # 處理停用請求 (0)
             if thinking_budget == 0:
                 if not ALLOW_DISABLE:
-                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens")
+                    print(safe_t('thinking.no_disable_adjusted',
+                                fallback="⚠️  {model} 不支援停用思考（0 tokens），已調整為最小值 {min_tokens} tokens",
+                                model=model_name, min_tokens=MIN_TOKENS))
                     thinking_budget = MIN_TOKENS
                 # else: thinking_budget = 0 保持不變
             # 處理動態請求 (-1)
@@ -221,10 +258,14 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
                 pass  # 保持 -1
             # 處理指定 tokens
             elif thinking_budget < MIN_TOKENS:
-                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整")
+                print(safe_t('thinking.budget_below_min',
+                            fallback="⚠️  思考預算低於最小值 {min_tokens} tokens，已調整",
+                            min_tokens=MIN_TOKENS))
                 thinking_budget = MIN_TOKENS
             elif thinking_budget > MAX_TOKENS:
-                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值")
+                print(safe_t('thinking.budget_above_max',
+                            fallback="⚠️  思考預算超過上限 {max_tokens:,} tokens，已調整為最大值",
+                            max_tokens=MAX_TOKENS))
                 thinking_budget = MAX_TOKENS
 
         user_input = re.sub(think_pattern, '', user_input, flags=re.IGNORECASE).strip()
