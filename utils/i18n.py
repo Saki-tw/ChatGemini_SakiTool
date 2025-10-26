@@ -292,6 +292,72 @@ def t(key: str, **kwargs) -> str:
 _ = t
 
 
+def safe_t(key: str, fallback: str = None, **kwargs) -> str:
+    """
+    安全的翻譯函數，支援降級運行（永不失敗原則）
+
+    當 i18n 系統失敗或翻譯鍵不存在時，優雅降級至預設文字。
+    這個函數確保即使在不完整的環境下也能正常運行。
+
+    Args:
+        key: 翻譯鍵值（支援點號路徑，如 "chat.welcome"）
+        fallback: 降級時使用的預設文字，如果未提供則自動生成
+        **kwargs: 參數化變數（用於格式化翻譯字串）
+
+    Returns:
+        翻譯後的字串或降級文字
+
+    降級策略：
+        1. 嘗試使用全域 builtins.t()（最佳）
+        2. 嘗試使用模組級別 t()（次佳）
+        3. 使用提供的 fallback 文字（降級）
+        4. 從 key 自動生成文字（最小可用）
+
+    Examples:
+        >>> # 正常使用（i18n 可用）
+        >>> safe_t('chat.welcome')
+        '歡迎使用 ChatGemini！'
+
+        >>> # 提供降級預設值
+        >>> safe_t('chat.user_prompt', fallback='你')
+        '你'  # i18n 可用時返回翻譯，不可用時返回 '你'
+
+        >>> # 帶參數格式化
+        >>> safe_t('common.language_switched', fallback='語言已切換至 {lang}', lang='ko')
+        '語言已切換至 ko'
+
+        >>> # i18n 失敗時的降級
+        >>> safe_t('some.missing.key')  # 假設 i18n 失敗
+        'Key'  # 自動從最後一段生成
+    """
+    try:
+        # 策略 1：嘗試使用全域 builtins.t()
+        import builtins
+        if hasattr(builtins, 't') and callable(builtins.t):
+            return builtins.t(key, **kwargs)
+
+        # 策略 2：嘗試使用模組級別的 t()
+        return t(key, **kwargs)
+
+    except (NameError, AttributeError, KeyError, Exception):
+        # 策略 3 & 4：降級處理
+        if fallback is None:
+            # 從 key 提取最後一段作為自動降級值
+            # 例如：'chat.user_prompt' -> 'User Prompt'
+            last_part = key.split('.')[-1]
+            fallback = last_part.replace('_', ' ').title()
+
+        # 如果有格式化參數，嘗試格式化降級文字
+        if kwargs:
+            try:
+                return fallback.format(**kwargs)
+            except (KeyError, ValueError):
+                # 格式化失敗，直接返回降級文字
+                pass
+
+        return fallback
+
+
 def switch_language(lang: str, save_to_env: bool = False) -> bool:
     """
     切換語言（全域函數）

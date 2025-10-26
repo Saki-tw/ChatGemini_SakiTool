@@ -36,6 +36,7 @@ from rich.panel import Panel
 # i18n 國際化（必須在最前面導入以觸發自動初始化）
 # ==========================================
 import utils  # 自動初始化 i18n 並注入 t() 到 builtins
+from utils import safe_t  # 導入安全翻譯函數，支援降級運行
 
 # ==========================================
 # 動態模組載入器
@@ -1304,15 +1305,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
     while True:
         try:
-            # 使用增強型輸入（自動使用當前語言）
-            user_input = get_user_input(t('chat.user_prompt') + ": ")
+            # 使用增強型輸入（自動使用當前語言，支援降級運行）
+            user_input = get_user_input(safe_t('chat.user_prompt', fallback='你') + ": ")
 
             if not user_input:
                 continue
 
             # 處理指令
             if user_input.lower() in ['exit', 'quit', '退出']:
-                print(f"\n{t('chat.goodbye')}")
+                print(f"\n{safe_t('chat.goodbye', fallback='再見！')}")
                 chat_logger.save_session()
 
                 # 保存使用者設定（CodeGemini 配置）
@@ -3102,7 +3103,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         auto_cache_mgr.create_cache(model_name)
 
         except KeyboardInterrupt:
-            print(f"\n\n{t('chat.goodbye')}")
+            print(f"\n\n{safe_t('chat.goodbye', fallback='再見！')}")
             chat_logger.save_session()
 
             # 保存使用者設定（CodeGemini 配置）

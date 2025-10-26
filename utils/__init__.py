@@ -7,6 +7,7 @@ ChatGemini_SakiTool 共用工具模組
 from .i18n import (
     t,
     _,
+    safe_t,
     get_current_language,
     switch_language,
     get_available_languages,
@@ -55,6 +56,7 @@ __all__ = [
     # i18n 國際化
     't',
     '_',
+    'safe_t',
     'get_current_language',
     'switch_language',
     'get_available_languages',
