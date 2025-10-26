@@ -470,6 +470,11 @@ model:
   supported_models: サポートされているモデル
 
   # Model selector
+  selector_title: 🤖 Gemini モデル選択
+  col_option: オプション
+  col_name: モデル名
+  col_thinking_range: Thinking Token 範囲
+  col_price_range: 価格範囲 (NT$)
   select_prompt: オプションを入力してください (1-3 または 0)
   validation_warning: ⚠️  モデルの可用性を確認できません。入力されたモデル名を直接使用します
   enter_name: モデル名を入力してください

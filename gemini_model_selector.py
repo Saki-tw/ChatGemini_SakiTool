@@ -49,17 +49,34 @@ def select_model() -> str:
     console = Console()
 
     console.print("\n")
+
+    # 使用 safe_t 支援降級運行
+    try:
+        from utils import safe_t
+        title_text = safe_t('model.selector_title', fallback='🤖 Gemini 模型選擇')
+        col_option = safe_t('model.col_option', fallback='選項')
+        col_name = safe_t('model.col_name', fallback='模型名稱')
+        col_thinking = safe_t('model.col_thinking_range', fallback='Thinking Token 範圍')
+        col_price = safe_t('model.col_price_range', fallback='價格範圍 (NT$)')
+    except (ImportError, NameError):
+        # 降級：使用硬編碼文字
+        title_text = '🤖 Gemini 模型選擇'
+        col_option = '選項'
+        col_name = '模型名稱'
+        col_thinking = 'Thinking Token 範圍'
+        col_price = '價格範圍 (NT$)'
+
     console.print(Panel.fit(
-        "[bold #DDA0DD]🤖 Gemini 模型選擇[/bold #DDA0DD]",
+        f"[bold #DDA0DD]{title_text}[/bold #DDA0DD]",
         border_style="#DDA0DD"
     ))
 
     # 建立模型資訊表格
     table = Table(show_header=True, header_style="bold #DDA0DD", border_style="#DDA0DD")
-    table.add_column("選項", style="#DA70D6", justify="center")
-    table.add_column("模型名稱", style="white")
-    table.add_column("Thinking Token 範圍", style="#BA55D3")
-    table.add_column("價格範圍 (NT$)", style="#FF00FF", justify="right")
+    table.add_column(col_option, style="#DA70D6", justify="center")
+    table.add_column(col_name, style="white")
+    table.add_column(col_thinking, style="#BA55D3")
+    table.add_column(col_price, style="#FF00FF", justify="right")
 
     # 導入價格計算
     try:

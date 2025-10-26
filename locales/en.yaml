@@ -470,6 +470,11 @@ model:
   supported_models: Supported models
 
   # Model selector
+  selector_title: 🤖 Gemini Model Selection
+  col_option: Option
+  col_name: Model Name
+  col_thinking_range: Thinking Token Range
+  col_price_range: Price Range (NT$)
   select_prompt: Please enter option (1-3 or 0)
   validation_warning: ⚠️  Cannot validate model availability, will use your input directly
   enter_name: Please enter model name

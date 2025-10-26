@@ -655,6 +655,11 @@ model:
   supported_models: "支援的模型"
 
   # 模型選擇器
+  selector_title: "🤖 Gemini 模型選擇"
+  col_option: "選項"
+  col_name: "模型名稱"
+  col_thinking_range: "Thinking Token 範圍"
+  col_price_range: "價格範圍 (NT$)"
   select_prompt: "請輸入選項 (1-3 或 0)"
   validation_warning: "⚠️  無法驗證模型可用性，將直接使用您輸入的模型名稱"
   enter_name: "請輸入模型名稱"
