@@ -1309,6 +1309,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
             if user_input.lower() in ['exit', 'quit', '退出']:
                 print("\n再見！")
                 chat_logger.save_session()
+
+                # 保存使用者設定（CodeGemini 配置）
+                if codegemini_config_manager:
+                    try:
+                        codegemini_config_manager.save_config()
+                        logger.debug("✓ 設定已保存")
+                    except Exception as e:
+                        logger.debug(f"設定保存失敗: {e}")
+
                 # 清理工具
                 if TOOLS_MANAGER_AVAILABLE:
                     try:
@@ -3090,6 +3099,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
         except KeyboardInterrupt:
             print("\n\n再見！")
             chat_logger.save_session()
+
+            # 保存使用者設定（CodeGemini 配置）
+            if codegemini_config_manager:
+                try:
+                    codegemini_config_manager.save_config()
+                    logger.debug("✓ 設定已保存")
+                except Exception as e:
+                    logger.debug(f"設定保存失敗: {e}")
+
             # 清理工具
             if TOOLS_MANAGER_AVAILABLE:
                 try:
