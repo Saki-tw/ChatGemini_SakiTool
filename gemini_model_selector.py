@@ -7,6 +7,9 @@ Gemini 模型選擇器
 from typing import Optional, List
 import logging
 
+# i18n 國際化
+import utils  # 自動初始化並注入 t() 到 builtins
+
 logger = logging.getLogger(__name__)
 
 
@@ -95,53 +98,105 @@ def select_model() -> str:
             table.add_row(key, description, "N/A", "N/A")
 
     console.print(table)
-    console.print("\n[#DA70D6]0.[/#DA70D6] 自訂模型名稱")
+
+    # 使用 i18n 翻譯或降級為硬編碼文字
+    try:
+        custom_model_text = t('model.custom_model')
+    except (NameError, AttributeError):
+        custom_model_text = "自訂模型名稱"
+
+    console.print(f"\n[#DA70D6]0.[/#DA70D6] {custom_model_text}")
     console.print("[dim]─[/dim]" * 60)
 
     # 預先獲取可用模型列表（用於自訂模型驗證）
     available_models = _get_available_models()
 
     while True:
-        choice = console.input(f"\n[#DDA0DD]請輸入選項 (1-{len(RECOMMENDED_MODELS)} 或 0):[/#DDA0DD] ").strip()
+        # 使用 i18n 翻譯提示文字，降級為硬編碼
+        try:
+            prompt_text = t('model.select_prompt')
+        except (NameError, AttributeError):
+            prompt_text = f"請輸入選項 (1-{len(RECOMMENDED_MODELS)} 或 0)"
+
+        choice = console.input(f"\n[#DDA0DD]{prompt_text}:[/#DDA0DD] ").strip()
 
         # 支援 exit/quit 退出
         if choice.lower() in ('exit', 'quit', 'q'):
-            console.print("[#DA70D6]已取消選擇[/#DA70D6]")
+            try:
+                cancel_text = t('common.cancel')
+            except (NameError, AttributeError):
+                cancel_text = "已取消選擇"
+            console.print(f"[#DA70D6]{cancel_text}[/#DA70D6]")
             import sys
             sys.exit(0)
 
         if choice == '0':
             # 自訂模型名稱（必須是 API 支援的模型）
             if available_models is None:
-                console.print("[#DA70D6]⚠️  無法驗證模型可用性，將直接使用您輸入的模型名稱[/#DA70D6]")
-                custom_model = console.input("[#DDA0DD]請輸入模型名稱:[/#DDA0DD] ").strip()
+                try:
+                    warning_text = t('model.validation_warning')
+                except (NameError, AttributeError):
+                    warning_text = "⚠️  無法驗證模型可用性，將直接使用您輸入的模型名稱"
+                console.print(f"[#DA70D6]{warning_text}[/#DA70D6]")
+
+                try:
+                    input_prompt = t('model.enter_name')
+                except (NameError, AttributeError):
+                    input_prompt = "請輸入模型名稱"
+                custom_model = console.input(f"[#DDA0DD]{input_prompt}:[/#DDA0DD] ").strip()
+
                 if custom_model:
                     return custom_model
                 else:
-                    console.print("[#DA70D6]模型名稱不能為空，請重試[/#DA70D6]")
+                    try:
+                        empty_text = t('model.name_empty')
+                    except (NameError, AttributeError):
+                        empty_text = "模型名稱不能為空，請重試"
+                    console.print(f"[#DA70D6]{empty_text}[/#DA70D6]")
                     continue
 
             # 顯示可用模型列表
-            console.print("\n[#DDA0DD]可用的 Gemini 模型：[/#DDA0DD]")
+            try:
+                available_text = t('model.available_models')
+            except (NameError, AttributeError):
+                available_text = "可用的 Gemini 模型"
+            console.print(f"\n[#DDA0DD]{available_text}：[/#DDA0DD]")
+
             for i, model in enumerate(available_models, 1):
                 console.print(f"  [#DA70D6]{i}.[/#DA70D6] [white]{model}[/white]")
             console.print()
 
-            custom_model = console.input("[#DDA0DD]請輸入模型名稱（必須是上列其中一個）:[/#DDA0DD] ").strip()
+            try:
+                enter_prompt = t('model.enter_from_list')
+            except (NameError, AttributeError):
+                enter_prompt = "請輸入模型名稱（必須是上列其中一個）"
+            custom_model = console.input(f"[#DDA0DD]{enter_prompt}:[/#DDA0DD] ").strip()
 
             if not custom_model:
-                console.print("[#DA70D6]模型名稱不能為空，請重試[/#DA70D6]")
+                try:
+                    empty_text = t('model.name_empty')
+                except (NameError, AttributeError):
+                    empty_text = "模型名稱不能為空，請重試"
+                console.print(f"[#DA70D6]{empty_text}[/#DA70D6]")
                 continue
 
             # 驗證模型是否存在
             if custom_model in available_models:
                 return custom_model
             else:
-                console.print(f"[#DA70D6]⚠️  模型 '{custom_model}' 不在可用列表中，請重新選擇[/#DA70D6]")
+                try:
+                    not_in_list_text = t('model.not_in_list', model=custom_model)
+                except (NameError, AttributeError):
+                    not_in_list_text = f"⚠️  模型 '{custom_model}' 不在可用列表中，請重新選擇"
+                console.print(f"[#DA70D6]{not_in_list_text}[/#DA70D6]")
                 continue
 
         if choice in RECOMMENDED_MODELS:
             model_name, _ = RECOMMENDED_MODELS[choice]
             return model_name
 
-        console.print("[#DA70D6]無效的選項，請重試[/#DA70D6]")
+        try:
+            invalid_text = t('model.invalid_option')
+        except (NameError, AttributeError):
+            invalid_text = "無效的選項，請重試"
+        console.print(f"[#DA70D6]{invalid_text}[/#DA70D6]")

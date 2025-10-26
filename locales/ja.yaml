@@ -468,6 +468,17 @@ model:
   model_version: モデルバージョン
   model_info: モデル情報
   supported_models: サポートされているモデル
+
+  # Model selector
+  select_prompt: オプションを入力してください (1-3 または 0)
+  validation_warning: ⚠️  モデルの可用性を確認できません。入力されたモデル名を直接使用します
+  enter_name: モデル名を入力してください
+  name_empty: モデル名は空にできません。再試行してください
+  available_models: 利用可能な Gemini モデル
+  enter_from_list: モデル名を入力してください（上記のいずれか）
+  not_in_list: ⚠️  モデル '{model}' は利用可能なリストにありません。再選択してください
+  invalid_option: 無効なオプションです。再試行してください
+  custom_model: カスタムモデル名
 validation:
   validating: 検証中
   valid: 有効

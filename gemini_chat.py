@@ -33,6 +33,11 @@ from rich.markdown import Markdown
 from rich.panel import Panel
 
 # ==========================================
+# i18n 國際化（必須在最前面導入以觸發自動初始化）
+# ==========================================
+import utils  # 自動初始化 i18n 並注入 t() 到 builtins
+
+# ==========================================
 # 動態模組載入器
 # ==========================================
 from gemini_module_loader import ModuleLoader
@@ -1299,15 +1304,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
     while True:
         try:
-            # 使用增強型輸入
-            user_input = get_user_input("你: ")
+            # 使用增強型輸入（自動使用當前語言）
+            user_input = get_user_input(t('chat.user_prompt') + ": ")
 
             if not user_input:
                 continue
 
             # 處理指令
             if user_input.lower() in ['exit', 'quit', '退出']:
-                print("\n再見！")
+                print(f"\n{t('chat.goodbye')}")
                 chat_logger.save_session()
 
                 # 保存使用者設定（CodeGemini 配置）
@@ -3097,7 +3102,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         auto_cache_mgr.create_cache(model_name)
 
         except KeyboardInterrupt:
-            print("\n\n再見！")
+            print(f"\n\n{t('chat.goodbye')}")
             chat_logger.save_session()
 
             # 保存使用者設定（CodeGemini 配置）

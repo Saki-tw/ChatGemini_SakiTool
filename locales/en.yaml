@@ -468,6 +468,17 @@ model:
   model_version: Model version
   model_info: Model info
   supported_models: Supported models
+
+  # Model selector
+  select_prompt: Please enter option (1-3 or 0)
+  validation_warning: ⚠️  Cannot validate model availability, will use your input directly
+  enter_name: Please enter model name
+  name_empty: Model name cannot be empty, please try again
+  available_models: Available Gemini models
+  enter_from_list: Please enter model name (must be one from the list above)
+  not_in_list: ⚠️  Model '{model}' is not in the available list, please reselect
+  invalid_option: Invalid option, please try again
+  custom_model: Custom model name
 validation:
   validating: Validating
   valid: Valid

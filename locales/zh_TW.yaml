@@ -654,6 +654,17 @@ model:
   model_info: "模型資訊"
   supported_models: "支援的模型"
 
+  # 模型選擇器
+  select_prompt: "請輸入選項 (1-3 或 0)"
+  validation_warning: "⚠️  無法驗證模型可用性，將直接使用您輸入的模型名稱"
+  enter_name: "請輸入模型名稱"
+  name_empty: "模型名稱不能為空，請重試"
+  available_models: "可用的 Gemini 模型"
+  enter_from_list: "請輸入模型名稱（必須是上列其中一個）"
+  not_in_list: "⚠️  模型 '{model}' 不在可用列表中，請重新選擇"
+  invalid_option: "無效的選項，請重試"
+  custom_model: "自訂模型名稱"
+
 # ============================================================================
 # 驗證分類 (validation)
 # ============================================================================
