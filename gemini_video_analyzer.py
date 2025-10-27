@@ -25,6 +25,7 @@ from utils import (
     create_generation_config,
     THINKING_MODELS
 )
+from utils.i18n import safe_t
 
 # 導入記憶體管理模組
 try:

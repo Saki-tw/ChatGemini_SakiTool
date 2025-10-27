@@ -739,3 +739,72 @@ validation:
   required: "必填"
   optional: "選填"
   format_error: "格式錯誤"
+
+# ============================================================================
+# 錯誤處理分類 (error) - Phase 5
+# ============================================================================
+error:
+  details: "錯誤詳情"
+  retry_attempt: "⚠️  嘗試 {attempt}/{max_retries} 失敗，{delay:.1f} 秒後重試..."
+  message: "錯誤：{msg}"
+  max_retries_reached: "❌ 已達到最大重試次數 ({max_retries})，操作失敗"
+  severity: "嚴重程度：{level}"
+  timestamp: "時間：{time}"
+  context_info: "上下文資訊："
+  suggestions: "建議的解決方案："
+  stack_trace: "堆疊追蹤："
+  stats_title: "📊 錯誤統計（最近 {days} 天）"
+  total_count: "總錯誤數：{count}"
+  type_distribution: "錯誤類型分佈："
+  severity_distribution: "嚴重程度分佈："
+  video_not_found: "錯誤：找不到影片檔案：{path}"
+  video_info_failed: "錯誤：無法獲取影片資訊"
+  unsupported_format: "不支援的格式：{format}"
+
+# ============================================================================
+# 恢復管理分類 (recovery) - Phase 5
+# ============================================================================
+recovery:
+  checkpoint_saved: "💾 已保存恢復檢查點：{name}"
+  checkpoint_loaded: "📂 已載入恢復檢查點：{name}"
+  checkpoint_load_failed: "載入檢查點失敗：{error}"
+  checkpoint_deleted: "🗑️  已刪除恢復檢查點：{name}"
+  checkpoint_read_warning: "警告：無法讀取檢查點 {name}: {error}"
+  no_checkpoints: "沒有可恢復的檢查點"
+  checkpoints_title: "可恢復的檢查點"
+  checkpoints_cleaned: "已清理 {count} 個舊的恢復檢查點"
+
+# ============================================================================
+# 媒體處理分類 (media) - Phase 5
+# ============================================================================
+media:
+  video:
+    analyzing_file: "📹 分析影片：{name}"
+    duration: "時長：{duration:.2f} 秒"
+    extracting_frames: "將提取 {count} 個關鍵幀"
+    frames_extracted: "✓ 已提取 {count} 個關鍵幀"
+    analyzing_frames: "🤖 使用 Gemini Vision 分析關鍵幀..."
+    analyzing: "分析中"
+    detecting_scenes: "🔍 檢測場景變化..."
+    scenes_detected: "✓ 檢測到 {count} 個場景"
+    frame_extract_warning: "警告：提取幀 {num} 失敗"
+    frame_analyze_warning: "警告：分析幀失敗：{error}"
+    cannot_analyze: "無法分析"
+    unknown_scene: "未知場景"
+    scene_list_title: "🎬 場景列表"
+    scene_index_saved: "✓ 場景索引已保存：{file}"
+  clip:
+    analysis_title: "🎬 AI 剪輯建議分析"
+    video_file: "📁 影片：{name}"
+    total_duration: "⏱️  總長度：{time}"
+    target_duration: "🎯 目標長度：{time}"
+    scene_detection: "📦 執行場景檢測..."
+    scenes_found: "✓ 檢測到 {count} 個場景"
+    analyzing_features: "🔍 分析影片內容特徵..."
+    generating_suggestions: "💡 生成剪輯建議..."
+    suggestions_generated: "✓ 已生成 {count} 個剪輯建議"
+    preview_frame_warning: "警告：提取預覽幀失敗 ({time}s): {error}"
+    no_suggestions: "沒有生成剪輯建議"
+    suggestions_list: "📋 剪輯建議列表（{count} 個）"
+    detailed_suggestions: "💡 詳細建議："
+    suggestions_saved: "✓ 剪輯建議已保存：{file}"

@@ -1,7 +1,14 @@
 # ChatGemini
 **省錢 90%！輕量向量資料庫！MCP 整合！一鍵安裝的完整 Gemini AI 工具套件**
 
-English page: https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_EN.md
+English page: 
+[https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_EN.md](https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_EN.md)
+
+README_Japan.md
+[https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_JA.md](https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_JA.md)
+
+README_Korea.md
+[https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_KO.md](https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_KO.md)
 
 ---
 

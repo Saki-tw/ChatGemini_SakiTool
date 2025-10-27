@@ -24,6 +24,9 @@ from utils.pricing_loader import (
     USD_TO_TWD
 )
 
+# 導入 i18n 國際化支援
+from utils.i18n import safe_t
+
 console = Console()
 
 # 初始化 API 客戶端
@@ -82,17 +85,17 @@ class CacheManager:
 
         # 檢查模型支援
         if not self._check_model_support(model):
-            console.print(f"[magenta]警告：{model} 可能不支援 Context Caching[/yellow]")
+            console.print(f"[magenta]{safe_t('cache.warning_model_not_support', fallback='警告：{model} 可能不支援 Context Caching', model=model)}[/yellow]")
 
         # 檢查最低 token 要求
         min_tokens = MIN_TOKENS.get(model, 1024)
-        console.print(f"\n[magenta]📦 建立 Context Cache[/magenta]")
-        console.print(f"   模型：{model}")
-        console.print(f"   最低 tokens：{min_tokens:,}")
-        console.print(f"   TTL：{ttl_seconds} 秒 ({ttl_seconds / 3600:.1f} 小時)")
+        console.print(f"\n[magenta]{safe_t('cache.create_title', fallback='📦 建立 Context Cache')}[/magenta]")
+        console.print(f"   {safe_t('cache.model_info', fallback='模型：{model}', model=model)}")
+        console.print(f"   {safe_t('cache.min_tokens_info', fallback='最低 tokens：{min}', min=f'{min_tokens:,}')}")
+        console.print(f"   {safe_t('cache.ttl_info', fallback='TTL：{seconds} 秒 ({hours} 小時)', seconds=ttl_seconds, hours=f'{ttl_seconds/3600:.1f}')}")
 
         if display_name:
-            console.print(f"   名稱：{display_name}")
+            console.print(f"   {safe_t('cache.display_name_info', fallback='名稱：{name}', name=display_name)}")
 
         try:
             # 準備配置
@@ -108,16 +111,16 @@ class CacheManager:
                 config_params["display_name"] = display_name
 
             # 建立快取
-            console.print("\n[magenta]⏳ 建立中...[/magenta]")
+            console.print(f"\n[magenta]{safe_t('cache.creating', fallback='⏳ 建立中...')}[/magenta]")
 
             cache = client.caches.create(
                 model=f"models/{model}",
                 config=types.CreateCachedContentConfig(**config_params)
             )
 
-            console.print(f"[bright_magenta]✓ 快取已建立[/green]")
-            console.print(f"   快取名稱：{cache.name}")
-            console.print(f"   過期時間：{cache.expire_time}")
+            console.print(f"[bright_magenta]{safe_t('cache.created_success', fallback='✓ 快取已建立')}[/green]")
+            console.print(f"   {safe_t('cache.cache_name_info', fallback='快取名稱：{name}', name=cache.name)}")
+            console.print(f"   {safe_t('cache.expire_time_info', fallback='過期時間：{time}', time=cache.expire_time)}")
 
             # 儲存到活動快取
             cache_key = display_name or cache.name
@@ -129,15 +132,15 @@ class CacheManager:
             return cache
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 建立快取失敗：{e}[/red]")
+            console.print(f"[dim magenta]{safe_t('cache.create_failed', fallback='✗ 建立快取失敗：{error}', error=str(e))}[/red]")
 
             # 檢查常見錯誤
             error_str = str(e).lower()
             if 'token' in error_str and 'minimum' in error_str:
-                console.print(f"\n[magenta]提示：內容可能少於最低 {min_tokens} tokens[/yellow]")
-                console.print(f"[magenta]請增加內容長度以使用 Context Caching[/yellow]")
+                console.print(f"\n[magenta]{safe_t('cache.hint_content_too_short', fallback='提示：內容可能少於最低 {min_tokens} tokens', min_tokens=min_tokens)}[/yellow]")
+                console.print(f"[magenta]{safe_t('cache.hint_increase_content', fallback='請增加內容長度以使用 Context Caching')}[/yellow]")
             elif 'not support' in error_str:
-                console.print(f"\n[magenta]提示：{model} 可能不支援 Context Caching[/yellow]")
+                console.print(f"\n[magenta]{safe_t('cache.hint_model_not_support', fallback='提示：{model} 可能不支援 Context Caching', model=model)}[/yellow]")
 
             raise
 
@@ -151,9 +154,9 @@ class CacheManager:
         discount = CACHE_DISCOUNT.get(model, 0.75)
         discount_percent = int(discount * 100)
 
-        console.print(f"\n[bold green]💰 成本節省資訊[/bold green]")
-        console.print(f"   快取折扣：{discount_percent}%")
-        console.print(f"   範例：原本 $1.00 → 現在 ${1.00 * (1 - discount):.2f}")
+        console.print(f"\n[bold green]{safe_t('cache.savings_info_title', fallback='💰 成本節省資訊')}[/bold green]")
+        console.print(f"   {safe_t('cache.discount_info', fallback='快取折扣：{discount}%', discount=discount_percent)}")
+        console.print(f"   {safe_t('cache.example_savings', fallback='範例：原本 ${original} → 現在 ${discounted}', original='1.00', discounted=f'{1.00 * (1 - discount):.2f}')}")
 
     def query_with_cache(
         self,
@@ -176,14 +179,14 @@ class CacheManager:
         cache = self.active_caches.get(cache_name_or_key)
         if not cache:
             # 嘗試列出並查找
-            console.print(f"[magenta]在本地找不到快取，嘗試從 API 獲取...[/yellow]")
+            console.print(f"[magenta]{safe_t('cache.trying_api', fallback='在本地找不到快取，嘗試從 API 獲取...')}[/yellow]")
             cache = self._find_cache_by_name(cache_name_or_key)
             if not cache:
-                raise ValueError(f"找不到快取：{cache_name_or_key}")
+                raise ValueError(safe_t('cache.cache_not_found', fallback='找不到快取：{name}', name=cache_name_or_key))
 
-        console.print(f"\n[magenta]🔍 使用快取查詢[/magenta]")
-        console.print(f"   快取：{cache.name}")
-        console.print(f"   問題：{question}\n")
+        console.print(f"\n[magenta]{safe_t('cache.query_title', fallback='🔍 使用快取查詢')}[/magenta]")
+        console.print(f"   {safe_t('cache.cache_info', fallback='快取：{name}', name=cache.name)}")
+        console.print(f"   {safe_t('cache.question_info', fallback='問題：{question}', question=question)}\n")
 
         try:
             # 使用快取進行查詢
@@ -212,31 +215,31 @@ class CacheManager:
 
                 # 顯示成本資訊（含快取折扣說明）
                 if cost > 0 or cached_tokens > 0:
-                    console.print(f"\n[dim]💰 查詢成本 (使用快取): NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
-                    console.print(f"[dim]   快取 tokens: {cached_tokens:,} (90% 折扣)[/dim]")
-                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
+                    console.print(f"\n[dim]{safe_t('cache.query_cost', fallback='💰 查詢成本 (使用快取): NT${twd} (${usd} USD)', twd=f'{cost * USD_TO_TWD:.2f}', usd=f'{cost:.6f}')}[/dim]")
+                    console.print(f"[dim]   {safe_t('cache.cached_tokens_detail', fallback='快取 tokens: {cached} (90% 折扣)', cached=f'{cached_tokens:,}')}[/dim]")
+                    console.print(f"[dim]   {safe_t('cache.tokens_detail', fallback='輸入: {input} tokens, 輸出: {output} tokens, 思考: {thinking} tokens', input=f'{input_tokens:,}', output=f'{output_tokens:,}', thinking=f'{thinking_tokens:,}')}[/dim]")
 
                     # 計算如果不使用快取的成本
                     if cached_tokens > 0:
                         full_cost, _ = global_pricing_calculator.calculate_text_cost(
                             cache.model,
-                            input_tokens + cached_tokens,  # 不使用快取需要全額付費
+                            input_tokens + cached_tokens,
                             output_tokens,
                             thinking_tokens
                         )
                         savings = full_cost - cost
                         savings_percent = (savings / full_cost * 100) if full_cost > 0 else 0
-                        console.print(f"[dim]   💸 節省成本: NT${savings * USD_TO_TWD:.2f} (約 {savings_percent:.0f}%)[/dim]")
+                        console.print(f"[dim]   {safe_t('cache.savings_detail', fallback='💸 節省成本: NT${twd} (約 {percent}%)', twd=f'{savings * USD_TO_TWD:.2f}', percent=f'{savings_percent:.0f}')}[/dim]")
 
-                    console.print(f"[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f} USD)[/dim]\n")
+                    console.print(f"[dim]   {safe_t('cache.cumulative_cost_info', fallback='累計成本: NT${twd} (${usd} USD)', twd=f'{global_pricing_calculator.total_cost * USD_TO_TWD:.2f}', usd=f'{global_pricing_calculator.total_cost:.6f}')}[/dim]\n")
 
-            console.print("[magenta]Gemini (使用快取)：[/magenta]")
+            console.print(f"[magenta]{safe_t('cache.using_cache_label', fallback='Gemini (使用快取)：')}[/magenta]")
             console.print(response.text)
 
             return response.text
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 查詢失敗：{e}[/red]")
+            console.print(f"[dim magenta]{safe_t('cache.query_failed', fallback='✗ 查詢失敗：{error}', error=str(e))}[/red]")
             raise
 
     def _find_cache_by_name(self, name: str) -> Optional[Any]:
@@ -252,22 +255,22 @@ class CacheManager:
 
     def list_caches(self) -> List[Any]:
         """列出所有快取"""
-        console.print("\n[magenta]📦 已建立的 Context Caches：[/magenta]\n")
+        console.print(f"\n[magenta]{safe_t('cache.list_title', fallback='📦 已建立的 Context Caches：')}[/magenta]\n")
 
         try:
             caches = list(client.caches.list())
 
             if not caches:
-                console.print("[magenta]沒有找到快取[/yellow]")
+                console.print(f"[magenta]{safe_t('cache.no_caches_found', fallback='沒有找到快取')}[/yellow]")
                 return []
 
             # 建立表格
             table = Table(show_header=True, header_style="bold bright_magenta")
-            table.add_column("名稱", style="green")
-            table.add_column("模型")
-            table.add_column("建立時間")
-            table.add_column("過期時間")
-            table.add_column("狀態", justify="center")
+            table.add_column(safe_t('cache.table_col_name', fallback='名稱'), style="green")
+            table.add_column(safe_t('cache.table_col_model', fallback='模型'))
+            table.add_column(safe_t('cache.table_col_created', fallback='建立時間'))
+            table.add_column(safe_t('cache.table_col_expire', fallback='過期時間'))
+            table.add_column(safe_t('cache.table_col_status', fallback='狀態'), justify="center")
 
             for cache in caches:
                 display_name = getattr(cache, 'display_name', cache.name.split('/')[-1])
@@ -277,7 +280,7 @@ class CacheManager:
                 expire_time = cache.expire_time
                 is_expired = expire_time < now if expire_time else False
 
-                status = "[dim magenta]已過期[/red]" if is_expired else "[bright_magenta]有效[/green]"
+                status = f"[dim magenta]{safe_t('cache.status_expired', fallback='已過期')}[/red]" if is_expired else f"[bright_magenta]{safe_t('cache.status_valid', fallback='有效')}[/green]"
 
                 table.add_row(
                     display_name,
@@ -288,12 +291,12 @@ class CacheManager:
                 )
 
             console.print(table)
-            console.print(f"\n總計：{len(caches)} 個快取")
+            console.print(f"\n{safe_t('cache.total_caches', fallback='總計：{count} 個快取', count=len(caches))}")
 
             return caches
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 列出快取失敗：{e}[/red]")
+            console.print(f"[dim magenta]{safe_t('cache.list_failed', fallback='✗ 列出快取失敗：{error}', error=str(e))}[/red]")
             return []
 
     def delete_cache(self, cache_name_or_key: str) -> bool:

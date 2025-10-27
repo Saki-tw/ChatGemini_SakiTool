@@ -1,0 +1,98 @@
+  # Context Caching Manager 相關
+  manager_title: "Context Caching 管理器"
+  create_title: "📦 建立 Context Cache"
+  min_tokens: "最低 tokens"
+  min_tokens_info: "最低 tokens：{min}"
+  ttl_seconds: "TTL：{seconds} 秒"
+  ttl_hours: "TTL：{seconds} 秒 ({hours} 小時)"
+  display_name: "名稱：{name}"
+  creating: "⏳ 建立中..."
+  created_success: "✓ 快取已建立"
+  expire_time: "過期時間：{time}"
+  create_failed: "✗ 建立快取失敗：{error}"
+
+  # 警告與提示
+  warning_model_not_support: "警告：{model} 可能不支援 Context Caching"
+  hint_content_too_short: "提示：內容可能少於最低 {min_tokens} tokens"
+  hint_increase_content: "請增加內容長度以使用 Context Caching"
+  hint_model_not_support: "提示：{model} 可能不支援 Context Caching"
+
+  # 成本資訊
+  savings_info_title: "💰 成本節省資訊"
+  discount_percent: "快取折扣：{discount}%"
+  example_savings: "範例：原本 ${original} → 現在 ${discounted}"
+
+  # 查詢相關
+  query_title: "🔍 使用快取查詢"
+  question: "問題：{question}"
+  query_cost: "💰 查詢成本 (使用快取): NT${twd} (${usd} USD)"
+  cached_tokens_info: "快取 tokens: {cached} (90% 折扣)"
+  tokens_info: "輸入: {input} tokens, 輸出: {output} tokens, 思考: {thinking} tokens"
+  query_failed: "✗ 查詢失敗：{error}"
+  using_cache: "Gemini (使用快取)："
+
+  # 列表相關
+  list_title: "📦 已建立的 Context Caches："
+  no_caches: "沒有找到快取"
+  table_name: "名稱"
+  table_model: "模型"
+  table_created_time: "建立時間"
+  table_expire_time: "過期時間"
+  table_status: "狀態"
+  status_active: "有效"
+  status_expired: "已過期"
+  total_count: "總計：{count} 個快取"
+  list_failed: "✗ 列出快取失敗：{error}"
+
+  # 刪除相關
+  delete_success: "✓ 已刪除快取：{name}"
+  delete_failed: "✗ 刪除快取失敗：{error}"
+
+  # 其他
+  not_found: "找不到快取：{name}"
+  try_fetch_from_api: "在本地找不到快取，嘗試從 API 獲取..."
+  savings_amount: "💸 節省成本: NT${twd} (約 {percent}%)"
+  cumulative_cost: "累計成本: NT${twd} (${usd} USD)"
+
+  # CLI 使用說明
+  context_caching_title: "Gemini Context Caching 管理器"
+  can_save_up_to: "💰 使用快取可節省最高 90% 的成本！"
+  usage_title: "使用方式："
+  create_usage: "建立快取："
+  list_usage: "列出快取："
+  query_usage: "使用快取查詢："
+  delete_usage: "刪除快取："
+  calculate_usage: "計算節省："
+  error_provide_content: "錯誤：請提供 --content"
+  error_provide_cache: "錯誤：請提供 --cache"
+  error_provide_cache_and_question: "錯誤：請提供 --cache 和 --question"
+  error_provide_tokens: "錯誤：請提供 --tokens"
+
+  # 自動快取管理器
+  trigger_reminder: "🔔 快取觸發提醒"
+  current_status: "📊 目前狀態："
+  accumulated_input: "累積輸入：{tokens} tokens"
+  conversation_rounds: "對話輪次：{rounds} 次"
+  cost_analysis: "💰 成本分析："
+  cache_create_cost: "快取建立成本：NT$ {cost} (一次性)"
+  future_query: "後續每次查詢（{tokens} tokens 輸入）："
+  without_cache_cost: "不使用快取：NT$ {cost}"
+  with_cache_cost: "使用快取：  NT$ {cost}"
+  savings_per_query: "每次節省：  NT$ {savings} (省 {percent}%)"
+  breakeven_point: "💡 損益平衡：{queries} 次查詢後開始省錢"
+  cache_ttl_hours: "(快取有效期 {hours} 小時)"
+  cost_calc_failed: "成本計算失敗: {error}"
+  content_preview: "📦 快取內容預覽："
+  preview_user: "- 你: {msg}"
+  preview_ai: "- AI: {msg}"
+  preview_more: "... (共 {total} 輪對話)"
+  create_cache_prompt: "建立快取？ (y/n) [y]: "
+  cache_not_enabled: "⚠️  快取功能未啟用（gemini_cache_manager.py 未找到）"
+  cache_creating: "⏳ 建立快取中..."
+  cache_create_success: "✅ 快取建立成功！後續對話將自動使用快取節省成本。"
+  cache_create_failed: "⚠️  快取建立失敗：{error}"
+
+  # 快取控制指令
+  auto_cache_paused: "⚠️  自動快取已暫停"
+  auto_cache_resumed: "✓ 自動快取已恢復"
+  no_cache_this_turn: "⚠️  本次對話不列入快取"

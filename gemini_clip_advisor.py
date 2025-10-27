@@ -23,6 +23,7 @@ from google.genai import types
 # 導入價格模組
 from utils.pricing_loader import get_pricing_calculator, PRICING_ENABLED
 from gemini_pricing import USD_TO_TWD
+from utils.i18n import safe_t
 
 console = Console()
 client = get_gemini_client()
@@ -87,34 +88,34 @@ class ClipAdvisor:
         Returns:
             剪輯建議列表
         """
-        console.print("\n[bold magenta]🎬 AI 剪輯建議分析[/bold magenta]\n")
-        console.print(f"📁 影片：{os.path.basename(video_path)}")
+        console.print(safe_t('media.clip.analysis_title', fallback='\n[bold magenta]🎬 AI 剪輯建議分析[/bold magenta]\n'))
+        console.print(safe_t('media.clip.video_file', fallback='📁 影片：{name}', name=os.path.basename(video_path)))
 
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print("[dim magenta]錯誤：無法獲取影片資訊[/red]")
+            console.print(safe_t('error.video_info_failed', fallback='[dim magenta]錯誤：無法獲取影片資訊[/red]'))
             return []
 
         duration = info['duration']
-        console.print(f"⏱️  總長度：{self._format_time(duration)}")
+        console.print(safe_t('media.clip.total_duration', fallback='⏱️  總長度：{time}', time=self._format_time(duration)))
 
         if target_duration:
-            console.print(f"🎯 目標長度：{self._format_time(target_duration)}")
+            console.print(safe_t('media.clip.target_duration', fallback='🎯 目標長度：{time}', time=self._format_time(target_duration)))
 
         # 2. 場景檢測（如果啟用）
         scenes = []
         if self.use_scene_detection:
-            console.print("\n[magenta]📦 執行場景檢測...[/magenta]")
+            console.print(safe_t('media.clip.scene_detection', fallback='\n[magenta]📦 執行場景檢測...[/magenta]'))
             scenes = self.scene_detector.detect_scenes(video_path, num_keyframes=20)
-            console.print(f"✓ 檢測到 {len(scenes)} 個場景")
+            console.print(safe_t('media.clip.scenes_found', fallback='✓ 檢測到 {count} 個場景', count=len(scenes)))
 
         # 3. 分析內容特徵
-        console.print("\n[magenta]🔍 分析影片內容特徵...[/magenta]")
+        console.print(safe_t('media.clip.analyzing_features', fallback='\n[magenta]🔍 分析影片內容特徵...[/magenta]'))
         content_features = self._analyze_content_features(video_path, scenes, duration)
 
         # 4. 生成剪輯建議
-        console.print("\n[magenta]💡 生成剪輯建議...[/magenta]")
+        console.print(safe_t('media.clip.generating_suggestions', fallback='\n[magenta]💡 生成剪輯建議...[/magenta]'))
         suggestions = self._generate_suggestions(
             video_path,
             scenes,
@@ -128,7 +129,7 @@ class ClipAdvisor:
         # 5. 排序並篩選
         suggestions = self._rank_and_filter_suggestions(suggestions, num_suggestions)
 
-        console.print(f"\n[bright_magenta]✓ 已生成 {len(suggestions)} 個剪輯建議[/green]")
+        console.print(safe_t('media.clip.suggestions_generated', fallback='\n[bright_magenta]✓ 已生成 {count} 個剪輯建議[/green]', count=len(suggestions)))
 
         return suggestions
 
@@ -550,7 +551,7 @@ class ClipAdvisor:
             subprocess.run(cmd, capture_output=True, check=True)
             return str(frame_path)
         except Exception as e:
-            console.print(f"[magenta]警告：提取預覽幀失敗 ({timestamp}s): {e}[/yellow]")
+            console.print(safe_t('media.clip.preview_frame_warning', fallback='[magenta]警告：提取預覽幀失敗 ({time}s): {error}[/yellow]', time=timestamp, error=e))
             return ""
 
     def _rank_and_filter_suggestions(
@@ -575,10 +576,10 @@ class ClipAdvisor:
     def display_suggestions(self, suggestions: List[ClipSuggestion]):
         """顯示剪輯建議"""
         if not suggestions:
-            console.print("[magenta]沒有生成剪輯建議[/yellow]")
+            console.print(safe_t('media.clip.no_suggestions', fallback='[magenta]沒有生成剪輯建議[/yellow]'))
             return
 
-        console.print(f"\n[bold magenta]📋 剪輯建議列表（{len(suggestions)} 個）[/bold magenta]\n")
+        console.print(safe_t('media.clip.suggestions_list', fallback='\n[bold magenta]📋 剪輯建議列表（{count} 個）[/bold magenta]\n', count=len(suggestions)))
 
         # 創建表格
         table = Table(show_header=True, header_style="bold bright_magenta")
@@ -623,7 +624,7 @@ class ClipAdvisor:
         console.print(table)
 
         # 顯示詳細資訊
-        console.print("\n[bold magenta]💡 詳細建議：[/bold magenta]\n")
+        console.print(safe_t('media.clip.detailed_suggestions', fallback='\n[bold magenta]💡 詳細建議：[/bold magenta]\n'))
         for suggestion in suggestions[:5]:  # 只顯示前 5 個的詳細資訊
             self._display_suggestion_detail(suggestion)
 
@@ -713,10 +714,10 @@ class ClipAdvisor:
                     f.write(f"* COMMENT: {suggestion.clip_type} - {suggestion.reasoning}\n\n")
 
         else:
-            console.print(f"[dim magenta]不支援的格式：{format}[/red]")
+            console.print(safe_t('error.unsupported_format', fallback='[dim magenta]不支援的格式：{format}[/red]', format=format))
             return ""
 
-        console.print(f"[bright_magenta]✓ 剪輯建議已保存：{output_file}[/green]")
+        console.print(safe_t('media.clip.suggestions_saved', fallback='[bright_magenta]✓ 剪輯建議已保存：{file}[/green]', file=output_file))
         return str(output_file)
 
     def _format_time(self, seconds: float) -> str:
@@ -754,7 +755,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(f"[dim magenta]錯誤：找不到影片檔案：{args.video}[/red]")
+        console.print(safe_t('error.video_not_found', fallback='[dim magenta]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
         return
 
     # 創建建議器
