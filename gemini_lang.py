@@ -26,6 +26,7 @@ if str(project_root) not in sys.path:
 
 from utils.i18n import init_i18n, get_available_languages, get_language_info, switch_language, get_current_language
 from utils.locale_detector import SUPPORTED_LANGS, validate_language_code, normalize_language_code
+from utils.i18n import safe_t
 
 
 def update_env_file(lang: str):

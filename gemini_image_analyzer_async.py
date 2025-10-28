@@ -93,8 +93,8 @@ class AsyncImageAnalyzer(ImageAnalyzer):
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['describe'])
 
-        console.print(f"\n[magenta]💭 任務：{task} (異步模式)[/magenta]")
-        console.print(f"[magenta]🤖 Gemini 分析中...[/magenta]\n")
+        console.print(safe_t('common.message', fallback='\n[magenta]💭 任務：{task} (異步模式)[/magenta]', task=task))
+        console.print(safe_t('common.analyzing', fallback='[magenta]🤖 Gemini 分析中...[/magenta]\n'))
 
         # 轉換圖片為 Part（使用父類方法）
         image_part = self._image_to_part(image_path)
@@ -129,6 +129,7 @@ class AsyncImageAnalyzer(ImageAnalyzer):
 
         # 處理回應（與父類相同）
         from rich.panel import Panel
+from utils.i18n import safe_t
         from rich.markdown import Markdown
 
         console.print(Panel(
@@ -160,9 +161,9 @@ class AsyncImageAnalyzer(ImageAnalyzer):
                     thinking_tokens
                 )
                 if thinking_tokens > 0:
-                    console.print(f"[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]")
+                    console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]', cost * USD_TO_TWD:.2f=cost * USD_TO_TWD:.2f, input_tokens:,=input_tokens:,, thinking_tokens:,=thinking_tokens:,, output_tokens:,=output_tokens:,, global_pricing_calculator.total_cost * USD_TO_TWD:.2f=global_pricing_calculator.total_cost * USD_TO_TWD:.2f, global_pricing_calculator.total_cost:.6f=global_pricing_calculator.total_cost:.6f))
                 else:
-                    console.print(f"[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]")
+                    console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]', cost * USD_TO_TWD:.2f=cost * USD_TO_TWD:.2f, input_tokens:,=input_tokens:,, output_tokens:,=output_tokens:,, global_pricing_calculator.total_cost * USD_TO_TWD:.2f=global_pricing_calculator.total_cost * USD_TO_TWD:.2f, global_pricing_calculator.total_cost:.6f=global_pricing_calculator.total_cost:.6f))
             except Exception as e:
                 pass
 
@@ -188,7 +189,7 @@ class AsyncImageAnalyzer(ImageAnalyzer):
             loop = asyncio.get_running_loop()
 
             # 在事件循環中，返回異步版本
-            console.print("[dim]使用異步模式（event loop detected）[/dim]")
+            console.print(safe_t('common.message', fallback='[dim]使用異步模式（event loop detected）[/dim]'))
             return self.analyze_image_async(image_path, prompt, task)
 
         except RuntimeError:
@@ -219,7 +220,7 @@ class AsyncImageAnalyzer(ImageAnalyzer):
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['compare'])
 
-        console.print(f"\n[magenta]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/magenta]")
+        console.print(safe_t('common.loading', fallback='\n[magenta]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/magenta]', len(image_paths)=len(image_paths)))
 
         # 並行載入所有圖片
         import os
@@ -232,13 +233,13 @@ class AsyncImageAnalyzer(ImageAnalyzer):
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(f"   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]")
+                console.print(safe_t('error.failed', fallback='   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]', os.path.basename(path)=os.path.basename(path), e=e))
 
         if not parts:
             raise ValueError("沒有成功載入任何圖片")
 
-        console.print(f"\n[magenta]💭 任務：{task}[/magenta]")
-        console.print(f"\n[magenta]🤖 Gemini 分析中...[/magenta]\n")
+        console.print(safe_t('common.message', fallback='\n[magenta]💭 任務：{task}[/magenta]', task=task))
+        console.print(safe_t('common.analyzing', fallback='\n[magenta]🤖 Gemini 分析中...[/magenta]\n'))
 
         # 異步 API 調用
         loop = asyncio.get_running_loop()
@@ -271,6 +272,7 @@ class AsyncImageAnalyzer(ImageAnalyzer):
         # 顯示結果
         from rich.panel import Panel
         from rich.markdown import Markdown
+from utils.i18n import safe_t
 
         console.print(Panel(
             Markdown(response.text),

@@ -129,6 +129,7 @@ class ModuleLoader:
             # 延遲導入 config 避免循環依賴
             try:
                 import config
+from utils.i18n import safe_t
                 module_config = config.MODULES.get(module_name, {})
                 self._enabled_modules[module_name] = module_config.get('enabled', False)
             except (ImportError, AttributeError):
