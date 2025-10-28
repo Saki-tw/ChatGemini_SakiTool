@@ -1,0 +1,39 @@
+# gemini_error_handler.py i18n entries
+# English (en_US)
+
+error:
+  # Error severity levels
+  severity:
+    low: "Low"
+    medium: "Medium"
+    high: "High"
+    critical: "Critical"
+
+  # Error panel
+  panel:
+    details: "Error Details"
+
+  # Retry messages
+  retry:
+    attempting: "[yellow]⚠️  Attempt {attempt}/{max_retries} failed, retrying in {delay:.1f} seconds...[/yellow]"
+
+  # Error messages
+  message: "[dim]Error: {error}[/dim]"
+
+  # Error statistics
+  stats:
+    title: "\n[bold cyan]📊 Error Statistics (Last {days} Days)[/bold cyan]\n"
+    total: "Total Errors: {total}"
+    by_type: "\n[yellow]Error Type Distribution:[/yellow]"
+    by_severity: "\n[yellow]Severity Distribution:[/yellow]"
+
+recovery:
+  # Checkpoint recovery messages
+  checkpoint:
+    saved: "[cyan]💾 Checkpoint saved: {name}[/cyan]"
+    loaded: "[cyan]📂 Checkpoint loaded: {name}[/cyan]"
+    load_failed: "[red]Failed to load checkpoint: {error}[/red]"
+    deleted: "[green]🗑️  Checkpoint deleted: {name}[/green]"
+    read_warning: "[yellow]Warning: Cannot read checkpoint {name}: {error}[/yellow]"
+    none: "[yellow]No recoverable checkpoints[/yellow]"
+    cleaned: "[green]Cleaned up {count} old checkpoint(s)[/green]"

@@ -49,10 +49,14 @@ console = Console()
 
 class ErrorSeverity(Enum):
     """錯誤嚴重程度"""
-    LOW = "低"          # 可忽略的警告
-    MEDIUM = "中"       # 需要注意但不影響主要功能
-    HIGH = "高"         # 影響功能但可恢復
-    CRITICAL = "嚴重"   # 致命錯誤，需要立即處理
+    LOW = "low"          # 可忽略的警告
+    MEDIUM = "medium"       # 需要注意但不影響主要功能
+    HIGH = "high"         # 影響功能但可恢復
+    CRITICAL = "critical"   # 致命錯誤，需要立即處理
+
+    def localized(self) -> str:
+        """返回本地化的嚴重程度名稱"""
+        return safe_t(f'error.severity.{self.value}', fallback=self.value)
 
 
 class GeminiVideoError(Exception):
@@ -186,25 +190,25 @@ class ErrorFormatter:
         # === 第 1 部分：錯誤類型與基本訊息 ===
         error_type = error.__class__.__name__
         lines.append(f"[bold red]❌ {error_type}[/bold red]")
-        lines.append(f"[dim magenta]{str(error)}[/red]")
+        lines.append(f"[red]{str(error)}[/red]")
 
         # === 第 2 部分：自訂錯誤的額外資訊 ===
         # 只有繼承自 GeminiVideoError 的異常才有這些屬性
         if isinstance(error, GeminiVideoError):
             # 顯示嚴重程度（LOW/MEDIUM/HIGH/CRITICAL）
-            lines.append(safe_t('error.severity', fallback='\n[magenta]嚴重程度：{level}[/yellow]', level=error.severity.value))
+            lines.append(f"\n[yellow]嚴重程度：{error.severity.value}[/yellow]")
             # 顯示錯誤發生時間
-            lines.append(safe_t('error.timestamp', fallback='[dim]時間：{time}[/dim]', time=error.timestamp.strftime('%Y-%m-%d %H:%M:%S')))
+            lines.append(f"[dim]時間：{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
 
             # 上下文資訊（檔案路徑、API 名稱、命令等）
             if error.context:
-                lines.append(safe_t('error.context_info', fallback='\n[magenta]上下文資訊：[/magenta]'))
+                lines.append("\n[cyan]上下文資訊：[/cyan]")
                 for key, value in error.context.items():
                     lines.append(f"  • {key}: {value}")
 
             # 修復建議列表
             if show_suggestions and error.suggestions:
-                lines.append(safe_t('error.suggestions', fallback='\n[bright_magenta]建議的解決方案：[/green]'))
+                lines.append("\n[green]建議的解決方案：[/green]")
                 for i, suggestion in enumerate(error.suggestions, 1):
                     lines.append(f"  {i}. {suggestion}")
 
@@ -214,7 +218,7 @@ class ErrorFormatter:
             tb = traceback.format_exc()
             # 過濾掉空的或無意義的追蹤
             if tb and tb != "NoneType: None\n":
-                lines.append(safe_t('error.stack_trace', fallback='\n[dim]堆疊追蹤：[/dim]'))
+                lines.append("\n[dim]堆疊追蹤：[/dim]")
                 lines.append(f"[dim]{tb}[/dim]")
 
         # 將所有行合併為單一字串，用換行分隔
@@ -224,7 +228,7 @@ class ErrorFormatter:
     def display_error(error: Exception, **kwargs):
         """顯示格式化的錯誤訊息"""
         formatted = ErrorFormatter.format_error(error, **kwargs)
-        console.print(Panel(formatted, title=safe_t('error.details', fallback='錯誤詳情'), border_style="red"))
+        console.print(Panel(formatted, title=safe_t('error.panel.details', fallback='錯誤詳情'), border_style="red"))
 
 
 # ============================================================================
@@ -296,25 +300,23 @@ def retry_on_error(
                         if on_retry:
                             on_retry(e, attempt + 1)
                         else:
-                            console.print(safe_t(
-                                'error.retry_attempt',
-                                fallback='[magenta]⚠️  嘗試 {attempt}/{max_retries} 失敗，{delay:.1f} 秒後重試...[/yellow]',
-                                attempt=attempt + 1,
-                                max_retries=max_retries,
-                                delay=current_delay
-                            ))
-                            console.print(safe_t('error.message', fallback='[dim]錯誤：{msg}[/dim]', msg=str(e)))
+                            console.print(
+                                safe_t('error.retry.attempting',
+                                       fallback=f"[yellow]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗，{{delay:.1f}} 秒後重試...[/yellow]",
+                                       attempt=attempt + 1,
+                                       max_retries=max_retries,
+                                       delay=current_delay)
+                            )
+                            console.print(safe_t('error.message', fallback=f"[dim]錯誤：{{error}}[/dim]", error=str(e)))
 
                         time.sleep(current_delay)
                         # 指數退避：下次延遲時間 = 當前延遲 * backoff
                         current_delay *= backoff
                     else:
                         # 最後一次嘗試失敗
-                        console.print(safe_t(
-                            'error.max_retries_reached',
-                            fallback='[dim magenta]❌ 已達到最大重試次數 ({max_retries})，操作失敗[/red]',
-                            max_retries=max_retries
-                        ))
+                        console.print(
+                            f"[red]❌ 已達到最大重試次數 ({max_retries})，操作失敗[/red]"
+                        )
                         raise
 
             # 理論上不會到這裡，但為了型別安全
@@ -363,15 +365,16 @@ class RecoveryManager:
         初始化恢復管理器
 
         Args:
-            recovery_dir: 恢復檔案目錄（預設使用統一診斷目錄）
+            recovery_dir: 恢復檔案目錄，預設為 ~/gemini_videos/.recovery
         """
         if recovery_dir is None:
-            # 使用統一診斷目錄
-            from utils.path_manager import get_diagnostics_dir
-            self.recovery_dir = get_diagnostics_dir('recovery')
-        else:
-            self.recovery_dir = Path(recovery_dir)
-            self.recovery_dir.mkdir(parents=True, exist_ok=True)
+            recovery_dir = os.path.join(
+                os.path.expanduser("~"),
+                "gemini_videos",
+                ".recovery"
+            )
+        self.recovery_dir = Path(recovery_dir)
+        self.recovery_dir.mkdir(parents=True, exist_ok=True)
 
     def save_checkpoint(
         self,
@@ -414,7 +417,9 @@ class RecoveryManager:
         with open(checkpoint_path, 'w', encoding='utf-8') as f:
             json.dump(asdict(checkpoint), f, ensure_ascii=False, indent=2)
 
-        console.print(safe_t('recovery.checkpoint_saved', fallback='[magenta]💾 已保存恢復檢查點：{name}[/magenta]', name=checkpoint_path.name))
+        console.print(safe_t('recovery.checkpoint.saved',
+                             fallback=f"[cyan]💾 已保存恢復檢查點：{{name}}[/cyan]",
+                             name=checkpoint_path.name))
         return str(checkpoint_path)
 
     def load_checkpoint(self, task_id: str) -> Optional[RecoveryCheckpoint]:
@@ -440,11 +445,15 @@ class RecoveryManager:
 
             # 將字典還原為 RecoveryCheckpoint 物件
             checkpoint = RecoveryCheckpoint(**data)
-            console.print(safe_t('recovery.checkpoint_loaded', fallback='[magenta]📂 已載入恢復檢查點：{name}[/magenta]', name=checkpoint_path.name))
+            console.print(safe_t('recovery.checkpoint.loaded',
+                                 fallback=f"[cyan]📂 已載入恢復檢查點：{{name}}[/cyan]",
+                                 name=checkpoint_path.name))
             return checkpoint
 
         except Exception as e:
-            console.print(safe_t('recovery.checkpoint_load_failed', fallback='[dim magenta]載入檢查點失敗：{error}[/red]', error=e))
+            console.print(safe_t('recovery.checkpoint.load_failed',
+                                 fallback=f"[red]載入檢查點失敗：{{error}}[/red]",
+                                 error=str(e)))
             return None
 
     def delete_checkpoint(self, task_id: str) -> bool:
@@ -461,7 +470,9 @@ class RecoveryManager:
 
         if checkpoint_path.exists():
             checkpoint_path.unlink()
-            console.print(safe_t('recovery.checkpoint_deleted', fallback='[bright_magenta]🗑️  已刪除恢復檢查點：{name}[/green]', name=checkpoint_path.name))
+            console.print(safe_t('recovery.checkpoint.deleted',
+                                 fallback=f"[green]🗑️  已刪除恢復檢查點：{{name}}[/green]",
+                                 name=checkpoint_path.name))
             return True
         return False
 
@@ -475,7 +486,10 @@ class RecoveryManager:
                     data = json.load(f)
                 checkpoints.append(RecoveryCheckpoint(**data))
             except Exception as e:
-                console.print(safe_t('recovery.checkpoint_read_warning', fallback='[magenta]警告：無法讀取檢查點 {name}: {error}[/yellow]', name=checkpoint_file.name, error=e))
+                console.print(safe_t('recovery.checkpoint.read_warning',
+                                     fallback=f"[yellow]警告：無法讀取檢查點 {{name}}: {{error}}[/yellow]",
+                                     name=checkpoint_file.name,
+                                     error=str(e)))
 
         return checkpoints
 
@@ -484,11 +498,11 @@ class RecoveryManager:
         checkpoints = self.list_checkpoints()
 
         if not checkpoints:
-            console.print(safe_t('recovery.no_checkpoints', fallback='[magenta]沒有可恢復的檢查點[/yellow]'))
+            console.print(safe_t('recovery.checkpoint.none', fallback='[yellow]沒有可恢復的檢查點[/yellow]'))
             return
 
-        table = Table(title=safe_t('recovery.checkpoints_title', fallback='可恢復的檢查點'))
-        table.add_column("任務 ID", style="bright_magenta")
+        table = Table(title="可恢復的檢查點")
+        table.add_column("任務 ID", style="cyan")
         table.add_column("類型", style="green")
         table.add_column("進度", style="yellow")
         table.add_column("時間", style="dim")
@@ -523,7 +537,9 @@ class RecoveryManager:
                 deleted += 1
 
         if deleted > 0:
-            console.print(safe_t('recovery.checkpoints_cleaned', fallback='[bright_magenta]已清理 {count} 個舊的恢復檢查點[/green]', count=deleted))
+            console.print(safe_t('recovery.checkpoint.cleaned',
+                                 fallback=f"[green]已清理 {{count}} 個舊的恢復檢查點[/green]",
+                                 count=deleted))
 
 
 # ============================================================================
@@ -549,15 +565,16 @@ class ErrorLogger:
         初始化錯誤記錄器
 
         Args:
-            log_dir: 日誌目錄（預設使用統一診斷目錄）
+            log_dir: 日誌目錄，預設為 ~/gemini_videos/.logs
         """
         if log_dir is None:
-            # 使用統一診斷目錄
-            from utils.path_manager import get_diagnostics_dir
-            self.log_dir = get_diagnostics_dir('error_logs')
-        else:
-            self.log_dir = Path(log_dir)
-            self.log_dir.mkdir(parents=True, exist_ok=True)
+            log_dir = os.path.join(
+                os.path.expanduser("~"),
+                "gemini_videos",
+                ".logs"
+            )
+        self.log_dir = Path(log_dir)
+        self.log_dir.mkdir(parents=True, exist_ok=True)
 
         self.error_log_path = self.log_dir / "errors.jsonl"
 
@@ -645,16 +662,20 @@ class ErrorLogger:
         """顯示錯誤統計"""
         stats = self.get_error_stats(days)
 
-        console.print(safe_t('error.stats_title', fallback='\n[bold magenta]📊 錯誤統計（最近 {days} 天）[/bold magenta]\n', days=days))
-        console.print(safe_t('error.total_count', fallback='總錯誤數：{count}', count=stats['total']))
+        console.print(safe_t('error.stats.title',
+                             fallback=f"\n[bold cyan]📊 錯誤統計（最近 {{days}} 天）[/bold cyan]\n",
+                             days=days))
+        console.print(safe_t('error.stats.total',
+                             fallback=f"總錯誤數：{{total}}",
+                             total=stats['total']))
 
         if stats['by_type']:
-            console.print(safe_t('error.type_distribution', fallback='\n[magenta]錯誤類型分佈：[/yellow]'))
+            console.print(safe_t('error.stats.by_type', fallback="\n[yellow]錯誤類型分佈：[/yellow]"))
             for error_type, count in sorted(stats['by_type'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {error_type}: {count}")
 
         if stats['by_severity']:
-            console.print(safe_t('error.severity_distribution', fallback='\n[magenta]嚴重程度分佈：[/yellow]'))
+            console.print(safe_t('error.stats.by_severity', fallback="\n[yellow]嚴重程度分佈：[/yellow]"))
             for severity, count in sorted(stats['by_severity'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {severity}: {count}")
 

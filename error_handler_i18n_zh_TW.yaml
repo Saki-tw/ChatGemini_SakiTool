@@ -1,0 +1,39 @@
+# gemini_error_handler.py i18n 條目
+# 繁體中文 (zh_TW)
+
+error:
+  # 錯誤嚴重程度
+  severity:
+    low: "低"
+    medium: "中"
+    high: "高"
+    critical: "嚴重"
+
+  # 錯誤面板
+  panel:
+    details: "錯誤詳情"
+
+  # 重試訊息
+  retry:
+    attempting: "[yellow]⚠️  嘗試 {attempt}/{max_retries} 失敗，{delay:.1f} 秒後重試...[/yellow]"
+
+  # 錯誤訊息
+  message: "[dim]錯誤：{error}[/dim]"
+
+  # 錯誤統計
+  stats:
+    title: "\n[bold cyan]📊 錯誤統計（最近 {days} 天）[/bold cyan]\n"
+    total: "總錯誤數：{total}"
+    by_type: "\n[yellow]錯誤類型分佈：[/yellow]"
+    by_severity: "\n[yellow]嚴重程度分佈：[/yellow]"
+
+recovery:
+  # 檢查點恢復訊息
+  checkpoint:
+    saved: "[cyan]💾 已保存恢復檢查點：{name}[/cyan]"
+    loaded: "[cyan]📂 已載入恢復檢查點：{name}[/cyan]"
+    load_failed: "[red]載入檢查點失敗：{error}[/red]"
+    deleted: "[green]🗑️  已刪除恢復檢查點：{name}[/green]"
+    read_warning: "[yellow]警告：無法讀取檢查點 {name}: {error}[/yellow]"
+    none: "[yellow]沒有可恢復的檢查點[/yellow]"
+    cleaned: "[green]已清理 {count} 個舊的恢復檢查點[/green]"

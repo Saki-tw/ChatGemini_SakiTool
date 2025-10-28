@@ -1,0 +1,233 @@
+# gemini_error_handler.py i18n 鍵值對
+# 總計：230 個條目
+
+error.comment.上下文資訊展示: 上下文資訊展示
+error.comment.上下文資訊檔案路徑API名稱命: 上下文資訊（檔案路徑、API 名稱、命令等）
+error.comment.使用append模式不會覆蓋現: 使用 append 模式，不會覆蓋現有日誌
+error.comment.使用範例僅供參考不會執行: 使用範例（僅供參考，不會執行）====================
+error.comment.例如1s2s4s8s: 例如：1s, 2s, 4s, 8s...
+error.comment.保存檢查點: 保存檢查點
+error.comment.保留中文字符: 保留中文字符
+error.comment.修復建議列表: 修復建議列表
+error.comment.初始化統計結構: 初始化統計結構
+error.comment.包含完整堆疊追蹤: 包含完整堆疊追蹤
+error.comment.參數驗證失敗: 參數驗證失敗
+error.comment.只有繼承自GeminiVide: 只有繼承自 GeminiVideoError 的異常才有這些屬性
+error.comment.只統計時間範圍內的錯誤: 只統計時間範圍內的錯誤
+error.comment.呼叫可能因網路問題失敗: 呼叫可能因網路問題失敗
+error.comment.呼叫重試回調: 呼叫重試回調
+error.comment.呼叫錯誤: 呼叫錯誤
+error.comment.命令執行失敗: 命令執行失敗
+error.comment.嚴重程度標記: 嚴重程度標記
+error.comment.執行目標函數: 執行目標函數
+error.comment.基礎錯誤類別: 基礎錯誤類別
+error.comment.堆疊追蹤可選: 堆疊追蹤（可選）
+error.comment.堆疊追蹤對於除錯非常重要顯示錯: 堆疊追蹤對於除錯非常重要，顯示錯誤發生的完整呼叫鏈
+error.comment.失敗後從上次檢查點恢復: 失敗後從上次檢查點恢復
+error.comment.失敗恢復管理器Checkpoi: 失敗恢復管理器（Checkpoint & Recovery）
+error.comment.如果日誌檔案不存在返回空統計: 如果日誌檔案不存在，返回空統計
+error.comment.如果是自訂錯誤包含額外資訊: 如果是自訂錯誤，包含額外資訊
+error.comment.定期儲存檢查點checkpoi: 定期儲存檢查點（checkpoint）
+error.comment.實作指數退避演算法避免瞬間大量: 實作指數退避演算法，避免瞬間大量重試造成系統負載
+error.comment.寫入日誌檔案JSONL格式每行: 寫入日誌檔案（JSONL 格式：每行一個 JSON 物件）
+error.comment.將dataclass轉換為字典: 將 dataclass 轉換為字典並儲存為 JSON
+error.comment.將字典還原為RecoveryC: 將字典還原為 RecoveryCheckpoint 物件
+error.comment.將所有行合併為單一字串用換行分: 將所有行合併為單一字串，用換行分隔
+error.comment.將錯誤轉換為美觀的Rich格式: 將錯誤轉換為美觀的 Rich 格式化輸出：
+error.comment.彩色錯誤類型標示: 彩色錯誤類型標示
+error.comment.指數退避下次延遲時間當前延遲b: 指數退避：下次延遲時間 = 當前延遲 * backoff
+error.comment.捕獲到允許重試的異常: 捕獲到允許重試的異常
+error.comment.提供6種自定義異常涵蓋影音處理: 提供 6 種自定義異常，涵蓋影音處理的常見錯誤場景：
+error.comment.提供結構化錯誤日誌功能: 提供結構化錯誤日誌功能：
+error.comment.提供長時間任務的失敗恢復機制: 提供長時間任務的失敗恢復機制：
+error.comment.支援上下文資訊: 支援上下文資訊
+error.comment.易於後續分析與除錯: 易於後續分析與除錯
+error.comment.最後一次嘗試失敗: 最後一次嘗試失敗
+error.comment.格式儲存每行一個JSON物件: 格式儲存（每行一個 JSON 物件）
+error.comment.檔案讀寫格式錯誤: 檔案讀寫、格式錯誤
+error.comment.檢查是否還有剩餘重試次數: 檢查是否還有剩餘重試次數
+error.comment.檢查檢查點檔案是否存在: 檢查檢查點檔案是否存在
+error.comment.檢查點檔案命名taskidjs: 檢查點檔案命名：{task_id}.json
+error.comment.理論上不會到這裡但為了型別安全: 理論上不會到這裡，但為了型別安全
+error.comment.第1部分錯誤類型與基本訊息: 第 1 部分：錯誤類型與基本訊息 ===
+error.comment.第2部分自訂錯誤的額外資訊: 第 2 部分：自訂錯誤的額外資訊 ===
+error.comment.第3部分堆疊追蹤StackTr: 第 3 部分：堆疊追蹤（Stack Trace）===
+error.comment.範例1使用重試裝飾器: 範例 1：使用重試裝飾器
+error.comment.範例2使用自訂錯誤與建議: 範例 2：使用自訂錯誤與建議
+error.comment.範例3使用恢復管理器: 範例 3：使用恢復管理器
+error.comment.範例4使用錯誤記錄器: 範例 4：使用錯誤記錄器
+error.comment.統計嚴重程度LOWMEDIUM: 統計嚴重程度（LOW, MEDIUM, HIGH, CRITICAL）
+error.comment.統計錯誤類型APIErrorF: 統計錯誤類型（APIError, FileProcessingError...）
+error.comment.網路連接問題: 網路連接問題
+error.comment.解析JSON行: 解析 JSON 行
+error.comment.計算時間截止點只統計最近N天的: 計算時間截止點（只統計最近 N 天的錯誤）
+error.comment.讀取JSON檔案: 讀取 JSON 檔案
+error.comment.讓檔案可讀性更高方便手動檢查: 讓檔案可讀性更高（方便手動檢查）
+error.comment.跳過損壞的JSON行: 跳過損壞的 JSON 行
+error.comment.輔助函數: 輔助函數 ====================
+error.comment.逐行讀取JSONL檔案: 逐行讀取 JSONL 檔案
+error.comment.過濾掉空的或無意義的追蹤: 過濾掉空的或無意義的追蹤
+error.comment.適用場景影片批次處理多步驟轉換: 適用場景：影片批次處理、多步驟轉換流程
+error.comment.避免重新執行已完成的步驟: 避免重新執行已完成的步驟
+error.comment.重試時間序列2s4s8s: 重試時間序列：2s, 4s, 8s
+error.comment.重試裝飾器Exponentia: 重試裝飾器（Exponential Backoff）
+error.comment.重試迴圈嘗試maxretrie: 重試迴圈：嘗試 max_retries + 1 次（初始嘗試 + 重試）
+error.comment.重試間隔delaydelayb: 重試間隔：delay, delay*backoff, delay*backoff^2, ...
+error.comment.錯誤訊息格式化器RichFor: 錯誤訊息格式化器（Rich Formatting）
+error.comment.錯誤記錄器Structured: 錯誤記錄器（Structured Logging）
+error.comment.錯誤類別定義: 錯誤類別定義
+error.comment.顯示嚴重程度LOWMEDIUM: 顯示嚴重程度（LOW/MEDIUM/HIGH/CRITICAL）
+error.comment.顯示檢查點: 顯示檢查點
+error.comment.顯示統計: 顯示統計
+error.comment.顯示錯誤發生時間: 顯示錯誤發生時間
+error.doc.列出所有恢復檢查點: 列出所有恢復檢查點
+error.doc.可能失敗的API呼叫: 可能失敗的 API 呼叫
+error.doc.失敗恢復管理器: 失敗恢復管理器
+error.doc.檔案處理錯誤: 檔案處理錯誤
+error.doc.相關錯誤: 相關錯誤
+error.doc.網路相關錯誤: 網路相關錯誤
+error.doc.轉換為字典格式: 轉換為字典格式
+error.doc.返回本地化的嚴重程度名稱: 返回本地化的嚴重程度名稱
+error.doc.錯誤嚴重程度: 錯誤嚴重程度
+error.doc.顯示所有恢復檢查點: 顯示所有恢復檢查點
+error.doc.顯示格式化的錯誤訊息: 顯示格式化的錯誤訊息
+error.doc.顯示錯誤統計: 顯示錯誤統計
+error.doc.驗證錯誤: 驗證錯誤
+error.msg.任務ID: 任務 ID
+error.msg.可忽略的警告: 可忽略的警告
+error.msg.可恢復的檢查點: 可恢復的檢查點
+error.msg.影響功能但可恢復: 影響功能但可恢復
+error.msg.暫時無法使用: 暫時無法使用
+error.msg.無效的參數: 無效的參數
+error.msg.致命錯誤需要立即處理: 致命錯誤，需要立即處理
+error.msg.錯誤詳情: 錯誤詳情
+error.msg.需要注意但不影響主要功能: 需要注意但不影響主要功能
+error.text.上下文資訊: 上下文資訊
+error.text.上下文資訊cyan: 上下文資訊：[/cyan]
+error.text.上下文資訊檔案路徑參數等: 上下文資訊（檔案路徑、參數等）
+error.text.不適合永久性錯誤金鑰錯誤檔案不: 不適合永久性錯誤（金鑰錯誤、檔案不存在）
+error.text.任務ID: 任務 ID
+error.text.任務識別資訊: 任務識別資訊
+error.text.任務類型: 任務類型
+error.text.使用JSONLJSONLine: 使用 JSONL（JSON Lines）格式記錄錯誤，方便後續分析。
+error.text.使用Rich函式庫提供彩色結構: 使用 Rich 函式庫提供彩色、結構化的錯誤輸出，
+error.text.使用指數退避避免瞬間大量重試: 使用指數退避避免瞬間大量重試
+error.text.保存恢復檢查點: 保存恢復檢查點
+error.text.保留天數超過此天數的檢查點將被: 保留天數，超過此天數的檢查點將被刪除
+error.text.修復建議: 修復建議
+error.text.修復建議列表: 修復建議列表
+error.text.儲存任務執行狀態用於失敗後恢復: 儲存任務執行狀態，用於失敗後恢復。每個檢查點包含：
+error.text.初始化恢復管理器: 初始化恢復管理器
+error.text.初始化錯誤記錄器: 初始化錯誤記錄器
+error.text.初始延遲時間單位秒預設10: 初始延遲時間，單位秒（預設 1.0）
+error.text.刪除恢復檢查點: 刪除恢復檢查點
+error.text.原始異常如有: 原始異常（如有）
+error.text.取得錯誤統計: 取得錯誤統計
+error.text.嘗試attempt1maxre: 嘗試 {attempt + 1}/{max_retries} 失敗，
+error.text.嘗試使用管理員權限執行: 嘗試使用管理員權限執行
+error.text.嘗試轉換影片格式: 嘗試轉換影片格式
+error.text.嚴重程度: 嚴重程度
+error.text.嚴重程度errorseveri: 嚴重程度：{error.severity.value}[/yellow]
+error.text.嚴重程度分佈yellow: 嚴重程度分佈：[/yellow]
+error.text.嚴重程度分級: 嚴重程度分級
+error.text.堆疊追蹤dim: 堆疊追蹤：[/dim]
+error.text.失敗恢復管理: 失敗恢復管理
+error.text.失敗恢復與checkpoint: 失敗恢復與checkpoint支援
+error.text.已保存恢復檢查點checkpo: 已保存恢復檢查點：{checkpoint_path.name}[/cyan]
+error.text.已刪除恢復檢查點checkpo: 已刪除恢復檢查點：{checkpoint_path.name}[/green]
+error.text.已完成步驟: 已完成步驟
+error.text.已完成的步驟列表: 已完成的步驟列表
+error.text.已清理deleted個舊的恢復: 已清理 {deleted} 個舊的恢復檢查點[/green]
+error.text.已載入恢復檢查點checkpo: 已載入恢復檢查點：{checkpoint_path.name}[/cyan]
+error.text.已達到最大重試次數maxret: 已達到最大重試次數 ({max_retries})，操作失敗[/red]
+error.text.延遲倍數用於指數退避預設20: 延遲倍數，用於指數退避（預設 2.0）
+error.text.建議列表: 建議列表
+error.text.建議的解決方案green: 建議的解決方案：[/green]
+error.text.影音處理基礎錯誤類別: 影音處理基礎錯誤類別
+error.text.恢復檔案目錄預設為gemini: 恢復檔案目錄，預設為 ~/gemini_videos/.recovery
+error.text.恢復檢查點若不存在則回傳Non: 恢復檢查點，若不存在則回傳 None
+error.text.恢復檢查點資料結構: 恢復檢查點資料結構
+error.text.所有自定義異常的基類提供統一的: 所有自定義異常的基類，提供統一的錯誤資訊結構：
+error.text.按嚴重程度分組: 按嚴重程度分組
+error.text.按錯誤類型分組: 按錯誤類型分組
+error.text.提供統一的錯誤處理重試機制詳細: 提供統一的錯誤處理、重試機制、詳細錯誤訊息、失敗恢復功能
+error.text.提供自動重試機制使用指數退避演: 提供自動重試機制，使用指數退避演算法避免系統過載。
+error.text.提升錯誤訊息的可讀性與除錯效率: 提升錯誤訊息的可讀性與除錯效率。
+error.text.日誌目錄預設為geminivi: 日誌目錄，預設為 ~/gemini_videos/.logs
+error.text.是否成功刪除: 是否成功刪除
+error.text.是否顯示堆疊追蹤: 是否顯示堆疊追蹤
+error.text.是否顯示建議: 是否顯示建議
+error.text.時間errortimestam: 時間：{error.timestamp.strftime(
+error.text.時間戳記: 時間戳記
+error.text.最大重試次數預設3: 最大重試次數（預設 3）
+error.text.本模組提供: 本模組提供：
+error.text.查看API文檔: 查看 API 文檔
+error.text.根據錯誤類型提供建議的解決方案: 根據錯誤類型提供建議的解決方案
+error.text.格式化後的錯誤訊息: 格式化後的錯誤訊息
+error.text.格式化錯誤訊息: 格式化錯誤訊息
+error.text.檢查API服務狀態: 檢查 API 服務狀態
+error.text.檢查API金鑰是否正確: 檢查 API 金鑰是否正確
+error.text.檢查ffmpeg版本是否符合要: 檢查 ffmpeg 版本是否符合要求
+error.text.檢查影片格式是否支援: 檢查影片格式是否支援
+error.text.檢查影片檔案是否損壞: 檢查影片檔案是否損壞
+error.text.檢查檔案權限: 檢查檔案權限
+error.text.檢查檔案權限設定: 檢查檔案權限設定
+error.text.檢查檔案路徑是否正確: 檢查檔案路徑是否正確
+error.text.檢查網路連線: 檢查網路連線
+error.text.檢查防火牆設定: 檢查防火牆設定
+error.text.檢查點檔案路徑: 檢查點檔案路徑
+error.text.每個錯誤記錄包含時間戳錯誤類型: 每個錯誤記錄包含時間戳、錯誤類型、訊息、堆疊追蹤等資訊。
+error.text.沒有可恢復的檢查點yellow: 沒有可恢復的檢查點[/yellow]
+error.text.注意: 注意：
+error.text.清理舊的恢復檢查點: 清理舊的恢復檢查點
+error.text.無法處理影片檔案: 無法處理影片檔案
+error.text.當前執行狀態: 當前執行狀態
+error.text.當前狀態: 當前狀態
+error.text.發生時間: 發生時間
+error.text.確認API服務是否正常: 確認 API 服務是否正常
+error.text.確認API配額是否足夠: 確認 API 配額是否足夠
+error.text.確認ffmpeg已安裝: 確認 ffmpeg 已安裝
+error.text.確認ffmpeg已安裝brew: 確認 ffmpeg 已安裝：brew install ffmpeg
+error.text.確認影片格式是否支援: 確認影片格式是否支援
+error.text.確認是否有寫入權限: 確認是否有寫入權限
+error.text.確認檔案是否存在: 確認檔案是否存在
+error.text.秒後重試yellow: 秒後重試...[/yellow]
+error.text.稍後再試: 稍後再試
+error.text.種自定義異常類別API檔案FF: 種自定義異常類別（API、檔案、FFmpeg、網路、驗證錯誤）
+error.text.第1次重試delay秒: 第 1 次重試：delay 秒
+error.text.第2次重試delaybacko: 第 2 次重試：delay * backoff 秒
+error.text.第3次重試delaybacko: 第 3 次重試：delay * backoff^2 秒
+error.text.統一的錯誤處理介面: 統一的錯誤處理介面
+error.text.統計天數: 統計天數
+error.text.總步驟數: 總步驟數
+error.text.總錯誤數: 總錯誤數
+error.text.總錯誤數stats: 總錯誤數：{stats[
+error.text.自動重試機制避免驚群效應: 自動重試機制（避免驚群效應）
+error.text.裝飾器函數: 裝飾器函數
+error.text.裝飾器指數退避隨機抖動: 裝飾器（指數退避 + 隨機抖動）
+error.text.要重試的異常類型預設所有Exc: 要重試的異常類型（預設所有 Exception）
+error.text.記錄錯誤: 記錄錯誤
+error.text.設計原則: 設計原則：
+error.text.詳細的錯誤上下文資訊: 詳細的錯誤上下文資訊
+error.text.警告無法讀取檢查點checkp: 警告：無法讀取檢查點 {checkpoint_file.name}: {e}[/yellow]
+error.text.載入恢復檢查點: 載入恢復檢查點
+error.text.載入檢查點失敗ered: 載入檢查點失敗：{e}[/red]
+error.text.適合暫時性錯誤網路限流暫時忙碌: 適合暫時性錯誤（網路、限流、暫時忙碌）
+error.text.適用於API呼叫網路請求FFm: 適用於 API 呼叫、網路請求、FFmpeg 執行等可能暫時失敗的操作。
+error.text.重試時的回調函數接收excep: 重試時的回調函數，接收 (exception, attempt_number)
+error.text.重試裝飾器支援指數退避: 重試裝飾器（支援指數退避）
+error.text.錯誤stredim: 錯誤：{str(e)}[/dim]
+error.text.錯誤原因鏈: 錯誤原因鏈
+error.text.錯誤日誌記錄: 錯誤日誌記錄
+error.text.錯誤物件: 錯誤物件
+error.text.錯誤統計最近days天bold: 錯誤統計（最近 {days} 天）[/bold cyan]\n
+error.text.錯誤統計資料: 錯誤統計資料
+error.text.錯誤處理模組: 錯誤處理模組
+error.text.錯誤訊息: 錯誤訊息
+error.text.錯誤訊息格式化: 錯誤訊息格式化
+error.text.錯誤訊息格式化器: 錯誤訊息格式化器
+error.text.錯誤記錄器: 錯誤記錄器
+error.text.錯誤資訊如有: 錯誤資訊（如有）
+error.text.錯誤資訊選用: 錯誤資訊（選用）
+error.text.錯誤類型分佈yellow: 錯誤類型分佈：[/yellow]
+error.text.額外的上下文資訊: 額外的上下文資訊
