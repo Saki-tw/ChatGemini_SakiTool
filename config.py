@@ -970,28 +970,70 @@ if __name__ == "__main__":
 
 
 # ==========================================
-# Markdown 渲染主題（馬卡龍紫）
+# 色彩系統定義 - ChatGemini_SakiTool 專案思想
+# ==========================================
+#
+# 本專案採用「雙主題色系」設計哲學：
+# 1. 馬卡龍紫 (Macaron Purple) - 優雅、專業、溫暖
+# 2. 勿忘草藍 (Forget-me-not Blue) - 清新、信賴、寧靜
+#
+# 兩者皆為柔和色調,相互協調而非對立,
+# 營造出既專業又親和的使用者體驗。
+#
+# ==========================================
+
+# 馬卡龍紫色系定義
+MACARON_PURPLE_PALETTE = {
+    'plum': '#DDA0DD',           # 主紫色 - 標題、框線
+    'orchid': '#DA70D6',         # 蘭花紫 - 次要元素
+    'medium_purple': '#BA55D3',  # 中度紫 - 強調色
+    'thistle': '#D8BFD8',        # 薊紫 - 柔和背景
+    'lavender': '#E6E6FA',       # 薰衣草 - 淡雅襯托
+}
+
+# 勿忘草藍色系定義
+FORGET_ME_NOT_PALETTE = {
+    'forget_me_not': '#87CEEB',  # 天空藍 - 主藍色 (Sky Blue)
+    'light_blue': '#7EC8E3',     # 淺藍 - 柔和提示
+    'powder_blue': '#B0E0E6',    # 粉藍 - 背景襯托
+    'alice_blue': '#F0F8FF',     # 愛麗絲藍 - 極淡背景
+    'steel_blue': '#4682B4',     # 鋼青藍 - 深度對比
+}
+
+# 語義色彩（通用標準）
+SEMANTIC_COLORS = {
+    'success': 'green',          # 成功 ✅
+    'error': 'red',              # 錯誤 ❌
+    'warning': '#DDA0DD',        # 警告 ⚠️ (使用馬卡龍紫而非黃色)
+    'info': '#87CEEB',           # 訊息 💡 (使用勿忘草藍)
+}
+
+# ==========================================
+# Markdown 渲染主題（整合雙色系）
 # ==========================================
 
 MARKDOWN_THEME = {
-    'name': 'macaron_purple',
+    'name': 'macaron_purple_forget_me_not',
     'colors': {
         # 主要顏色：馬卡龍紫色系
-        'primary': 'plum',              # 主標題、重點文字
-        'secondary': 'orchid1',         # 次標題
-        'accent': 'medium_purple3',     # 強調色
-        
+        'primary': 'plum',              # 主標題、重點文字 (#DDA0DD)
+        'secondary': 'orchid1',         # 次標題 (#DA70D6)
+        'accent': 'medium_purple3',     # 強調色 (#BA55D3)
+
+        # 輔助顏色：勿忘草藍色系
+        'info': '#87CEEB',              # 訊息提示
+        'link': '#87CEEB',              # 連結（改用勿忘草藍）
+
         # 文字顏色
         'text': 'white',                # 一般文字
         'text_dim': 'bright_black',     # 暗色文字
         'text_code': 'bright_magenta',  # 程式碼
-        
+
         # 背景與邊框
         'bg_code': 'grey11',            # 程式碼區塊背景
         'border': 'plum',               # 邊框
-        
+
         # 特殊元素
-        'link': 'deep_sky_blue3',       # 連結
         'quote': 'grey50',              # 引用
         'list_marker': 'orchid',        # 清單標記
     },
@@ -1019,10 +1061,38 @@ MARKDOWN_THEME = {
         'list_item': 'white',
         
         # 其他元素
-        'link': 'underline deep_sky_blue3',
+        'link': 'underline #87CEEB',     # 連結使用勿忘草藍
         'quote': 'italic grey50',
         'hr': 'plum',
         'table': 'plum',
     }
 }
+
+# ==========================================
+# 色彩使用指南 - 開發者參考
+# ==========================================
+#
+# 【何時使用馬卡龍紫】
+# - 主要 UI 元素：選單、標題、框線
+# - 核心功能模組：模型選擇器、配置介面
+# - 強調與重點：需要使用者注意的元素
+# - 警告訊息：取代傳統黃色,更柔和
+#
+# 【何時使用勿忘草藍】
+# - 訊息提示：中性資訊、操作指引
+# - 連結與參考：超連結、文件引用
+# - 輔助說明：幫助文字、提示框
+# - 狀態指示：進行中、等待中
+#
+# 【色彩搭配原則】
+# - 主紫輔藍：紫色為主題,藍色為點綴
+# - 冷暖平衡：紫色偏暖,藍色偏冷,互補協調
+# - 避免衝突：綠色(成功)、紅色(錯誤)保持語義
+# - 層次分明：深淺搭配,確保可讀性
+#
+# 【色碼速查】
+# 馬卡龍紫: #DDA0DD (主) | #DA70D6 (次) | #BA55D3 (強調)
+# 勿忘草藍: #87CEEB (主) | #7EC8E3 (輔) | #B0E0E6 (淡)
+#
+# ==========================================
 

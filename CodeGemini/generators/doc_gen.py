@@ -60,7 +60,7 @@ class DocumentationGenerator:
         Args:
             exclude_dirs: 要排除的目錄列表
         """
-        console.print(f"\n[magenta]🔍 掃描專案：{self.project_path}[/magenta]")
+        console.print(f"\n[#DDA0DD]🔍 掃描專案：{self.project_path}[/#DDA0DD]")
 
         if exclude_dirs is None:
             exclude_dirs = [
@@ -77,7 +77,7 @@ class DocumentationGenerator:
 
             python_files.append(py_file)
 
-        console.print(f"[bright_magenta]✓ 發現 {len(python_files)} 個 Python 檔案[/green]")
+        console.print(f"[#DA70D6]✓ 發現 {len(python_files)} 個 Python 檔案[/green]")
 
         # 分析每個檔案
         for py_file in python_files:
@@ -85,7 +85,7 @@ class DocumentationGenerator:
             if module_info:
                 self.modules.append(module_info)
 
-        console.print(f"[bright_magenta]✓ 分析完成：{len(self.modules)} 個模組[/green]")
+        console.print(f"[#DA70D6]✓ 分析完成：{len(self.modules)} 個模組[/green]")
 
     def _analyze_module(self, file_path: Path) -> Optional[ModuleInfo]:
         """分析單個模組"""
@@ -130,7 +130,7 @@ class DocumentationGenerator:
             )
 
         except Exception as e:
-            console.print(f"[magenta]警告：無法分析 {file_path} - {e}[/yellow]")
+            console.print(f"[#DDA0DD]警告：無法分析 {file_path} - {e}[/#DDA0DD]")
             return None
 
     def _extract_function_info(self, node: ast.FunctionDef) -> FunctionInfo:
@@ -184,7 +184,7 @@ class DocumentationGenerator:
         Returns:
             str: README 內容
         """
-        console.print(f"\n[magenta]📝 生成 README.md...[/magenta]")
+        console.print(f"\n[#DDA0DD]📝 生成 README.md...[/#DDA0DD]")
 
         lines = []
 
@@ -264,7 +264,7 @@ class DocumentationGenerator:
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(readme_content)
-            console.print(f"[bright_magenta]✓ README 已儲存：{output_path}[/green]")
+            console.print(f"[#DA70D6]✓ README 已儲存：{output_path}[/green]")
 
         return readme_content
 
@@ -278,7 +278,7 @@ class DocumentationGenerator:
         Returns:
             str: API 文檔內容
         """
-        console.print(f"\n[magenta]📝 生成 API 文檔...[/magenta]")
+        console.print(f"\n[#DDA0DD]📝 生成 API 文檔...[/#DDA0DD]")
 
         lines = []
 
@@ -324,7 +324,7 @@ class DocumentationGenerator:
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(api_docs)
-            console.print(f"[bright_magenta]✓ API 文檔已儲存：{output_path}[/green]")
+            console.print(f"[#DA70D6]✓ API 文檔已儲存：{output_path}[/green]")
 
         return api_docs
 
@@ -427,7 +427,7 @@ def main():
     """文檔生成器命令列工具"""
     import sys
 
-    console.print("\n[bold magenta]CodeGemini Documentation Generator[/bold magenta]\n")
+    console.print("\n[bold #DDA0DD]CodeGemini Documentation Generator[/bold #DDA0DD]\n")
 
     if len(sys.argv) < 2:
         console.print("用法：")
@@ -456,7 +456,7 @@ def main():
     if readme_path or not api_path:
         readme = generator.generate_readme(readme_path)
         if not readme_path:
-            console.print(f"\n[magenta]README.md：[/magenta]\n")
+            console.print(f"\n[#DDA0DD]README.md：[/#DDA0DD]\n")
             console.print(readme)
 
     if api_path:

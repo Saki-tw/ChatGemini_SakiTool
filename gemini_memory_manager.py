@@ -29,6 +29,7 @@ from typing import List, Dict, Any, Optional, Callable, Tuple
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from PIL import Image
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.progress import Progress, TaskID, BarColumn, TextColumn, TimeRemainingColumn
 from rich.panel import Panel
 from rich import print as rprint
@@ -53,7 +54,7 @@ class MemoryPoolManager:
         self.max_memory = max_memory_mb * 1024 * 1024  # 轉換為 bytes
         self.process = psutil.Process()
         self.peak_memory = 0
-        self.start_memory = self.get_current_memory()
+        start_memory=self.get_current_memory()
 
     def get_current_memory(self) -> int:
         """取得當前程序的記憶體使用量 (bytes)"""
@@ -99,16 +100,16 @@ class MemoryPoolManager:
         report = self.get_memory_report()
 
         console.print(Panel(
-            f"""[bold magenta]記憶體使用報告[/bold magenta]
+            f"""[bold #DDA0DD]記憶體使用報告[/bold #DDA0DD]
 
-當前使用: [magenta]{report['current_mb']} MB[/yellow]
-峰值使用: [dim magenta]{report['peak_mb']} MB[/red]
-起始使用: [bright_magenta]{report['start_mb']} MB[/green]
-增量使用: [magenta]{report['delta_mb']} MB[/magenta]
+當前使用: [#DDA0DD]{report['current_mb']} MB[/#DDA0DD]
+峰值使用: [dim #DDA0DD]{report['peak_mb']} MB[/red]
+起始使用: [#DA70D6]{report['start_mb']} MB[/green]
+增量使用: [#DDA0DD]{report['delta_mb']} MB[/#DDA0DD]
 使用率: [{'red' if report['usage_percent'] > 80 else 'green'}]{report['usage_percent']}%[/]
 記憶體限制: {report['max_limit_mb']} MB""",
             title="💾 Memory Report",
-            border_style="bright_magenta"
+            border_style="#DA70D6"
         ))
 
 
@@ -180,7 +181,7 @@ class ConversationManager:
         split_point = self.max_history // 2
 
         to_archive = self.history[:split_point]
-        self.history = self.history[split_point:]
+        history=self.history[split_point:]
 
         # 寫入存檔
         timestamp = int(time.time())
@@ -189,7 +190,7 @@ class ConversationManager:
         with open(archive_file, 'w', encoding='utf-8') as f:
             json.dump(to_archive, f, ensure_ascii=False, indent=2)
 
-        console.print(f"[dim]📁 已存檔 {len(to_archive)} 則對話到 {archive_file.name}[/dim]")
+        console.print(safe_t('common.message', fallback='[dim]📁 已存檔 {len(to_archive)} 則對話到 {archive_file.name}[/dim]', to_archive_count=len(to_archive), name=archive_file.name))
 
         # 強制垃圾回收
         gc.collect()
@@ -276,12 +277,12 @@ def load_image_chunked(
             new_size = img.size
             reduction = round((1 - len(image_bytes) / os.path.getsize(file_path)) * 100, 2)
 
-            console.print(f"[dim]🖼️  圖片處理: {original_size} → {new_size}, 記憶體減少 {reduction}%[/dim]")
+            console.print(safe_t('common.processing', fallback='[dim]🖼️  圖片處理: {original_size} → {new_size}, 記憶體減少 {reduction}%[/dim]', original_size=original_size, new_size=new_size, reduction=reduction))
 
             return image_bytes
 
     except Exception as e:
-        console.print(f"[dim magenta]❌ 圖片載入失敗: {e}[/red]")
+        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 圖片載入失敗: {e}[/red]', e=e))
         raise
 
 
@@ -312,7 +313,7 @@ def get_video_duration(video_path: str) -> float:
         return float(result.stdout.strip())
 
     except Exception as e:
-        console.print(f"[dim magenta]❌ 無法取得影片時長: {e}[/red]")
+        console.print(safe_t('error.cannot_process', fallback='[dim #DDA0DD]❌ 無法取得影片時長: {e}[/red]', e=e))
         return 0.0
 
 
@@ -395,23 +396,23 @@ def process_video_chunked(
                 gc.collect()
 
         # 合併所有片段
-        console.print("[magenta]🔗 合併影片片段...[/yellow]")
+        console.print(safe_t('common.message', fallback='[#DDA0DD]🔗 合併影片片段...[/#DDA0DD]'))
         _merge_video_chunks(processed_chunks, output_path)
 
         # 清理臨時檔案
         if cleanup:
-            console.print("[dim]🧹 清理臨時檔案...[/dim]")
+            console.print(safe_t('common.message', fallback='[dim]🧹 清理臨時檔案...[/dim]'))
             for chunk in processed_chunks:
                 if os.path.exists(chunk):
                     os.remove(chunk)
             if temp_dir.exists():
                 temp_dir.rmdir()
 
-        console.print(f"[bright_magenta]✅ 影片處理完成: {output_path}[/green]")
+        console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 影片處理完成: {output_path}[/green]', output_path=output_path))
         return True
 
     except Exception as e:
-        console.print(f"[dim magenta]❌ 影片處理失敗: {e}[/red]")
+        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 影片處理失敗: {e}[/red]', e=e))
         return False
 
 
@@ -532,7 +533,7 @@ class ChunkedUploader:
 
             # 如果已完成，直接返回
             if progress.get("completed"):
-                console.print("[bright_magenta]✅ 檔案已上傳完成（使用快取）[/green]")
+                console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 檔案已上傳完成（使用快取）[/green]'))
                 return True
 
             uploaded_chunks = set(progress["uploaded_chunks"])
@@ -542,7 +543,7 @@ class ChunkedUploader:
                 BarColumn(),
                 TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
                 TextColumn("•"),
-                TextColumn("[magenta]{task.completed}/{task.total} chunks"),
+                TextColumn("[#DDA0DD]{task.completed}/{task.total} chunks"),
                 TimeRemainingColumn(),
                 console=console
             ) as progress_bar:
@@ -569,7 +570,7 @@ class ChunkedUploader:
                         success = upload_func(chunk_data, chunk_idx, total_chunks)
 
                         if not success:
-                            console.print(f"[dim magenta]❌ Chunk {chunk_idx} 上傳失敗[/red]")
+                            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ Chunk {chunk_idx} 上傳失敗[/red]', chunk_idx=chunk_idx))
                             return False
 
                         # 更新進度
@@ -587,11 +588,11 @@ class ChunkedUploader:
             progress["completed"] = True
             self._save_progress(file_path, progress)
 
-            console.print(f"[bright_magenta]✅ 檔案上傳完成: {file_path}[/green]")
+            console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 檔案上傳完成: {file_path}[/green]', file_path=file_path))
             return True
 
         except Exception as e:
-            console.print(f"[dim magenta]❌ 上傳失敗: {e}[/red]")
+            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 上傳失敗: {e}[/red]', e=e))
             return False
 
 
@@ -679,7 +680,7 @@ class ParallelProcessor:
         success_count = sum(1 for r in results if r["status"] == "success")
         error_count = len(results) - success_count
 
-        console.print(f"\n[bright_magenta]✅ 成功: {success_count}[/green] | [dim magenta]❌ 失敗: {error_count}[/red]")
+        console.print(safe_t('error.failed', fallback='\n[#DA70D6]✅ 成功: {success_count}[/green] | [dim #DDA0DD]❌ 失敗: {error_count}[/red]', success_count=success_count, error_count=error_count))
 
         return results
 
@@ -690,7 +691,7 @@ class ParallelProcessor:
 
 if __name__ == "__main__":
     console.print(Panel(
-        """[bold magenta]Gemini Memory Manager[/bold magenta]
+        """[bold #DDA0DD]Gemini Memory Manager[/bold #DDA0DD]
 
 ✅ 記憶體池管理器 (MemoryPoolManager)
 ✅ 對話歷史管理器 (ConversationManager)
@@ -701,7 +702,7 @@ if __name__ == "__main__":
 
 [dim]Author: Saki-tw | Email: Saki@saki-studio.com.tw[/dim]""",
         title="💾 Memory Management Tools",
-        border_style="bright_magenta"
+        border_style="#DA70D6"
     ))
 
     # 示範記憶體管理器

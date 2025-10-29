@@ -6,6 +6,7 @@ Gemini 對話日誌記錄器
 
 import os
 import json
+from utils.i18n import safe_t
 import logging
 from pathlib import Path
 from datetime import datetime

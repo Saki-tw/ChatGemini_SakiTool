@@ -23,6 +23,7 @@ from google import genai
 # 導入價格模組
 from utils.pricing_loader import get_pricing_calculator, PRICING_ENABLED
 from gemini_pricing import USD_TO_TWD
+from utils.i18n import safe_t
 
 console = Console()
 
@@ -112,7 +113,7 @@ class TaskPlanner:
         """
         self.api_key = api_key or os.getenv('GEMINI_API_KEY')
         if not self.api_key:
-            raise RuntimeError("請設置 GEMINI_API_KEY 環境變數")
+            raise RuntimeError(safe_t('codegemini.planner.api_key_required', fallback='請設置 GEMINI_API_KEY 環境變數'))
 
         self.client = genai.Client(api_key=self.api_key)
         self.model = 'gemini-2.0-flash-exp'  # 使用最新的 Flash 模型
@@ -130,7 +131,7 @@ class TaskPlanner:
         Returns:
             TaskAnalysis: 任務分析結果
         """
-        console.print(f"\n[magenta]🔍 分析使用者請求...[/magenta]")
+        console.print(safe_t('codegemini.planner.analyzing_request', fallback='\n[#DDA0DD]🔍 分析使用者請求...[/#DDA0DD]'))
 
         # 使用 Gemini 分析請求
         prompt = f"""你是一個專業的程式碼分析助手。請分析以下使用者請求：
@@ -197,15 +198,15 @@ class TaskPlanner:
                 keywords=data.get('keywords', [])
             )
 
-            console.print(f"  [bright_magenta]✓ 分析完成[/green]")
-            console.print(f"  意圖：{analysis.intent}")
-            console.print(f"  類型：{analysis.task_type.value}")
-            console.print(f"  複雜度：{analysis.complexity}")
+            console.print(safe_t('codegemini.planner.analysis_complete', fallback='  [#DA70D6]✓ 分析完成[/green]'))
+            console.print(safe_t('codegemini.planner.intent', fallback='  意圖：{intent}', intent=analysis.intent))
+            console.print(safe_t('codegemini.planner.type', fallback='  類型：{type}', type=analysis.task_type.value))
+            console.print(safe_t('codegemini.planner.complexity', fallback='  複雜度：{complexity}', complexity=analysis.complexity))
 
             return analysis
 
         except Exception as e:
-            console.print(f"[magenta]警告：Gemini 分析失敗，使用備用分析 - {e}[/yellow]")
+            console.print(safe_t('codegemini.planner.analysis_failed', fallback='[#DDA0DD]警告：Gemini 分析失敗，使用備用分析 - {error}[/#DDA0DD]', error=e))
 
             # 備用：簡單的啟發式分析
             return self._fallback_analysis(user_request)
@@ -250,10 +251,10 @@ class TaskPlanner:
         Returns:
             CodebaseContext: 程式碼庫上下文
         """
-        console.print(f"\n[magenta]📂 掃描程式碼庫...[/magenta]")
+        console.print(safe_t('codegemini.planner.scanning_codebase', fallback='\n[#DDA0DD]📂 掃描程式碼庫...[/#DDA0DD]'))
 
         if not os.path.isdir(project_path):
-            raise ValueError(f"專案路徑不存在：{project_path}")
+            raise ValueError(safe_t('codegemini.planner.path_not_exists', fallback='專案路徑不存在：{path}', path=project_path))
 
         # 簡單的檔案掃描
         python_files = []
@@ -283,11 +284,11 @@ class TaskPlanner:
             relevant_files=python_files[:10],  # 取前 10 個檔案
         )
 
-        console.print(f"  [bright_magenta]✓ 掃描完成[/green]")
-        console.print(f"  專案類型：{context.project_type}")
-        console.print(f"  檔案數量：{context.file_count}")
+        console.print(safe_t('codegemini.planner.scan_complete', fallback='  [#DA70D6]✓ 掃描完成[/green]'))
+        console.print(safe_t('codegemini.planner.project_type', fallback='  專案類型：{type}', type=context.project_type))
+        console.print(safe_t('codegemini.planner.file_count', fallback='  檔案數量：{count}', count=context.file_count))
         if context.framework:
-            console.print(f"  框架：{context.framework}")
+            console.print(safe_t('codegemini.planner.framework', fallback='  框架：{framework}', framework=context.framework))
 
         return context
 
@@ -308,7 +309,7 @@ class TaskPlanner:
         Returns:
             ExecutionPlan: 執行計畫
         """
-        console.print(f"\n[magenta]📋 生成執行計畫...[/magenta]")
+        console.print(safe_t('codegemini.planner.generating_plan', fallback='\n[#DDA0DD]📋 生成執行計畫...[/#DDA0DD]'))
 
         # 使用 Gemini 生成詳細計畫
         prompt = f"""你是一個專業的軟體開發規劃師。請為以下任務生成執行計畫：
@@ -420,14 +421,14 @@ class TaskPlanner:
                 considerations=data.get('considerations', [])
             )
 
-            console.print(f"  [bright_magenta]✓ 計畫生成完成[/green]")
-            console.print(f"  步驟數量：{len(plan.steps)}")
-            console.print(f"  風險等級：{plan.risk_level.value}")
+            console.print(safe_t('codegemini.planner.plan_generated', fallback='  [#DA70D6]✓ 計畫生成完成[/green]'))
+            console.print(safe_t('codegemini.planner.step_count', fallback='  步驟數量：{count}', count=len(plan.steps)))
+            console.print(safe_t('codegemini.planner.risk_level', fallback='  風險等級：{level}', level=plan.risk_level.value))
 
             return plan
 
         except Exception as e:
-            console.print(f"[magenta]警告：Gemini 計畫生成失敗，使用備用計畫 - {e}[/yellow]")
+            console.print(safe_t('codegemini.planner.plan_failed', fallback='[#DDA0DD]警告：Gemini 計畫生成失敗，使用備用計畫 - {error}[/#DDA0DD]', error=e))
 
             # 備用：生成簡單計畫
             return self._fallback_plan(analysis)
@@ -464,19 +465,19 @@ class TaskPlanner:
         """
         console.print("\n" + "=" * 70)
         console.print(Panel.fit(
-            f"[bold magenta]執行計畫[/bold magenta]\n\n"
+            f"[bold #DDA0DD]執行計畫[/bold #DDA0DD]\n\n"
             f"[bold]任務類型：[/bold]{plan.task_type.value}\n"
             f"[bold]風險等級：[/bold]{plan.risk_level.value}\n"
             f"[bold]預估時間：[/bold]{plan.estimated_total_time}",
             title="CodeGemini Agent Mode",
-            border_style="bright_magenta"
+            border_style="#DA70D6"
         ))
 
-        console.print(f"\n[bold magenta]任務摘要：[/bold magenta]")
+        console.print(f"\n[bold #DDA0DD]任務摘要：[/bold #DDA0DD]")
         console.print(f"  {plan.task_summary}")
 
         # 執行步驟
-        console.print(f"\n[bold magenta]執行步驟：[/bold magenta]")
+        console.print(f"\n[bold #DDA0DD]執行步驟：[/bold #DDA0DD]")
         for step in plan.steps:
             console.print(f"\n  [bold]步驟 {step.step_number}：[/bold]{step.description}")
             console.print(f"    預估時間：{step.estimated_time}")
@@ -494,7 +495,7 @@ class TaskPlanner:
 
         # 受影響的檔案
         if plan.affected_files:
-            console.print(f"\n[bold magenta]受影響的檔案：[/bold magenta]")
+            console.print(f"\n[bold #DDA0DD]受影響的檔案：[/bold #DDA0DD]")
             for file in plan.affected_files[:10]:  # 只顯示前 10 個
                 console.print(f"  - {file}")
             if len(plan.affected_files) > 10:
@@ -502,7 +503,7 @@ class TaskPlanner:
 
         # 注意事項
         if plan.considerations:
-            console.print(f"\n[bold yellow]注意事項：[/bold yellow]")
+            console.print(f"\n[bold #DDA0DD]注意事項：[/bold #DDA0DD]")
             for i, note in enumerate(plan.considerations, 1):
                 console.print(f"  {i}. {note}")
 
@@ -594,10 +595,10 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print("[magenta]用法：[/magenta]")
-        console.print('  python task_planner.py "任務描述" [專案路徑]')
-        console.print("\n[magenta]範例：[/magenta]")
-        console.print('  python task_planner.py "新增使用者登入功能" .')
+        console.print(safe_t('codegemini.planner.usage', fallback='[#DDA0DD]用法：[/#DDA0DD]'))
+        console.print(safe_t('codegemini.planner.usage_cmd', fallback='  python task_planner.py "任務描述" [專案路徑]'))
+        console.print(safe_t('codegemini.planner.example_title', fallback='\n[#DDA0DD]範例：[/#DDA0DD]'))
+        console.print(safe_t('codegemini.planner.example_cmd', fallback='  python task_planner.py "新增使用者登入功能" .'))
         sys.exit(1)
 
     user_request = sys.argv[1]
@@ -607,10 +608,10 @@ def main():
         planner = TaskPlanner()
         plan = planner.create_plan(user_request, project_path)
 
-        console.print(f"\n[bold green]✅ 計畫生成成功！[/bold green]")
+        console.print(safe_t('codegemini.planner.success', fallback='\n[bold green]✅ 計畫生成成功！[/bold green]'))
 
     except Exception as e:
-        console.print(f"\n[dim magenta]錯誤：{e}[/red]")
+        console.print(safe_t('error.generic', fallback='\n[dim #DDA0DD]錯誤：{error}[/red]', error=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

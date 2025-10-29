@@ -9,6 +9,7 @@ import base64
 from typing import Optional, List
 from PIL import Image
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.panel import Panel
 from rich.markdown import Markdown
 
@@ -76,7 +77,7 @@ class ImageAnalyzer:
 
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model_name = model_name
-        console.print(f"[bright_magenta]✓ 已載入模型：{model_name}[/green]")
+        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 已載入模型：{model_name}[/green]', model_name=model_name))
 
     def _image_to_part(self, image_path: str, use_memory_optimization: bool = True) -> types.Part:
         """
@@ -106,7 +107,7 @@ class ImageAnalyzer:
             try:
                 image_bytes = load_image_chunked(image_path, max_size=(1920, 1080))
             except Exception as e:
-                console.print(f"[magenta]⚠️  記憶體優化失敗，使用標準載入: {e}[/yellow]")
+                console.print(safe_t('error.failed', fallback='[#DDA0DD]⚠️  記憶體優化失敗，使用標準載入: {e}[/#DDA0DD]', e=e))
                 # 降級到標準載入
                 with open(image_path, 'rb') as f:
                     image_bytes = f.read()
@@ -152,7 +153,7 @@ class ImageAnalyzer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     image_path = alternative_path
-                    console.print(f"[bright_magenta]✅ 已切換至：{image_path}[/green]\n")
+                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
                 else:
                     raise FileNotFoundError(f"找不到圖片，請參考上述建議")
             except ImportError:
@@ -162,15 +163,16 @@ class ImageAnalyzer:
         # 檢查格式
         ext = os.path.splitext(image_path)[1].lower()
         if ext not in SUPPORTED_FORMATS:
-            console.print(f"[magenta]警告：{ext} 可能不受支援[/yellow]")
+            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：{ext} 可能不受支援[/#DDA0DD]', ext=ext))
 
         # 載入圖片資訊
         try:
             img = Image.open(image_path)
-            console.print(f"\n[magenta]📷 圖片資訊：[/magenta]")
-            console.print(f"   檔案：{os.path.basename(image_path)}")
-            console.print(f"   大小：{img.size[0]} × {img.size[1]}")
-            console.print(f"   格式：{img.format}")
+            console.print(safe_t('common.message', fallback='\n[#DDA0DD]📷 圖片資訊：[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='   檔案：{basename}', basename=os.path.basename(image_path)))
+            width, height = img.size
+            console.print(safe_t('common.message', fallback='   大小：{width} × {height}', width=width, height=height))
+            console.print(safe_t('common.message', fallback='   格式：{format}', format=img.format))
         except Exception as e:
             # 🎯 一鍵修復：顯示圖片載入失敗的修復建議
             try:
@@ -185,11 +187,11 @@ class ImageAnalyzer:
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['describe'])
 
-        console.print(f"\n[magenta]💭 任務：{task}[/magenta]")
-        console.print(f"[magenta]📝 提示：{prompt[:50]}...[/magenta]" if len(prompt) > 50 else f"[magenta]📝 提示：{prompt}[/magenta]")
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 任務：{task}[/#DDA0DD]', task=task))
+        console.print(f"[#DDA0DD]📝 提示：{prompt[:50]}...[/#DDA0DD]" if len(prompt) > 50 else f"[#DDA0DD]📝 提示：{prompt}[/#DDA0DD]")
 
         # 分析圖片
-        console.print(f"\n[magenta]🤖 Gemini 分析中...[/magenta]\n")
+        console.print(safe_t('common.analyzing', fallback='\n[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]\n'))
 
         try:
             # 轉換圖片為 Part
@@ -213,8 +215,8 @@ class ImageAnalyzer:
             # 顯示結果（Markdown 格式化）
             console.print(Panel(
                 Markdown(response.text),
-                title="[bright_magenta]📝 Gemini 分析結果[/bright_magenta]",
-                border_style="magenta"
+                title="[#DA70D6]📝 Gemini 分析結果[/#DA70D6]",
+                border_style="#DDA0DD"
             ))
 
             # 提取 tokens
@@ -236,17 +238,21 @@ class ImageAnalyzer:
                         output_tokens,
                         thinking_tokens
                     )
+                    cost_twd = cost * USD_TO_TWD
+                    total_cost_twd = global_pricing_calculator.total_cost * USD_TO_TWD
+                    total_cost_usd = global_pricing_calculator.total_cost
+
                     if thinking_tokens > 0:
-                        console.print(f"[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]")
+                        console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost_twd:.2f} (圖片+提示: {input_tokens:,} tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${total_cost_twd:.2f} (${total_cost_usd:.6f})[/dim]', cost_twd=cost_twd, input_tokens=input_tokens, thinking_tokens=thinking_tokens, output_tokens=output_tokens, total_cost_twd=total_cost_twd, total_cost_usd=total_cost_usd))
                     else:
-                        console.print(f"[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]")
+                        console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost_twd:.2f} (圖片+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${total_cost_twd:.2f} (${total_cost_usd:.6f})[/dim]', cost_twd=cost_twd, input_tokens=input_tokens, output_tokens=output_tokens, total_cost_twd=total_cost_twd, total_cost_usd=total_cost_usd))
                 except Exception as e:
                     pass
 
             return response.text
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
+            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 分析失敗：{e}[/red]', e=e))
             raise
 
     def analyze_multiple_images(
@@ -257,7 +263,7 @@ class ImageAnalyzer:
     ) -> str:
         """分析多張圖片"""
         # 載入所有圖片
-        console.print(f"\n[magenta]📷 載入 {len(image_paths)} 張圖片：[/magenta]")
+        console.print(safe_t('common.loading', fallback='\n[#DDA0DD]📷 載入 {len(image_paths)} 張圖片：[/#DDA0DD]', image_paths_count=len(image_paths)))
 
         parts = []
         for i, path in enumerate(image_paths, 1):
@@ -266,7 +272,7 @@ class ImageAnalyzer:
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(f"   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]")
+                console.print(safe_t('error.failed', fallback='   [dim #DDA0DD]✗ {basename} - 載入失敗：{e}[/red]', basename=os.path.basename(path), e=e))
 
         if not parts:
             # 🎯 一鍵修復：顯示無圖片載入修復建議
@@ -283,10 +289,10 @@ class ImageAnalyzer:
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['compare'])
 
-        console.print(f"\n[magenta]💭 任務：{task}[/magenta]")
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 任務：{task}[/#DDA0DD]', task=task))
 
         # 分析
-        console.print(f"\n[magenta]🤖 Gemini 分析中...[/magenta]\n")
+        console.print(safe_t('common.analyzing', fallback='\n[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]\n'))
 
         try:
             # 配置
@@ -306,14 +312,14 @@ class ImageAnalyzer:
 
             console.print(Panel(
                 Markdown(response.text),
-                title="[bright_magenta]📝 Gemini 分析結果[/bright_magenta]",
-                border_style="magenta"
+                title="[#DA70D6]📝 Gemini 分析結果[/#DA70D6]",
+                border_style="#DDA0DD"
             ))
 
             return response.text
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
+            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 分析失敗：{e}[/red]', e=e))
             raise
 
     def batch_analyze(
@@ -324,10 +330,10 @@ class ImageAnalyzer:
         """批次分析多張圖片"""
         results = []
 
-        console.print(f"\n[bold magenta]📦 批次分析 {len(image_paths)} 張圖片[/bold magenta]")
+        console.print(safe_t('common.analyzing', fallback='\n[bold #DDA0DD]📦 批次分析 {len(image_paths)} 張圖片[/bold #DDA0DD]', image_paths_count=len(image_paths)))
 
         for i, path in enumerate(image_paths, 1):
-            console.print(f"\n[magenta]━━━ 圖片 {i}/{len(image_paths)} ━━━[/magenta]")
+            console.print(safe_t('common.message', fallback='\n[#DDA0DD]━━━ 圖片 {i}/{len(image_paths)} ━━━[/#DDA0DD]', i=i, image_paths_count=len(image_paths)))
 
             try:
                 result_text = self.analyze_image(path, task=task)
@@ -339,7 +345,7 @@ class ImageAnalyzer:
                     'success': True
                 })
             except Exception as e:
-                console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
+                console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 分析失敗：{e}[/red]', e=e))
                 results.append({
                     'path': path,
                     'filename': os.path.basename(path),
@@ -350,7 +356,7 @@ class ImageAnalyzer:
 
         # 統計
         success_count = sum(1 for r in results if r['success'])
-        console.print(f"\n[bright_magenta]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/green]")
+        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/green]', success_count=success_count, image_paths_count=len(image_paths)))
 
         return results
 
@@ -358,24 +364,24 @@ class ImageAnalyzer:
 def show_examples():
     """顯示使用範例"""
     console.print(Panel.fit(
-        """[bold magenta]Gemini 圖像分析工具 - 使用範例[/bold magenta]
+        """[bold #DDA0DD]Gemini 圖像分析工具 - 使用範例[/bold #DDA0DD]
 
-[magenta]1. 基本圖片描述[/yellow]
+[#DDA0DD]1. 基本圖片描述[/#DDA0DD]
    python3 gemini_image_analyzer.py describe image.jpg
 
-[magenta]2. OCR 文字提取[/yellow]
+[#DDA0DD]2. OCR 文字提取[/#DDA0DD]
    python3 gemini_image_analyzer.py ocr document.png
 
-[magenta]3. 物體偵測[/yellow]
+[#DDA0DD]3. 物體偵測[/#DDA0DD]
    python3 gemini_image_analyzer.py objects photo.jpg
 
-[magenta]4. 圖片比較[/yellow]
+[#DDA0DD]4. 圖片比較[/#DDA0DD]
    python3 gemini_image_analyzer.py compare image1.jpg image2.jpg
 
-[magenta]5. 批次分析[/yellow]
+[#DDA0DD]5. 批次分析[/#DDA0DD]
    python3 gemini_image_analyzer.py batch *.jpg
         """,
-        border_style="magenta"
+        border_style="#DDA0DD"
     ))
 
 
@@ -398,7 +404,7 @@ def main():
 
     # 檢查圖片
     if not args.images:
-        console.print("[dim magenta]錯誤：請提供圖片路徑[/red]")
+        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]錯誤：請提供圖片路徑[/red]'))
         show_examples()
         sys.exit(1)
 
@@ -423,7 +429,7 @@ def main():
             analyzer.analyze_image(args.images[0], task=args.task)
 
     except Exception as e:
-        console.print(f"[dim magenta]✗ 執行失敗：{e}[/red]")
+        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 執行失敗：{e}[/red]', e=e))
         sys.exit(1)
 
 

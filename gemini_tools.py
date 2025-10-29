@@ -28,6 +28,7 @@ from typing import Dict, Optional, Any, List
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from rich.console import Console
+from utils.i18n import safe_t
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -223,7 +224,7 @@ class AutoToolManager:
         # 惰性載入工具
         loader = self._tool_loaders.get(tool_name)
         if not loader:
-            console.print(f"[dim]⚠️ 未知工具：{tool_name}[/dim]")
+            console.print(safe_t('common.warning', fallback='[dim]⚠️ 未知工具：{tool_name}[/dim]', tool_name=tool_name))
             return False
 
         try:
@@ -241,7 +242,7 @@ class AutoToolManager:
 
             # 僅在配置允許時顯示訊息
             if self._show_load_message:
-                console.print(f"[dim]✓ {tool_name} 已載入[/dim]")
+                console.print(safe_t('common.completed', fallback='[dim]✓ {tool_name} 已載入[/dim]', tool_name=tool_name))
 
             logger.info(f"工具 {tool_name} 已成功載入")
             return True
@@ -249,13 +250,13 @@ class AutoToolManager:
         except ImportError as e:
             error_msg = f"模組不可用: {str(e)}"
             logger.error(f"工具 {tool_name} 載入失敗 - {error_msg}")
-            console.print(f"[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]")
+            console.print(safe_t('error.failed', fallback='[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]', tool_name=tool_name, error_msg=error_msg))
             return False
 
         except Exception as e:
             error_msg = str(e)
             logger.error(f"工具 {tool_name} 載入失敗 - {error_msg}")
-            console.print(f"[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]")
+            console.print(safe_t('error.failed', fallback='[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]', tool_name=tool_name, error_msg=error_msg))
             return False
 
     def get_tool(self, tool_name: str) -> Optional[Any]:
@@ -274,7 +275,7 @@ class AutoToolManager:
 
             # 首次實際使用時顯示訊息
             if record.use_count == 1:
-                console.print(f"[dim bright_magenta]✓ 使用 {tool_name}[/green][/dim]")
+                console.print(safe_t('common.completed', fallback='[dim bright_magenta]✓ 使用 {tool_name}[/green][/dim]', tool_name=tool_name))
 
             return record.instance
         return None
@@ -345,25 +346,25 @@ class AutoToolManager:
         """
         stats = self.get_stats(detailed)
 
-        console.print("\n[bold bright_magenta]🔧 工具調用統計[/bold bright_magenta]\n")
+        console.print(safe_t('common.message', fallback='\n[bold bright_magenta]🔧 工具調用統計[/bold bright_magenta]\n'))
 
         if stats['loaded_count'] == 0:
-            console.print("[dim]目前沒有已載入的工具[/dim]\n")
+            console.print(safe_t('common.loading', fallback='[dim]目前沒有已載入的工具[/dim]\n'))
             return
 
-        console.print(f"[bright_magenta]已載入工具數：[/bright_magenta]{stats['loaded_count']}")
-        console.print(f"[bright_magenta]總調用次數：[/bright_magenta]{stats['total_calls']}")
-        console.print(f"[bright_magenta]總錯誤次數：[/bright_magenta]{stats['total_errors']}")
+        console.print(safe_t('common.loading', fallback='[#DA70D6]已載入工具數：[/#DA70D6]{loaded_count}', loaded_count=stats['loaded_count']))
+        console.print(safe_t('common.message', fallback='[#DA70D6]總調用次數：[/#DA70D6]{total_calls}', total_calls=stats['total_calls']))
+        console.print(safe_t('error.failed', fallback='[#DA70D6]總錯誤次數：[/#DA70D6]{total_errors}', total_errors=stats['total_errors']))
 
         if stats['total_calls'] > 0:
             overall_success_rate = ((stats['total_calls'] - stats['total_errors']) / stats['total_calls']) * 100
-            console.print(f"[bright_magenta]整體成功率：[/bright_magenta]{overall_success_rate:.1f}%")
+            console.print(safe_t('common.message', fallback='[#DA70D6]整體成功率：[/#DA70D6]{overall_success_rate:.1f}%', overall_success_rate=overall_success_rate))
 
-        console.print("\n[bold bright_magenta]各工具詳細資訊：[/bold bright_magenta]\n")
+        console.print(safe_t('common.message', fallback='\n[bold bright_magenta]各工具詳細資訊：[/bold bright_magenta]\n'))
 
         from rich.table import Table
-        table = Table(show_header=True, header_style="bold magenta")
-        table.add_column("工具名稱", style="cyan")
+        table = Table(show_header=True, header_style="bold #DDA0DD")
+        table.add_column("工具名稱", style="#87CEEB")
         table.add_column("調用次數", justify="right")
         table.add_column("錯誤次數", justify="right")
         table.add_column("成功率", justify="right")
@@ -383,7 +384,7 @@ class AutoToolManager:
         console.print(table)
 
         if detailed:
-            console.print("\n[bold bright_magenta]詳細錯誤資訊：[/bold bright_magenta]\n")
+            console.print(safe_t('error.failed', fallback='\n[bold bright_magenta]詳細錯誤資訊：[/bold bright_magenta]\n'))
             for tool_name, tool_stats in stats['tools'].items():
                 if tool_stats.get('last_error'):
                     console.print(f"[dim]{tool_name}:[/dim] {tool_stats['last_error']}")
@@ -594,31 +595,31 @@ def cleanup_tools():
 # ==========================================
 
 if __name__ == "__main__":
-    console.print("\n[bold bright_magenta]自動化工具管理系統測試[/bold bright_magenta]\n")
+    console.print(safe_t('common.message', fallback='\n[bold bright_magenta]自動化工具管理系統測試[/bold bright_magenta]\n'))
 
     # 測試 1: 自動偵測搜尋需求
-    console.print("[bold]測試 1: 搜尋偵測[/bold]")
+    console.print(safe_t('common.message', fallback='[bold]測試 1: 搜尋偵測[/bold]'))
     user_input_1 = "請幫我搜尋一下 Python 最新版本的資訊"
     prepared = prepare_tools_for_input(user_input_1)
-    console.print(f"輸入: {user_input_1}")
-    console.print(f"準備工具: {prepared}\n")
+    console.print(safe_t('common.message', fallback='輸入: {user_input_1}', user_input_1=user_input_1))
+    console.print(safe_t('common.message', fallback='準備工具: {prepared}\n', prepared=prepared))
 
     # 測試 2: 自動偵測網頁抓取需求
-    console.print("[bold]測試 2: 網頁抓取偵測[/bold]")
+    console.print(safe_t('common.message', fallback='[bold]測試 2: 網頁抓取偵測[/bold]'))
     user_input_2 = "請抓取 https://example.com 的內容"
     prepared = prepare_tools_for_input(user_input_2)
-    console.print(f"輸入: {user_input_2}")
-    console.print(f"準備工具: {prepared}\n")
+    console.print(safe_t('common.message', fallback='輸入: {user_input_2}', user_input_2=user_input_2))
+    console.print(safe_t('common.message', fallback='準備工具: {prepared}\n', prepared=prepared))
 
     # 測試 3: 自動偵測命令執行需求
-    console.print("[bold]測試 3: 命令執行偵測[/bold]")
+    console.print(safe_t('common.message', fallback='[bold]測試 3: 命令執行偵測[/bold]'))
     user_input_3 = "請在背景執行 ping google.com"
     prepared = prepare_tools_for_input(user_input_3)
-    console.print(f"輸入: {user_input_3}")
-    console.print(f"準備工具: {prepared}\n")
+    console.print(safe_t('common.message', fallback='輸入: {user_input_3}', user_input_3=user_input_3))
+    console.print(safe_t('common.message', fallback='準備工具: {prepared}\n', prepared=prepared))
 
     # 顯示統計
-    console.print("[bold]統計資訊:[/bold]")
+    console.print(safe_t('common.message', fallback='[bold]統計資訊:[/bold]'))
     console.print(auto_tool_manager.get_stats())
 
-    console.print("\n[bright_magenta]✓ 測試完成[/green]\n")
+    console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 測試完成[/green]\n'))

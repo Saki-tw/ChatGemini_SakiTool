@@ -17,6 +17,7 @@ from pathlib import Path
 from enum import Enum
 from abc import ABC, abstractmethod
 import logging
+from utils.i18n import safe_t
 
 try:
     from rich.console import Console
@@ -329,9 +330,9 @@ class EnhancedBatchProcessor:
                         task = EnhancedBatchTask(**task_data)
                         self.tasks[task.task_id] = task
 
-                self._print(f"[magenta]📂 載入了 {len(self.tasks)} 個任務[/magenta]")
+                self._print(safe_t("batch.load.tasks", fallback="[#DDA0DD]📂 載入了 {count} 個任務[/#DDA0DD]").format(count=len(self.tasks)))
             except Exception as e:
-                self._print(f"[magenta]載入任務失敗：{e}[/yellow]")
+                self._print(safe_t("batch.load.tasks_failed", fallback="[#DDA0DD]載入任務失敗：{error}[/#DDA0DD]").format(error=e))
 
         # 載入群組
         groups_file = self.storage_dir / "groups.json"
@@ -346,9 +347,9 @@ class EnhancedBatchProcessor:
                         group = TaskGroup(**group_data)
                         self.groups[group.group_id] = group
 
-                self._print(f"[magenta]📂 載入了 {len(self.groups)} 個任務群組[/magenta]")
+                self._print(safe_t("batch.load.groups", fallback="[#DDA0DD]📂 載入了 {count} 個任務群組[/#DDA0DD]").format(count=len(self.groups)))
             except Exception as e:
-                self._print(f"[magenta]載入群組失敗：{e}[/yellow]")
+                self._print(safe_t("batch.load.groups_failed", fallback="[#DDA0DD]載入群組失敗：{error}[/#DDA0DD]").format(error=e))
 
     def _save_state(self):
         """保存任務與群組到檔案"""
@@ -369,7 +370,7 @@ class EnhancedBatchProcessor:
             with open(tasks_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            self._print(f"[dim magenta]保存任務失敗：{e}[/red]")
+            self._print(safe_t("batch.save.tasks_failed", fallback="[dim #DDA0DD]保存任務失敗：{error}[/red]").format(error=e))
 
         # 保存群組
         groups_file = self.storage_dir / "groups.json"
@@ -387,7 +388,7 @@ class EnhancedBatchProcessor:
             with open(groups_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            self._print(f"[dim magenta]保存群組失敗：{e}[/red]")
+            self._print(safe_t("batch.save.groups_failed", fallback="[dim #DDA0DD]保存群組失敗：{error}[/red]").format(error=e))
 
     def _print(self, message: str):
         """統一的輸出方法"""
@@ -410,7 +411,7 @@ class EnhancedBatchProcessor:
             handler: 處理函數，接收參數並返回結果
         """
         self.task_handlers[task_type] = handler
-        self._print(f"[bright_magenta]✓ 註冊任務處理器：{task_type}[/green]")
+        self._print(safe_t("batch.register.handler", fallback="[#DA70D6]✓ 註冊任務處理器：{type}[/green]").format(type=task_type))
 
     # ==================== 任務管理 ====================
 
@@ -476,7 +477,7 @@ class EnhancedBatchProcessor:
             self.groups[group_id].task_ids.append(task_id)
 
         self._save_state()
-        self._print(f"[bright_magenta]✓ 已添加任務：{task_id}[/green]")
+        self._print(safe_t("batch.task.added", fallback="[#DA70D6]✓ 已添加任務：{id}[/green]").format(id=task_id))
 
         return task_id
 
@@ -507,7 +508,7 @@ class EnhancedBatchProcessor:
             )
             task_ids.append(task_id)
 
-        self._print(f"[bright_magenta]✓ 已批次添加 {len(task_ids)} 個任務[/green]")
+        self._print(safe_t("batch.task.batch_added", fallback="[#DA70D6]✓ 已批次添加 {count} 個任務[/green]").format(count=len(task_ids)))
         return task_ids
 
     # ==================== 任務分組管理 ====================
@@ -550,7 +551,7 @@ class EnhancedBatchProcessor:
         self.groups[group_id] = group
         self._save_state()
 
-        self._print(f"[bright_magenta]✓ 已建立任務群組：{group_id}[/green]")
+        self._print(safe_t("batch.group.created", fallback="[#DA70D6]✓ 已建立任務群組：{id}[/green]").format(id=group_id))
         return group_id
 
     def add_task_to_group(self, task_id: str, group_id: str):
@@ -565,7 +566,7 @@ class EnhancedBatchProcessor:
             self.groups[group_id].task_ids.append(task_id)
 
         self._save_state()
-        self._print(f"[bright_magenta]✓ 已將任務 {task_id} 添加到群組 {group_id}[/green]")
+        self._print(safe_t("batch.group.task_added", fallback="[#DA70D6]✓ 已將任務 {task} 添加到群組 {group}[/green]").format(task=task_id, group=group_id))
 
     def get_group_tasks(self, group_id: str) -> List[EnhancedBatchTask]:
         """獲取群組內的所有任務"""
@@ -591,7 +592,7 @@ class EnhancedBatchProcessor:
 
         self.groups[group_id].status = TaskStatus.PAUSED
         self._save_state()
-        self._print(f"[magenta]⏸️  已暫停群組：{group_id}[/yellow]")
+        self._print(safe_t("batch.group.paused", fallback="[#DDA0DD]⏸️  已暫停群組：{id}[/#DDA0DD]").format(id=group_id))
 
     def resume_group(self, group_id: str):
         """恢復群組內的所有任務"""
@@ -610,7 +611,7 @@ class EnhancedBatchProcessor:
 
         self.groups[group_id].status = TaskStatus.PENDING
         self._save_state()
-        self._print(f"[bright_magenta]▶️  已恢復群組：{group_id}[/green]")
+        self._print(safe_t("batch.group.resumed", fallback="[#DA70D6]▶️  已恢復群組：{id}[/green]").format(id=group_id))
 
     def cancel_group(self, group_id: str):
         """取消群組內的所有任務"""
@@ -624,7 +625,7 @@ class EnhancedBatchProcessor:
 
         self.groups[group_id].status = TaskStatus.CANCELLED
         self._save_state()
-        self._print(f"[dim magenta]🚫 已取消群組 {group_id}（{cancelled_count} 個任務）[/red]")
+        self._print(safe_t("batch.group.cancelled", fallback="[dim #DDA0DD]🚫 已取消群組 {id}（{count} 個任務）[/red]").format(id=group_id, count=cancelled_count))
 
     # ==================== 依賴管理 ====================
 
@@ -651,7 +652,7 @@ class EnhancedBatchProcessor:
             if dependent and dependent.status == TaskStatus.WAITING_DEPENDENCIES:
                 if self._check_dependencies_satisfied(dependent):
                     dependent.status = TaskStatus.PENDING
-                    self._print(f"[magenta]🔓 任務 {dependent_id} 的依賴已滿足，設為待處理[/magenta]")
+                    self._print(safe_t("batch.task.dependency_satisfied", fallback="[#DDA0DD]🔓 任務 {id} 的依賴已滿足，設為待處理[/#DDA0DD]").format(id=dependent_id))
 
     def get_dependency_graph(self) -> Dict[str, List[str]]:
         """獲取任務依賴圖"""
@@ -703,7 +704,7 @@ class EnhancedBatchProcessor:
                 raise ValueError(f"未找到任務處理器：{task.task_type}")
 
             # 執行任務
-            self._print(f"\n[magenta]▶️  開始執行任務：{task.task_id}[/magenta]")
+            self._print(safe_t("batch.task.starting", fallback="\n[#DDA0DD]▶️  開始執行任務：{id}[/#DDA0DD]").format(id=task.task_id))
             result = handler(**task.parameters)
 
             # 標記完成
@@ -711,20 +712,20 @@ class EnhancedBatchProcessor:
             task.completed_at = datetime.now().isoformat()
             task.result = result if isinstance(result, dict) else {'output': str(result)}
 
-            self._print(f"[bright_magenta]✅ 任務完成：{task.task_id}[/green]")
+            self._print(safe_t("batch.task.completed", fallback="[#DA70D6]✅ 任務完成：{id}[/green]").format(id=task.task_id))
 
             # 更新依賴此任務的其他任務
             self._update_dependent_tasks(task.task_id)
 
         except Exception as e:
-            self._print(f"[dim magenta]❌ 任務失敗：{task.task_id} - {e}[/red]")
+            self._print(safe_t("batch.task.failed", fallback="[dim #DDA0DD]❌ 任務失敗：{id} - {error}[/red]").format(id=task.task_id, error=e))
 
             # 使用重試策略判斷是否重試
             if task.retry_strategy.should_retry(task.retry_count + 1, task.max_retries, e):
                 task.retry_count += 1
                 delay = task.retry_strategy.get_delay(task.retry_count)
 
-                self._print(f"[magenta]🔄 將在 {delay:.1f} 秒後重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/yellow]")
+                self._print(safe_t("batch.task.retrying", fallback="[#DDA0DD]🔄 將在 {delay:.1f} 秒後重試任務 ({current}/{max})：{id}[/#DDA0DD]").format(delay=delay, current=task.retry_count, max=task.max_retries, id=task.task_id))
 
                 # 延遲後設回待處理
                 time.sleep(delay)
@@ -747,7 +748,7 @@ class EnhancedBatchProcessor:
         Args:
             blocking: 是否阻塞直到所有任務完成
         """
-        self._print(f"\n[bold magenta]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold magenta]\n")
+        self._print(safe_t("batch.process.starting", fallback="\n[bold #DDA0DD]🚀 開始批次處理（最大並行：{max}）[/bold #DDA0DD]\n").format(max=self.max_concurrent))
 
         if blocking:
             self._run_blocking()
@@ -764,7 +765,7 @@ class EnhancedBatchProcessor:
         total_tasks = len(pending_tasks)
 
         if total_tasks == 0:
-            self._print("[magenta]沒有待處理的任務[/yellow]")
+            self._print(safe_t("batch.process.no_pending", fallback="[#DDA0DD]沒有待處理的任務[/#DDA0DD]"))
             return
 
         completed = 0
@@ -786,7 +787,7 @@ class EnhancedBatchProcessor:
         else:
             completed = self._run_task_loop(None, None, total_tasks)
 
-        self._print(f"\n[bold green]✅ 批次處理完成！（完成 {completed}/{total_tasks} 個任務）[/bold green]")
+        self._print(safe_t("batch.process.completed", fallback="\n[bold green]✅ 批次處理完成！（完成 {completed}/{total} 個任務）[/bold green]").format(completed=completed, total=total_tasks))
         self.display_summary()
 
     def _run_task_loop(self, progress, progress_task, total_tasks) -> int:
@@ -835,34 +836,34 @@ class EnhancedBatchProcessor:
     def pause(self):
         """暫停批次處理（不影響正在執行的任務）"""
         self._paused = True
-        self._print("[magenta]⏸️  批次處理已暫停[/yellow]")
+        self._print(safe_t("batch.process.paused", fallback="[#DDA0DD]⏸️  批次處理已暫停[/#DDA0DD]"))
 
     def resume(self):
         """恢復批次處理"""
         self._paused = False
-        self._print("[bright_magenta]▶️  批次處理已恢復[/green]")
+        self._print(safe_t("batch.process.resumed", fallback="[#DA70D6]▶️  批次處理已恢復[/green]"))
 
     def stop(self):
         """停止批次處理"""
         self._stop_requested = True
-        self._print("[dim magenta]⏹️  批次處理已停止[/red]")
+        self._print(safe_t("batch.process.stopped", fallback="[dim #DDA0DD]⏹️  批次處理已停止[/red]"))
 
     def cancel_task(self, task_id: str) -> bool:
         """取消任務"""
         task = self.tasks.get(task_id)
         if not task:
-            self._print(f"[dim magenta]未找到任務：{task_id}[/red]")
+            self._print(safe_t("batch.task.not_found", fallback="[dim #DDA0DD]未找到任務：{id}[/red]").format(id=task_id))
             return False
 
         if task.status == TaskStatus.RUNNING:
-            self._print(f"[magenta]無法取消正在執行的任務：{task_id}[/yellow]")
+            self._print(safe_t("batch.task.cannot_cancel", fallback="[#DDA0DD]無法取消正在執行的任務：{id}[/#DDA0DD]").format(id=task_id))
             return False
 
         task.status = TaskStatus.CANCELLED
         task.completed_at = datetime.now().isoformat()
         self._save_state()
 
-        self._print(f"[bright_magenta]✓ 已取消任務：{task_id}[/green]")
+        self._print(safe_t("batch.task.cancelled", fallback="[#DA70D6]✓ 已取消任務：{id}[/green]").format(id=task_id))
         return True
 
     # ==================== 查詢與顯示 ====================
@@ -901,16 +902,16 @@ class EnhancedBatchProcessor:
         tasks = self.list_tasks(status=status, task_type=task_type, group_id=group_id)
 
         if not tasks:
-            self._print("[magenta]沒有符合條件的任務[/yellow]")
+            self._print(safe_t("batch.task.no_matches", fallback="[#DDA0DD]沒有符合條件的任務[/#DDA0DD]"))
             return
 
         if RICH_AVAILABLE and self.console:
             table = Table(title=f"批次任務列表（共 {len(tasks)} 個）")
-            table.add_column("任務 ID", style="bright_magenta", no_wrap=True)
+            table.add_column("任務 ID", style="#DA70D6", no_wrap=True)
             table.add_column("類型", style="green")
-            table.add_column("狀態", style="yellow")
-            table.add_column("優先級", style="magenta")
-            table.add_column("群組", style="magenta")
+            table.add_column("狀態", style="#DDA0DD")
+            table.add_column("優先級", style="#DDA0DD")
+            table.add_column("群組", style="#DDA0DD")
             table.add_column("依賴", style="dim")
             table.add_column("重試", style="red")
 
@@ -938,32 +939,32 @@ class EnhancedBatchProcessor:
             self.console.print(table)
         else:
             # 純文字輸出
-            print(f"\n批次任務列表（共 {len(tasks)} 個）")
+            print(safe_t("batch.list.tasks_header", fallback="\n批次任務列表（共 {count} 個）").format(count=len(tasks)))
             print("-" * 80)
             for task in tasks:
                 print(f"ID: {task.task_id}")
-                print(f"  類型: {task.task_type}")
-                print(f"  狀態: {task.status.value}")
-                print(f"  優先級: {task.priority.name}")
-                print(f"  群組: {task.group_id or '-'}")
-                print(f"  依賴數: {len(task.dependencies)}")
-                print(f"  重試: {task.retry_count}/{task.max_retries}")
+                print(safe_t("batch.list.type", fallback="  類型: {type}").format(type=task.task_type))
+                print(safe_t("batch.list.status", fallback="  狀態: {status}").format(status=task.status.value))
+                print(safe_t("batch.list.priority", fallback="  優先級: {priority}").format(priority=task.priority.name))
+                print(safe_t("batch.list.group", fallback="  群組: {group}").format(group=task.group_id or '-'))
+                print(safe_t("batch.list.dependencies", fallback="  依賴數: {count}").format(count=len(task.dependencies)))
+                print(safe_t("batch.list.retry", fallback="  重試: {current}/{max}").format(current=task.retry_count, max=task.max_retries))
                 print("-" * 80)
 
     def display_groups(self):
         """顯示任務群組列表"""
         if not self.groups:
-            self._print("[magenta]沒有任務群組[/yellow]")
+            self._print(safe_t("batch.group.no_groups", fallback="[#DDA0DD]沒有任務群組[/#DDA0DD]"))
             return
 
         if RICH_AVAILABLE and self.console:
             table = Table(title=f"任務群組列表（共 {len(self.groups)} 個）")
-            table.add_column("群組 ID", style="bright_magenta")
+            table.add_column("群組 ID", style="#DA70D6")
             table.add_column("名稱", style="green")
             table.add_column("描述", style="dim")
-            table.add_column("任務數", style="yellow")
-            table.add_column("狀態", style="magenta")
-            table.add_column("優先級", style="magenta")
+            table.add_column("任務數", style="#DDA0DD")
+            table.add_column("狀態", style="#DDA0DD")
+            table.add_column("優先級", style="#DDA0DD")
 
             for group in self.groups.values():
                 table.add_row(
@@ -978,13 +979,13 @@ class EnhancedBatchProcessor:
             self.console.print(table)
         else:
             # 純文字輸出
-            print(f"\n任務群組列表（共 {len(self.groups)} 個）")
+            print(safe_t("batch.list.groups_header", fallback="\n任務群組列表（共 {count} 個）").format(count=len(self.groups)))
             print("-" * 80)
             for group in self.groups.values():
                 print(f"ID: {group.group_id}")
-                print(f"  名稱: {group.name}")
-                print(f"  任務數: {len(group.task_ids)}")
-                print(f"  狀態: {group.status.value}")
+                print(safe_t("batch.list.group_name", fallback="  名稱: {name}").format(name=group.name))
+                print(safe_t("batch.list.group_tasks", fallback="  任務數: {count}").format(count=len(group.task_ids)))
+                print(safe_t("batch.list.group_status", fallback="  狀態: {status}").format(status=group.status.value))
                 print("-" * 80)
 
     def display_summary(self):
@@ -995,7 +996,7 @@ class EnhancedBatchProcessor:
             stats[task.status] = stats.get(task.status, 0) + 1
 
         summary_text = f"""
-[bold magenta]批次任務統計[/bold magenta]
+[bold #DDA0DD]批次任務統計[/bold #DDA0DD]
 
   總任務數：{len(self.tasks)}
   ✅ 已完成：{stats[TaskStatus.COMPLETED]}
@@ -1010,7 +1011,7 @@ class EnhancedBatchProcessor:
         """
 
         if RICH_AVAILABLE and self.console:
-            self.console.print(Panel(summary_text, border_style="bright_magenta"))
+            self.console.print(Panel(summary_text, border_style="#DA70D6"))
         else:
             print(summary_text)
 
@@ -1025,7 +1026,7 @@ class EnhancedBatchProcessor:
             del self.tasks[task_id]
 
         self._save_state()
-        self._print(f"[bright_magenta]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]")
+        self._print(safe_t("batch.cleanup.completed", fallback="[#DA70D6]✓ 已清理 {count} 個已完成的任務[/green]").format(count=len(completed_ids)))
 
 
 # ==================== 工具函數 ====================

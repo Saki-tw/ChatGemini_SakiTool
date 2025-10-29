@@ -69,7 +69,7 @@ class TestGenerator:
         Returns:
             Dict: 分析結果
         """
-        console.print(f"\n[magenta]🔍 分析檔案：{file_path}[/magenta]")
+        console.print(f"\n[#DDA0DD]🔍 分析檔案：{file_path}[/#DDA0DD]")
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -101,7 +101,7 @@ class TestGenerator:
                 elif isinstance(node, (ast.Import, ast.ImportFrom)):
                     imports.append(ast.unparse(node))
 
-            console.print(f"[bright_magenta]✓ 分析完成[/green]")
+            console.print(f"[#DA70D6]✓ 分析完成[/green]")
             console.print(f"  函數：{len(functions)} 個")
             console.print(f"  類別：{len(classes)} 個")
 
@@ -113,7 +113,7 @@ class TestGenerator:
             }
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 分析失敗：{e}[/red]")
+            console.print(f"[dim #DDA0DD]✗ 分析失敗：{e}[/red]")
             return None
 
     def _extract_function_info(self, node: ast.FunctionDef) -> FunctionInfo:
@@ -173,7 +173,7 @@ class TestGenerator:
         Returns:
             str: 測試程式碼
         """
-        console.print(f"\n[magenta]📝 生成測試程式碼...[/magenta]")
+        console.print(f"\n[#DDA0DD]📝 生成測試程式碼...[/#DDA0DD]")
 
         if self.framework == "pytest":
             test_code = self._generate_pytest(analysis)
@@ -185,7 +185,7 @@ class TestGenerator:
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(test_code)
-            console.print(f"[bright_magenta]✓ 測試檔案已儲存：{output_path}[/green]")
+            console.print(f"[#DA70D6]✓ 測試檔案已儲存：{output_path}[/green]")
 
         return test_code
 
@@ -412,7 +412,7 @@ def main():
     """測試生成器命令列工具"""
     import sys
 
-    console.print("\n[bold magenta]CodeGemini Test Generator[/bold magenta]\n")
+    console.print("\n[bold #DDA0DD]CodeGemini Test Generator[/bold #DDA0DD]\n")
 
     if len(sys.argv) < 2:
         console.print("用法：")
@@ -442,7 +442,7 @@ def main():
         test_code = generator.generate_test(analysis, output_path)
 
         if not output_path:
-            console.print(f"\n[magenta]生成的測試程式碼：[/magenta]\n")
+            console.print(f"\n[#DDA0DD]生成的測試程式碼：[/#DDA0DD]\n")
             console.print(test_code)
 
 

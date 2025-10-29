@@ -36,6 +36,7 @@ import uuid
 import re
 
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.table import Table
 from rich.panel import Panel
 from rich.prompt import Confirm, Prompt
@@ -429,8 +430,8 @@ class CheckpointManager:
         """
         self.project_root = Path(project_root).resolve()
         self.checkpoints_dir = checkpoints_dir or (self.project_root / ".checkpoints")
-        self.snapshots_dir = self.checkpoints_dir / "snapshots"
-        self.db_path = self.checkpoints_dir / "metadata.db"
+        snapshots_dir=self.checkpoints_dir / "snapshots"
+        db_path=self.checkpoints_dir / "metadata.db"
 
         # 建立目錄結構
         self.checkpoints_dir.mkdir(parents=True, exist_ok=True)
@@ -439,7 +440,7 @@ class CheckpointManager:
         # 初始化資料庫
         self._init_database()
 
-        console.print(f"[dim]✓ CheckpointManager 初始化完成: {self.checkpoints_dir}[/dim]")
+        console.print(safe_t('common.completed', fallback='[dim]✓ CheckpointManager 初始化完成: {checkpoints_dir}[/dim]', checkpoints_dir=self.checkpoints_dir))
 
     def _init_database(self):
         """初始化 SQLite 資料庫"""
@@ -546,8 +547,8 @@ class CheckpointManager:
         # 儲存至資料庫
         self._save_checkpoint_to_db(checkpoint)
 
-        console.print(f"[green]✓[/green] 檢查點已建立: [cyan]{checkpoint_id[:8]}[/cyan]")
-        console.print(f"  └─ 檔案變更: {len(file_changes)} 個")
+        console.print(safe_t('common.completed', fallback='[green]✓[/green] 檢查點已建立: [#87CEEB]{checkpoint_id[:8]}[/#87CEEB]', checkpoint_id_short=checkpoint_id[:8]))
+        console.print(safe_t('common.message', fallback='  └─ 檔案變更: {len(file_changes)} 個', file_changes_count=len(file_changes)))
         console.print(f"  └─ 壓縮率: {compressed_size / total_size * 100:.1f}%" if total_size > 0 else "  └─ 空檢查點")
 
         return checkpoint
@@ -599,7 +600,7 @@ class CheckpointManager:
             conn.commit()
         except Exception as e:
             conn.rollback()
-            console.print(f"[red]✗[/red] 儲存檢查點失敗: {e}")
+            console.print(safe_t('error.failed', fallback='[red]✗[/red] 儲存檢查點失敗: {e}', e=e))
             raise
         finally:
             conn.close()
@@ -709,7 +710,7 @@ class CheckpointManager:
         checkpoint = self.get_checkpoint(checkpoint_id)
 
         if not checkpoint:
-            console.print(f"[red]✗[/red] 找不到檢查點: {checkpoint_id}")
+            console.print(safe_t('common.message', fallback='[red]✗[/red] 找不到檢查點: {checkpoint_id}', checkpoint_id=checkpoint_id))
             return False
 
         # 顯示檢查點資訊
@@ -718,11 +719,11 @@ class CheckpointManager:
         # 確認
         if confirm:
             if not Confirm.ask(f"\n確定要回溯至此檢查點嗎？"):
-                console.print("[yellow]已取消回溯[/yellow]")
+                console.print(safe_t('common.message', fallback='[#DDA0DD]已取消回溯[/#DDA0DD]'))
                 return False
 
         # 執行回溯
-        console.print(f"\n[cyan]開始回溯至檢查點 {checkpoint.id[:8]}...[/cyan]")
+        console.print(safe_t('common.message', fallback='\n[#87CEEB]開始回溯至檢查點 {checkpoint_id_short}...[/#87CEEB]', checkpoint_id_short=checkpoint.id[:8]))
 
         success_count = 0
         fail_count = 0
@@ -736,7 +737,7 @@ class CheckpointManager:
                 snapshot_path = self.snapshots_dir / snapshot_filename
 
                 if not snapshot_path.exists():
-                    console.print(f"  [yellow]⚠[/yellow] 快照檔案不存在: {file_change.file_path}")
+                    console.print(safe_t('common.message', fallback='  [#DDA0DD]⚠[/#DDA0DD] 快照檔案不存在: {file_path}', file_path=file_change.file_path))
                     fail_count += 1
                     continue
 
@@ -750,7 +751,7 @@ class CheckpointManager:
                     # 刪除新建的檔案
                     if file_path.exists():
                         file_path.unlink()
-                        console.print(f"  [green]✓[/green] 刪除: {file_change.file_path}")
+                        console.print(safe_t('common.completed', fallback='  [green]✓[/green] 刪除: {file_path}', file_path=file_change.file_path))
                     success_count += 1
 
                 elif file_change.change_type == FileChangeType.DELETED:
@@ -758,7 +759,7 @@ class CheckpointManager:
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(snapshot_data['content_before'] or '')
-                    console.print(f"  [green]✓[/green] 恢復: {file_change.file_path}")
+                    console.print(safe_t('common.completed', fallback='  [green]✓[/green] 恢復: {file_path}', file_path=file_change.file_path))
                     success_count += 1
 
                 elif file_change.change_type == FileChangeType.MODIFIED:
@@ -766,42 +767,42 @@ class CheckpointManager:
                     file_path.parent.mkdir(parents=True, exist_ok=True)
                     with open(file_path, 'w', encoding='utf-8') as f:
                         f.write(snapshot_data['content_before'] or '')
-                    console.print(f"  [green]✓[/green] 恢復: {file_change.file_path}")
+                    console.print(safe_t('common.completed', fallback='  [green]✓[/green] 恢復: {file_path}', file_path=file_change.file_path))
                     success_count += 1
 
             except Exception as e:
-                console.print(f"  [red]✗[/red] 失敗: {file_change.file_path} - {e}")
+                console.print(safe_t('error.failed', fallback='  [red]✗[/red] 失敗: {file_path} - {e}', file_path=file_change.file_path, e=e))
                 fail_count += 1
 
         # 顯示結果
-        console.print(f"\n[green]✓[/green] 回溯完成:")
-        console.print(f"  └─ 成功: {success_count} 個檔案")
+        console.print(safe_t('common.completed', fallback='\n[green]✓[/green] 回溯完成:'))
+        console.print(safe_t('common.message', fallback='  └─ 成功: {success_count} 個檔案', success_count=success_count))
         if fail_count > 0:
-            console.print(f"  └─ 失敗: {fail_count} 個檔案")
+            console.print(safe_t('error.failed', fallback='  └─ 失敗: {fail_count} 個檔案', fail_count=fail_count))
 
         return fail_count == 0
 
     def _display_checkpoint_detail(self, checkpoint: Checkpoint):
         """顯示檢查點詳細資訊"""
         panel = Panel(
-            f"[bold cyan]{checkpoint.description}[/bold cyan]\n\n"
-            f"ID: {checkpoint.id[:8]}...\n"
+            f"[bold #87CEEB]{checkpoint.description}[/bold #87CEEB]\n\n"
+            f"ID: {checkpoint_id_short}...\n"
             f"時間: {checkpoint.timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n"
             f"類型: {checkpoint.checkpoint_type.value}\n"
             f"檔案變更: {len(checkpoint.file_changes)} 個\n"
             f"大小: {checkpoint.total_size / 1024:.2f} KB → {checkpoint.compressed_size / 1024:.2f} KB "
             f"(壓縮率 {checkpoint.compressed_size / checkpoint.total_size * 100:.1f}%)",
             title="[bold]檢查點資訊[/bold]",
-            border_style="cyan"
+            border_style="#87CEEB"
         )
         console.print(panel)
 
         # 顯示檔案清單
         if checkpoint.file_changes:
-            table = Table(title="檔案變更清單", show_header=True, header_style="bold magenta")
-            table.add_column("變更類型", style="cyan", width=12)
+            table = Table(title="檔案變更清單", show_header=True, header_style="bold #DDA0DD")
+            table.add_column("變更類型", style="#87CEEB", width=12)
             table.add_column("檔案路徑", style="white")
-            table.add_column("大小變化", justify="right", style="yellow")
+            table.add_column("大小變化", justify="right", style="#DDA0DD")
 
             for fc in checkpoint.file_changes:
                 change_emoji = {
@@ -822,13 +823,13 @@ class CheckpointManager:
         checkpoints = self.list_checkpoints(limit=limit)
 
         if not checkpoints:
-            console.print("[yellow]沒有檢查點[/yellow]")
+            console.print(safe_t('common.message', fallback='[#DDA0DD]沒有檢查點[/#DDA0DD]'))
             return
 
-        table = Table(title=f"檢查點清單（最近 {len(checkpoints)} 個）", show_header=True, header_style="bold magenta")
-        table.add_column("ID", style="cyan", width=10)
+        table = Table(title=f"檢查點清單（最近 {len(checkpoints)} 個）", show_header=True, header_style="bold #DDA0DD")
+        table.add_column("ID", style="#87CEEB", width=10)
         table.add_column("時間", style="white", width=20)
-        table.add_column("類型", style="yellow", width=10)
+        table.add_column("類型", style="#DDA0DD", width=10)
         table.add_column("描述", style="white")
         table.add_column("檔案數", justify="right", style="green", width=8)
 
@@ -855,7 +856,7 @@ class CheckpointManager:
         checkpoint = self.get_checkpoint(checkpoint_id)
 
         if not checkpoint:
-            console.print(f"[red]✗[/red] 找不到檢查點: {checkpoint_id}")
+            console.print(safe_t('common.message', fallback='[red]✗[/red] 找不到檢查點: {checkpoint_id}', checkpoint_id=checkpoint_id))
             return False
 
         conn = sqlite3.connect(self.db_path)
@@ -874,12 +875,12 @@ class CheckpointManager:
             cursor.execute("DELETE FROM checkpoints WHERE id = ?", (checkpoint.id,))
             conn.commit()
 
-            console.print(f"[green]✓[/green] 已刪除檢查點: {checkpoint.id[:8]}")
+            console.print(safe_t('common.completed', fallback='[green]✓[/green] 已刪除檢查點: {checkpoint_id_short}', checkpoint_id_short=checkpoint.id[:8]))
             return True
 
         except Exception as e:
             conn.rollback()
-            console.print(f"[red]✗[/red] 刪除失敗: {e}")
+            console.print(safe_t('error.failed', fallback='[red]✗[/red] 刪除失敗: {e}', e=e))
             return False
         finally:
             conn.close()
@@ -895,24 +896,24 @@ class CheckpointManager:
         checkpoints = self.list_checkpoints(limit=1000)
 
         if len(checkpoints) <= keep_count:
-            console.print(f"[green]無需清理（共 {len(checkpoints)} 個檢查點，保留 {keep_count} 個）[/green]")
+            console.print(safe_t('common.message', fallback='[green]無需清理（共 {len(checkpoints)} 個檢查點，保留 {keep_count} 個）[/green]', checkpoints_count=len(checkpoints), keep_count=keep_count))
             return
 
         to_delete = checkpoints[keep_count:]
 
-        console.print(f"\n[yellow]將刪除 {len(to_delete)} 個舊檢查點:[/yellow]")
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]將刪除 {len(to_delete)} 個舊檢查點:[/#DDA0DD]', to_delete_count=len(to_delete)))
         for cp in to_delete[:10]:  # 顯示前 10 個
             console.print(f"  - {cp.id[:8]} | {cp.timestamp.strftime('%Y-%m-%d %H:%M:%S')} | {cp.description[:40]}")
 
         if len(to_delete) > 10:
-            console.print(f"  ... 及其他 {len(to_delete) - 10} 個")
+            console.print(safe_t('common.message', fallback='  ... 及其他 {remaining_count} 個', remaining_count=len(to_delete) - 10))
 
         if dry_run:
-            console.print("\n[cyan]（試運行模式，未實際刪除）[/cyan]")
+            console.print(safe_t('common.message', fallback='\n[#87CEEB]（試運行模式，未實際刪除）[/#87CEEB]'))
             return
 
         if not Confirm.ask("\n確定要刪除這些檢查點嗎？"):
-            console.print("[yellow]已取消清理[/yellow]")
+            console.print(safe_t('common.message', fallback='[#DDA0DD]已取消清理[/#DDA0DD]'))
             return
 
         deleted_count = 0
@@ -920,7 +921,7 @@ class CheckpointManager:
             if self.delete_checkpoint(cp.id):
                 deleted_count += 1
 
-        console.print(f"\n[green]✓[/green] 已清理 {deleted_count} 個舊檢查點")
+        console.print(safe_t('common.completed', fallback='\n[green]✓[/green] 已清理 {deleted_count} 個舊檢查點', deleted_count=deleted_count))
 
 
 # ============================================================================
@@ -1002,19 +1003,19 @@ if __name__ == "__main__":
 
     elif args.command == 'create':
         if not args.files:
-            console.print("[red]需要指定 --files[/red]")
+            console.print(safe_t('common.message', fallback='[red]需要指定 --files[/red]'))
         else:
             auto_checkpoint(args.files, args.description or "")
 
     elif args.command == 'rewind':
         if not args.id:
-            console.print("[red]需要指定 --id[/red]")
+            console.print(safe_t('common.message', fallback='[red]需要指定 --id[/red]'))
         else:
             manager.rewind_to_checkpoint(args.id)
 
     elif args.command == 'delete':
         if not args.id:
-            console.print("[red]需要指定 --id[/red]")
+            console.print(safe_t('common.message', fallback='[red]需要指定 --id[/red]'))
         else:
             manager.delete_checkpoint(args.id)
 
@@ -1023,7 +1024,7 @@ if __name__ == "__main__":
 
     elif args.command == 'test':
         # 測試模式
-        console.print("[cyan]測試模式 - 建立範例檢查點[/cyan]\n")
+        console.print(safe_t('common.message', fallback='[#87CEEB]測試模式 - 建立範例檢查點[/#87CEEB]\n'))
 
         # 建立測試檔案
         test_file = Path("test_checkpoint.txt")
@@ -1037,4 +1038,4 @@ if __name__ == "__main__":
 
         # 清理
         test_file.unlink()
-        console.print("\n[green]✓[/green] 測試完成")
+        console.print(safe_t('common.completed', fallback='\n[green]✓[/green] 測試完成'))

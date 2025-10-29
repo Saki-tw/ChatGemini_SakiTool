@@ -33,6 +33,7 @@ examples:
 {% if condition %}條件內容{% endif %}
 """
 import os
+import sys
 import re
 import time
 from pathlib import Path
@@ -44,6 +45,13 @@ from rich.table import Table
 
 from .registry import CommandTemplate, CommandType, CommandRegistry
 
+# 確保可以 import utils
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from utils.i18n import safe_t
+
 console = Console()
 
 # Lazy import for yaml (only needed when actually loading Markdown commands)
@@ -53,8 +61,8 @@ def _import_yaml():
         import yaml
         return yaml
     except ImportError:
-        console.print("[dim magenta]錯誤：缺少 PyYAML 依賴[/dim magenta]")
-        console.print("[magenta]請執行：pip install pyyaml[/magenta]")
+        console.print(safe_t("commands.error.missing_yaml", fallback="[dim #DDA0DD]錯誤：缺少 PyYAML 依賴[/dim #DDA0DD]"))
+        console.print(safe_t("commands.error.install_yaml", fallback="[#DDA0DD]請執行：pip install pyyaml[/#DDA0DD]"))
         raise ImportError("PyYAML is required for Markdown command loading")
 
 
@@ -122,14 +130,14 @@ class MarkdownCommandLoader:
             int: 成功載入的命令數量
         """
         if not silent:
-            console.print(f"\n[magenta]🔍 掃描命令目錄：{self.commands_dir}[/magenta]")
+            console.print(safe_t("commands.scan.starting", fallback="\n[#DDA0DD]🔍 掃描命令目錄：{dir}[/#DDA0DD]").format(dir=self.commands_dir))
 
         # 查找所有 .md 檔案
         md_files = list(Path(self.commands_dir).glob("*.md"))
 
         if not md_files:
             if not silent:
-                console.print("[magenta]未找到任何 Markdown 命令檔案[/yellow]")
+                console.print(safe_t("commands.scan.no_files", fallback="[#DDA0DD]未找到任何 Markdown 命令檔案[/#DDA0DD]"))
             return 0
 
         loaded_count = 0
@@ -183,7 +191,7 @@ class MarkdownCommandLoader:
 
                         if not silent:
                             console.print(
-                                f"[bright_magenta]  ✓ 載入：{file_name} → /{command.name}[/bright_magenta]"
+                                f"[#DA70D6]  ✓ 載入：{file_name} → /{command.name}[/#DA70D6]"
                             )
                     else:
                         error_count += 1
@@ -193,7 +201,7 @@ class MarkdownCommandLoader:
             except Exception as e:
                 error_count += 1
                 if not silent:
-                    console.print(f"[dim magenta]  ✗ 錯誤：{file_name} - {e}[/dim magenta]")
+                    console.print(safe_t("commands.load.error", fallback="[dim #DDA0DD]  ✗ 錯誤：{file} - {error}[/dim #DDA0DD]").format(file=file_name, error=e))
 
                 # 記錄錯誤
                 self.loaded_files[file_path] = CommandFile(
@@ -207,9 +215,9 @@ class MarkdownCommandLoader:
 
         if not silent:
             console.print(
-                f"\n[bright_magenta]✓ 載入完成：{loaded_count} 個成功"
+                f"\n[#DA70D6]✓ 載入完成：{loaded_count} 個成功"
                 f"{f'、{skipped_count} 個跳過' if skipped_count > 0 else ''}"
-                f"{f'、{error_count} 個錯誤' if error_count > 0 else ''}[/bright_magenta]"
+                f"{f'、{error_count} 個錯誤' if error_count > 0 else ''}[/#DA70D6]"
             )
 
         return loaded_count
@@ -335,7 +343,7 @@ class MarkdownCommandLoader:
         if existing_command:
             if existing_command.command_type == CommandType.BUILTIN:
                 console.print(
-                    f"[dim magenta]✗ 衝突：'{command_name}' 與內建命令衝突，已跳過[/dim magenta]"
+                    f"[dim #DDA0DD]✗ 衝突：'{command_name}' 與內建命令衝突，已跳過[/dim #DDA0DD]"
                 )
                 return True
 
@@ -345,11 +353,11 @@ class MarkdownCommandLoader:
 
             if existing_file != file_path:
                 console.print(
-                    f"[magenta]⚠ 警告：'{command_name}' 重複定義於多個檔案：[/yellow]"
+                    f"[#DDA0DD]⚠ 警告：'{command_name}' 重複定義於多個檔案：[/#DDA0DD]"
                 )
                 console.print(f"  - {existing_file}")
                 console.print(f"  - {file_path}")
-                console.print(f"  將使用第一個定義")
+                console.print(safe_t("commands.conflict.use_first", fallback="  將使用第一個定義"))
                 return True
 
         return False
@@ -371,9 +379,9 @@ class MarkdownCommandLoader:
             建議使用 watchdog 庫進行檔案監視。
         """
         console.print(
-            f"\n[magenta]👀 開始監視命令目錄（每 {check_interval} 秒檢查一次）[/magenta]"
+            f"\n[#DDA0DD]👀 開始監視命令目錄（每 {check_interval} 秒檢查一次）[/#DDA0DD]"
         )
-        console.print("[dim]按 Ctrl+C 停止監視[/dim]\n")
+        console.print(safe_t("commands.watch.hint", fallback="[dim]按 Ctrl+C 停止監視[/dim]\n"))
 
         try:
             while True:
@@ -384,14 +392,14 @@ class MarkdownCommandLoader:
 
                 if loaded_count > 0:
                     console.print(
-                        f"[bright_magenta]🔄 重新載入：{loaded_count} 個命令已更新[/bright_magenta]"
+                        f"[#DA70D6]🔄 重新載入：{loaded_count} 個命令已更新[/#DA70D6]"
                     )
 
                     if callback:
                         callback(loaded_count)
 
         except KeyboardInterrupt:
-            console.print("\n[magenta]已停止監視[/yellow]")
+            console.print(safe_t("commands.watch.stopped", fallback="\n[#DDA0DD]已停止監視[/#DDA0DD]"))
 
     def reload_command(self, command_name: str) -> bool:
         """
@@ -404,7 +412,7 @@ class MarkdownCommandLoader:
             bool: 是否成功重新載入
         """
         if command_name not in self.command_file_map:
-            console.print(f"[dim magenta]錯誤：找不到命令 '{command_name}'[/dim magenta]")
+            console.print(safe_t("commands.reload.not_found", fallback="[dim #DDA0DD]錯誤：找不到命令 '{name}'[/dim #DDA0DD]").format(name=command_name))
             return False
 
         file_path = self.command_file_map[command_name]
@@ -427,26 +435,26 @@ class MarkdownCommandLoader:
                     # 更新記錄
                     self.loaded_files[file_path].modified_time = os.path.getmtime(file_path)
 
-                    console.print(f"[bright_magenta]✓ 已重新載入命令：{command_name}[/bright_magenta]")
+                    console.print(safe_t("commands.reload.success", fallback="[#DA70D6]✓ 已重新載入命令：{name}[/#DA70D6]").format(name=command_name))
                     return True
 
             return False
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：重新載入失敗 - {e}[/dim magenta]")
+            console.print(safe_t("commands.reload.failed", fallback="[dim #DDA0DD]錯誤：重新載入失敗 - {error}[/dim #DDA0DD]").format(error=e))
             return False
 
     def show_loaded_commands(self):
         """顯示已載入的命令列表"""
         if not self.loaded_files:
-            console.print("[magenta]尚未載入任何 Markdown 命令[/yellow]")
+            console.print(safe_t("commands.list.empty", fallback="[#DDA0DD]尚未載入任何 Markdown 命令[/#DDA0DD]"))
             return
 
-        table = Table(show_header=True, header_style="bold bright_magenta")
-        table.add_column("命令名稱", style="yellow")
+        table = Table(show_header=True, header_style="bold #DA70D6")
+        table.add_column("命令名稱", style="#DDA0DD")
         table.add_column("檔案名稱", style="white")
         table.add_column("狀態", style="green")
-        table.add_column("修改時間", style="magenta")
+        table.add_column("修改時間", style="#DDA0DD")
 
         for file_info in self.loaded_files.values():
             # 格式化時間
@@ -465,16 +473,16 @@ class MarkdownCommandLoader:
                 mtime
             )
 
-        console.print(f"\n[bold magenta]已載入的 Markdown 命令（共 {len(self.loaded_files)} 個）：[/bold magenta]")
+        console.print(safe_t("commands.list.header", fallback="\n[bold #DDA0DD]已載入的 Markdown 命令（共 {count} 個）：[/bold #DDA0DD]").format(count=len(self.loaded_files)))
         console.print(table)
 
         # 顯示錯誤詳情
         error_files = [f for f in self.loaded_files.values() if not f.is_valid]
 
         if error_files:
-            console.print(f"\n[bold magenta]錯誤詳情：[/bold magenta]")
+            console.print(safe_t("commands.list.errors", fallback="\n[bold #DDA0DD]錯誤詳情：[/bold #DDA0DD]"))
             for file_info in error_files:
-                console.print(f"  [dim magenta]✗ {file_info.file_name}：{file_info.error_message}[/dim magenta]")
+                console.print(f"  [dim #DDA0DD]✗ {file_info.file_name}：{file_info.error_message}[/dim #DDA0DD]")
 
     def create_example_command(self, command_name: str = "example") -> str:
         """
@@ -489,7 +497,7 @@ class MarkdownCommandLoader:
         file_path = os.path.join(self.commands_dir, f"{command_name}.md")
 
         if os.path.exists(file_path):
-            console.print(f"[magenta]警告：檔案已存在：{file_path}[/yellow]")
+            console.print(safe_t("commands.example.exists", fallback="[#DDA0DD]警告：檔案已存在：{path}[/#DDA0DD]").format(path=file_path))
             return file_path
 
         example_content = """---
@@ -531,7 +539,7 @@ examples:
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(example_content)
 
-        console.print(f"[bright_magenta]✓ 已創建範例命令：{file_path}[/bright_magenta]")
+        console.print(safe_t("commands.example.created", fallback="[#DA70D6]✓ 已創建範例命令：{path}[/#DA70D6]").format(path=file_path))
 
         return file_path
 
@@ -557,26 +565,26 @@ examples:
 
 def main():
     """測試用主程式"""
-    console.print("[bold magenta]CodeGemini Markdown Command Loader 測試[/bold magenta]\n")
+    console.print(safe_t("commands.test.title", fallback="[bold #DDA0DD]CodeGemini Markdown Command Loader 測試[/bold #DDA0DD]\n"))
 
     # 建立載入器
     loader = MarkdownCommandLoader()
 
     # 創建範例命令
-    console.print("[bold]1. 創建範例命令檔案[/bold]")
+    console.print(safe_t("commands.test.step1", fallback="[bold]1. 創建範例命令檔案[/bold]"))
     loader.create_example_command("example")
     loader.create_example_command("test-command")
 
     # 掃描並載入
-    console.print("\n[bold]2. 掃描並載入命令[/bold]")
+    console.print(safe_t("commands.test.step2", fallback="\n[bold]2. 掃描並載入命令[/bold]"))
     loaded_count = loader.scan_and_load()
 
     # 顯示已載入的命令
-    console.print("\n[bold]3. 已載入的命令[/bold]")
+    console.print(safe_t("commands.test.step3", fallback="\n[bold]3. 已載入的命令[/bold]"))
     loader.show_loaded_commands()
 
     # 顯示統計資訊
-    console.print("\n[bold]4. 統計資訊[/bold]")
+    console.print(safe_t("commands.test.step4", fallback="\n[bold]4. 統計資訊[/bold]"))
     stats = loader.get_statistics()
     console.print(Panel(
         f"""[bold]總檔案數：[/bold]{stats['total_files']}
@@ -585,15 +593,15 @@ def main():
 [bold]命令目錄：[/bold]{stats['commands_dir']}
 [bold]已載入命令：[/bold]{', '.join(stats['loaded_commands']) if stats['loaded_commands'] else '無'}""",
         title="統計資訊",
-        border_style="bright_magenta"
+        border_style="#DA70D6"
     ))
 
     # 顯示命令詳情
     if loaded_count > 0:
-        console.print("\n[bold]5. 命令詳情（範例）[/bold]")
+        console.print(safe_t("commands.test.step5", fallback="\n[bold]5. 命令詳情（範例）[/bold]"))
         loader.registry.show_command_details("example")
 
-    console.print("\n[bold green]✅ 測試完成[/bold green]")
+    console.print(safe_t("commands.test.completed", fallback="\n[bold green]✅ 測試完成[/bold green]"))
 
 
 if __name__ == "__main__":

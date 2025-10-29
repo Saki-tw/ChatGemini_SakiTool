@@ -42,6 +42,9 @@ psutil>=5.9.0                       # CPU、記憶體監控
 # HTTP 請求（驗證系統需要）
 requests>=2.31.0
 
+# 網路搜尋（web_search.py 需要）
+duckduckgo-search>=4.0.0
+
 # CodeGemini 依賴（完整版需要，基礎版可選）
 pyyaml>=6.0
 html2text>=2020.1.16

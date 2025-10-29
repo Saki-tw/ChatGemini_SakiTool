@@ -334,10 +334,18 @@ def safe_t(key: str, fallback: str = None, **kwargs) -> str:
         # 策略 1：嘗試使用全域 builtins.t()
         import builtins
         if hasattr(builtins, 't') and callable(builtins.t):
-            return builtins.t(key, **kwargs)
+            result = builtins.t(key, **kwargs)
+            # 檢查是否返回 [MISSING:] 或 [INVALID:] 標記
+            if isinstance(result, str) and (result.startswith('[MISSING:') or result.startswith('[INVALID:')):
+                raise KeyError(f"Translation key not found: {key}")
+            return result
 
         # 策略 2：嘗試使用模組級別的 t()
-        return t(key, **kwargs)
+        result = t(key, **kwargs)
+        # 檢查是否返回 [MISSING:] 或 [INVALID:] 標記
+        if isinstance(result, str) and (result.startswith('[MISSING:') or result.startswith('[INVALID:')):
+            raise KeyError(f"Translation key not found: {key}")
+        return result
 
     except (NameError, AttributeError, KeyError, Exception):
         # 策略 3 & 4：降級處理

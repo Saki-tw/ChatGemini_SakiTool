@@ -43,6 +43,7 @@ from typing import Optional, Dict, List, Tuple, Any
 from dataclasses import dataclass, field
 from enum import Enum
 from datetime import datetime
+from utils.i18n import safe_t
 
 
 # Gemini API 定價資訊
@@ -244,7 +245,9 @@ class EnvironmentChecker:
             major_version = int(version_str.strip('v').split('.')[0])
             if major_version < REQUIRED_NODE_VERSION:
                 self.warnings.append(
-                    f"Node.js 版本過舊 ({version_str})，建議升級至 v{REQUIRED_NODE_VERSION}+"
+                    safe_t('codegemini.env_check.nodejs_outdated',
+                           fallback='Node.js 版本過舊 ({version})，建議升級至 v{required}+',
+                           version=version_str, required=REQUIRED_NODE_VERSION)
                 )
             return True, version_str
         except ValueError:
@@ -290,7 +293,7 @@ class EnvironmentChecker:
 
     def run_full_check(self) -> EnvironmentCheck:
         """執行完整環境檢查"""
-        logger.info("開始環境檢查...")
+        logger.info(safe_t('codegemini.env_check.starting', fallback='開始環境檢查...'))
 
         # 作業系統資訊
         os_type = os.uname().sysname
@@ -300,12 +303,12 @@ class EnvironmentChecker:
         # Node.js 檢查
         node_installed, node_version = self.check_node_version()
         if not node_installed:
-            self.errors.append("Node.js 未安裝或版本不符")
+            self.errors.append(safe_t('codegemini.env_check.nodejs_not_installed', fallback='Node.js 未安裝或版本不符'))
 
         # npm 檢查
         npm_installed, npm_version = self.check_npm_version()
         if not npm_installed:
-            self.errors.append("npm 未安裝")
+            self.errors.append(safe_t('codegemini.env_check.npm_not_installed', fallback='npm 未安裝'))
 
         # Gemini CLI 檢查
         gemini_installed, gemini_version = self.check_gemini_cli()
@@ -313,7 +316,7 @@ class EnvironmentChecker:
         # API Key 檢查
         api_key_configured = self.check_api_key()
         if not api_key_configured:
-            self.warnings.append("GEMINI_API_KEY 未配置")
+            self.warnings.append(safe_t('codegemini.env_check.api_key_not_configured', fallback='GEMINI_API_KEY 未配置'))
 
         # 判斷是否通過
         passed = len(self.errors) == 0
@@ -382,20 +385,20 @@ class GeminiCLIManager:
         Returns:
             安裝是否成功
         """
-        logger.info("開始安裝 Gemini CLI...")
+        logger.info(safe_t('codegemini.cli.install_starting', fallback='開始安裝 Gemini CLI...'))
 
         if use_script:
             script_path = CODEGEMINI_DIR / "INSTALL.sh"
             if not script_path.exists():
-                logger.error(f"安裝腳本不存在: {script_path}")
+                logger.error(safe_t('codegemini.cli.install_script_not_found', fallback='安裝腳本不存在: {path}', path=script_path))
                 return False
 
             try:
                 subprocess.run([str(script_path)], check=True)
-                logger.info("✓ Gemini CLI 安裝成功")
+                logger.info(safe_t('codegemini.cli.install_success', fallback='✓ Gemini CLI 安裝成功'))
                 return True
             except subprocess.CalledProcessError as e:
-                logger.error(f"✗ 安裝失敗: {e}")
+                logger.error(safe_t('codegemini.cli.install_failed', fallback='✗ 安裝失敗: {error}', error=e))
                 return False
         else:
             # 直接使用 npm 安裝
@@ -404,24 +407,24 @@ class GeminiCLIManager:
                     ["npm", "install", "-g", "@google/gemini-cli"],
                     check=True
                 )
-                logger.info("✓ Gemini CLI 安裝成功")
+                logger.info(safe_t('codegemini.cli.install_success', fallback='✓ Gemini CLI 安裝成功'))
                 return True
             except subprocess.CalledProcessError as e:
-                logger.error(f"✗ 安裝失敗: {e}")
+                logger.error(safe_t('codegemini.cli.install_failed', fallback='✗ 安裝失敗: {error}', error=e))
                 return False
 
     def update(self) -> bool:
         """更新 Gemini CLI"""
-        logger.info("開始更新 Gemini CLI...")
+        logger.info(safe_t('codegemini.cli.update_starting', fallback='開始更新 Gemini CLI...'))
 
         script_path = CODEGEMINI_DIR / "UPDATE.sh"
         if script_path.exists():
             try:
                 subprocess.run([str(script_path)], check=True)
-                logger.info("✓ Gemini CLI 更新成功")
+                logger.info(safe_t('codegemini.cli.update_success', fallback='✓ Gemini CLI 更新成功'))
                 return True
             except subprocess.CalledProcessError as e:
-                logger.error(f"✗ 更新失敗: {e}")
+                logger.error(safe_t('codegemini.cli.update_failed', fallback='✗ 更新失敗: {error}', error=e))
                 return False
         else:
             # 使用 npm 更新
@@ -430,24 +433,24 @@ class GeminiCLIManager:
                     ["npm", "update", "-g", "@google/gemini-cli"],
                     check=True
                 )
-                logger.info("✓ Gemini CLI 更新成功")
+                logger.info(safe_t('codegemini.cli.update_success', fallback='✓ Gemini CLI 更新成功'))
                 return True
             except subprocess.CalledProcessError as e:
-                logger.error(f"✗ 更新失敗: {e}")
+                logger.error(safe_t('codegemini.cli.update_failed', fallback='✗ 更新失敗: {error}', error=e))
                 return False
 
     def uninstall(self) -> bool:
         """卸載 Gemini CLI"""
-        logger.info("開始卸載 Gemini CLI...")
+        logger.info(safe_t('codegemini.cli.uninstall_starting', fallback='開始卸載 Gemini CLI...'))
 
         script_path = CODEGEMINI_DIR / "UNINSTALL.sh"
         if script_path.exists():
             try:
                 subprocess.run([str(script_path)], check=True)
-                logger.info("✓ Gemini CLI 卸載成功")
+                logger.info(safe_t('codegemini.cli.uninstall_success', fallback='✓ Gemini CLI 卸載成功'))
                 return True
             except subprocess.CalledProcessError as e:
-                logger.error(f"✗ 卸載失敗: {e}")
+                logger.error(safe_t('codegemini.cli.uninstall_failed', fallback='✗ 卸載失敗: {error}', error=e))
                 return False
         else:
             # 使用 npm 卸載
@@ -456,10 +459,10 @@ class GeminiCLIManager:
                     ["npm", "uninstall", "-g", "@google/gemini-cli"],
                     check=True
                 )
-                logger.info("✓ Gemini CLI 卸載成功")
+                logger.info(safe_t('codegemini.cli.uninstall_success', fallback='✓ Gemini CLI 卸載成功'))
                 return True
             except subprocess.CalledProcessError as e:
-                logger.error(f"✗ 卸載失敗: {e}")
+                logger.error(safe_t('codegemini.cli.uninstall_failed', fallback='✗ 卸載失敗: {error}', error=e))
                 return False
 
 # ============================================================================
@@ -515,24 +518,24 @@ class APIKeyManager:
         try:
             with open(target, 'w') as f:
                 f.write(f"GEMINI_API_KEY={api_key}\n")
-            logger.info(f"✓ API Key 已設定至 {target}")
+            logger.info(safe_t('codegemini.api_key.set_success', fallback='✓ API Key 已設定至 {target}', target=target))
             return True
         except Exception as e:
-            logger.error(f"✗ 設定失敗: {e}")
+            logger.error(safe_t('codegemini.api_key.set_failed', fallback='✗ 設定失敗: {error}', error=e))
             return False
 
     def setup_interactive(self) -> bool:
         """互動式 API Key 設定"""
         script_path = CODEGEMINI_DIR / "SETUP-API-KEY.sh"
         if not script_path.exists():
-            logger.error(f"設定腳本不存在: {script_path}")
+            logger.error(safe_t('codegemini.api_key.setup_script_not_found', fallback='設定腳本不存在: {path}', path=script_path))
             return False
 
         try:
             subprocess.run([str(script_path)], check=True)
             return True
         except subprocess.CalledProcessError as e:
-            logger.error(f"✗ 設定失敗: {e}")
+            logger.error(safe_t('codegemini.api_key.setup_failed', fallback='✗ 設定失敗: {error}', error=e))
             return False
 
 # ============================================================================
@@ -548,14 +551,14 @@ class MCPConfigManager:
     def load_config(self) -> Optional[Dict]:
         """載入 MCP 配置"""
         if not self.config_path.exists():
-            logger.warning(f"MCP 配置檔不存在: {self.config_path}")
+            logger.warning(safe_t('codegemini.mcp.config_not_found', fallback='MCP 配置檔不存在: {path}', path=self.config_path))
             return None
 
         try:
             with open(self.config_path) as f:
                 return json.load(f)
         except json.JSONDecodeError as e:
-            logger.error(f"✗ MCP 配置格式錯誤: {e}")
+            logger.error(safe_t('codegemini.mcp.config_format_error', fallback='✗ MCP 配置格式錯誤: {error}', error=e))
             return None
 
     def save_config(self, config: Dict) -> bool:
@@ -563,10 +566,10 @@ class MCPConfigManager:
         try:
             with open(self.config_path, 'w') as f:
                 json.dump(config, f, indent=2)
-            logger.info(f"✓ MCP 配置已儲存至 {self.config_path}")
+            logger.info(safe_t('codegemini.mcp.config_saved', fallback='✓ MCP 配置已儲存至 {path}', path=self.config_path))
             return True
         except Exception as e:
-            logger.error(f"✗ 儲存失敗: {e}")
+            logger.error(safe_t('codegemini.mcp.save_failed', fallback='✗ 儲存失敗: {error}', error=e))
             return False
 
 # ============================================================================
@@ -590,14 +593,14 @@ class TemplateManager:
         """載入 template"""
         template_path = self.templates_dir / name
         if not template_path.exists():
-            logger.error(f"Template 不存在: {name}")
+            logger.error(safe_t("codegemini.template.not_found", fallback="Template 不存在: {name}").format(name=name))
             return None
 
         try:
             with open(template_path) as f:
                 return f.read()
         except Exception as e:
-            logger.error(f"✗ 讀取失敗: {e}")
+            logger.error(safe_t("codegemini.template.read_failed", fallback="✗ 讀取失敗: {error}").format(error=e))
             return None
 
 # ============================================================================
@@ -619,7 +622,7 @@ class BackgroundShellManager:
     def __init__(self):
         self.shells: Dict[str, BackgroundShell] = {}
         self._lock = threading.Lock()
-        logger.info("BackgroundShellManager 已初始化")
+        logger.info(safe_t('codegemini.background_shell.initialized', fallback='BackgroundShellManager 已初始化'))
 
     def start_shell(
         self,
@@ -642,7 +645,7 @@ class BackgroundShellManager:
 
         with self._lock:
             if shell_id in self.shells:
-                logger.warning(f"Shell ID 已存在: {shell_id}")
+                logger.warning(safe_t("codegemini.shell.id_exists", fallback="Shell ID 已存在: {id}").format(id=shell_id))
                 return shell_id
 
             try:
@@ -672,14 +675,14 @@ class BackgroundShellManager:
                 )
                 thread.start()
 
-                logger.info(f"✓ 背景 Shell 已啟動: {shell_id}")
+                logger.info(safe_t("codegemini.shell.started", fallback="✓ 背景 Shell 已啟動: {id}").format(id=shell_id))
                 if description:
-                    logger.info(f"  描述: {description}")
+                    logger.info(safe_t("codegemini.common.description", fallback="  描述: {desc}").format(desc=description))
 
                 return shell_id
 
             except Exception as e:
-                logger.error(f"✗ 啟動 Shell 失敗: {e}")
+                logger.error(safe_t("codegemini.shell.start_failed", fallback="✗ 啟動 Shell 失敗: {error}").format(error=e))
                 raise
 
     def _collect_output(self, shell_id: str):
@@ -702,7 +705,7 @@ class BackgroundShellManager:
                 shell.status = ShellStatus.COMPLETED if exit_code == 0 else ShellStatus.FAILED
 
         except Exception as e:
-            logger.error(f"✗ 收集輸出失敗 ({shell_id}): {e}")
+            logger.error(safe_t("codegemini.shell.collect_failed", fallback="✗ 收集輸出失敗 ({id}): {error}").format(id=shell_id, error=e))
             with self._lock:
                 shell.status = ShellStatus.FAILED
                 shell.ended_at = datetime.now()
@@ -726,7 +729,7 @@ class BackgroundShellManager:
         with self._lock:
             shell = self.shells.get(shell_id)
             if not shell:
-                logger.error(f"Shell 不存在: {shell_id}")
+                logger.error(safe_t("codegemini.shell.not_found", fallback="Shell 不存在: {id}").format(id=shell_id))
                 return ""
 
             output = shell.output.copy()
@@ -740,7 +743,7 @@ class BackgroundShellManager:
                     pattern = re.compile(filter_regex)
                     output = [line for line in output if pattern.search(line)]
                 except re.error as e:
-                    logger.error(f"✗ 正則表達式錯誤: {e}")
+                    logger.error(safe_t("codegemini.shell.regex_error", fallback="✗ 正則表達式錯誤: {error}").format(error=e))
 
             return '\n'.join(output)
 
@@ -756,7 +759,7 @@ class BackgroundShellManager:
         with self._lock:
             shell = self.shells.get(shell_id)
             if not shell:
-                logger.error(f"Shell 不存在: {shell_id}")
+                logger.error(safe_t("codegemini.shell.not_found", fallback="Shell 不存在: {id}").format(id=shell_id))
                 return False
 
             try:
@@ -764,18 +767,18 @@ class BackgroundShellManager:
                 shell.process.wait(timeout=5)
                 shell.status = ShellStatus.KILLED
                 shell.ended_at = datetime.now()
-                logger.info(f"✓ Shell 已終止: {shell_id}")
+                logger.info(safe_t("codegemini.shell.killed", fallback="✓ Shell 已終止: {id}").format(id=shell_id))
                 return True
 
             except subprocess.TimeoutExpired:
                 shell.process.kill()
                 shell.status = ShellStatus.KILLED
                 shell.ended_at = datetime.now()
-                logger.warning(f"⚠ Shell 已強制終止: {shell_id}")
+                logger.warning(safe_t("codegemini.shell.force_killed", fallback="⚠ Shell 已強制終止: {id}").format(id=shell_id))
                 return True
 
             except Exception as e:
-                logger.error(f"✗ 終止 Shell 失敗: {e}")
+                logger.error(safe_t("codegemini.shell.kill_failed", fallback="✗ 終止 Shell 失敗: {error}").format(error=e))
                 return False
 
     def list_shells(self) -> List[Dict[str, Any]]:
@@ -811,7 +814,7 @@ class BackgroundShellManager:
                 del self.shells[sid]
 
             if finished:
-                logger.info(f"✓ 已清理 {len(finished)} 個完成的 Shell")
+                logger.info(safe_t("codegemini.shell.cleaned", fallback="✓ 已清理 {count} 個完成的 Shell").format(count=len(finished)))
 
 # ============================================================================
 # Todo Tracking 模組
@@ -830,7 +833,7 @@ class TodoTracker:
 
     def __init__(self):
         self.todos: List[Todo] = []
-        logger.info("TodoTracker 已初始化")
+        logger.info(safe_t('codegemini.todo_tracker.initialized', fallback='TodoTracker 已初始化'))
 
     def add_todo(self, content: str, active_form: str) -> None:
         """新增任務
@@ -841,7 +844,7 @@ class TodoTracker:
         """
         todo = Todo(content=content, active_form=active_form)
         self.todos.append(todo)
-        logger.info(f"✓ 任務已新增: {content}")
+        logger.info(safe_t("codegemini.todo.added", fallback="✓ 任務已新增: {content}").format(content=content))
 
     def update_status(self, index: int, status: TodoStatus) -> bool:
         """更新任務狀態
@@ -854,7 +857,7 @@ class TodoTracker:
             是否成功
         """
         if not 0 <= index < len(self.todos):
-            logger.error(f"任務索引超出範圍: {index}")
+            logger.error(safe_t("codegemini.todo.index_out_of_range", fallback="任務索引超出範圍: {index}").format(index=index))
             return False
 
         todo = self.todos[index]
@@ -868,7 +871,7 @@ class TodoTracker:
         else:
             todo.status = status
 
-        logger.info(f"✓ 任務狀態已更新: {todo.content} ({old_status.value} → {status.value})")
+        logger.info(safe_t("codegemini.todo.status_updated", fallback="✓ 任務狀態已更新: {content} ({old} → {new})").format(content=todo.content, old=old_status.value, new=status.value))
         return True
 
     def get_todos(self) -> List[Dict[str, Any]]:
@@ -917,7 +920,7 @@ class TodoTracker:
         """
         completed_count = sum(1 for t in self.todos if t.is_completed)
         self.todos = [t for t in self.todos if not t.is_completed]
-        logger.info(f"✓ 已清除 {completed_count} 個已完成任務")
+        logger.info(safe_t("codegemini.todo.cleared", fallback="✓ 已清除 {count} 個已完成任務").format(count=completed_count))
         return completed_count
 
 # ============================================================================
@@ -936,7 +939,7 @@ class InteractiveQA:
     """
 
     def __init__(self):
-        logger.info("InteractiveQA 已初始化")
+        logger.info(safe_t('codegemini.interactive_qa.initialized', fallback='InteractiveQA 已初始化'))
 
     def ask_question(
         self,
@@ -970,25 +973,25 @@ class InteractiveQA:
                 print(f"      {description}")
 
         if multi_select:
-            print(f"\n  [0] 其他（自訂輸入）")
-            print("提示：多選模式，輸入選項編號（用空格或逗號分隔），或輸入 0 自訂")
+            print(safe_t("codegemini.menu.other", fallback="\n  [0] 其他（自訂輸入）"))
+            print(safe_t("codegemini.menu.hint_multi", fallback="提示：多選模式，輸入選項編號（用空格或逗號分隔），或輸入 0 自訂"))
         else:
-            print(f"\n  [0] 其他（自訂輸入）")
-            print("提示：輸入選項編號，或輸入 0 自訂")
+            print(safe_t("codegemini.menu.other", fallback="\n  [0] 其他（自訂輸入）"))
+            print(safe_t("codegemini.menu.hint_single", fallback="提示：輸入選項編號，或輸入 0 自訂"))
 
         print("=" * 60)
 
         while True:
             try:
-                user_input = input("請選擇: ").strip()
+                user_input = input(safe_t("codegemini.common.choose_prompt", fallback="請選擇: ")).strip()
 
                 if not user_input:
-                    print("⚠️  請輸入選項編號")
+                    print(safe_t("codegemini.menu.invalid_empty", fallback="⚠️  請輸入選項編號"))
                     continue
 
                 # 處理自訂輸入
                 if user_input == "0":
-                    custom = input("請輸入自訂答案: ").strip()
+                    custom = input(safe_t("codegemini.common.custom_answer", fallback="請輸入自訂答案: ")).strip()
                     return [custom] if custom else []
 
                 # 解析選擇
@@ -1002,10 +1005,10 @@ class InteractiveQA:
                             if 1 <= idx <= len(options):
                                 indices.append(idx - 1)
                             else:
-                                print(f"⚠️  無效的選項: {s}")
+                                print(safe_t("codegemini.menu.invalid_option", fallback="⚠️  無效的選項: {s}").format(s=s))
                                 raise ValueError
                         except ValueError:
-                            print(f"⚠️  請輸入有效的數字")
+                            print(safe_t("codegemini.menu.invalid_number", fallback="⚠️  請輸入有效的數字"))
                             raise
 
                     if indices:
@@ -1015,13 +1018,13 @@ class InteractiveQA:
                     if 1 <= idx <= len(options):
                         return [options[idx - 1]["label"]]
                     else:
-                        print(f"⚠️  無效的選項: {idx}")
+                        print(safe_t("codegemini.menu.invalid_option", fallback="⚠️  無效的選項: {idx}").format(idx=idx))
                         continue
 
             except ValueError:
                 continue
             except KeyboardInterrupt:
-                print("\n\n⚠️  已取消")
+                print(safe_t("codegemini.menu.cancelled", fallback="\n\n⚠️  已取消"))
                 return []
 
     def confirm(self, message: str, default: bool = True) -> bool:
@@ -1046,7 +1049,7 @@ class InteractiveQA:
             return response in ['y', 'yes', '是', 'Y']
 
         except KeyboardInterrupt:
-            print("\n⚠️  已取消")
+            print(safe_t("codegemini.menu.cancelled_short", fallback="\n⚠️  已取消"))
             return False
 
 # ============================================================================
@@ -1120,7 +1123,7 @@ class PricingDisplay:
     def __init__(self, exchange_rate: float = USD_TO_TWD):
         self.exchange_rate = exchange_rate
         self.search_usage_count = {}  # {engine: count}
-        logger.info("PricingDisplay 已初始化")
+        logger.info(safe_t("codegemini.pricing.initialized", fallback="PricingDisplay 已初始化"))
 
     def track_search_usage(self, engine: str, query_count: int = 1) -> Dict[str, Any]:
         """追蹤搜尋 API 使用量
@@ -1259,21 +1262,21 @@ class PricingDisplay:
         cost_info = self.estimate_cost(model, input_tokens, output_tokens)
 
         print("\n" + "=" * 60)
-        print("💰 API 成本預估")
+        print(safe_t("codegemini.cost.title", fallback="💰 API 成本預估"))
         if description:
-            print(f"📝 操作：{description}")
+            print(safe_t("codegemini.cost.operation", fallback="📝 操作：{description}").format(description=description))
         print("-" * 60)
-        print(f"🤖 模型：{cost_info['model']}")
+        print(safe_t("codegemini.cost.model", fallback="🤖 模型：{model}").format(model=cost_info['model']))
         print(f"📊 Token：{cost_info['input_tokens']:,} (input) + {cost_info['output_tokens']:,} (output) = {cost_info['total_tokens']:,}")
-        print(f"💵 成本：${cost_info['cost_usd']:.6f} USD ≈ NT${cost_info['cost_twd']:.4f} TWD")
+        print(safe_t("codegemini.cost.amount", fallback="💵 成本：${usd:.6f} USD ≈ NT${twd:.4f} TWD").format(usd=cost_info['cost_usd'], twd=cost_info['cost_twd']))
         print("=" * 60 + "\n")
 
     def display_pricing_table(self) -> None:
         """顯示完整定價表"""
         print("\n" + "=" * 80)
-        print("💰 Gemini API 定價表（2025年1月）")
+        print(safe_t("codegemini.pricing.title", fallback="💰 Gemini API 定價表（2025年1月）"))
         print("=" * 80)
-        print(f"匯率：1 USD = {self.exchange_rate} TWD")
+        print(safe_t("codegemini.pricing.exchange_rate", fallback="匯率：1 USD = {rate} TWD").format(rate=self.exchange_rate))
         print("-" * 80)
 
         for model, pricing in self.PRICING.items():
@@ -1297,7 +1300,7 @@ class PricingDisplay:
                       f"(NT${pricing['output'] * self.exchange_rate:.2f}/1M tokens)")
 
         # 搜尋 API 定價
-        print("\n🔍 搜尋 API 定價")
+        print(safe_t("codegemini.pricing.search_title", fallback="\n🔍 搜尋 API 定價"))
         print("-" * 80)
 
         for engine, pricing in self.SEARCH_API_PRICING.items():
@@ -1310,27 +1313,27 @@ class PricingDisplay:
             print(f"\n🔎 {engine_display}")
 
             if pricing['cost_per_1000'] == 0:
-                print(f"  價格：✅ 完全免費")
+                print(safe_t("codegemini.pricing.free", fallback="  價格：✅ 完全免費"))
             else:
-                print(f"  價格：${pricing['cost_per_1000']}/1000 queries "
+                print(safe_t("codegemini.pricing.cost_per_query", fallback="  價格：${cost}/1000 queries ").format(cost=pricing['cost_per_1000']) 
                       f"(NT${pricing['cost_per_1000'] * self.exchange_rate:.2f}/1000 queries)")
 
             if pricing['free_tier'] != float('inf'):
-                print(f"  免費額度：{pricing['free_tier']:,} queries")
+                print(safe_t("codegemini.pricing.free_tier", fallback="  免費額度：{tier:,} queries").format(tier=pricing['free_tier']))
 
-            print(f"  說明：{pricing['note']}")
+            print(safe_t("codegemini.pricing.note", fallback="  說明：{note}").format(note=pricing['note']))
 
         print("\n" + "=" * 80)
-        print("💡 提示：")
-        print("  - Gemini API 費用以 Google Cloud 帳單為準")
-        print("  - 搜尋 API 建議優先使用 DuckDuckGo（免費）")
-        print("  - 付費搜尋 API 需在免費額度用完後才計費")
+        print(safe_t("codegemini.pricing.tips", fallback="💡 提示："))
+        print(safe_t("codegemini.pricing.tip1", fallback="  - Gemini API 費用以 Google Cloud 帳單為準"))
+        print(safe_t("codegemini.pricing.tip2", fallback="  - 搜尋 API 建議優先使用 DuckDuckGo（免費）"))
+        print(safe_t("codegemini.pricing.tip3", fallback="  - 付費搜尋 API 需在免費額度用完後才計費"))
         print("=" * 80 + "\n")
 
     def display_usage_note(self) -> None:
         """顯示 API 使用說明"""
         print("\n" + "=" * 80)
-        print("📌 CodeGemini API 使用說明")
+        print(safe_t("codegemini.api.title", fallback="📌 CodeGemini API 使用說明"))
         print("=" * 80)
         print("""
 當前實作的功能模組：
@@ -1391,7 +1394,7 @@ class CheckpointManager:
         self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
         self.checkpoints: List[Checkpoint] = []
         self._load_checkpoints()
-        logger.info("CheckpointManager 已初始化")
+        logger.info(safe_t("codegemini.checkpoint.initialized", fallback="CheckpointManager 已初始化"))
 
     def _load_checkpoints(self):
         """載入所有 checkpoints"""
@@ -1410,7 +1413,7 @@ class CheckpointManager:
                         )
                         self.checkpoints.append(checkpoint)
             except Exception as e:
-                logger.error(f"✗ 載入 checkpoints 失敗: {e}")
+                logger.error(safe_t("codegemini.checkpoint.load_failed", fallback="✗ 載入 checkpoints 失敗: {error}").format(error=e))
 
     def _save_checkpoints(self):
         """保存 checkpoints 元數據"""
@@ -1429,7 +1432,7 @@ class CheckpointManager:
             with open(metadata_file, 'w') as f:
                 json.dump(data, f, indent=2)
         except Exception as e:
-            logger.error(f"✗ 保存 checkpoints 失敗: {e}")
+            logger.error(safe_t("codegemini.checkpoint.save_failed", fallback="✗ 保存 checkpoints 失敗: {error}").format(error=e))
 
     def _calculate_file_hash(self, file_path: Path) -> str:
         """計算檔案 hash"""
@@ -1437,7 +1440,7 @@ class CheckpointManager:
             with open(file_path, 'rb') as f:
                 return hashlib.md5(f.read()).hexdigest()
         except Exception as e:
-            logger.error(f"✗ 計算 hash 失敗 ({file_path}): {e}")
+            logger.error(safe_t("codegemini.checkpoint.hash_failed", fallback="✗ 計算 hash 失敗 ({path}): {error}").format(path=file_path, error=e))
             return ""
 
     def _snapshot_files(self, paths: List[str]) -> Dict[str, str]:
@@ -1503,9 +1506,9 @@ class CheckpointManager:
         self.checkpoints.append(checkpoint)
         self._save_checkpoints()
 
-        logger.info(f"✓ Checkpoint 已建立: {checkpoint_id}")
-        logger.info(f"  描述: {description}")
-        logger.info(f"  檔案數: {len(files_snapshot)}")
+        logger.info(safe_t("codegemini.checkpoint.created", fallback="✓ Checkpoint 已建立: {id}").format(id=checkpoint_id))
+        logger.info(safe_t("codegemini.common.description", fallback="  描述: {desc}").format(desc=description))
+        logger.info(safe_t("codegemini.checkpoint.file_count", fallback="  檔案數: {count}").format(count=len(files_snapshot)))
 
         return checkpoint_id
 
@@ -1542,13 +1545,13 @@ class CheckpointManager:
                 break
 
         if not checkpoint:
-            logger.error(f"Checkpoint 不存在: {checkpoint_id}")
+            logger.error(safe_t("codegemini.checkpoint.not_found", fallback="Checkpoint 不存在: {id}").format(id=checkpoint_id))
             return False
 
         # 恢復檔案
         backup_dir = self.checkpoint_dir / checkpoint_id
         if not backup_dir.exists():
-            logger.error(f"Checkpoint 備份目錄不存在: {backup_dir}")
+            logger.error(safe_t("codegemini.checkpoint.backup_dir_not_found", fallback="Checkpoint 備份目錄不存在: {dir}").format(dir=backup_dir))
             return False
 
         try:
@@ -1562,12 +1565,12 @@ class CheckpointManager:
                     shutil.copy2(src_path, dst_path)
                     restored_count += 1
 
-            logger.info(f"✓ Checkpoint 已恢復: {checkpoint_id}")
-            logger.info(f"  恢復檔案數: {restored_count}")
+            logger.info(safe_t("codegemini.checkpoint.restored", fallback="✓ Checkpoint 已恢復: {id}").format(id=checkpoint_id))
+            logger.info(safe_t("codegemini.checkpoint.restored_count", fallback="  恢復檔案數: {count}").format(count=restored_count))
             return True
 
         except Exception as e:
-            logger.error(f"✗ 恢復 checkpoint 失敗: {e}")
+            logger.error(safe_t("codegemini.checkpoint.restore_failed", fallback="✗ 恢復 checkpoint 失敗: {error}").format(error=e))
             return False
 
     def rewind(self, steps: int = 1) -> bool:
@@ -1580,17 +1583,17 @@ class CheckpointManager:
             是否成功
         """
         if steps <= 0:
-            logger.error("回退步數必須大於 0")
+            logger.error(safe_t("codegemini.checkpoint.rollback_steps_invalid", fallback="回退步數必須大於 0"))
             return False
 
         if len(self.checkpoints) < steps:
-            logger.error(f"Checkpoints 數量不足（現有 {len(self.checkpoints)}）")
+            logger.error(safe_t("codegemini.checkpoint.insufficient_count", fallback="Checkpoints 數量不足（現有 {count}）").format(count=len(self.checkpoints)))
             return False
 
         # 獲取目標 checkpoint
         target_checkpoint = self.checkpoints[-(steps + 1)]
 
-        logger.info(f"回退 {steps} 步到: {target_checkpoint.checkpoint_id}")
+        logger.info(safe_t("codegemini.checkpoint.rollback_to", fallback="回退 {steps} 步到: {id}").format(steps=steps, id=target_checkpoint.checkpoint_id))
         return self.restore_checkpoint(target_checkpoint.checkpoint_id)
 
     def delete_checkpoint(self, checkpoint_id: str) -> bool:
@@ -1614,10 +1617,10 @@ class CheckpointManager:
                 self.checkpoints.pop(i)
                 self._save_checkpoints()
 
-                logger.info(f"✓ Checkpoint 已刪除: {checkpoint_id}")
+                logger.info(safe_t("codegemini.checkpoint.deleted", fallback="✓ Checkpoint 已刪除: {id}").format(id=checkpoint_id))
                 return True
 
-        logger.error(f"Checkpoint 不存在: {checkpoint_id}")
+        logger.error(safe_t("codegemini.checkpoint.not_found", fallback="Checkpoint 不存在: {id}").format(id=checkpoint_id))
         return False
 
     def cleanup_old_checkpoints(self, keep_count: int = 10):
@@ -1634,7 +1637,7 @@ class CheckpointManager:
         for cp in to_delete:
             self.delete_checkpoint(cp.checkpoint_id)
 
-        logger.info(f"✓ 已清理 {len(to_delete)} 個舊 checkpoints")
+        logger.info(safe_t("codegemini.checkpoint.cleaned_old", fallback="✓ 已清理 {count} 個舊 checkpoints").format(count=len(to_delete)))
 
 # ============================================================================
 # Custom Slash Commands（自訂斜線指令）
@@ -1726,14 +1729,14 @@ class SlashCommandManager:
         self.commands: Dict[str, SlashCommand] = {}
         self._load_commands()
 
-        logger.info(f"SlashCommandManager 已初始化")
-        logger.info(f"Commands 目錄: {self.commands_dir}")
+        logger.info(safe_t("codegemini.slash_command.initialized", fallback="SlashCommandManager 已初始化"))
+        logger.info(safe_t("codegemini.slash_command.commands_dir", fallback="Commands 目錄: {dir}").format(dir=self.commands_dir))
 
     def _load_commands(self):
         """載入所有 slash commands"""
         if not self.commands_dir.exists():
-            logger.warning(f"Commands 目錄不存在: {self.commands_dir}")
-            logger.info(f"提示：建立目錄並新增 .md 檔案來定義自訂指令")
+            logger.warning(safe_t("codegemini.slash_command.dir_not_found", fallback="Commands 目錄不存在: {dir}").format(dir=self.commands_dir))
+            logger.info(safe_t("codegemini.slash_command.hint_create_dir", fallback="提示：建立目錄並新增 .md 檔案來定義自訂指令"))
             return
 
         # 尋找所有 .md 檔案
@@ -1754,9 +1757,9 @@ class SlashCommandManager:
                 logger.debug(f"載入指令: /{command_name}")
 
             except Exception as e:
-                logger.error(f"載入指令失敗 {md_file}: {e}")
+                logger.error(safe_t("codegemini.slash_command.load_failed", fallback="載入指令失敗 {file}: {error}").format(file=md_file, error=e))
 
-        logger.info(f"✓ 已載入 {len(self.commands)} 個 slash commands")
+        logger.info(safe_t("codegemini.slash_command.loaded", fallback="✓ 已載入 {count} 個 slash commands").format(count=len(self.commands)))
 
     def list_commands(self) -> List[Dict[str, str]]:
         """列出所有可用的 slash commands
@@ -1803,7 +1806,7 @@ class SlashCommandManager:
         cmd = self.get_command(command_name)
 
         if cmd is None:
-            logger.error(f"指令不存在: /{command_name}")
+            logger.error(safe_t("codegemini.slash_command.not_found", fallback="指令不存在: /{name}").format(name=command_name))
             return None
 
         prompt = cmd.get_prompt()
@@ -1812,14 +1815,14 @@ class SlashCommandManager:
         if args:
             prompt = f"{prompt}\n\n參數: {args}"
 
-        logger.info(f"✓ 執行指令: /{command_name}")
+        logger.info(safe_t("codegemini.slash_command.executed", fallback="✓ 執行指令: /{name}").format(name=command_name))
         return prompt
 
     def reload_commands(self):
         """重新載入所有 commands"""
         self.commands.clear()
         self._load_commands()
-        logger.info("✓ 已重新載入所有 slash commands")
+        logger.info(safe_t("codegemini.slash_command.reloaded", fallback="✓ 已重新載入所有 slash commands"))
 
     def create_command_template(self, command_name: str, description: str, prompt: str) -> Path:
         """建立新的 slash command 範本
@@ -1850,8 +1853,8 @@ description: {description}
         # 重新載入 commands
         self.reload_commands()
 
-        logger.info(f"✓ 已建立指令: /{command_name}")
-        logger.info(f"  檔案: {file_path}")
+        logger.info(safe_t("codegemini.slash_command.created", fallback="✓ 已建立指令: /{name}").format(name=command_name))
+        logger.info(safe_t("codegemini.common.file", fallback="  檔案: {path}").format(path=file_path))
 
         return file_path
 
@@ -1897,7 +1900,7 @@ class AutoModelSelector:
         """
         self.strategy = strategy
         self.models = self._init_models()
-        logger.info(f"AutoModelSelector 已初始化（策略: {strategy}）")
+        logger.info(safe_t("codegemini.auto_model.initialized", fallback="AutoModelSelector 已初始化（策略: {strategy}）").format(strategy=strategy))
 
     def _init_models(self) -> Dict[str, ModelProfile]:
         """初始化模型資料"""
@@ -2049,9 +2052,9 @@ class AutoModelSelector:
             input_tokens: 預估輸入 token 數
             output_tokens: 預估輸出 token 數
         """
-        print(f"\n任務類型: {task_type}")
-        print(f"預估 Tokens: {input_tokens:,} input + {output_tokens:,} output\n")
-        print(f"{'模型':<25} {'速度':<10} {'成本 (USD)':<15} {'成本 (TWD)':<15} {'推薦'}")
+        print(safe_t("codegemini.recommend.task_type", fallback="\n任務類型: {task}").format(task=task_type))
+        print(safe_t("codegemini.recommend.tokens", fallback="預估 Tokens: {input:,} input + {output:,} output\n").format(input=input_tokens, output=output_tokens))
+        print(safe_t("codegemini.recommend.header", fallback="{model:<25} {speed:<10} {cost_usd:<15} {cost_twd:<15} {rec}").format(model="模型", speed="速度", cost_usd="成本 (USD)", cost_twd="成本 (TWD)", rec="推薦"))
         print("-" * 80)
 
         recommended = self.select_model(task_type)
@@ -2062,8 +2065,8 @@ class AutoModelSelector:
 
             print(f"{name:<25} {model.speed:<10} ${cost['usd']:<14.6f} NT${cost['twd']:<14.2f} {is_recommended}")
 
-        print(f"\n✓ 推薦模型: {recommended}")
-        print(f"  策略: {self.strategy}")
+        print(safe_t("codegemini.recommend.result", fallback="\n✓ 推薦模型: {model}").format(model=recommended))
+        print(safe_t("codegemini.strategy", fallback="  策略: {strategy}").format(strategy=self.strategy))
 
     def set_strategy(self, strategy: str):
         """更改選擇策略
@@ -2073,11 +2076,11 @@ class AutoModelSelector:
         """
         valid_strategies = ["cost_optimized", "speed_optimized", "quality_optimized", "balanced"]
         if strategy not in valid_strategies:
-            logger.error(f"無效的策略: {strategy}，可用策略: {valid_strategies}")
+            logger.error(safe_t("codegemini.auto_model.invalid_strategy", fallback="無效的策略: {strategy}，可用策略: {valid}").format(strategy=strategy, valid=valid_strategies))
             return
 
         self.strategy = strategy
-        logger.info(f"✓ 已切換至策略: {strategy}")
+        logger.info(safe_t("codegemini.auto_model.switched", fallback="✓ 已切換至策略: {strategy}").format(strategy=strategy))
 
 # ============================================================================
 # 主要 CodeGemini 類別
@@ -2106,50 +2109,50 @@ class CodeGemini:
         self.auto_model_selector = None
         self.thinking_mode = None
 
-        logger.info("CodeGemini 已初始化")
-        logger.info("💡 提示：v1.2.0 新功能需手動啟用，請使用 enable_*() 方法")
+        logger.info(safe_t('codegemini.main.initialized', fallback='CodeGemini 已初始化'))
+        logger.info(safe_t('codegemini.main.enable_hint', fallback='💡 提示：v1.2.0 新功能需手動啟用，請使用 enable_*() 方法'))
 
     def enable_checkpointing(self, checkpoint_dir: Optional[Path] = None):
         """啟用 Checkpointing System（可選功能）"""
         if self.checkpoint_manager is None:
             self.checkpoint_manager = CheckpointManager(checkpoint_dir)
-            logger.info("✓ Checkpointing System 已啟用")
-            logger.info("  使用 disable_checkpointing() 可卸載")
+            logger.info(safe_t('codegemini.checkpoint.enabled', fallback='✓ Checkpointing System 已啟用'))
+            logger.info(safe_t('codegemini.checkpoint.disable_hint', fallback='  使用 disable_checkpointing() 可卸載'))
         return self.checkpoint_manager
 
     def disable_checkpointing(self):
         """卸載 Checkpointing System"""
         if self.checkpoint_manager is not None:
             self.checkpoint_manager = None
-            logger.info("✓ Checkpointing System 已卸載")
+            logger.info(safe_t('codegemini.checkpoint.disabled', fallback='✓ Checkpointing System 已卸載'))
 
     def enable_slash_commands(self, commands_dir: Optional[Path] = None):
         """啟用 Custom Slash Commands（可選功能）"""
         if self.slash_commands is None:
             self.slash_commands = SlashCommandManager(commands_dir)
-            logger.info("✓ Custom Slash Commands 已啟用")
-            logger.info("  使用 disable_slash_commands() 可卸載")
+            logger.info(safe_t('codegemini.slash_commands.enabled', fallback='✓ Custom Slash Commands 已啟用'))
+            logger.info(safe_t('codegemini.slash_commands.disable_hint', fallback='  使用 disable_slash_commands() 可卸載'))
         return self.slash_commands
 
     def disable_slash_commands(self):
         """卸載 Custom Slash Commands"""
         if self.slash_commands is not None:
             self.slash_commands = None
-            logger.info("✓ Custom Slash Commands 已卸載")
+            logger.info(safe_t('codegemini.slash_commands.disabled', fallback='✓ Custom Slash Commands 已卸載'))
 
     def enable_auto_model_selector(self, strategy: str = "balanced"):
         """啟用 Auto Model Selection（可選功能）"""
         if self.auto_model_selector is None:
             self.auto_model_selector = AutoModelSelector(strategy)
-            logger.info("✓ Auto Model Selection 已啟用")
-            logger.info("  使用 disable_auto_model_selector() 可卸載")
+            logger.info(safe_t('codegemini.auto_model.enabled', fallback='✓ Auto Model Selection 已啟用'))
+            logger.info(safe_t('codegemini.auto_model.disable_hint', fallback='  使用 disable_auto_model_selector() 可卸載'))
         return self.auto_model_selector
 
     def disable_auto_model_selector(self):
         """卸載 Auto Model Selection"""
         if self.auto_model_selector is not None:
             self.auto_model_selector = None
-            logger.info("✓ Auto Model Selection 已卸載")
+            logger.info(safe_t('codegemini.auto_model.disabled', fallback='✓ Auto Model Selection 已卸載'))
 
     def enable_codebase_embedding(
         self,
@@ -2187,14 +2190,14 @@ class CodeGemini:
                     orthogonal_mode=orthogonal_mode,
                     similarity_threshold=similarity_threshold
                 )
-                logger.info("✓ Codebase Embedding 已啟用")
+                logger.info(safe_t("codegemini.embedding.enabled", fallback="✓ Codebase Embedding 已啟用"))
                 if orthogonal_mode:
-                    logger.info(f"  正交模式已啟用（相似度閾值: {similarity_threshold}）")
-                logger.info("  使用 disable_codebase_embedding() 可卸載")
+                    logger.info(safe_t("codegemini.embedding.orthogonal_mode", fallback="  正交模式已啟用（相似度閾值: {threshold}）").format(threshold=similarity_threshold))
+                logger.info(safe_t("codegemini.embedding.disable_hint", fallback="  使用 disable_codebase_embedding() 可卸載"))
 
             except ImportError as e:
-                logger.error(f"✗ 無法啟用 Codebase Embedding: {e}")
-                logger.info("  請確認 numpy 已安裝")
+                logger.error(safe_t("codegemini.embedding.enable_failed", fallback="✗ 無法啟用 Codebase Embedding: {error}").format(error=e))
+                logger.info(safe_t("codegemini.embedding.numpy_hint", fallback="  請確認 numpy 已安裝"))
                 return None
 
         return self.codebase_embedding
@@ -2203,7 +2206,7 @@ class CodeGemini:
         """卸載 Codebase Embedding"""
         if self.codebase_embedding is not None:
             self.codebase_embedding = None
-            logger.info("✓ Codebase Embedding 已卸載")
+            logger.info(safe_t("codegemini.embedding.disabled", fallback="✓ Codebase Embedding 已卸載"))
 
     def check_environment(self) -> EnvironmentCheck:
         """檢查環境"""
@@ -2215,36 +2218,36 @@ class CodeGemini:
         cli_info = self.cli_manager.get_status()
 
         print("\n" + "="*60)
-        print("  CodeGemini - Google Gemini CLI 管理工具")
+        print(safe_t("codegemini.title", fallback="  CodeGemini - Google Gemini CLI 管理工具"))
         print("="*60)
 
-        print("\n📊 環境狀態:")
-        print(f"  作業系統: {env_check.os_type} {env_check.os_version}")
-        print(f"  架構: {env_check.arch}")
+        print(safe_t("codegemini.env.title", fallback="\n📊 環境狀態:"))
+        print(safe_t("codegemini.env.os", fallback="  作業系統: {os_type} {os_version}").format(os_type=env_check.os_type, os_version=env_check.os_version))
+        print(safe_t("codegemini.env.arch", fallback="  架構: {arch}").format(arch=env_check.arch))
         print(f"  Node.js: {'✓' if env_check.node_installed else '✗'} {env_check.node_version or 'N/A'}")
         print(f"  npm: {'✓' if env_check.npm_installed else '✗'} {env_check.npm_version or 'N/A'}")
 
         print("\n🔧 Gemini CLI:")
-        print(f"  安裝狀態: {'✓ 已安裝' if cli_info.installed else '✗ 未安裝'}")
-        print(f"  版本: {cli_info.version or 'N/A'}")
-        print(f"  路徑: {cli_info.install_path or 'N/A'}")
+        print(safe_t("codegemini.cli.status", fallback="  安裝狀態: {status}").format(status="✓ 已安裝" if cli_info.installed else "✗ 未安裝"))
+        print(safe_t("codegemini.cli.version", fallback="  版本: {version}").format(version=cli_info.version or 'N/A'))
+        print(safe_t("codegemini.cli.path", fallback="  路徑: {path}").format(path=cli_info.install_path or 'N/A'))
 
         print("\n🔑 API Key:")
         api_key = self.api_key_manager.get_api_key()
         if api_key:
             masked_key = api_key[:10] + "..." + api_key[-4:] if len(api_key) > 14 else "***"
-            print(f"  狀態: ✓ 已配置")
-            print(f"  金鑰: {masked_key}")
+            print(safe_t("codegemini.api_key.configured", fallback="  狀態: ✓ 已配置"))
+            print(safe_t("codegemini.api_key.key", fallback="  金鑰: {key}").format(key=masked_key))
         else:
-            print(f"  狀態: ✗ 未配置")
+            print(safe_t("codegemini.api_key.not_configured", fallback="  狀態: ✗ 未配置"))
 
         if env_check.warnings:
-            print("\n⚠️  警告:")
+            print(safe_t("codegemini.warning", fallback="\n⚠️  警告:"))
             for warning in env_check.warnings:
                 print(f"  - {warning}")
 
         if env_check.errors:
-            print("\n✗ 錯誤:")
+            print(safe_t("codegemini.error", fallback="\n✗ 錯誤:"))
             for error in env_check.errors:
                 print(f"  - {error}")
 
@@ -2314,42 +2317,42 @@ def main():
     elif args.command == "check":
         env_check = cg.check_environment()
         if env_check.passed:
-            print("✓ 環境檢查通過")
+            print(safe_t("codegemini.check.passed", fallback="✓ 環境檢查通過"))
             sys.exit(0)
         else:
-            print("✗ 環境檢查失敗")
+            print(safe_t("codegemini.check.failed", fallback="✗ 環境檢查失敗"))
             sys.exit(1)
 
     elif args.command == "install":
         if cg.cli_manager.install():
-            print("✓ 安裝成功")
+            print(safe_t("codegemini.install.success", fallback="✓ 安裝成功"))
             sys.exit(0)
         else:
-            print("✗ 安裝失敗")
+            print(safe_t("codegemini.install.failed", fallback="✗ 安裝失敗"))
             sys.exit(1)
 
     elif args.command == "update":
         if cg.cli_manager.update():
-            print("✓ 更新成功")
+            print(safe_t("codegemini.update.success", fallback="✓ 更新成功"))
             sys.exit(0)
         else:
-            print("✗ 更新失敗")
+            print(safe_t("codegemini.update.failed", fallback="✗ 更新失敗"))
             sys.exit(1)
 
     elif args.command == "uninstall":
         if cg.cli_manager.uninstall():
-            print("✓ 卸載成功")
+            print(safe_t("codegemini.uninstall.success", fallback="✓ 卸載成功"))
             sys.exit(0)
         else:
-            print("✗ 卸載失敗")
+            print(safe_t("codegemini.uninstall.failed", fallback="✗ 卸載失敗"))
             sys.exit(1)
 
     elif args.command == "setup-api-key":
         if cg.api_key_manager.setup_interactive():
-            print("✓ API Key 設定完成")
+            print(safe_t("codegemini.api_key.setup_success", fallback="✓ API Key 設定完成"))
             sys.exit(0)
         else:
-            print("✗ API Key 設定失敗")
+            print(safe_t("codegemini.api_key.setup_failed", fallback="✗ API Key 設定失敗"))
             sys.exit(1)
 
     elif args.command == "pricing":
@@ -2366,21 +2369,21 @@ def main():
         commands = cg.slash_commands.list_commands()
 
         if not commands:
-            print("目前沒有自訂的 slash commands")
-            print(f"\n提示：在 {cg.slash_commands.commands_dir} 建立 .md 檔案來定義指令")
+            print(safe_t("codegemini.slash.no_commands", fallback="目前沒有自訂的 slash commands"))
+            print(safe_t("codegemini.slash.hint", fallback="\n提示：在 {dir} 建立 .md 檔案來定義指令").format(dir=cg.slash_commands.commands_dir))
             sys.exit(0)
 
-        print(f"\n可用的 Slash Commands ({len(commands)} 個)：\n")
+        print(safe_t("codegemini.slash.list", fallback="\n可用的 Slash Commands ({count} 個)：\n").format(count=len(commands)))
         for cmd in commands:
             print(f"  {cmd['name']:<20} - {cmd['description']}")
-            print(f"  {'':20}   檔案: {cmd['file_path']}\n")
+            print(safe_t("codegemini.slash.file", fallback="  {'':20}   檔案: {path}\n").format(path=cmd['file_path']))
 
         sys.exit(0)
 
     elif args.command == "create-command":
         # 建立新的 slash command
         if not args.name or not args.description or not args.prompt:
-            print("錯誤：建立指令需要 --name、--description 和 --prompt 參數")
+            print(safe_t("codegemini.slash.create_error", fallback="錯誤：建立指令需要 --name、--description 和 --prompt 參數"))
             sys.exit(1)
 
         cg.enable_slash_commands()
@@ -2390,9 +2393,9 @@ def main():
             prompt=args.prompt
         )
 
-        print(f"✓ 已建立指令: /{args.name}")
-        print(f"  檔案: {file_path}")
-        print(f"\n使用方式：")
+        print(safe_t("codegemini.slash.created", fallback="✓ 已建立指令: /{name}").format(name=args.name))
+        print(safe_t("codegemini.slash.file_path", fallback="  檔案: {path}").format(path=file_path))
+        print(safe_t("codegemini.slash.usage", fallback="\n使用方式："))
         print(f"  cg.enable_slash_commands()")
         print(f"  prompt = cg.slash_commands.execute_command('{args.name}')")
         sys.exit(0)
@@ -2400,31 +2403,31 @@ def main():
     elif args.command == "select-model":
         # 選擇最佳模型
         if not args.task_type:
-            print("錯誤：請使用 --task-type 指定任務類型")
+            print(safe_t("codegemini.recommend.error_no_task", fallback="錯誤：請使用 --task-type 指定任務類型"))
             sys.exit(1)
 
         cg.enable_auto_model_selector(strategy=args.strategy)
         model = cg.auto_model_selector.select_model(args.task_type)
 
-        print(f"\n任務類型: {args.task_type}")
-        print(f"選擇策略: {args.strategy}")
-        print(f"\n✓ 推薦模型: {model}")
+        print(safe_t("codegemini.recommend.task", fallback="\n任務類型: {task}").format(task=args.task_type))
+        print(safe_t("codegemini.recommend.strategy", fallback="選擇策略: {strategy}").format(strategy=args.strategy))
+        print(safe_t("codegemini.recommend.model", fallback="\n✓ 推薦模型: {model}").format(model=model))
 
         # 顯示模型資訊
         model_info = cg.auto_model_selector.get_model_info(model)
         if model_info:
-            print(f"\n模型資訊：")
-            print(f"  速度: {model_info.speed}")
+            print(safe_t("codegemini.recommend.model_info", fallback="\n模型資訊："))
+            print(safe_t("codegemini.recommend.speed", fallback="  速度: {speed}").format(speed=model_info.speed))
             print(f"  Context Window: {model_info.context_window:,} tokens")
-            print(f"  成本: ${model_info.cost_per_1m_input}/1M (input), ${model_info.cost_per_1m_output}/1M (output)")
-            print(f"  優勢: {', '.join(model_info.strengths)}")
+            print(safe_t("codegemini.recommend.cost", fallback="  成本: ${input}/1M (input), ${output}/1M (output)").format(input=model_info.cost_per_1m_input, output=model_info.cost_per_1m_output))
+            print(safe_t("codegemini.recommend.strengths", fallback="  優勢: {strengths}").format(strengths=', '.join(model_info.strengths)))
 
         sys.exit(0)
 
     elif args.command == "compare-models":
         # 比較模型
         if not args.task_type:
-            print("錯誤：請使用 --task-type 指定任務類型")
+            print(safe_t("codegemini.recommend.error_no_task", fallback="錯誤：請使用 --task-type 指定任務類型"))
             sys.exit(1)
 
         cg.enable_auto_model_selector(strategy=args.strategy)

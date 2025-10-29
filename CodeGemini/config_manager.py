@@ -14,6 +14,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 from dataclasses import dataclass, asdict, field
+from utils.i18n import safe_t
 
 logger = logging.getLogger(__name__)
 
@@ -49,6 +50,10 @@ class SystemConfig:
     # 記憶體管理
     memory_warning_threshold_gb: float = 1.5
     memory_auto_cleanup: bool = True
+
+    # UI 偏好設定（新增）
+    show_thinking_process: bool = False  # 思考過程顯示開關
+    last_menu_choice: str = "1"  # 記憶上次選單選擇
 
 
 @dataclass
@@ -114,7 +119,7 @@ class ConfigManager:
 
         # 載入配置
         self.config = self.load_config()
-        logger.info(f"✓ ConfigManager 已初始化: {self.config_path}")
+        logger.info(safe_t('codegemini.config.initialized', fallback='✓ ConfigManager 已初始化: {path}', path=self.config_path))
 
     def load_config(self) -> CodeGeminiConfig:
         """載入配置檔案（Tier 2: 使用者級配置）
@@ -123,7 +128,7 @@ class ConfigManager:
             CodeGeminiConfig 實例
         """
         if not self.config_path.exists():
-            logger.info("配置檔案不存在，使用預設配置")
+            logger.info(safe_t('codegemini.config.not_found', fallback='配置檔案不存在，使用預設配置'))
             return CodeGeminiConfig()
 
         try:
@@ -146,12 +151,12 @@ class ConfigManager:
                 system=system_config,
                 last_menu_choice=last_menu_choice
             )
-            logger.info("✓ 配置檔案已載入")
+            logger.info(safe_t('codegemini.config.loaded', fallback='✓ 配置檔案已載入'))
             return config
 
         except Exception as e:
-            logger.error(f"✗ 載入配置失敗: {e}")
-            logger.info("使用預設配置")
+            logger.error(safe_t('codegemini.config.load_failed', fallback='✗ 載入配置失敗: {error}', error=e))
+            logger.info(safe_t('codegemini.config.use_defaults', fallback='使用預設配置'))
             return CodeGeminiConfig()
 
     def save_config(self) -> bool:
@@ -172,7 +177,7 @@ class ConfigManager:
             with open(self.config_path, 'w', encoding='utf-8') as f:
                 json.dump(config_dict, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"✓ 配置已儲存: {self.config_path}")
+            logger.info(safe_t('codegemini.config.saved', fallback='✓ 配置已儲存: {path}', path=self.config_path))
 
             # 同步到 UnifiedConfig（如果可用）
             try:
@@ -187,7 +192,7 @@ class ConfigManager:
             return True
 
         except Exception as e:
-            logger.error(f"✗ 儲存配置失敗: {e}")
+            logger.error(safe_t('codegemini.config.save_failed', fallback='✗ 儲存配置失敗: {error}', error=e))
             return False
 
     def get_codebase_embedding_config(self) -> CodebaseEmbeddingConfig:
@@ -231,7 +236,7 @@ class ConfigManager:
             if 0.0 <= similarity_threshold <= 1.0:
                 emb_config.similarity_threshold = similarity_threshold
             else:
-                logger.error(f"✗ 無效的相似度閾值: {similarity_threshold}（應在 0.0-1.0 之間）")
+                logger.error(safe_t('codegemini.config.invalid_threshold', fallback='✗ 無效的相似度閾值: {threshold}（應在 0.0-1.0 之間）', threshold=similarity_threshold))
                 return False
         if collection_name is not None:
             emb_config.collection_name = collection_name
@@ -246,7 +251,7 @@ class ConfigManager:
             是否成功
         """
         self.config = CodeGeminiConfig()
-        logger.info("✓ 配置已重置為預設值")
+        logger.info(safe_t('codegemini.config.reset', fallback='✓ 配置已重置為預設值'))
         return self.save_config()
 
     def get_last_menu_choice(self) -> str:
@@ -327,7 +332,7 @@ def _validate_and_suggest_path(
 
     # 處理空輸入
     if not path_input or path_input.strip() == "":
-        console.print("[yellow]⚠ 路徑不能為空[/yellow]")
+        console.print(safe_t('codegemini.config.path_empty', fallback='[#DDA0DD]⚠ 路徑不能為空[/#DDA0DD]'))
         return (path_input, False)
 
     # 移除首尾空白
@@ -349,36 +354,36 @@ def _validate_and_suggest_path(
         path_obj = base_dir / path_input
 
     # 驗證路徑
-    console.print(f"\n[dim]完整路徑: {path_obj}[/dim]")
+    console.print(safe_t('codegemini.config.full_path', fallback='\n[dim]完整路徑: {path}[/dim]', path=path_obj))
 
     # 檢查父目錄是否存在
     parent_dir = path_obj.parent
     if not parent_dir.exists():
-        console.print(f"[yellow]⚠ 父目錄不存在: {parent_dir}[/yellow]")
+        console.print(safe_t('codegemini.config.parent_dir_missing', fallback='[#DDA0DD]⚠ 父目錄不存在: {dir}[/#DDA0DD]', dir=parent_dir))
 
         if create_if_missing:
-            if Confirm.ask("是否創建父目錄？", default=True):
+            if Confirm.ask(safe_t('codegemini.config.create_parent_dir', fallback='是否創建父目錄？'), default=True):
                 try:
                     parent_dir.mkdir(parents=True, exist_ok=True)
-                    console.print(f"[green]✓ 已創建父目錄[/green]")
+                    console.print(safe_t('codegemini.config.parent_dir_created', fallback='[green]✓ 已創建父目錄[/green]'))
                 except Exception as e:
-                    console.print(f"[red]✗ 創建父目錄失敗: {e}[/red]")
+                    console.print(safe_t('codegemini.config.parent_dir_create_failed', fallback='[red]✗ 創建父目錄失敗: {error}[/red]', error=e))
                     return (path_input, False)
             else:
-                console.print("[yellow]已取消，路徑可能無法使用[/yellow]")
+                console.print(safe_t('codegemini.config.path_cancelled', fallback='[#DDA0DD]已取消，路徑可能無法使用[/#DDA0DD]'))
                 return (path_input, False)
 
     # 檢查路徑是否已存在
     if path_obj.exists():
         if path_obj.is_file():
-            console.print(f"[yellow]⚠ 此路徑指向檔案，而非目錄: {path_obj}[/yellow]")
-            console.print("[dim]建議: 向量資料庫路徑應為目錄[/dim]")
-            if not Confirm.ask("確定要使用此路徑？", default=False):
+            console.print(safe_t('codegemini.config.path_is_file', fallback='[#DDA0DD]⚠ 此路徑指向檔案，而非目錄: {path}[/#DDA0DD]', path=path_obj))
+            console.print(safe_t('codegemini.config.path_should_be_dir', fallback='[dim]建議: 向量資料庫路徑應為目錄[/dim]'))
+            if not Confirm.ask(safe_t('codegemini.config.confirm_use_path', fallback='確定要使用此路徑？'), default=False):
                 return (path_input, False)
         else:
-            console.print(f"[green]✓ 路徑有效（目錄已存在）[/green]")
+            console.print(safe_t('codegemini.config.path_valid', fallback='[green]✓ 路徑有效（目錄已存在）[/green]'))
     else:
-        console.print(f"[dim]路徑尚未建立，將在首次使用時自動創建[/dim]")
+        console.print(safe_t('codegemini.config.path_will_create', fallback='[dim]路徑尚未建立，將在首次使用時自動創建[/dim]'))
 
     # 檢查寫入權限
     try:
@@ -386,10 +391,10 @@ def _validate_and_suggest_path(
         test_file = parent_dir / ".write_test"
         test_file.touch()
         test_file.unlink()
-        console.print("[green]✓ 目錄可寫入[/green]")
+        console.print(safe_t('codegemini.config.path_writable', fallback='[green]✓ 目錄可寫入[/green]'))
     except Exception as e:
-        console.print(f"[red]✗ 無寫入權限: {e}[/red]")
-        console.print("[dim]建議: 選擇有寫入權限的目錄[/dim]")
+        console.print(safe_t('codegemini.config.no_write_permission', fallback='[red]✗ 無寫入權限: {error}[/red]', error=e))
+        console.print(safe_t('codegemini.config.suggest_writable_dir', fallback='[dim]建議: 選擇有寫入權限的目錄[/dim]'))
         return (path_input, False)
 
     return (path_input, True)
@@ -412,8 +417,8 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
     while True:
         console.clear()
         console.print(Panel.fit(
-            "[bold magenta]CodeGemini 配置管理[/bold magenta]",
-            border_style="magenta"
+            "[bold #DDA0DD]CodeGemini 配置管理[/bold #DDA0DD]",
+            border_style="#DDA0DD"
         ))
 
         # 顯示當前配置
@@ -421,7 +426,7 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
 
         table = Table(title="[bold]Codebase Embedding 配置[/bold]", show_header=True)
         console_width = console.width or 120
-        table.add_column("設定項", style="magenta", width=max(20, int(console_width * 0.25)))
+        table.add_column("設定項", style="#DDA0DD", width=max(20, int(console_width * 0.25)))
         table.add_column("當前值", style="green", width=max(25, int(console_width * 0.30)))
         table.add_column("說明", style="dim", width=max(30, int(console_width * 0.35)))
 
@@ -452,17 +457,18 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
         )
 
         console.print(table)
-        console.print("\n[bold yellow]其他選項：[/bold yellow]")
-        console.print("  6. 重置為預設配置")
-        console.print("  7. 查看配置檔案路徑")
-        console.print("  0. 返回主選單")
+        console.print(safe_t("config.menu.other_options", fallback="\n[bold #DDA0DD]其他選項：[/bold #DDA0DD]"))
+        console.print(safe_t("config.menu.reset", fallback="  6. 重置為預設配置"))
+        console.print(safe_t("config.menu.view_path", fallback="  7. 查看配置檔案路徑"))
+        console.print(safe_t("config.menu.view_modules", fallback="  8. 查看已啟用模組（背景載入狀態）"))
+        console.print(safe_t("config.menu.back", fallback="  0. 返回主選單"))
 
         # ✅ V-5 修復：記憶上次選擇
         last_choice = config_manager.get_last_menu_choice()
 
         choice = Prompt.ask(
-            "\n[bold magenta]請選擇要修改的設定[/bold magenta]",
-            choices=["0", "1", "2", "3", "4", "5", "6", "7"],
+            "\n[bold #DDA0DD]請選擇要修改的設定[/bold #DDA0DD]",
+            choices=["0", "1", "2", "3", "4", "5", "6", "7", "8"],
             default=last_choice,
             show_default=True
         )
@@ -481,15 +487,15 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 default=emb_config.enabled
             )
             config_manager.update_codebase_embedding_config(enabled=new_enabled)
-            console.print("[bright_magenta]✓ 已更新啟用狀態[/green]")
-            console.input("\n按 Enter 繼續...")
+            console.print(safe_t('codegemini.config.updated_enabled', fallback='[#DA70D6]✓ 已更新啟用狀態[/green]'))
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "2":
             # 修改向量資料庫路徑（✅ V-7: 路徑輸入驗證與建議）
-            console.print("\n[plum]📁 向量資料庫路徑配置[/plum]")
-            console.print("[dim]· 用途: 儲存程式碼向量 embedding 資料[/dim]")
-            console.print("[dim]· 格式: 可使用相對路徑（相對於 Cache 目錄）或絕對路徑[/dim]")
-            console.print("[dim]· 當前路徑: {}[/dim]\n".format(emb_config.vector_db_path))
+            console.print(safe_t("config.vector.path_title", fallback="\n[plum]📁 向量資料庫路徑配置[/plum]"))
+            console.print(safe_t("config.vector.path_usage", fallback="[dim]· 用途: 儲存程式碼向量 embedding 資料[/dim]"))
+            console.print(safe_t("config.vector.path_format", fallback="[dim]· 格式: 可使用相對路徑（相對於 Cache 目錄）或絕對路徑[/dim]"))
+            console.print(safe_t("config.vector.path_current", fallback="[dim]· 當前路徑: {path}[/dim]\n").format(path=emb_config.vector_db_path))
 
             while True:
                 new_path = Prompt.ask(
@@ -505,15 +511,15 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
 
                 if is_valid:
                     config_manager.update_codebase_embedding_config(vector_db_path=validated_path)
-                    console.print("\n[bright_magenta]✓ 已更新向量資料庫路徑[/green]")
+                    console.print(safe_t('codegemini.config.updated_path', fallback='\n[#DA70D6]✓ 已更新向量資料庫路徑[/green]'))
                     break
                 else:
-                    console.print("\n[yellow]路徑驗證失敗，請重新輸入[/yellow]")
-                    if not Confirm.ask("是否重新輸入？", default=True):
-                        console.print("[dim]已取消，保留原路徑[/dim]")
+                    console.print(safe_t('codegemini.config.path_validation_failed', fallback='\n[#DDA0DD]路徑驗證失敗，請重新輸入[/#DDA0DD]'))
+                    if not Confirm.ask(safe_t('codegemini.config.retry_input', fallback='是否重新輸入？'), default=True):
+                        console.print(safe_t('codegemini.config.keep_original_path', fallback='[dim]已取消，保留原路徑[/dim]'))
                         break
 
-            console.input("\n按 Enter 繼續...")
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "3":
             # 切換正交模式
@@ -522,18 +528,18 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 default=emb_config.orthogonal_mode
             )
             config_manager.update_codebase_embedding_config(orthogonal_mode=new_orthogonal)
-            console.print("[bright_magenta]✓ 已更新正交模式[/green]")
-            console.input("\n按 Enter 繼續...")
+            console.print(safe_t('codegemini.config.updated_orthogonal', fallback='[#DA70D6]✓ 已更新正交模式[/green]'))
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "4":
             # 修改向量相關係數閾值
-            console.print("\n[plum]向量相關係數閾值說明：[/plum]")
-            console.print("  - 0.95: 非常嚴格（只過濾幾乎完全相同的內容）")
-            console.print("  - 0.85: 建議值（過濾高度相似的內容）")
-            console.print("  - 0.75: 寬鬆（過濾明顯相似的內容）")
+            console.print(safe_t("config.vector.threshold_desc", fallback="\n[plum]向量相關係數閾值說明：[/plum]"))
+            console.print(safe_t("config.vector.threshold_095", fallback="  - 0.95: 非常嚴格（只過濾幾乎完全相同的內容）"))
+            console.print(safe_t("config.vector.threshold_085", fallback="  - 0.85: 建議值（過濾高度相似的內容）"))
+            console.print(safe_t("config.vector.threshold_075", fallback="  - 0.75: 寬鬆（過濾明顯相似的內容）"))
 
             # ✅ M3 修復：使用選項而非自由輸入
-            console.print("\n[plum]向量相關係數閾值選項：[/plum]")
+            console.print(safe_t("config.vector.threshold_options", fallback="\n[plum]向量相關係數閾值選項：[/plum]"))
 
             options = {
                 "1": ("非常嚴格", 0.95),
@@ -544,7 +550,7 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
 
             for key, (desc, val) in options.items():
                 marker = "✓" if val == emb_config.similarity_threshold else " "
-                console.print(f"  {key}. [{marker}] {desc} ({val if val else '自訂'})")
+                console.print(safe_t("config.vector.threshold_item", fallback="  {key}. [{marker}] {desc} ({val})").format(key=key, marker=marker, desc=desc, val=val if val else '自訂'))
 
             choice_threshold = Prompt.ask("請選擇", choices=list(options.keys()), default="2")
 
@@ -557,34 +563,34 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 try:
                     new_threshold = float(new_threshold_str)
                 except ValueError:
-                    console.print("[dim magenta]✗ 無效的數值[/red]")
-                    console.input("\n按 Enter 繼續...")
+                    console.print(safe_t('codegemini.config.invalid_value', fallback='[dim #DDA0DD]✗ 無效的數值[/red]'))
+                    console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
                     continue
             else:
                 _, new_threshold = options[choice_threshold]
 
             if config_manager.update_codebase_embedding_config(similarity_threshold=new_threshold):
-                console.print("[plum]✓ 已更新向量相關係數閾值[/plum]")
+                console.print(safe_t('codegemini.config.updated_threshold', fallback='[plum]✓ 已更新向量相關係數閾值[/plum]'))
             else:
-                console.print("[yellow]✗ 更新失敗（向量相關係數閾值應在 0.0-1.0 之間）[/yellow]")
+                console.print(safe_t('codegemini.config.threshold_update_failed', fallback='[#DDA0DD]✗ 更新失敗（向量相關係數閾值應在 0.0-1.0 之間）[/#DDA0DD]'))
 
-            console.input("\n按 Enter 繼續...")
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "5":
             # 修改向量資料庫集合名稱（✅ M2: 中文命名明確性改善）
-            console.print("\n[plum]📋 向量資料庫集合名稱配置[/plum]")
-            console.print("[dim]· 用途說明: 在 ChromaDB 中唯一識別此程式碼庫的向量集合[/dim]")
-            console.print("[dim]· 格式限制: 僅限英文字母 (a-z, A-Z)、數字 (0-9)、底線 (_)[/dim]")
-            console.print("[dim]· 禁止內容: 空格、連字號 (-) 等特殊符號、中文字元[/dim]")
-            console.print("[dim]· 建議長度: 3-32 字元[/dim]")
-            console.print("\n[plum]✓ 有效範例:[/plum]")
-            console.print("  [orchid1]codebase_main[/orchid1] (基礎命名)")
-            console.print("  [orchid1]project_v2_embeddings[/orchid1] (含版本號)")
-            console.print("  [orchid1]ChatGemini_SakiTool[/orchid1] (專案名稱)")
-            console.print("\n[yellow]✗ 無效範例 (會被拒絕):[/yellow]")
-            console.print("  [dim]my-project[/dim] → 含連字號 (-)")
-            console.print("  [dim]code base[/dim] → 含空格")
-            console.print("  [dim]專案名稱[/dim] → 含中文字元\n")
+            console.print(safe_t("config.vector.collection_title", fallback="\n[plum]📋 向量資料庫集合名稱配置[/plum]"))
+            console.print(safe_t("config.vector.collection_usage", fallback="[dim]· 用途說明: 在 ChromaDB 中唯一識別此程式碼庫的向量集合[/dim]"))
+            console.print(safe_t("config.vector.collection_format", fallback="[dim]· 格式限制: 僅限英文字母 (a-z, A-Z)、數字 (0-9)、底線 (_)[/dim]"))
+            console.print(safe_t("config.vector.collection_forbidden", fallback="[dim]· 禁止內容: 空格、連字號 (-) 等特殊符號、中文字元[/dim]"))
+            console.print(safe_t("config.vector.collection_length", fallback="[dim]· 建議長度: 3-32 字元[/dim]"))
+            console.print(safe_t("config.vector.collection_valid", fallback="\n[plum]✓ 有效範例:[/plum]"))
+            console.print(safe_t("config.vector.example1", fallback="  [orchid1]codebase_main[/orchid1] (基礎命名)"))
+            console.print(safe_t("config.vector.example2", fallback="  [orchid1]project_v2_embeddings[/orchid1] (含版本號)"))
+            console.print(safe_t("config.vector.example3", fallback="  [orchid1]ChatGemini_SakiTool[/orchid1] (專案名稱)"))
+            console.print(safe_t("config.vector.collection_invalid", fallback="\n[#DDA0DD]✗ 無效範例 (會被拒絕):[/#DDA0DD]"))
+            console.print(safe_t("config.vector.invalid1", fallback="  [dim]my-project[/dim] → 含連字號 (-)"))
+            console.print(safe_t("config.vector.invalid2", fallback="  [dim]code base[/dim] → 含空格"))
+            console.print(safe_t("config.vector.invalid3", fallback="  [dim]專案名稱[/dim] → 含中文字元\n"))
 
             import re
             while True:
@@ -595,33 +601,90 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
 
                 # 格式驗證
                 if re.match(r'^[a-zA-Z0-9_]+$', new_collection_name):
-                    console.print(f"\n[plum]✓ 格式驗證通過: {new_collection_name}[/plum]")
+                    console.print(safe_t('codegemini.config.collection_format_valid', fallback='\n[plum]✓ 格式驗證通過: {name}[/plum]', name=new_collection_name))
                     break
                 else:
-                    console.print("\n[yellow]❌ 名稱格式不符合規則[/yellow]")
-                    console.print("[dim]· 原因: 包含不允許的字元[/dim]")
-                    console.print("[dim]· 允許: 英文字母 (a-zA-Z)、數字 (0-9)、底線 (_)[/dim]")
-                    console.print("[dim]· 請參考上方有效範例重新輸入[/dim]\n")
+                    console.print(safe_t('codegemini.config.collection_format_invalid', fallback='\n[#DDA0DD]❌ 名稱格式不符合規則[/#DDA0DD]'))
+                    console.print(safe_t('codegemini.config.collection_invalid_reason', fallback='[dim]· 原因: 包含不允許的字元[/dim]'))
+                    console.print(safe_t('codegemini.config.collection_allowed_chars', fallback='[dim]· 允許: 英文字母 (a-zA-Z)、數字 (0-9)、底線 (_)[/dim]'))
+                    console.print(safe_t('codegemini.config.collection_refer_examples', fallback='[dim]· 請參考上方有效範例重新輸入[/dim]\n'))
 
             # 更新配置
             config_manager.update_codebase_embedding_config(
                 collection_name=new_collection_name
             )
-            console.print("[plum]✓ 已更新向量資料庫集合名稱[/plum]")
-            console.input("\n按 Enter 繼續...")
+            console.print(safe_t('codegemini.config.updated_collection', fallback='[plum]✓ 已更新向量資料庫集合名稱[/plum]'))
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "6":
             # 重置為預設配置
-            if Confirm.ask("[bold red]確定要重置所有配置為預設值嗎？[/bold red]", default=False):
+            if Confirm.ask(safe_t('codegemini.config.confirm_reset', fallback='[bold red]確定要重置所有配置為預設值嗎？[/bold red]'), default=False):
                 config_manager.reset_to_defaults()
-                console.print("[bright_magenta]✓ 配置已重置為預設值[/green]")
-            console.input("\n按 Enter 繼續...")
+                console.print(safe_t('codegemini.config.reset_done', fallback='[#DA70D6]✓ 配置已重置為預設值[/green]'))
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "7":
             # 查看配置檔案路徑
-            console.print(f"\n[magenta]配置檔案路徑：[/magenta] {config_manager.config_path}")
-            console.print(f"[magenta]檔案存在：[/magenta] {'是' if config_manager.config_path.exists() else '否'}")
-            console.input("\n按 Enter 繼續...")
+            console.print(safe_t('codegemini.config.file_path', fallback='\n[#DDA0DD]配置檔案路徑：[/#DDA0DD] {path}', path=config_manager.config_path))
+            console.print(safe_t('codegemini.config.file_exists', fallback='[#DDA0DD]檔案存在：[/#DDA0DD] {exists}', exists='是' if config_manager.config_path.exists() else '否'))
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
+
+        elif choice == "8":
+            # 查看已啟用模組（背景載入狀態）
+            try:
+                from smart_background_loader import get_smart_loader
+
+                console.print(safe_t('config.modules.title', fallback='\n[bold #DDA0DD]📦 已啟用模組狀態[/bold #DDA0DD]\n'))
+
+                loader = get_smart_loader()
+                stats = loader.get_stats()
+
+                # 顯示統計資訊
+                console.print(safe_t('config.modules.summary', fallback='[#DDA0DD]載入統計：[/#DDA0DD]'))
+                console.print(safe_t('config.modules.total', fallback='  · 總任務數: {total}').format(total=stats['total_tasks']))
+                console.print(safe_t('config.modules.loaded', fallback='  · 已載入: {loaded} ({rate:.1%})').format(
+                    loaded=stats['loaded_tasks'],
+                    rate=stats['loading_rate']
+                ))
+                console.print(safe_t('config.modules.time', fallback='  · 總載入時間: {time:.2f}s').format(time=stats['total_load_time']))
+                console.print(safe_t('config.modules.background', fallback='  · 背景載入時間: {time:.2f}s').format(time=stats['background_load_time']))
+                console.print(safe_t('config.modules.foreground', fallback='  · 前景載入時間: {time:.2f}s').format(time=stats['foreground_load_time']))
+
+                # 顯示模組詳細列表
+                console.print(safe_t('config.modules.detail', fallback='\n[#DDA0DD]模組詳細列表：[/#DDA0DD]'))
+
+                from rich.table import Table
+                module_table = Table(show_header=True, header_style="bold #DDA0DD", border_style="#DDA0DD")
+                module_table.add_column("模組名稱", style="#87CEEB", width=25)
+                module_table.add_column("狀態", style="white", width=12)
+                module_table.add_column("優先級", style="white", width=12)
+                module_table.add_column("載入時間", style="white", width=15)
+
+                # 獲取所有任務資訊
+                with loader._lock:
+                    tasks = list(loader._tasks.values())
+
+                # 按優先級排序
+                tasks.sort(key=lambda t: t.priority.value)
+
+                for task in tasks:
+                    status = "✅ 已載入" if task.loaded else "⏳ 未載入"
+                    load_time = f"{task.load_time:.3f}s" if task.loaded else "—"
+                    module_table.add_row(
+                        task.name,
+                        status,
+                        task.priority.name,
+                        load_time
+                    )
+
+                console.print(module_table)
+
+                console.print(safe_t('config.modules.note', fallback='\n[dim]💡 提示：背景載入器會在使用者操作時自動載入模組，無需手動干預[/dim]'))
+
+            except Exception as e:
+                console.print(safe_t('config.modules.error', fallback='[#DDA0DD]✗ 無法獲取模組狀態: {e}[/#DDA0DD]', e=str(e)))
+
+            console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
 
 # 測試用例
@@ -634,19 +697,19 @@ if __name__ == "__main__":
     )
 
     print("=" * 60)
-    print("CodeGemini 配置管理器測試")
+    print(safe_t("config.test.title", fallback="CodeGemini 配置管理器測試"))
     print("=" * 60)
 
     # 建立配置管理器
     config_manager = ConfigManager()
 
     # 顯示當前配置
-    print("\n當前配置：")
+    print(safe_t("config.test.current", fallback="\n當前配置："))
     summary = config_manager.get_config_summary()
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
     # 測試更新配置
-    print("\n測試更新配置...")
+    print(safe_t("config.test.updating", fallback="\n測試更新配置..."))
     config_manager.update_codebase_embedding_config(
         enabled=True,
         orthogonal_mode=True,
@@ -654,7 +717,7 @@ if __name__ == "__main__":
     )
 
     # 顯示更新後的配置
-    print("\n更新後的配置：")
+    print(safe_t("config.test.updated", fallback="\n更新後的配置："))
     summary = config_manager.get_config_summary()
     print(json.dumps(summary, indent=2, ensure_ascii=False))
 
@@ -662,4 +725,4 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--interactive":
         interactive_config_menu(config_manager)
 
-    print("\n✓ 所有測試通過！")
+    print(safe_t("config.test.passed", fallback="\n✓ 所有測試通過！"))

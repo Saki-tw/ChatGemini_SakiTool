@@ -24,6 +24,7 @@ from typing import Optional, Dict, List, Any
 from pathlib import Path
 from dataclasses import dataclass, asdict
 from rich.console import Console
+from utils.i18n import safe_t
 
 console = Console()
 
@@ -107,13 +108,13 @@ class MCPRegistry:
                 return data
 
         except urllib.error.URLError as e:
-            console.print(f"[dim]✗ 端點無法訪問：{endpoint} ({e.reason})[/dim]")
+            console.print(safe_t("registry.endpoint.unreachable", fallback="[dim]✗ 端點無法訪問：{endpoint} ({reason})[/dim]").format(endpoint=endpoint, reason=e.reason))
             return None
         except json.JSONDecodeError:
-            console.print(f"[dim]✗ 端點回應格式錯誤：{endpoint}[/dim]")
+            console.print(safe_t("registry.endpoint.invalid_format", fallback="[dim]✗ 端點回應格式錯誤：{endpoint}[/dim]").format(endpoint=endpoint))
             return None
         except Exception as e:
-            console.print(f"[dim]✗ 端點錯誤：{endpoint} ({e})[/dim]")
+            console.print(safe_t("registry.endpoint.error", fallback="[dim]✗ 端點錯誤：{endpoint} ({error})[/dim]").format(endpoint=endpoint, error=e))
             return None
 
     @classmethod
@@ -124,17 +125,17 @@ class MCPRegistry:
         Returns:
             Optional[Dict]: Server 列表，失敗返回 None
         """
-        console.print("[dim]🌐 正在從 MCP Registry 獲取 Server 元數據...[/dim]")
+        console.print(safe_t("registry.fetch.starting", fallback="[dim]🌐 正在從 MCP Registry 獲取 Server 元數據...[/dim]"))
 
         for i, endpoint in enumerate(cls.ENDPOINTS):
-            console.print(f"[dim]  嘗試端點 {i+1}/{len(cls.ENDPOINTS)}: {endpoint}[/dim]")
+            console.print(safe_t("registry.fetch.trying", fallback="[dim]  嘗試端點 {current}/{total}: {endpoint}[/dim]").format(current=i+1, total=len(cls.ENDPOINTS), endpoint=endpoint))
 
             data = cls._fetch_from_endpoint(endpoint)
             if data:
-                console.print(f"[dim magenta]✓ 成功獲取數據（端點 {i+1}）[/dim magenta]")
+                console.print(safe_t("registry.fetch.success", fallback="[dim #DDA0DD]✓ 成功獲取數據（端點 {num}）[/dim #DDA0DD]").format(num=i+1))
                 return data
 
-        console.print("[yellow]⚠️  所有 Registry 端點均無法訪問[/yellow]")
+        console.print(safe_t("registry.fetch.all_failed", fallback="[#DDA0DD]⚠️  所有 Registry 端點均無法訪問[/#DDA0DD]"))
         return None
 
     @classmethod
@@ -157,14 +158,14 @@ class MCPRegistry:
             age = time.time() - cache_time
 
             if age > cls.CACHE_TTL:
-                console.print(f"[dim]⚠️  快取已過期（{age/3600:.1f} 小時）[/dim]")
+                console.print(safe_t("registry.cache.expired", fallback="[dim]⚠️  快取已過期（{hours:.1f} 小時）[/dim]").format(hours=age/3600))
                 return None
 
-            console.print(f"[dim magenta]✓ 使用快取數據（{age/3600:.1f} 小時前）[/dim magenta]")
+            console.print(safe_t("registry.cache.using", fallback="[dim #DDA0DD]✓ 使用快取數據（{hours:.1f} 小時前）[/dim #DDA0DD]").format(hours=age/3600))
             return cache_data.get('servers')
 
         except Exception as e:
-            console.print(f"[dim]✗ 快取載入失敗：{e}[/dim]")
+            console.print(safe_t("registry.cache.load_failed", fallback="[dim]✗ 快取載入失敗：{error}[/dim]").format(error=e))
             return None
 
     @classmethod
@@ -186,10 +187,10 @@ class MCPRegistry:
             with open(cls.CACHE_FILE, 'w', encoding='utf-8') as f:
                 json.dump(cache_data, f, ensure_ascii=False, indent=2)
 
-            console.print(f"[dim]✓ 已更新快取[/dim]")
+            console.print(safe_t("registry.cache.updated", fallback="[dim]✓ 已更新快取[/dim]"))
 
         except Exception as e:
-            console.print(f"[dim]⚠️  快取儲存失敗：{e}[/dim]")
+            console.print(safe_t("registry.cache.save_failed", fallback="[dim]⚠️  快取儲存失敗：{error}[/dim]").format(error=e))
 
     @classmethod
     def _get_servers_data(cls, force_refresh: bool = False) -> Optional[Dict]:
@@ -221,14 +222,14 @@ class MCPRegistry:
             return servers
 
         # 網路也失敗，嘗試使用過期快取（優雅降級）
-        console.print("[yellow]⚠️  嘗試使用過期快取...[/yellow]")
+        console.print(safe_t("registry.fallback.trying", fallback="[#DDA0DD]⚠️  嘗試使用過期快取...[/#DDA0DD]"))
         if cls.CACHE_FILE.exists():
             try:
                 with open(cls.CACHE_FILE, 'r', encoding='utf-8') as f:
                     cache_data = json.load(f)
                     servers = cache_data.get('servers')
                     if servers:
-                        console.print("[yellow]✓ 使用過期快取（降級模式）[/yellow]")
+                        console.print(safe_t("registry.fallback.success", fallback="[#DDA0DD]✓ 使用過期快取（降級模式）[/#DDA0DD]"))
                         return servers
             except:
                 pass
@@ -250,7 +251,7 @@ class MCPRegistry:
         servers = cls._get_servers_data(force_refresh)
 
         if not servers:
-            console.print("[dim]⚠️  無法獲取 Registry 數據[/dim]")
+            console.print(safe_t("registry.data.unavailable", fallback="[dim]⚠️  無法獲取 Registry 數據[/dim]"))
             return None
 
         # 查找 Server
@@ -372,7 +373,7 @@ class MCPRegistry:
         if not check_result['required']:
             return  # 無環境變數需求
 
-        console.print(f"\n[yellow]💡 提示：{server_name} Server 需要以下環境變數[/yellow]")
+        console.print(safe_t("registry.env.hint", fallback="\n[#DDA0DD]💡 提示：{name} Server 需要以下環境變數[/#DDA0DD]").format(name=server_name))
 
         for env_var, description in check_result['required'].items():
             is_set = env_var in check_result['present']
@@ -381,9 +382,9 @@ class MCPRegistry:
             console.print(f"     {description}")
 
         if check_result['missing']:
-            console.print(f"\n[dim]設定方式：[/dim]")
+            console.print(safe_t("registry.env.setup", fallback="\n[dim]設定方式：[/dim]"))
             console.print(f"[dim]  export {check_result['missing'][0]}=\"your_value_here\"[/dim]")
-            console.print(f"[dim]或在 ~/.bashrc / ~/.zshrc 中永久設定[/dim]\n")
+            console.print(safe_t("registry.env.permanent", fallback="[dim]或在 ~/.bashrc / ~/.zshrc 中永久設定[/dim]\n"))
 
 
 # ==================== 測試與命令列工具 ====================
@@ -392,58 +393,58 @@ def main():
     """Registry 客戶端測試工具"""
     import sys
 
-    console.print("\n[bold magenta]CodeGemini MCP Registry Client[/bold magenta]\n")
+    console.print("\n[bold #DDA0DD]CodeGemini MCP Registry Client[/bold #DDA0DD]\n")
 
     if len(sys.argv) < 2:
-        console.print("用法：")
-        console.print("  python registry.py info <server_name>    - 查詢 Server 資訊")
-        console.print("  python registry.py env <server_name>     - 檢查環境變數")
-        console.print("  python registry.py refresh               - 強制更新快取")
+        console.print(safe_t("registry.usage.header", fallback="用法："))
+        console.print(safe_t("registry.usage.info", fallback="  python registry.py info <server_name>    - 查詢 Server 資訊"))
+        console.print(safe_t("registry.usage.env", fallback="  python registry.py env <server_name>     - 檢查環境變數"))
+        console.print(safe_t("registry.usage.refresh", fallback="  python registry.py refresh               - 強制更新快取"))
         return
 
     command = sys.argv[1]
 
     if command == "info":
         if len(sys.argv) < 3:
-            console.print("[red]請指定 Server 名稱[/red]")
+            console.print(safe_t("registry.cli.specify_server", fallback="[red]請指定 Server 名稱[/red]"))
             return
 
         server_name = sys.argv[2]
         metadata = MCPRegistry.fetch_server_info(server_name)
 
         if metadata:
-            console.print(f"\n[magenta]📦 {metadata.name}[/magenta]")
-            console.print(f"描述：{metadata.description}")
-            console.print(f"套件：{metadata.package}")
-            console.print(f"版本：{metadata.version}")
+            console.print(f"\n[#DDA0DD]📦 {metadata.name}[/#DDA0DD]")
+            console.print(safe_t("registry.info.description", fallback="描述：{desc}").format(desc=metadata.description))
+            console.print(safe_t("registry.info.package", fallback="套件：{pkg}").format(pkg=metadata.package))
+            console.print(safe_t("registry.info.version", fallback="版本：{ver}").format(ver=metadata.version))
             if metadata.homepage:
-                console.print(f"首頁：{metadata.homepage}")
+                console.print(safe_t("registry.info.homepage", fallback="首頁：{url}").format(url=metadata.homepage))
 
             if metadata.env_vars:
-                console.print(f"\n環境變數需求：")
+                console.print(safe_t("registry.info.env_required", fallback="\n環境變數需求："))
                 for var, desc in metadata.env_vars.items():
                     console.print(f"  • {var}: {desc}")
         else:
-            console.print(f"[red]✗ 找不到 Server：{server_name}[/red]")
+            console.print(safe_t("registry.server.not_found", fallback="[red]✗ 找不到 Server：{name}[/red]").format(name=server_name))
 
     elif command == "env":
         if len(sys.argv) < 3:
-            console.print("[red]請指定 Server 名稱[/red]")
+            console.print(safe_t("registry.cli.specify_server", fallback="[red]請指定 Server 名稱[/red]"))
             return
 
         server_name = sys.argv[2]
         MCPRegistry.print_env_setup_hint(server_name)
 
     elif command == "refresh":
-        console.print("[magenta]🔄 強制更新快取...[/magenta]")
+        console.print(safe_t("registry.refresh.starting", fallback="[#DDA0DD]🔄 強制更新快取...[/#DDA0DD]"))
         servers = MCPRegistry._get_servers_data(force_refresh=True)
         if servers:
-            console.print(f"[green]✓ 已更新，共 {len(servers)} 個 Server[/green]")
+            console.print(safe_t("registry.refresh.success", fallback="[green]✓ 已更新，共 {count} 個 Server[/green]").format(count=len(servers)))
         else:
-            console.print("[red]✗ 更新失敗[/red]")
+            console.print(safe_t("registry.refresh.failed", fallback="[red]✗ 更新失敗[/red]"))
 
     else:
-        console.print(f"[red]未知指令：{command}[/red]")
+        console.print(safe_t("registry.cli.unknown_command", fallback="[red]未知指令：{cmd}[/red]").format(cmd=command))
 
 
 if __name__ == "__main__":

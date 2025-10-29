@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 """
+
+# i18n support
+import sys
+from pathlib import Path
+
+# 確保可以 import utils
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from utils.i18n import safe_t
 CodeGemini Built-in Commands Module
 內建命令 - 預定義的常用命令
 
@@ -46,8 +57,8 @@ class BuiltinCommands:
         """生成單元測試命令"""
         return CommandTemplate(
             name="test",
-            description="為指定的函數或類別生成單元測試",
-            template="""請為以下程式碼生成單元測試：
+            description=safe_t("commands.builtin.test.description", "為指定的函數或類別生成單元測試"),
+            template=safe_t("commands.builtin.test.template", """請為以下程式碼生成單元測試：
 
 目標：{target}
 測試框架：{framework|default:"pytest"}
@@ -67,7 +78,7 @@ class BuiltinCommands:
 
 程式碼：
 {code}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["target", "code"],
             examples=[
@@ -84,8 +95,8 @@ class BuiltinCommands:
         """優化程式碼命令"""
         return CommandTemplate(
             name="optimize",
-            description="分析並優化程式碼效能",
-            template="""請分析以下程式碼並提供優化建議：
+            description=safe_t("commands.builtin.optimize.description", "分析並優化程式碼效能"),
+            template=safe_t("commands.builtin.optimize.template", """請分析以下程式碼並提供優化建議：
 
 優化目標：{goal|default:"效能"}
 語言：{language}
@@ -102,7 +113,7 @@ class BuiltinCommands:
 
 {% if benchmark %}請包含基準測試程式碼{% endif %}
 {% if profile %}請包含效能分析建議{% endif %}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["code", "language"],
             examples=[
@@ -119,8 +130,8 @@ class BuiltinCommands:
         """解釋程式碼命令"""
         return CommandTemplate(
             name="explain",
-            description="解釋程式碼的功能與運作方式",
-            template="""請詳細解釋以下程式碼：
+            description=safe_t("commands.builtin.explain.description", "解釋程式碼的功能與運作方式"),
+            template=safe_t("commands.builtin.explain.template", """請詳細解釋以下程式碼：
 
 程式碼：
 {code}
@@ -134,7 +145,7 @@ class BuiltinCommands:
 4. 使用的演算法或設計模式
 {% if beginner_friendly %}5. 新手友善的比喻說明{% endif %}
 {% if include_diagram %}6. 流程圖或架構圖（使用 Mermaid 或 ASCII）{% endif %}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["code"],
             examples=[
@@ -151,8 +162,8 @@ class BuiltinCommands:
         """重構建議命令"""
         return CommandTemplate(
             name="refactor",
-            description="提供程式碼重構建議",
-            template="""請為以下程式碼提供重構建議：
+            description=safe_t("commands.builtin.refactor.description", "提供程式碼重構建議"),
+            template=safe_t("commands.builtin.refactor.template", """請為以下程式碼提供重構建議：
 
 程式碼：
 {code}
@@ -169,7 +180,7 @@ class BuiltinCommands:
 
 {% if design_patterns %}請建議適用的設計模式{% endif %}
 {% if show_before_after %}請提供重構前後對比{% endif %}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["code"],
             examples=[
@@ -186,8 +197,8 @@ class BuiltinCommands:
         """生成文檔命令"""
         return CommandTemplate(
             name="docs",
-            description="為程式碼生成文檔",
-            template="""請為以下程式碼生成文檔：
+            description=safe_t("commands.builtin.docs.description", "為程式碼生成文檔"),
+            template=safe_t("commands.builtin.docs.template", """請為以下程式碼生成文檔：
 
 程式碼：
 {code}
@@ -206,7 +217,7 @@ class BuiltinCommands:
 {% if style %}
 文檔風格：{style}
 {% endif %}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["code"],
             examples=[
@@ -223,8 +234,8 @@ class BuiltinCommands:
         """搭建專案結構命令"""
         return CommandTemplate(
             name="scaffold",
-            description="搭建新專案或元件的檔案結構",
-            template="""請搭建以下專案結構：
+            description=safe_t("commands.builtin.scaffold.description", "搭建新專案或元件的檔案結構"),
+            template=safe_t("commands.builtin.scaffold.template", """請搭建以下專案結構：
 
 專案類型：{project_type}
 專案名稱：{project_name}
@@ -247,7 +258,7 @@ class BuiltinCommands:
 {% for feature in features %}  - {feature}
 {% endfor %}
 {% endif %}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["project_type", "project_name"],
             examples=[
@@ -264,8 +275,8 @@ class BuiltinCommands:
         """程式碼審查命令"""
         return CommandTemplate(
             name="review",
-            description="進行全面的程式碼審查",
-            template="""請審查以下程式碼：
+            description=safe_t("commands.builtin.review.description", "進行全面的程式碼審查"),
+            template=safe_t("commands.builtin.review.template", """請審查以下程式碼：
 
 程式碼：
 {code}
@@ -285,7 +296,7 @@ class BuiltinCommands:
 {% if provide_examples %}請提供改善範例{% endif %}
 
 請以清單方式標註問題等級（🔴 嚴重、🟡 中等、🟢 建議）
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["code"],
             examples=[
@@ -302,8 +313,8 @@ class BuiltinCommands:
         """除錯協助命令"""
         return CommandTemplate(
             name="debug",
-            description="協助診斷並修復程式碼問題",
-            template="""請協助除錯以下程式碼：
+            description=safe_t("commands.builtin.debug.description", "協助診斷並修復程式碼問題"),
+            template=safe_t("commands.builtin.debug.template", """請協助除錯以下程式碼：
 
 程式碼：
 {code}
@@ -329,7 +340,7 @@ class BuiltinCommands:
 
 {% if include_logging %}請建議日誌記錄策略{% endif %}
 {% if include_tests %}請提供測試案例以驗證修復{% endif %}
-""",
+"""),
             command_type=CommandType.BUILTIN,
             parameters=["code"],
             examples=[
@@ -369,29 +380,29 @@ class BuiltinCommands:
 
 def main():
     """測試用主程式"""
-    console.print("[bold magenta]CodeGemini Built-in Commands 測試[/bold magenta]\n")
+    console.print(f"[bold #DDA0DD]{safe_t('commands.builtin.test_header', 'CodeGemini Built-in Commands 測試')}[/bold #DDA0DD]\n")
 
     # 取得所有內建命令
     commands = BuiltinCommands.get_all_commands()
 
-    console.print(f"[bold]內建命令數量：{len(commands)}[/bold]\n")
+    console.print(f"[bold]{safe_t('commands.builtin.count', '內建命令數量')}：{len(commands)}[/bold]\n")
 
     # 顯示每個命令的詳情
     for cmd in commands:
-        console.print(f"[bold yellow]/{cmd.name}[/bold yellow]")
-        console.print(f"  描述：{cmd.description}")
-        console.print(f"  參數：{', '.join(cmd.parameters)}")
-        console.print(f"  標籤：{', '.join(cmd.tags)}")
+        console.print(f"[bold #DDA0DD]/{cmd.name}[/bold #DDA0DD]")
+        console.print(f"  {safe_t('commands.builtin.description_label', '描述')}：{cmd.description}")
+        console.print(f"  {safe_t('commands.builtin.parameters_label', '參數')}：{', '.join(cmd.parameters)}")
+        console.print(f"  {safe_t('commands.builtin.tags_label', '標籤')}：{', '.join(cmd.tags)}")
         console.print()
 
     # 測試註冊到 Registry
     from .registry import CommandRegistry
 
-    console.print("[bold magenta]測試註冊到 Registry：[/bold magenta]")
+    console.print(f"[bold #DDA0DD]{safe_t('commands.builtin.registry_test', '測試註冊到 Registry')}：[/bold #DDA0DD]")
     registry = CommandRegistry()
     count = BuiltinCommands.register_all(registry)
 
-    console.print(f"\n[bright_magenta]✓ 成功註冊 {count} 個內建命令[/green]")
+    console.print(f"\n[#DA70D6]✓ {safe_t('commands.builtin.register_success', '成功註冊')} {count} {safe_t('commands.builtin.commands_unit', '個內建命令')}[/green]")
 
     # 顯示註冊表中的命令
     registry.show_commands_table(filter_type=CommandType.BUILTIN)

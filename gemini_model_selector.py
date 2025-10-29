@@ -13,6 +13,28 @@ import utils  # 自動初始化並注入 t() 到 builtins
 logger = logging.getLogger(__name__)
 
 
+def _save_model_choice(model_name: str):
+    """保存使用者選擇的模型"""
+    try:
+        from CodeGemini.config_manager import ConfigManager
+        config_manager = ConfigManager()
+        config_manager.config.system.default_model = model_name
+        config_manager.save_config()
+        logger.debug(f"✓ 模型選擇已保存: {model_name}")
+    except Exception as e:
+        logger.debug(f"保存模型選擇失敗: {e}")
+
+
+def get_last_selected_model() -> Optional[str]:
+    """取得上次選擇的模型"""
+    try:
+        from CodeGemini.config_manager import ConfigManager
+        config_manager = ConfigManager()
+        return config_manager.config.system.default_model
+    except Exception:
+        return None
+
+
 # 推薦模型清單（從 gemini_chat.py 導入）
 RECOMMENDED_MODELS = {
     '1': ('gemini-2.5-flash', 'Gemini 2.5 Flash（推薦，最快）'),
@@ -48,6 +70,14 @@ def select_model() -> str:
 
     console = Console()
 
+    # 🎯 觸發背景載入（v2.3 智能預載入）
+    # 使用者選擇模型時，預估有 3-5 秒可用時間，載入 Tier 1 模組
+    try:
+        from smart_background_loader import on_model_selection_start
+        on_model_selection_start()
+    except Exception as e:
+        logger.debug(f"背景載入觸發失敗（不影響功能）: {e}")
+
     console.print("\n")
 
     # 使用 safe_t 支援降級運行
@@ -76,7 +106,7 @@ def select_model() -> str:
     table.add_column(col_option, style="#DA70D6", justify="center")
     table.add_column(col_name, style="white")
     table.add_column(col_thinking, style="#BA55D3")
-    table.add_column(col_price, style="#FF00FF", justify="right")
+    table.add_column(col_price, style="#DA70D6", justify="right")
 
     # 導入價格計算
     try:
@@ -163,6 +193,7 @@ def select_model() -> str:
                 custom_model = console.input(f"[#DDA0DD]{input_prompt}:[/#DDA0DD] ").strip()
 
                 if custom_model:
+                    _save_model_choice(custom_model)
                     return custom_model
                 else:
                     try:
@@ -199,6 +230,7 @@ def select_model() -> str:
 
             # 驗證模型是否存在
             if custom_model in available_models:
+                _save_model_choice(custom_model)
                 return custom_model
             else:
                 try:
@@ -210,6 +242,8 @@ def select_model() -> str:
 
         if choice in RECOMMENDED_MODELS:
             model_name, _ = RECOMMENDED_MODELS[choice]
+            # 保存模型選擇
+            _save_model_choice(model_name)
             return model_name
 
         try:

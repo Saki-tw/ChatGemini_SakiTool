@@ -785,8 +785,7 @@ metadata:
 
 ## 相關資源
 
-- **專案文檔**：`/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/`
-- **測試腳本**：`CodeGemini/tests/test_markdown_loader.py`
+- **官方文檔**：專案 README 與其他指南
 - **範例命令**：`~/.chatgemini/commands/`
 
 ---

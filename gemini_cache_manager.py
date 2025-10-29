@@ -85,11 +85,11 @@ class CacheManager:
 
         # 檢查模型支援
         if not self._check_model_support(model):
-            console.print(f"[magenta]{safe_t('cache.warning_model_not_support', fallback='警告：{model} 可能不支援 Context Caching', model=model)}[/yellow]")
+            console.print(f"[#DDA0DD]{safe_t('cache.warning_model_not_support', fallback='警告：{model} 可能不支援 Context Caching', model=model)}[/#DDA0DD]")
 
         # 檢查最低 token 要求
         min_tokens = MIN_TOKENS.get(model, 1024)
-        console.print(f"\n[magenta]{safe_t('cache.create_title', fallback='📦 建立 Context Cache')}[/magenta]")
+        console.print(f"\n[#DDA0DD]{safe_t('cache.create_title', fallback='📦 建立 Context Cache')}[/#DDA0DD]")
         console.print(f"   {safe_t('cache.model_info', fallback='模型：{model}', model=model)}")
         console.print(f"   {safe_t('cache.min_tokens_info', fallback='最低 tokens：{min}', min=f'{min_tokens:,}')}")
         console.print(f"   {safe_t('cache.ttl_info', fallback='TTL：{seconds} 秒 ({hours} 小時)', seconds=ttl_seconds, hours=f'{ttl_seconds/3600:.1f}')}")
@@ -111,14 +111,14 @@ class CacheManager:
                 config_params["display_name"] = display_name
 
             # 建立快取
-            console.print(f"\n[magenta]{safe_t('cache.creating', fallback='⏳ 建立中...')}[/magenta]")
+            console.print(f"\n[#DDA0DD]{safe_t('cache.creating', fallback='⏳ 建立中...')}[/#DDA0DD]")
 
             cache = client.caches.create(
                 model=f"models/{model}",
                 config=types.CreateCachedContentConfig(**config_params)
             )
 
-            console.print(f"[bright_magenta]{safe_t('cache.created_success', fallback='✓ 快取已建立')}[/green]")
+            console.print(f"[#DA70D6]{safe_t('cache.created_success', fallback='✓ 快取已建立')}[/green]")
             console.print(f"   {safe_t('cache.cache_name_info', fallback='快取名稱：{name}', name=cache.name)}")
             console.print(f"   {safe_t('cache.expire_time_info', fallback='過期時間：{time}', time=cache.expire_time)}")
 
@@ -132,15 +132,15 @@ class CacheManager:
             return cache
 
         except Exception as e:
-            console.print(f"[dim magenta]{safe_t('cache.create_failed', fallback='✗ 建立快取失敗：{error}', error=str(e))}[/red]")
+            console.print(f"[dim #DDA0DD]{safe_t('cache.create_failed', fallback='✗ 建立快取失敗：{error}', error=str(e))}[/red]")
 
             # 檢查常見錯誤
             error_str = str(e).lower()
             if 'token' in error_str and 'minimum' in error_str:
-                console.print(f"\n[magenta]{safe_t('cache.hint_content_too_short', fallback='提示：內容可能少於最低 {min_tokens} tokens', min_tokens=min_tokens)}[/yellow]")
-                console.print(f"[magenta]{safe_t('cache.hint_increase_content', fallback='請增加內容長度以使用 Context Caching')}[/yellow]")
+                console.print(f"\n[#DDA0DD]{safe_t('cache.hint_content_too_short', fallback='提示：內容可能少於最低 {min_tokens} tokens', min_tokens=min_tokens)}[/#DDA0DD]")
+                console.print(f"[#DDA0DD]{safe_t('cache.hint_increase_content', fallback='請增加內容長度以使用 Context Caching')}[/#DDA0DD]")
             elif 'not support' in error_str:
-                console.print(f"\n[magenta]{safe_t('cache.hint_model_not_support', fallback='提示：{model} 可能不支援 Context Caching', model=model)}[/yellow]")
+                console.print(f"\n[#DDA0DD]{safe_t('cache.hint_model_not_support', fallback='提示：{model} 可能不支援 Context Caching', model=model)}[/#DDA0DD]")
 
             raise
 
@@ -179,12 +179,12 @@ class CacheManager:
         cache = self.active_caches.get(cache_name_or_key)
         if not cache:
             # 嘗試列出並查找
-            console.print(f"[magenta]{safe_t('cache.trying_api', fallback='在本地找不到快取，嘗試從 API 獲取...')}[/yellow]")
+            console.print(f"[#DDA0DD]{safe_t('cache.trying_api', fallback='在本地找不到快取，嘗試從 API 獲取...')}[/#DDA0DD]")
             cache = self._find_cache_by_name(cache_name_or_key)
             if not cache:
                 raise ValueError(safe_t('cache.cache_not_found', fallback='找不到快取：{name}', name=cache_name_or_key))
 
-        console.print(f"\n[magenta]{safe_t('cache.query_title', fallback='🔍 使用快取查詢')}[/magenta]")
+        console.print(f"\n[#DDA0DD]{safe_t('cache.query_title', fallback='🔍 使用快取查詢')}[/#DDA0DD]")
         console.print(f"   {safe_t('cache.cache_info', fallback='快取：{name}', name=cache.name)}")
         console.print(f"   {safe_t('cache.question_info', fallback='問題：{question}', question=question)}\n")
 
@@ -233,13 +233,13 @@ class CacheManager:
 
                     console.print(f"[dim]   {safe_t('cache.cumulative_cost_info', fallback='累計成本: NT${twd} (${usd} USD)', twd=f'{global_pricing_calculator.total_cost * USD_TO_TWD:.2f}', usd=f'{global_pricing_calculator.total_cost:.6f}')}[/dim]\n")
 
-            console.print(f"[magenta]{safe_t('cache.using_cache_label', fallback='Gemini (使用快取)：')}[/magenta]")
+            console.print(f"[#DDA0DD]{safe_t('cache.using_cache_label', fallback='Gemini (使用快取)：')}[/#DDA0DD]")
             console.print(response.text)
 
             return response.text
 
         except Exception as e:
-            console.print(f"[dim magenta]{safe_t('cache.query_failed', fallback='✗ 查詢失敗：{error}', error=str(e))}[/red]")
+            console.print(f"[dim #DDA0DD]{safe_t('cache.query_failed', fallback='✗ 查詢失敗：{error}', error=str(e))}[/red]")
             raise
 
     def _find_cache_by_name(self, name: str) -> Optional[Any]:
@@ -250,22 +250,22 @@ class CacheManager:
                 if name in cache.name or (hasattr(cache, 'display_name') and cache.display_name == name):
                     return cache
         except Exception as e:
-            console.print(f"[dim magenta]列出快取失敗：{e}[/red]")
+            console.print(f"[dim #DDA0DD]列出快取失敗：{e}[/red]")
         return None
 
     def list_caches(self) -> List[Any]:
         """列出所有快取"""
-        console.print(f"\n[magenta]{safe_t('cache.list_title', fallback='📦 已建立的 Context Caches：')}[/magenta]\n")
+        console.print(f"\n[#DDA0DD]{safe_t('cache.list_title', fallback='📦 已建立的 Context Caches：')}[/#DDA0DD]\n")
 
         try:
             caches = list(client.caches.list())
 
             if not caches:
-                console.print(f"[magenta]{safe_t('cache.no_caches_found', fallback='沒有找到快取')}[/yellow]")
+                console.print(f"[#DDA0DD]{safe_t('cache.no_caches_found', fallback='沒有找到快取')}[/#DDA0DD]")
                 return []
 
             # 建立表格
-            table = Table(show_header=True, header_style="bold bright_magenta")
+            table = Table(show_header=True, header_style="bold #DA70D6")
             table.add_column(safe_t('cache.table_col_name', fallback='名稱'), style="green")
             table.add_column(safe_t('cache.table_col_model', fallback='模型'))
             table.add_column(safe_t('cache.table_col_created', fallback='建立時間'))
@@ -280,7 +280,7 @@ class CacheManager:
                 expire_time = cache.expire_time
                 is_expired = expire_time < now if expire_time else False
 
-                status = f"[dim magenta]{safe_t('cache.status_expired', fallback='已過期')}[/red]" if is_expired else f"[bright_magenta]{safe_t('cache.status_valid', fallback='有效')}[/green]"
+                status = f"[dim #DDA0DD]{safe_t('cache.status_expired', fallback='已過期')}[/red]" if is_expired else f"[#DA70D6]{safe_t('cache.status_valid', fallback='有效')}[/green]"
 
                 table.add_row(
                     display_name,
@@ -296,7 +296,7 @@ class CacheManager:
             return caches
 
         except Exception as e:
-            console.print(f"[dim magenta]{safe_t('cache.list_failed', fallback='✗ 列出快取失敗：{error}', error=str(e))}[/red]")
+            console.print(f"[dim #DDA0DD]{safe_t('cache.list_failed', fallback='✗ 列出快取失敗：{error}', error=str(e))}[/red]")
             return []
 
     def delete_cache(self, cache_name_or_key: str) -> bool:
@@ -321,7 +321,7 @@ class CacheManager:
                     cache_name = f"cachedContents/{cache_name}"
 
             client.caches.delete(name=cache_name)
-            console.print(f"[bright_magenta]✓ 已刪除快取：{cache_name_or_key}[/green]")
+            console.print(f"[#DA70D6]✓ 已刪除快取：{cache_name_or_key}[/green]")
 
             # 從 active_caches 移除
             if cache_name_or_key in self.active_caches:
@@ -330,7 +330,7 @@ class CacheManager:
             return True
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 刪除快取失敗：{e}[/red]")
+            console.print(f"[dim #DDA0DD]✗ 刪除快取失敗：{e}[/red]")
             return False
 
     def calculate_savings(
@@ -381,12 +381,12 @@ class CacheManager:
         result = self.calculate_savings(model, cached_tokens, query_count)
 
         panel_content = f"""
-[magenta]模型：[/magenta] {model}
-[magenta]快取 Tokens：[/magenta] {result['cached_tokens']:,}
-[magenta]查詢次數：[/magenta] {result['query_count']}
+[#DDA0DD]模型：[/#DDA0DD] {model}
+[#DDA0DD]快取 Tokens：[/#DDA0DD] {result['cached_tokens']:,}
+[#DDA0DD]查詢次數：[/#DDA0DD] {result['query_count']}
 
-[magenta]不使用快取成本：[/yellow] ${result['without_cache']:.6f}
-[bright_magenta]使用快取成本：[/green] ${result['with_cache']:.6f}
+[#DDA0DD]不使用快取成本：[/#DDA0DD] ${result['without_cache']:.6f}
+[#DA70D6]使用快取成本：[/green] ${result['with_cache']:.6f}
 [bold green]節省：[/bold green] ${result['savings']:.6f} ({result['discount_percent']}% 折扣)
 
 [dim]約合台幣節省：NT${result['savings'] * USD_TO_TWD:.2f}[/dim]
@@ -417,7 +417,7 @@ def main():
 
     if args.command == 'create':
         if not args.content:
-            console.print("[dim magenta]錯誤：請提供 --content[/red]")
+            console.print("[dim #DDA0DD]錯誤：請提供 --content[/red]")
             sys.exit(1)
 
         # 檢查是否為檔案
@@ -438,19 +438,19 @@ def main():
 
     elif args.command == 'delete':
         if not args.cache:
-            console.print("[dim magenta]錯誤：請提供 --cache[/red]")
+            console.print("[dim #DDA0DD]錯誤：請提供 --cache[/red]")
             sys.exit(1)
         manager.delete_cache(args.cache)
 
     elif args.command == 'query':
         if not args.cache or not args.question:
-            console.print("[dim magenta]錯誤：請提供 --cache 和 --question[/red]")
+            console.print("[dim #DDA0DD]錯誤：請提供 --cache 和 --question[/red]")
             sys.exit(1)
         manager.query_with_cache(args.cache, args.question)
 
     elif args.command == 'calculate':
         if not args.tokens:
-            console.print("[dim magenta]錯誤：請提供 --tokens[/red]")
+            console.print("[dim #DDA0DD]錯誤：請提供 --tokens[/red]")
             sys.exit(1)
         manager.show_savings_report(
             model=args.model,
@@ -461,7 +461,7 @@ def main():
 
 if __name__ == "__main__":
     if len(sys.argv) == 1:
-        console.print("\n[bold magenta]Gemini Context Caching 管理器[/bold magenta]\n")
+        console.print("\n[bold #DDA0DD]Gemini Context Caching 管理器[/bold #DDA0DD]\n")
         console.print("💰 [bold]使用快取可節省最高 90% 的成本！[/bold]\n")
         console.print("使用方式：")
         console.print("  建立快取：")

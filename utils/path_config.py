@@ -275,7 +275,7 @@ if __name__ == "__main__":
 
     table = Table(title="標準輸出路徑", show_header=True, header_style="bold bright_magenta")
     table.add_column("類別", style="bright_magenta")
-    table.add_column("路徑", style="yellow")
+    table.add_column("路徑", style="#DDA0DD")
 
     table.add_row("基礎目錄", str(BASE_DIR))
     table.add_row("報告", str(REPORTS_DIR))
@@ -298,17 +298,17 @@ if __name__ == "__main__":
     ]
 
     for name, path in test_cases:
-        console.print(f"[bright_magenta]✓[/bright_magenta] {name}: {path}")
+        console.print(f"[#DA70D6]✓[/#DA70D6] {name}: {path}")
 
     # 測試 3: 檢查舊路徑
     console.print("\n[bold bright_magenta]舊路徑遷移檢查[/bold bright_magenta]\n")
     old_paths = check_old_paths()
 
     if old_paths:
-        console.print("[yellow]⚠️  發現舊輸出路徑：[/yellow]")
+        console.print("[#DDA0DD]⚠️  發現舊輸出路徑：[/#DDA0DD]")
         for name, info in old_paths.items():
             console.print(f"  • {name}: {info['path']} ({info['file_count']} 個檔案)")
     else:
-        console.print("[bright_magenta]✓ 無舊路徑[/bright_magenta]")
+        console.print("[#DA70D6]✓ 無舊路徑[/#DA70D6]")
 
-    console.print("\n[bright_magenta]✅ 路徑配置模組測試完成[/bright_magenta]\n")
+    console.print("\n[#DA70D6]✅ 路徑配置模組測試完成[/#DA70D6]\n")

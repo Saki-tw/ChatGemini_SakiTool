@@ -164,7 +164,6 @@ def parse_cache_control(user_input: str, cache_mgr: 'AutoCacheManager') -> tuple
         (處理後的輸入, 快取動作)
     """
     import re
-from utils.i18n import safe_t
 
     # [cache:now] - 立即建立快取
     if re.search(r'\[cache:now\]', user_input, re.I):

@@ -86,6 +86,7 @@ select_installation() {
     echo "  • Python 3.10+, pip, ffmpeg"
     echo "  • google-genai, rich, prompt-toolkit"
     echo "  • Pillow, numpy, requests 等"
+    echo "  • 工具模組：requests, beautifulsoup4, html2text, duckduckgo-search (~1 MB)"
     echo ""
 
     echo -e "${BOLD}[2] 完整版 (ChatGemini + CodeGemini)${NC} ${BLUE}(約 550 MB，推薦)${NC}"
@@ -137,6 +138,7 @@ install_all() {
 
             command -v python3 &> /dev/null || brew install python@3.14 || brew install python@3.10
             command -v ffmpeg &> /dev/null || brew install ffmpeg
+            brew list python-yq &> /dev/null || brew install python-yq
 
             if [ "$INSTALL_CODEGEMINI" = true ]; then
                 command -v node &> /dev/null || brew install node
@@ -150,6 +152,7 @@ install_all() {
                     sudo apt install -y python3 python3-pip python3-venv
                 fi
                 command -v ffmpeg &> /dev/null || sudo apt install -y ffmpeg
+                command -v yq &> /dev/null || sudo apt install -y yq
 
                 if [ "$INSTALL_CODEGEMINI" = true ]; then
                     command -v node &> /dev/null || sudo apt install -y nodejs npm
@@ -183,6 +186,14 @@ install_all() {
 
         source "$VENV_DIR/bin/activate"
         pip install --upgrade pip setuptools wheel --quiet
+
+        # 優先使用 brew 安裝可用的依賴（macOS）
+        if [[ "$DETECTED_OS" == "macOS" ]]; then
+            # brew 可安裝的套件（若可用）
+            command -v ffmpeg &> /dev/null || brew install ffmpeg
+        fi
+
+        # pip 安裝所有 Python 依賴（包含工具模組）
         pip install -r "$SCRIPT_DIR/requirements.txt" --quiet
 
         [ ! -f "$SCRIPT_DIR/.env" ] && [ -f "$SCRIPT_DIR/.env.example" ] && cp "$SCRIPT_DIR/.env.example" "$SCRIPT_DIR/.env"

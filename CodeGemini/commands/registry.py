@@ -10,6 +10,7 @@ CodeGemini Command Registry Module
 4. 從配置檔導入命令
 """
 import os
+import sys
 import json
 import yaml
 from typing import Dict, List, Optional, Any
@@ -19,6 +20,13 @@ from enum import Enum
 from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
+
+# 確保可以 import utils
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from utils.i18n import safe_t
 
 console = Console()
 
@@ -100,17 +108,17 @@ class CommandRegistry:
         """
         # 驗證名稱
         if not name or not isinstance(name, str):
-            console.print(f"[dim magenta]錯誤：命令名稱無效[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.invalid_name', '錯誤：命令名稱無效')}[/dim #DDA0DD]")
             return False
 
         # 檢查是否已存在
         if name in self.commands:
-            console.print(f"[magenta]警告：命令 '{name}' 已存在，將被覆蓋[/yellow]")
+            console.print(f"[#DDA0DD]{safe_t('registry.warning.command_exists', '警告：命令已存在，將被覆蓋', name=name)}[/#DDA0DD]")
 
         # 註冊命令
         self.commands[name] = template
 
-        console.print(f"[bright_magenta]✓ 已註冊命令：{name}[/bright_magenta]")
+        console.print(f"[#DA70D6]✓ {safe_t('registry.success.registered', '已註冊命令', name=name)}[/#DA70D6]")
 
         # 儲存到配置檔
         if save_to_config:
@@ -129,16 +137,16 @@ class CommandRegistry:
             bool: 是否成功取消註冊
         """
         if name not in self.commands:
-            console.print(f"[dim magenta]錯誤：命令 '{name}' 不存在[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.command_not_found', '錯誤：命令不存在', name=name)}[/dim #DDA0DD]")
             return False
 
         # 檢查是否為內建命令
         if self.commands[name].command_type == CommandType.BUILTIN:
-            console.print(f"[dim magenta]錯誤：無法取消註冊內建命令[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.cannot_unregister_builtin', '錯誤：無法取消註冊內建命令')}[/dim #DDA0DD]")
             return False
 
         del self.commands[name]
-        console.print(f"[bright_magenta]✓ 已取消註冊命令：{name}[/bright_magenta]")
+        console.print(f"[#DA70D6]✓ {safe_t('registry.success.unregistered', '已取消註冊命令', name=name)}[/#DA70D6]")
 
         # 儲存到配置檔
         self._save_commands()
@@ -166,13 +174,13 @@ class CommandRegistry:
             return CommandResult(
                 success=False,
                 output="",
-                error_message=f"命令 '{name}' 不存在"
+                error_message=safe_t('registry.error.command_not_found', '命令不存在', name=name)
             )
 
         command = self.commands[name]
         args = args or {}
 
-        console.print(f"\n[magenta]🚀 執行命令：{name}[/magenta]")
+        console.print(f"\n[#DDA0DD]🚀 {safe_t('registry.execute.running', '執行命令', name=name)}[/#DDA0DD]")
 
         # 驗證參數
         validation_result = self._validate_parameters(command, args)
@@ -180,7 +188,7 @@ class CommandRegistry:
             return CommandResult(
                 success=False,
                 output="",
-                error_message=f"參數驗證失敗：{validation_result['message']}"
+                error_message=safe_t('registry.error.validation_failed', '參數驗證失敗', message=validation_result['message'])
             )
 
         try:
@@ -193,14 +201,14 @@ class CommandRegistry:
                 args
             )
 
-            console.print(f"[bright_magenta]✓ 命令已渲染[/bright_magenta]")
+            console.print(f"[#DA70D6]✓ {safe_t('registry.execute.rendered', '命令已渲染')}[/#DA70D6]")
 
             # 記錄歷史
             self._add_to_history(name, args, rendered)
 
             # 如果有執行器，實際執行
             if executor:
-                console.print(f"[magenta]使用執行器執行...[/magenta]")
+                console.print(f"[#DDA0DD]{safe_t('registry.execute.using_executor', '使用執行器執行...')}[/#DDA0DD]")
                 # 這裡可以整合 Gemini API 或其他執行器
                 # 目前返回渲染結果
                 pass
@@ -216,7 +224,7 @@ class CommandRegistry:
             )
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：{e}[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.generic', '錯誤', error=str(e))}[/dim #DDA0DD]")
             return CommandResult(
                 success=False,
                 output="",
@@ -276,10 +284,10 @@ class CommandRegistry:
             int: 成功導入的命令數量
         """
         if not os.path.exists(config_file):
-            console.print(f"[dim magenta]錯誤：配置檔不存在：{config_file}[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.file_not_found', '錯誤：配置檔不存在', file=config_file)}[/dim #DDA0DD]")
             return 0
 
-        console.print(f"\n[magenta]📥 導入命令：{config_file}[/magenta]")
+        console.print(f"\n[#DDA0DD]📥 {safe_t('registry.import.importing', '導入命令', file=config_file)}[/#DDA0DD]")
 
         try:
             # 讀取檔案
@@ -289,7 +297,7 @@ class CommandRegistry:
                 elif config_file.endswith('.json'):
                     data = json.load(f)
                 else:
-                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/dim magenta]")
+                    console.print(f"[dim #DDA0DD]{safe_t('registry.error.unsupported_format', '錯誤：不支援的檔案格式')}[/dim #DDA0DD]")
                     return 0
 
             # 解析命令
@@ -316,17 +324,17 @@ class CommandRegistry:
                     count += 1
 
                 except Exception as e:
-                    console.print(f"[magenta]警告：導入命令 '{cmd_data.get('name', 'unknown')}' 失敗 - {e}[/yellow]")
+                    console.print(f"[#DDA0DD]{safe_t('registry.warning.import_failed', '警告：導入命令失敗', name=cmd_data.get('name', 'unknown'), error=str(e))}[/#DDA0DD]")
 
             # 儲存所有導入的命令
             if count > 0:
                 self._save_commands()
 
-            console.print(f"[bright_magenta]✓ 成功導入 {count} 個命令[/bright_magenta]")
+            console.print(f"[#DA70D6]✓ {safe_t('registry.import.success', '成功導入命令', count=count)}[/#DA70D6]")
             return count
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：導入失敗 - {e}[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.import_failed', '錯誤：導入失敗', error=str(e))}[/dim #DDA0DD]")
             return 0
 
     def export_commands(self, output_file: str) -> bool:
@@ -339,7 +347,7 @@ class CommandRegistry:
         Returns:
             bool: 是否成功匯出
         """
-        console.print(f"\n[magenta]📤 匯出命令：{output_file}[/magenta]")
+        console.print(f"\n[#DDA0DD]📤 {safe_t('registry.export.exporting', '匯出命令', file=output_file)}[/#DDA0DD]")
 
         try:
             # 準備資料
@@ -370,14 +378,14 @@ class CommandRegistry:
                 elif output_file.endswith('.json'):
                     json.dump(data, f, ensure_ascii=False, indent=2)
                 else:
-                    console.print(f"[dim magenta]錯誤：不支援的檔案格式[/dim magenta]")
+                    console.print(f"[dim #DDA0DD]{safe_t('registry.error.unsupported_format', '錯誤：不支援的檔案格式')}[/dim #DDA0DD]")
                     return False
 
-            console.print(f"[bright_magenta]✓ 成功匯出 {len(commands_data)} 個命令[/bright_magenta]")
+            console.print(f"[#DA70D6]✓ {safe_t('registry.export.success', '成功匯出命令', count=len(commands_data))}[/#DA70D6]")
             return True
 
         except Exception as e:
-            console.print(f"[dim magenta]錯誤：匯出失敗 - {e}[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.export_failed', '錯誤：匯出失敗', error=str(e))}[/dim #DDA0DD]")
             return False
 
     def show_command_details(self, name: str):
@@ -385,32 +393,32 @@ class CommandRegistry:
         command = self.get_command(name)
 
         if not command:
-            console.print(f"[dim magenta]命令 '{name}' 不存在[/dim magenta]")
+            console.print(f"[dim #DDA0DD]{safe_t('registry.error.command_not_found', '命令不存在', name=name)}[/dim #DDA0DD]")
             return
 
         # 建立詳情面板
-        details = f"""[bold]名稱：[/bold]{command.name}
-[bold]描述：[/bold]{command.description}
-[bold]類型：[/bold]{command.command_type.value}
-[bold]版本：[/bold]{command.version}
-[bold]作者：[/bold]{command.author}
+        details = f"""[bold]{safe_t('registry.details.name', '名稱')}：[/bold]{command.name}
+[bold]{safe_t('registry.details.description', '描述')}：[/bold]{command.description}
+[bold]{safe_t('registry.details.type', '類型')}：[/bold]{command.command_type.value}
+[bold]{safe_t('registry.details.version', '版本')}：[/bold]{command.version}
+[bold]{safe_t('registry.details.author', '作者')}：[/bold]{command.author}
 """
 
         if command.parameters:
-            details += f"\n[bold]參數：[/bold]{', '.join(command.parameters)}"
+            details += f"\n[bold]{safe_t('registry.details.parameters', '參數')}：[/bold]{', '.join(command.parameters)}"
 
         if command.tags:
-            details += f"\n[bold]標籤：[/bold]{', '.join(command.tags)}"
+            details += f"\n[bold]{safe_t('registry.details.tags', '標籤')}：[/bold]{', '.join(command.tags)}"
 
-        console.print(Panel(details, title=f"命令詳情", border_style="bright_magenta"))
+        console.print(Panel(details, title=safe_t('registry.details.title', '命令詳情'), border_style="#DA70D6"))
 
         # 顯示模板
-        console.print(f"\n[bold magenta]模板內容：[/bold magenta]")
+        console.print(f"\n[bold #DDA0DD]{safe_t('registry.details.template', '模板內容')}：[/bold #DDA0DD]")
         console.print(command.template)
 
         # 顯示範例
         if command.examples:
-            console.print(f"\n[bold magenta]使用範例：[/bold magenta]")
+            console.print(f"\n[bold #DDA0DD]{safe_t('registry.details.examples', '使用範例')}：[/bold #DDA0DD]")
             for i, example in enumerate(command.examples, 1):
                 console.print(f"  {i}. {example}")
 
@@ -419,14 +427,14 @@ class CommandRegistry:
         commands = self.list_commands(filter_type=filter_type)
 
         if not commands:
-            console.print("[magenta]沒有已註冊的命令[/yellow]")
+            console.print(f"[#DDA0DD]{safe_t('registry.table.no_commands', '沒有已註冊的命令')}[/#DDA0DD]")
             return
 
-        table = Table(show_header=True, header_style="bold bright_magenta")
-        table.add_column("名稱", style="yellow")
-        table.add_column("描述", style="white")
-        table.add_column("類型", style="green")
-        table.add_column("參數", style="magenta")
+        table = Table(show_header=True, header_style="bold #DA70D6")
+        table.add_column(safe_t('registry.table.name', '名稱'), style="#DDA0DD")
+        table.add_column(safe_t('registry.table.description', '描述'), style="white")
+        table.add_column(safe_t('registry.table.type', '類型'), style="green")
+        table.add_column(safe_t('registry.table.parameters', '參數'), style="#DDA0DD")
 
         for cmd in commands:
             table.add_row(
@@ -436,7 +444,7 @@ class CommandRegistry:
                 str(len(cmd.parameters))
             )
 
-        console.print(f"\n[bold magenta]已註冊命令（共 {len(commands)} 個）：[/bold magenta]")
+        console.print(f"\n[bold #DDA0DD]{safe_t('registry.table.header', '已註冊命令', count=len(commands))}：[/bold #DDA0DD]")
         console.print(table)
 
     def _validate_parameters(
@@ -451,7 +459,7 @@ class CommandRegistry:
         if missing_params:
             return {
                 'valid': False,
-                'message': f"缺少必要參數：{', '.join(missing_params)}"
+                'message': safe_t('registry.validation.missing_params', '缺少必要參數', params=', '.join(missing_params))
             }
 
         return {'valid': True, 'message': ''}
@@ -477,14 +485,14 @@ class CommandRegistry:
             try:
                 self.import_commands(self.commands_file)
             except Exception as e:
-                console.print(f"[magenta]警告：載入命令失敗 - {e}[/yellow]")
+                console.print(f"[#DDA0DD]{safe_t('registry.warning.load_failed', '警告：載入命令失敗', error=str(e))}[/#DDA0DD]")
 
     def _save_commands(self):
         """儲存命令到配置檔"""
         try:
             self.export_commands(self.commands_file)
         except Exception as e:
-            console.print(f"[magenta]警告：儲存命令失敗 - {e}[/yellow]")
+            console.print(f"[#DDA0DD]{safe_t('registry.warning.save_failed', '警告：儲存命令失敗', error=str(e))}[/#DDA0DD]")
 
     def get_history(self, limit: int = 10) -> List[Dict[str, Any]]:
         """
@@ -501,7 +509,7 @@ class CommandRegistry:
 
 def main():
     """測試用主程式"""
-    console.print("[bold magenta]CodeGemini Command Registry 測試[/bold magenta]\n")
+    console.print(f"[bold #DDA0DD]{safe_t('registry.test.header', 'CodeGemini Command Registry 測試')}[/bold #DDA0DD]\n")
 
     # 建立註冊表
     registry = CommandRegistry()
@@ -509,8 +517,8 @@ def main():
     # 註冊測試命令
     test_command = CommandTemplate(
         name="test-example",
-        description="測試命令範例",
-        template="請執行以下任務：{task}\n使用語言：{language}",
+        description=safe_t('registry.test.example_desc', '測試命令範例'),
+        template=safe_t('registry.test.example_template', '請執行以下任務：{task}\n使用語言：{language}'),
         parameters=["task", "language"],
         examples=[
             "test-example task='寫一個函數' language='Python'",
@@ -535,12 +543,12 @@ def main():
     )
 
     if result.success:
-        console.print(f"\n[bold green]✅ 命令執行成功[/bold green]")
-        console.print(f"\n[magenta]輸出：[/magenta]")
+        console.print(f"\n[bold green]✅ {safe_t('registry.test.success', '命令執行成功')}[/bold green]")
+        console.print(f"\n[#DDA0DD]{safe_t('registry.test.output', '輸出')}：[/#DDA0DD]")
         console.print(result.output)
     else:
-        console.print(f"\n[bold red]❌ 命令執行失敗[/bold red]")
-        console.print(f"錯誤：{result.error_message}")
+        console.print(f"\n[bold red]❌ {safe_t('registry.test.failed', '命令執行失敗')}[/bold red]")
+        console.print(f"{safe_t('registry.test.error', '錯誤')}：{result.error_message}")
 
 
 if __name__ == "__main__":

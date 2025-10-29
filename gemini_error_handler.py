@@ -196,13 +196,13 @@ class ErrorFormatter:
         # 只有繼承自 GeminiVideoError 的異常才有這些屬性
         if isinstance(error, GeminiVideoError):
             # 顯示嚴重程度（LOW/MEDIUM/HIGH/CRITICAL）
-            lines.append(f"\n[yellow]嚴重程度：{error.severity.value}[/yellow]")
+            lines.append(f"\n[#DDA0DD]嚴重程度：{error.severity.value}[/#DDA0DD]")
             # 顯示錯誤發生時間
             lines.append(f"[dim]時間：{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
 
             # 上下文資訊（檔案路徑、API 名稱、命令等）
             if error.context:
-                lines.append("\n[cyan]上下文資訊：[/cyan]")
+                lines.append("\n[#87CEEB]上下文資訊：[/#87CEEB]")
                 for key, value in error.context.items():
                     lines.append(f"  • {key}: {value}")
 
@@ -302,7 +302,7 @@ def retry_on_error(
                         else:
                             console.print(
                                 safe_t('error.retry.attempting',
-                                       fallback=f"[yellow]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗，{{delay:.1f}} 秒後重試...[/yellow]",
+                                       fallback=f"[#DDA0DD]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗，{{delay:.1f}} 秒後重試...[/#DDA0DD]",
                                        attempt=attempt + 1,
                                        max_retries=max_retries,
                                        delay=current_delay)
@@ -418,7 +418,7 @@ class RecoveryManager:
             json.dump(asdict(checkpoint), f, ensure_ascii=False, indent=2)
 
         console.print(safe_t('recovery.checkpoint.saved',
-                             fallback=f"[cyan]💾 已保存恢復檢查點：{{name}}[/cyan]",
+                             fallback=f"[#87CEEB]💾 已保存恢復檢查點：{{name}}[/#87CEEB]",
                              name=checkpoint_path.name))
         return str(checkpoint_path)
 
@@ -446,7 +446,7 @@ class RecoveryManager:
             # 將字典還原為 RecoveryCheckpoint 物件
             checkpoint = RecoveryCheckpoint(**data)
             console.print(safe_t('recovery.checkpoint.loaded',
-                                 fallback=f"[cyan]📂 已載入恢復檢查點：{{name}}[/cyan]",
+                                 fallback=f"[#87CEEB]📂 已載入恢復檢查點：{{name}}[/#87CEEB]",
                                  name=checkpoint_path.name))
             return checkpoint
 
@@ -487,7 +487,7 @@ class RecoveryManager:
                 checkpoints.append(RecoveryCheckpoint(**data))
             except Exception as e:
                 console.print(safe_t('recovery.checkpoint.read_warning',
-                                     fallback=f"[yellow]警告：無法讀取檢查點 {{name}}: {{error}}[/yellow]",
+                                     fallback=f"[#DDA0DD]警告：無法讀取檢查點 {{name}}: {{error}}[/#DDA0DD]",
                                      name=checkpoint_file.name,
                                      error=str(e)))
 
@@ -498,19 +498,19 @@ class RecoveryManager:
         checkpoints = self.list_checkpoints()
 
         if not checkpoints:
-            console.print(safe_t('recovery.checkpoint.none', fallback='[yellow]沒有可恢復的檢查點[/yellow]'))
+            console.print(safe_t('recovery.checkpoint.none', fallback='[#DDA0DD]沒有可恢復的檢查點[/#DDA0DD]'))
             return
 
-        table = Table(title="可恢復的檢查點")
-        table.add_column("任務 ID", style="cyan")
-        table.add_column("類型", style="green")
-        table.add_column("進度", style="yellow")
-        table.add_column("時間", style="dim")
-        table.add_column("狀態", style="magenta")
+        table = Table(title=safe_t('recovery.checkpoint.table_title', fallback='可恢復的檢查點'))
+        table.add_column(safe_t('recovery.checkpoint.col_task_id', fallback='任務 ID'), style="#87CEEB")
+        table.add_column(safe_t('recovery.checkpoint.col_type', fallback='類型'), style="green")
+        table.add_column(safe_t('recovery.checkpoint.col_progress', fallback='進度'), style="#DDA0DD")
+        table.add_column(safe_t('recovery.checkpoint.col_time', fallback='時間'), style="dim")
+        table.add_column(safe_t('recovery.checkpoint.col_status', fallback='狀態'), style="#DDA0DD")
 
         for cp in checkpoints:
             progress = f"{len(cp.completed_steps)}/{cp.total_steps}"
-            status = "❌ 失敗" if cp.error else "⏸️ 暫停"
+            status = safe_t('recovery.checkpoint.status_failed', fallback='❌ 失敗') if cp.error else safe_t('recovery.checkpoint.status_paused', fallback='⏸️ 暫停')
             table.add_row(
                 cp.task_id,
                 cp.task_type,
@@ -576,7 +576,7 @@ class ErrorLogger:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
-        self.error_log_path = self.log_dir / "errors.jsonl"
+        error_log_path=self.log_dir / "errors.jsonl"
 
     def log_error(
         self,
@@ -663,19 +663,19 @@ class ErrorLogger:
         stats = self.get_error_stats(days)
 
         console.print(safe_t('error.stats.title',
-                             fallback=f"\n[bold cyan]📊 錯誤統計（最近 {{days}} 天）[/bold cyan]\n",
+                             fallback=f"\n[bold #87CEEB]📊 錯誤統計（最近 {{days}} 天）[/bold #87CEEB]\n",
                              days=days))
         console.print(safe_t('error.stats.total',
                              fallback=f"總錯誤數：{{total}}",
                              total=stats['total']))
 
         if stats['by_type']:
-            console.print(safe_t('error.stats.by_type', fallback="\n[yellow]錯誤類型分佈：[/yellow]"))
+            console.print(safe_t('error.stats.by_type', fallback="\n[#DDA0DD]錯誤類型分佈：[/#DDA0DD]"))
             for error_type, count in sorted(stats['by_type'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {error_type}: {count}")
 
         if stats['by_severity']:
-            console.print(safe_t('error.stats.by_severity', fallback="\n[yellow]嚴重程度分佈：[/yellow]"))
+            console.print(safe_t('error.stats.by_severity', fallback="\n[#DDA0DD]嚴重程度分佈：[/#DDA0DD]"))
             for severity, count in sorted(stats['by_severity'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {severity}: {count}")
 

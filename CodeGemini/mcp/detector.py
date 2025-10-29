@@ -214,14 +214,14 @@ class MCPServerDetector:
     def remove_rule(self, server_name: str):
         """移除指定 Server 的規則"""
         self.rules = [r for r in self.rules if r.server_name != server_name]
-        console.print(f"[yellow]✓ 已移除規則：{server_name}[/yellow]")
+        console.print(f"[#DDA0DD]✓ 已移除規則：{server_name}[/#DDA0DD]")
 
     def list_rules(self):
         """列出所有偵測規則"""
-        console.print("\n[bold cyan]📋 MCP Server 偵測規則列表[/bold cyan]\n")
+        console.print("\n[bold #87CEEB]📋 MCP Server 偵測規則列表[/bold #87CEEB]\n")
 
         for i, rule in enumerate(self.rules, 1):
-            console.print(f"[cyan]{i}. {rule.server_name}[/cyan]")
+            console.print(f"[#87CEEB]{i}. {rule.server_name}[/#87CEEB]")
             console.print(f"   說明：{rule.description}")
             console.print(f"   關鍵字數量：{len(rule.keywords)}")
             console.print(f"   模式數量：{len(rule.patterns)}")
@@ -246,7 +246,7 @@ def demo():
         "從雲端硬碟下載最新的簡報檔案"
     ]
 
-    console.print("[bold magenta]🔍 MCP Server 智慧偵測器示範[/bold magenta]\n")
+    console.print("[bold #DDA0DD]🔍 MCP Server 智慧偵測器示範[/bold #DDA0DD]\n")
 
     for i, test_input in enumerate(test_cases, 1):
         console.print(f"[bold]測試 {i}:[/bold] {test_input}")

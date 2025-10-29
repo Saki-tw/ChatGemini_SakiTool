@@ -10,6 +10,7 @@ import json
 from typing import Dict, Optional, List, Tuple
 from pathlib import Path
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.table import Table
 from rich.panel import Panel
 
@@ -92,7 +93,7 @@ class MediaViewer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     image_path = alternative_path
-                    console.print(f"[bright_magenta]✅ 已切換至：{image_path}[/green]\n")
+                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -145,7 +146,7 @@ class MediaViewer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(f"[bright_magenta]✅ 已切換至：{video_path}[/green]\n")
+                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -220,14 +221,14 @@ class MediaViewer:
 
     def display_image_info(self, image_path: str):
         """顯示圖片資訊"""
-        self.console.print(f"\n[magenta]📸 圖片資訊：{os.path.basename(image_path)}[/magenta]\n")
+        self.console.print(f"\n[#DDA0DD]📸 圖片資訊：{os.path.basename(image_path)}[/#DDA0DD]\n")
 
         try:
             info = self.get_image_info(image_path)
 
             # 創建資訊表格
             table = Table(show_header=False, box=None)
-            table.add_column("屬性", style="bright_magenta")
+            table.add_column("屬性", style="#DA70D6")
             table.add_column("值", style="white")
 
             table.add_row("檔案名稱", info['filename'])
@@ -246,21 +247,21 @@ class MediaViewer:
             self.console.print(table)
 
             if 'error' in info:
-                self.console.print(f"\n[magenta]⚠ 警告：{info['error']}[/yellow]")
+                self.console.print(f"\n[#DDA0DD]⚠ 警告：{info['error']}[/#DDA0DD]")
 
         except Exception as e:
-            self.console.print(f"[dim magenta]錯誤：{e}[/red]")
+            self.console.print(f"[dim #DDA0DD]錯誤：{e}[/red]")
 
     def display_video_info(self, video_path: str):
         """顯示影片資訊"""
-        self.console.print(f"\n[magenta]🎬 影片資訊：{os.path.basename(video_path)}[/magenta]\n")
+        self.console.print(f"\n[#DDA0DD]🎬 影片資訊：{os.path.basename(video_path)}[/#DDA0DD]\n")
 
         try:
             info = self.get_video_info(video_path)
 
             # 創建資訊表格
             table = Table(show_header=False, box=None)
-            table.add_column("屬性", style="bright_magenta")
+            table.add_column("屬性", style="#DA70D6")
             table.add_column("值", style="white")
 
             table.add_row("檔案名稱", info['filename'])
@@ -298,15 +299,15 @@ class MediaViewer:
 
             # API 限制檢查
             if info['size_mb'] > 2000:
-                self.console.print(f"\n[dim magenta]⚠ 警告：檔案大小超過 Gemini API 限制（2GB）[/red]")
+                self.console.print(f"\n[dim #DDA0DD]⚠ 警告：檔案大小超過 Gemini API 限制（2GB）[/red]")
             elif info['size_mb'] > 1900:
-                self.console.print(f"\n[magenta]⚠ 提示：檔案大小接近 API 限制，建議壓縮[/yellow]")
+                self.console.print(f"\n[#DDA0DD]⚠ 提示：檔案大小接近 API 限制，建議壓縮[/#DDA0DD]")
 
             if 'error' in info:
-                self.console.print(f"\n[magenta]⚠ 警告：{info['error']}[/yellow]")
+                self.console.print(f"\n[#DDA0DD]⚠ 警告：{info['error']}[/#DDA0DD]")
 
         except Exception as e:
-            self.console.print(f"[dim magenta]錯誤：{e}[/red]")
+            self.console.print(f"[dim #DDA0DD]錯誤：{e}[/red]")
 
     def analyze_with_ai(self, file_path: str, custom_prompt: Optional[str] = None):
         """
@@ -317,16 +318,16 @@ class MediaViewer:
             custom_prompt: 自訂提示（可選）
         """
         if not self.ai_analysis_enabled:
-            self.console.print("[magenta]AI 分析功能未啟用（需要 GEMINI_API_KEY）[/yellow]")
+            self.console.print("[#DDA0DD]AI 分析功能未啟用（需要 GEMINI_API_KEY）[/#DDA0DD]")
             return
 
         file_type = self.get_file_type(file_path)
 
         if file_type not in ['image', 'video']:
-            self.console.print(f"[magenta]不支援的檔案類型：{file_type}[/yellow]")
+            self.console.print(f"[#DDA0DD]不支援的檔案類型：{file_type}[/#DDA0DD]")
             return
 
-        self.console.print(f"\n[magenta]🤖 AI 分析中...[/magenta]\n")
+        self.console.print(f"\n[#DDA0DD]🤖 AI 分析中...[/#DDA0DD]\n")
 
         try:
             # 上傳檔案
@@ -369,12 +370,12 @@ class MediaViewer:
             # 顯示結果
             self.console.print(Panel(
                 response.text,
-                title="[bold magenta]AI 分析結果[/bold magenta]",
-                border_style="bright_magenta"
+                title="[bold #DDA0DD]AI 分析結果[/bold #DDA0DD]",
+                border_style="#DA70D6"
             ))
 
         except Exception as e:
-            self.console.print(f"[dim magenta]AI 分析失敗：{e}[/red]")
+            self.console.print(f"[dim #DDA0DD]AI 分析失敗：{e}[/red]")
 
     def view_file(self, file_path: str, analyze: bool = False, custom_prompt: Optional[str] = None):
         """
@@ -386,7 +387,7 @@ class MediaViewer:
             custom_prompt: 自訂分析提示
         """
         if not os.path.isfile(file_path):
-            self.console.print(f"[dim magenta]檔案不存在：{file_path}[/red]")
+            self.console.print(f"[dim #DDA0DD]檔案不存在：{file_path}[/red]")
             return
 
         file_type = self.get_file_type(file_path)
@@ -396,9 +397,9 @@ class MediaViewer:
         elif file_type == 'video':
             self.display_video_info(file_path)
         elif file_type == 'audio':
-            self.console.print("[magenta]音訊檔案資訊查看功能開發中[/yellow]")
+            self.console.print("[#DDA0DD]音訊檔案資訊查看功能開發中[/#DDA0DD]")
         else:
-            self.console.print(f"[magenta]不支援的檔案類型[/yellow]")
+            self.console.print(f"[#DDA0DD]不支援的檔案類型[/#DDA0DD]")
             return
 
         # AI 分析
@@ -410,18 +411,18 @@ def interactive_mode():
     """互動模式"""
     viewer = MediaViewer()
 
-    console.print("\n[bold magenta]🎬 Gemini 媒體檔案查看器[/bold magenta]\n")
+    console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]🎬 Gemini 媒體檔案查看器[/bold #DDA0DD]\n'))
 
     while True:
         console.print("\n" + "=" * 60)
-        file_path = console.input("\n[magenta]請輸入檔案路徑（或輸入 'exit' 退出）：[/magenta]\n").strip()
+        file_path = console.input("\n[#DDA0DD]請輸入檔案路徑（或輸入 'exit' 退出）：[/#DDA0DD]\n").strip()
 
         if not file_path or file_path.lower() in ['exit', 'quit', '退出']:
-            console.print("\n[bright_magenta]再見！[/green]")
+            console.print(safe_t('common.message', fallback='\n[#DA70D6]再見！[/green]'))
             break
 
         if not os.path.isfile(file_path):
-            console.print("[dim magenta]檔案不存在[/red]")
+            console.print(safe_t('common.message', fallback='[dim #DDA0DD]檔案不存在[/red]'))
             continue
 
         # 顯示資訊
@@ -429,13 +430,13 @@ def interactive_mode():
 
         # 詢問是否進行 AI 分析
         if viewer.ai_analysis_enabled:
-            analyze = console.input("\n[magenta]進行 AI 分析？(y/N): [/magenta]").strip().lower()
+            analyze = console.input("\n[#DDA0DD]進行 AI 分析？(y/N): [/#DDA0DD]").strip().lower()
             if analyze == 'y':
-                custom = console.input("[magenta]自訂分析提示（可留空使用預設）：[/magenta]\n").strip()
+                custom = console.input("[#DDA0DD]自訂分析提示（可留空使用預設）：[/#DDA0DD]\n").strip()
                 viewer.analyze_with_ai(file_path, custom if custom else None)
 
         # 詢問是否開啟檔案
-        open_file = console.input("\n[magenta]開啟檔案？(y/N): [/magenta]").strip().lower()
+        open_file = console.input("\n[#DDA0DD]開啟檔案？(y/N): [/#DDA0DD]").strip().lower()
         if open_file == 'y':
             os.system(f'open "{file_path}"')
 

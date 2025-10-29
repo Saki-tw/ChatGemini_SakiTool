@@ -168,7 +168,7 @@ class FeatureDetector:
 
             # 無法使用異步，警告並降級
             console.print(
-                "[yellow]警告：未安裝異步 HTTP 客戶端（aiohttp 或 httpx），降級到同步模式[/yellow]"
+                "[#DDA0DD]警告：未安裝異步 HTTP 客戶端（aiohttp 或 httpx），降級到同步模式[/#DDA0DD]"
             )
 
         # 同步模式：使用 requests
@@ -277,7 +277,7 @@ class FeatureDetector:
 
         # 建立表格
         table = Table(title="執行環境資訊", show_header=True)
-        table.add_column("項目", style="cyan")
+        table.add_column("項目", style="#87CEEB")
         table.add_column("狀態", style="green")
 
         # 基本資訊
@@ -303,7 +303,7 @@ class FeatureDetector:
             console.print(Panel(
                 recommendations_text,
                 title="建議",
-                border_style="yellow"
+                border_style="#DDA0DD"
             ))
 
 
@@ -376,15 +376,15 @@ def get_optimal_batch_processor():
 
 if __name__ == "__main__":
     # 測試程式碼
-    console.print("[bold cyan]功能偵測測試[/bold cyan]\n")
+    console.print("[bold #87CEEB]功能偵測測試[/bold #87CEEB]\n")
 
     # 測試基本檢測
-    console.print("[yellow]測試 1：基本功能檢測[/yellow]")
+    console.print("[#DDA0DD]測試 1：基本功能檢測[/#DDA0DD]")
     console.print(f"AsyncIO 支援：{FeatureDetector.supports_asyncio()}")
     console.print(f"Typing Extensions 支援：{FeatureDetector.supports_typing_extensions()}")
 
     # 測試套件檢測
-    console.print("\n[yellow]測試 2：套件可用性檢測[/yellow]")
+    console.print("\n[#DDA0DD]測試 2：套件可用性檢測[/#DDA0DD]")
     packages = ['rich', 'google.generativeai', 'aiohttp', 'httpx', 'requests']
     for package in packages:
         available = FeatureDetector.supports_package(package)
@@ -392,11 +392,11 @@ if __name__ == "__main__":
         console.print(f"{package}: {status}")
 
     # 顯示環境資訊
-    console.print("\n[yellow]測試 3：完整環境資訊[/yellow]")
+    console.print("\n[#DDA0DD]測試 3：完整環境資訊[/#DDA0DD]")
     FeatureDetector.display_environment_info()
 
     # 測試智能選擇
-    console.print("\n[yellow]測試 4：智能元件選擇[/yellow]")
+    console.print("\n[#DDA0DD]測試 4：智能元件選擇[/#DDA0DD]")
     try:
         BatchProcessor = FeatureDetector.get_batch_processor()
         console.print(f"選擇的批次處理器：{BatchProcessor.__name__}")
@@ -410,6 +410,6 @@ if __name__ == "__main__":
         console.print(f"[red]錯誤：{e}[/red]")
 
     # 測試快取後端
-    console.print("\n[yellow]測試 5：快取後端選擇[/yellow]")
+    console.print("\n[#DDA0DD]測試 5：快取後端選擇[/#DDA0DD]")
     cache = FeatureDetector.get_cache_backend(max_size_mb=100)
     console.print(f"選擇的快取後端：{cache.__class__.__name__}")

@@ -15,7 +15,7 @@ error:
 
   # Retry messages
   retry:
-    attempting: "[yellow]⚠️  Attempt {attempt}/{max_retries} failed, retrying in {delay:.1f} seconds...[/yellow]"
+    attempting: "[#DDA0DD]⚠️  Attempt {attempt}/{max_retries} failed, retrying in {delay:.1f} seconds...[/#DDA0DD]"
 
   # Error messages
   message: "[dim]Error: {error}[/dim]"
@@ -24,16 +24,16 @@ error:
   stats:
     title: "\n[bold cyan]📊 Error Statistics (Last {days} Days)[/bold cyan]\n"
     total: "Total Errors: {total}"
-    by_type: "\n[yellow]Error Type Distribution:[/yellow]"
-    by_severity: "\n[yellow]Severity Distribution:[/yellow]"
+    by_type: "\n[#DDA0DD]Error Type Distribution:[/#DDA0DD]"
+    by_severity: "\n[#DDA0DD]Severity Distribution:[/#DDA0DD]"
 
 recovery:
   # Checkpoint recovery messages
   checkpoint:
-    saved: "[cyan]💾 Checkpoint saved: {name}[/cyan]"
-    loaded: "[cyan]📂 Checkpoint loaded: {name}[/cyan]"
+    saved: "[#87CEEB]💾 Checkpoint saved: {name}[/#87CEEB]"
+    loaded: "[#87CEEB]📂 Checkpoint loaded: {name}[/#87CEEB]"
     load_failed: "[red]Failed to load checkpoint: {error}[/red]"
     deleted: "[green]🗑️  Checkpoint deleted: {name}[/green]"
-    read_warning: "[yellow]Warning: Cannot read checkpoint {name}: {error}[/yellow]"
-    none: "[yellow]No recoverable checkpoints[/yellow]"
+    read_warning: "[#DDA0DD]Warning: Cannot read checkpoint {name}: {error}[/#DDA0DD]"
+    none: "[#DDA0DD]No recoverable checkpoints[/#DDA0DD]"
     cleaned: "[green]Cleaned up {count} old checkpoint(s)[/green]"

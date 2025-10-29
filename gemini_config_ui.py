@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Dict
 from datetime import datetime
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.panel import Panel
 
 # 檢查 prompt_toolkit 可用性
@@ -66,11 +67,11 @@ class ConfigUI:
             配置字典
         """
         self.console.print(Panel(
-            "[bold magenta]🎛️  歡迎使用 ChatGemini 互動式配置[/bold magenta]\n\n"
+            "[bold #DDA0DD]🎛️  歡迎使用 ChatGemini 互動式配置[/bold #DDA0DD]\n\n"
             "[dim]此工具將引導您完成初始配置，讓您快速開始使用。\n"
             "您可以隨時修改 config.py 來調整這些設定。[/dim]",
-            title="[bold magenta]互動式配置精靈[/bold magenta]",
-            border_style="magenta"
+            title="[bold #DDA0DD]互動式配置精靈[/bold #DDA0DD]",
+            border_style="#DDA0DD"
         ))
 
         # 提供最佳預設值，避免多餘互動
@@ -85,11 +86,11 @@ class ConfigUI:
         # 步驟 2：詢問是否需要調整進階設定
         # ========================================
         self.console.print("\n" + "─" * 60)
-        self.console.print("[bold magenta]進階設定（可選）[/bold magenta]")
+        self.console.print("[bold #DDA0DD]進階設定（可選）[/bold #DDA0DD]")
         self.console.print("[dim]包含：模組啟用/停用、匯率、快取門檻等參數[/dim]\n")
 
         customize = self.console.input(
-            "[bold yellow]是否需要調整進階設定？[/bold yellow] y/[bright_magenta]N[/green] [dim](直接按 Enter 使用最佳預設值)[/dim]: "
+            "[bold #DDA0DD]是否需要調整進階設定？[/bold #DDA0DD] y/[#DA70D6]N[/green] [dim](直接按 Enter 使用最佳預設值)[/dim]: "
         ).strip().lower()
 
         if customize in ['y', 'yes', '是', '1']:
@@ -98,7 +99,7 @@ class ConfigUI:
             config_dict.update(self._prompt_advanced_settings())
         else:
             # 使用者跳過，使用最佳預設值
-            self.console.print("[bright_magenta]✓ 使用最佳預設值[/green]\n")
+            self.console.print("[#DA70D6]✓ 使用最佳預設值[/green]\n")
             config_dict['MODULES'] = self._get_default_modules()
             config_dict.update(self._get_default_advanced_settings())
 
@@ -144,12 +145,12 @@ class ConfigUI:
         """
         from rich.table import Table
 
-        self.console.print("\n[bold magenta]步驟 1: 選擇預設模型（涉及費用，請確認）[/bold magenta]")
+        self.console.print("\n[bold #DDA0DD]步驟 1: 選擇預設模型（涉及費用，請確認）[/bold #DDA0DD]")
 
         # 建立模型比較表
-        table = Table(title="可用的 Gemini 模型", show_header=True, header_style="bold magenta")
+        table = Table(title="可用的 Gemini 模型", show_header=True, header_style="bold #DDA0DD")
         console_width = self.console.width or 120
-        table.add_column("選項", style="magenta", width=max(6, int(console_width * 0.05)))
+        table.add_column("選項", style="#DDA0DD", width=max(6, int(console_width * 0.05)))
         table.add_column("模型名稱", style="green", width=max(22, int(console_width * 0.30)))
         table.add_column("描述", style="white", width=max(30, int(console_width * 0.45)))
 
@@ -160,17 +161,17 @@ class ConfigUI:
 
         # 使用 Rich Prompt 選擇
         while True:
-            choice = self.console.input("\n[bold magenta]請選擇模型 (1-4)[/bold magenta] [dim][預設: 2][/dim]: ").strip()
+            choice = self.console.input("\n[bold #DDA0DD]請選擇模型 (1-4)[/bold #DDA0DD] [dim][預設: 2][/dim]: ").strip()
 
             if not choice:
                 choice = '2'  # 預設選擇 gemini-2.5-flash
 
             if choice in RECOMMENDED_MODELS:
                 model_name, description = RECOMMENDED_MODELS[choice]
-                self.console.print(f"[bright_magenta]✓ 已選擇: {model_name}[/green]")
+                self.console.print(f"[#DA70D6]✓ 已選擇: {model_name}[/green]")
                 return model_name
             else:
-                self.console.print("[dim magenta]❌ 無效的選項，請輸入 1-4[/red]")
+                self.console.print("[dim #DDA0DD]❌ 無效的選項，請輸入 1-4[/red]")
 
     def _prompt_module_toggles(self) -> Dict:
         """
@@ -181,7 +182,7 @@ class ConfigUI:
         """
         from rich.table import Table
 
-        self.console.print("\n[bold magenta]模組配置[/bold magenta]")
+        self.console.print("\n[bold #DDA0DD]模組配置[/bold #DDA0DD]")
         self.console.print("[dim]按 Enter 接受預設值，輸入 y/n 來啟用/停用[/dim]\n")
 
         modules_config = {}
@@ -198,7 +199,7 @@ class ConfigUI:
         ]
 
         for module_name, description, default in module_options:
-            default_text = "[bright_magenta]Y[/green]/n" if default else "y/[dim magenta]N[/red]"
+            default_text = "[#DA70D6]Y[/green]/n" if default else "y/[dim #DDA0DD]N[/red]"
             user_input = self.console.input(
                 f"  {description} [{default_text}]: "
             ).strip().lower()
@@ -211,7 +212,7 @@ class ConfigUI:
             elif user_input in ['n', 'no', '否', '0']:
                 enabled = False
             else:
-                self.console.print(f"    [magenta]⚠️  無效輸入，使用預設值: {'啟用' if default else '停用'}[/yellow]")
+                self.console.print(f"    [#DDA0DD]⚠️  無效輸入，使用預設值: {'啟用' if default else '停用'}[/#DDA0DD]")
                 enabled = default
 
             modules_config[module_name] = {'enabled': enabled}
@@ -227,7 +228,7 @@ class ConfigUI:
         Returns:
             進階配置字典
         """
-        self.console.print("\n[bold magenta]進階參數[/bold magenta]")
+        self.console.print("\n[bold #DDA0DD]進階參數[/bold #DDA0DD]")
         self.console.print("[dim]一般使用者可直接按 Enter 使用預設值[/dim]\n")
 
         config = {}
@@ -252,11 +253,11 @@ class ConfigUI:
 
         # 啟動時翻譯
         trans_input = self.console.input(
-            "  🌐 啟動時啟用翻譯功能 [bright_magenta]Y[/green]/n: "
+            "  🌐 啟動時啟用翻譯功能 [#DA70D6]Y[/green]/n: "
         ).strip().lower()
         config['TRANSLATION_ON_STARTUP'] = trans_input not in ['n', 'no', '否', '0']
 
-        self.console.print("\n[bright_magenta]✓ 進階設定完成[/green]")
+        self.console.print("\n[#DA70D6]✓ 進階設定完成[/green]")
 
         return config
 
@@ -269,11 +270,11 @@ class ConfigUI:
         """
         from rich.table import Table
 
-        self.console.print("\n[bold magenta]配置預覽[/bold magenta]")
+        self.console.print("\n[bold #DDA0DD]配置預覽[/bold #DDA0DD]")
 
-        table = Table(show_header=True, header_style="bold magenta")
+        table = Table(show_header=True, header_style="bold #DDA0DD")
         console_width = self.console.width or 120
-        table.add_column("設定項目", style="magenta", width=max(25, int(console_width * 0.30)))
+        table.add_column("設定項目", style="#DDA0DD", width=max(25, int(console_width * 0.30)))
         table.add_column("數值", style="green")
 
         # 基本設定
@@ -286,9 +287,9 @@ class ConfigUI:
         self.console.print(table)
 
         # 模組狀態
-        modules_table = Table(title="功能模組", show_header=True, header_style="bold magenta")
+        modules_table = Table(title="功能模組", show_header=True, header_style="bold #DDA0DD")
         console_width = self.console.width or 120
-        modules_table.add_column("模組名稱", style="magenta", width=max(22, int(console_width * 0.30)))
+        modules_table.add_column("模組名稱", style="#DDA0DD", width=max(22, int(console_width * 0.30)))
         modules_table.add_column("狀態", style="green", width=max(10, int(console_width * 0.10)))
 
         for module_name, module_config in config_dict.get('MODULES', {}).items():
@@ -376,7 +377,7 @@ EMBEDDING_VECTOR_DB_PATH = "./codebase_vectors"
             self.console.print("[dim]您可以隨時編輯此檔案來調整配置[/dim]\n")
         except Exception as e:
             self.console.print(f"\n[bold red]❌ 建立配置檔案失敗：{e}[/bold red]")
-            self.console.print("[magenta]⚠️  將使用預設配置繼續執行[/yellow]\n")
+            self.console.print("[#DDA0DD]⚠️  將使用預設配置繼續執行[/#DDA0DD]\n")
 
 # 各模型的最低快取門檻要求（tokens）
 # 根據 Gemini API Context Caching 規範
@@ -454,7 +455,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
 
         # 沒有思考過程時提示
         if not LAST_THINKING_PROCESS:
-            console.print("\n[magenta]💭 尚未產生思考過程[/magenta]\n")
+            console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 尚未產生思考過程[/#DDA0DD]\n'))
             event.app.current_buffer.insert_text("")
             return
 
@@ -464,7 +465,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
         if CTRL_T_PRESS_COUNT == 1:
             # 第一次按下：顯示翻譯（或原文）
             SHOW_THINKING_PROCESS = True
-            console.print("\n[bright_magenta]━━━ 🧠 思考過程（翻譯） ━━━[/bright_magenta]")
+            console.print(safe_t('common.message', fallback='\n[#DA70D6]━━━ 🧠 思考過程（翻譯） ━━━[/#DA70D6]'))
 
             # 如果有翻譯且翻譯功能啟用，顯示翻譯；否則顯示原文
             if TRANSLATOR_ENABLED and global_translator and LAST_THINKING_TRANSLATED:
@@ -472,31 +473,31 @@ if PROMPT_TOOLKIT_AVAILABLE:
             else:
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
                 if TRANSLATOR_ENABLED and global_translator:
-                    console.print("[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]")
+                    console.print(safe_t('common.message', fallback='[dim #DDA0DD]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #DDA0DD]'))
 
-            console.print("[bright_magenta]━━━━━━━━━━━━━━━━━━━━━━━━━━[/bright_magenta]\n")
+            console.print("[#DA70D6]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#DA70D6]\n")
 
         elif CTRL_T_PRESS_COUNT == 2:
             # 第二次按下：顯示雙語對照
-            console.print("\n[bright_magenta]━━━ 🧠 思考過程（雙語對照） ━━━[/bright_magenta]")
+            console.print(safe_t('common.message', fallback='\n[#DA70D6]━━━ 🧠 思考過程（雙語對照） ━━━[/#DA70D6]'))
 
             if TRANSLATOR_ENABLED and global_translator and LAST_THINKING_TRANSLATED:
-                console.print("[bold bright_magenta]🇹🇼 繁體中文：[/bold bright_magenta]")
+                console.print(safe_t('common.message', fallback='[bold #DA70D6]🇹🇼 繁體中文：[/bold #DA70D6]'))
                 console.print(f"[dim]{LAST_THINKING_TRANSLATED}[/dim]\n")
-                console.print("[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]")
+                console.print(safe_t('common.message', fallback='[bold #DA70D6]🇬🇧 英文原文：[/bold #DA70D6]'))
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
             else:
-                console.print("[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]")
+                console.print(safe_t('common.message', fallback='[bold #DA70D6]🇬🇧 英文原文：[/bold #DA70D6]'))
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
                 if TRANSLATOR_ENABLED and global_translator:
-                    console.print("[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]")
+                    console.print(safe_t('common.message', fallback='[dim #DDA0DD]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #DDA0DD]'))
 
-            console.print("[bright_magenta]━━━━━━━━━━━━━━━━━━━━━━━━━━[/bright_magenta]\n")
+            console.print("[#DA70D6]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#DA70D6]\n")
 
         else:
             # 第三次按下：隱藏
             SHOW_THINKING_PROCESS = False
-            console.print("\n[magenta]💭 思考過程已隱藏[/magenta]\n")
+            console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 思考過程已隱藏[/#DDA0DD]\n'))
 
         event.app.current_buffer.insert_text("")  # 保持輸入狀態
 
@@ -508,12 +509,12 @@ if PROMPT_TOOLKIT_AVAILABLE:
     @key_bindings.add('c-d')
     def show_help_hint(event):
         """Ctrl+D: 顯示輸入提示"""
-        console.print("\n[bright_magenta]💡 輸入提示：[/bright_magenta]")
-        console.print("  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）")
-        console.print("  • [bold]Ctrl+T[/bold] - 切換思考過程顯示")
-        console.print("  • [bold]↑/↓[/bold] - 瀏覽歷史記錄")
-        console.print("  • [bold]Tab[/bold] - 自動補全指令與語法")
-        console.print("  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens")
+        console.print(safe_t('common.message', fallback='\n[#DA70D6]💡 輸入提示：[/#DA70D6]'))
+        console.print(safe_t('common.message', fallback='  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'))
+        console.print(safe_t('common.message', fallback='  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'))
+        console.print(safe_t('common.message', fallback='  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'))
+        console.print(safe_t('common.message', fallback='  • [bold]Tab[/bold] - 自動補全指令與語法'))
+        console.print(safe_t('common.message', fallback='  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens'))
         console.print()
         event.app.current_buffer.insert_text("")
 
@@ -820,7 +821,7 @@ def get_user_input(prompt_text: str = "你: ") -> str:
     if PROMPT_TOOLKIT_AVAILABLE:
         try:
             # 使用 HTML 格式化提示文字，支援顏色
-            formatted_prompt = HTML(f'<ansimagenta><b>{prompt_text}</b></ansimagenta>')  # 馬卡龍紫色
+            formatted_prompt = HTML(f'<#DA70D6><b>{prompt_text}</b></#DA70D6>')  # 馬卡龍紫色
 
             return prompt(
                 formatted_prompt,

@@ -77,6 +77,54 @@ chat:
   assistant_prompt: 어시스턴트
   thinking: 생각 중
   generating: 생성 중
+
+  # 명령 메뉴 (추가됨 - / 명령 목록 지원)
+  commands_menu:
+    title: "[bold #DA70D6]📋 사용 가능한 명령[/bold #DA70D6]"
+    command: "명령"
+    description: "설명"
+
+    # 기본 명령
+    help_desc: "상세한 도움말 시스템 표시"
+    lang_desc: "언어 전환 (zh-TW/en/ja/ko)"
+    model_desc: "AI 모델 전환"
+    clear_desc: "대화 기록 지우기"
+    exit_desc: "프로그램 종료"
+
+    # 기능 메뉴
+    cache_desc: "캐시 관리 메뉴"
+    media_desc: "미디어 기능 메뉴"
+    cli_desc: "Gemini CLI 관리 도구"
+    debug_desc: "디버그 및 테스트 도구"
+
+    # 메모리 관리
+    clear_memory_desc: "메모리 지우기"
+    memory_stats_desc: "메모리 통계"
+    help_memory_desc: "메모리 관리 가이드"
+
+    # 체크포인트 시스템
+    checkpoints_desc: "모든 체크포인트 나열"
+    checkpoint_desc: "수동 체크포인트 생성"
+    rewind_desc: "체크포인트로 되감기"
+    help_checkpoint_desc: "체크포인트 시스템 가이드"
+
+    # 대화 기록
+    search_desc: "대화 기록 검색"
+    history_desc: "대화 기록 보기"
+    stats_desc: "대화 통계"
+
+    # 빠른 구문
+    think_auto_desc: "동적 사고 모드"
+    think_budget_desc: "사고 예산 지정"
+    no_think_desc: "사고 모드 비활성화"
+    file_attach_desc: "파일 첨부"
+    cache_now_desc: "즉시 캐시 생성"
+
+    # 키보드 단축키
+    ctrl_t_desc: "사고 과정 표시 전환（숨김→번역→이중 언어）"
+
+    tip: "[dim #DDA0DD]💡 팁: 자세한 설명은 \"help\"를 입력하세요[/dim #DDA0DD]"
+
   streaming: 스트리밍 중
   waiting: 응답 대기 중
   analyzing: 분석 중
@@ -194,6 +242,11 @@ pricing:
   twd_equivalent: '約合台幣: {currency}{amount}'
   gemini_planning: "Gemini 계획 생성"
   veo_segments: "{num}개 세그먼트 x {sec}초"
+
+  # 장면 감지 비용
+  scene_detection_cost: "[dim]💰 장면 감지 비용: NT${twd} (${usd} USD)[/dim]"
+  tokens_detail: "[dim]   입력: {input:,} tokens, 출력: {output:,} tokens, 씽킹: {thinking:,} tokens[/dim]"
+  accumulated_cost: "[dim]   누적 비용: NT${twd} (${usd} USD)[/dim]"
 
 translator:
   engine_ready: "✅ deep-translator 준비 완료 (메인 엔진, 완전 무료)"
@@ -526,3 +579,21 @@ validation:
   required: 필수
   optional: 선택
   format_error: 형식 오류
+
+# ============================================================================
+# 형식 (format) - 2025-10-29 추가
+# ============================================================================
+format:
+  # 통화 기호
+  currency_symbol:
+    twd: "NT$"
+    usd: "US$"
+  
+  # 구분자
+  separator: ": "
+  separator_currency: ": NT$"
+  
+  # 단위
+  unit:
+    segment: "세그먼트"
+    second: "초"

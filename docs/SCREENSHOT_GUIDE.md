@@ -144,25 +144,19 @@ Gemini: [開始分析...]
 
 ## 📁 檔案組織
 
-### 目錄結構
-```
-ChatGemini_SakiTool/
-├── docs/
-│   └── images/
-│       ├── auto-cache-creation.png      # 必拍
-│       ├── cost-display.png             # 必拍
-│       ├── media-menu.png               # 必拍
-│       ├── file-attachment.png          # 必拍
-│       ├── thinking-mode.png            # 選用
-│       ├── help-menu.png                # 選用
-│       └── vector-search.png            # 選用
-└── README.md
-```
-
-### 建立目錄
+### 建立截圖目錄
 ```bash
 mkdir -p docs/images
 ```
+
+將截圖儲存在 `docs/images/` 目錄中，檔名如下：
+- `auto-cache-creation.png`（必拍）
+- `cost-display.png`（必拍）
+- `media-menu.png`（必拍）
+- `file-attachment.png`（必拍）
+- `thinking-mode.png`（選用）
+- `help-menu.png`（選用）
+- `vector-search.png`（選用）
 
 ---
 

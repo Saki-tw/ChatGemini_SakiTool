@@ -433,7 +433,6 @@ def process_file_attachments(user_input: str, enable_cache: bool = True, enable_
                 if ERROR_FIX_ENABLED:
                     try:
                         from gemini_error_fix import suggest_file_not_found
-from utils.i18n import safe_t
                         suggest_file_not_found(file_path)
                     except ImportError:
                         print(f"⚠️  找不到檔案: {file_path}")

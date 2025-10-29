@@ -89,12 +89,12 @@ class SceneDetector:
             場景列表
         """
         console.print(Panel.fit(
-            "[bold magenta]🎬 自動場景檢測[/bold magenta]",
-            border_style="bright_magenta"
+            "[bold #DDA0DD]🎬 自動場景檢測[/bold #DDA0DD]",
+            border_style="#DA70D6"
         ))
 
         # 1. 提取關鍵幀
-        console.print(safe_t('media.video.analyzing_file', fallback='\n[magenta]📹 分析影片：{name}[/magenta]', name=os.path.basename(video_path)))
+        console.print(safe_t('media.video.analyzing_file', fallback='\n[#DDA0DD]📹 分析影片：{name}[/#DDA0DD]', name=os.path.basename(video_path)))
 
         # 獲取影片資訊
         video_info = self.preprocessor.get_video_info(video_path)
@@ -106,10 +106,10 @@ class SceneDetector:
         # 修改 extract_keyframes 為支持更多幀數
         keyframes = self._extract_uniform_frames(video_path, num_keyframes, duration)
 
-        console.print(safe_t('media.video.frames_extracted', fallback='[bright_magenta]✓ 已提取 {count} 個關鍵幀[/green]\n', count=len(keyframes)))
+        console.print(safe_t('media.video.frames_extracted', fallback='[#DA70D6]✓ 已提取 {count} 個關鍵幀[/green]\n', count=len(keyframes)))
 
         # 2. 分析每個幀的內容
-        console.print(safe_t('media.video.analyzing_frames', fallback='[magenta]🤖 使用 Gemini Vision 分析關鍵幀...[/magenta]\n'))
+        console.print(safe_t('media.video.analyzing_frames', fallback='[#DDA0DD]🤖 使用 Gemini Vision 分析關鍵幀...[/#DDA0DD]\n'))
 
         frame_descriptions = []
         total_cost = 0.0
@@ -138,13 +138,13 @@ class SceneDetector:
                 progress.update(task, advance=1)
 
         # 3. 檢測場景變化
-        console.print(safe_t('media.video.detecting_scenes', fallback='\n[magenta]🔍 檢測場景變化...[/magenta]'))
+        console.print(safe_t('media.video.detecting_scenes', fallback='\n[#DDA0DD]🔍 檢測場景變化...[/#DDA0DD]'))
         scenes = self._detect_scene_changes(
             frame_descriptions,
             similarity_threshold
         )
 
-        console.print(safe_t('media.video.scenes_detected', fallback='[bright_magenta]✓ 檢測到 {count} 個場景[/green]\n', count=len(scenes)))
+        console.print(safe_t('media.video.scenes_detected', fallback='[#DA70D6]✓ 檢測到 {count} 個場景[/green]\n', count=len(scenes)))
 
         # 4. 顯示成本
         if PRICING_ENABLED and show_cost and global_pricing_calculator:
@@ -205,7 +205,7 @@ class SceneDetector:
                     'frame_number': i + 1
                 })
             except subprocess.CalledProcessError as e:
-                console.print(safe_t('media.video.frame_extract_warning', fallback='[magenta]警告：提取幀 {num} 失敗[/yellow]', num=i+1))
+                console.print(safe_t('media.video.frame_extract_warning', fallback='[#DDA0DD]警告：提取幀 {num} 失敗[/#DDA0DD]', num=i+1))
 
         return frame_paths
 
@@ -263,14 +263,24 @@ class SceneDetector:
 
                 # 顯示成本資訊
                 if cost > 0:
-                    console.print(f"[dim]💰 場景檢測成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]")
-                    console.print(f"[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]")
-                    console.print(f"[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f} USD)[/dim]")
+                    console.print(safe_t('pricing.scene_detection_cost',
+                                       fallback="[dim]💰 場景檢測成本: NT${twd} (${usd} USD)[/dim]",
+                                       twd=f"{cost * USD_TO_TWD:.2f}",
+                                       usd=f"{cost:.6f}"))
+                    console.print(safe_t('pricing.tokens_detail',
+                                       fallback="[dim]   輸入: {input:,} tokens, 輸出: {output:,} tokens, 思考: {thinking:,} tokens[/dim]",
+                                       input=input_tokens,
+                                       output=output_tokens,
+                                       thinking=thinking_tokens))
+                    console.print(safe_t('pricing.accumulated_cost',
+                                       fallback="[dim]   累計成本: NT${twd} (${usd} USD)[/dim]",
+                                       twd=f"{global_pricing_calculator.total_cost * USD_TO_TWD:.2f}",
+                                       usd=f"{global_pricing_calculator.total_cost:.6f}"))
 
             return response.text.strip()
 
         except Exception as e:
-            console.print(safe_t('media.video.frame_analyze_warning', fallback='[magenta]警告：分析幀失敗：{error}[/yellow]', error=e))
+            console.print(safe_t('media.video.frame_analyze_warning', fallback='[#DDA0DD]警告：分析幀失敗：{error}[/#DDA0DD]', error=e))
             return safe_t('media.video.cannot_analyze', fallback='無法分析')
 
     def _detect_scene_changes(
@@ -399,7 +409,7 @@ class SceneDetector:
         Args:
             scenes: 場景列表
         """
-        table = Table(title=safe_t('media.video.scene_list_title', fallback='🎬 場景列表'), show_header=True, header_style="bold magenta")
+        table = Table(title=safe_t('media.video.scene_list_title', fallback='🎬 場景列表'), show_header=True, header_style="bold #DDA0DD")
 
         console_width = console.width or 120
         table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
@@ -484,7 +494,7 @@ class SceneDetector:
                         f.write(f"關鍵元素：{', '.join(scene.key_elements)}\n")
                     f.write(f"\n")
 
-        console.print(safe_t('media.video.scene_index_saved', fallback='[bright_magenta]✓ 場景索引已保存：{file}[/green]', file=output_file))
+        console.print(safe_t('media.video.scene_index_saved', fallback='[#DA70D6]✓ 場景索引已保存：{file}[/green]', file=output_file))
         return output_file
 
     def _format_time(self, seconds: float) -> str:
@@ -511,7 +521,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(safe_t('error.video_not_found', fallback='[dim magenta]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
+        console.print(safe_t('error.video_not_found', fallback='[dim #DDA0DD]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
         return
 
     # 創建檢測器

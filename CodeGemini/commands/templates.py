@@ -206,7 +206,7 @@ class TemplateEngine:
             items = variables.get(list_name, [])
 
             if not isinstance(items, list):
-                console.print(f"[magenta]警告：'{list_name}' 不是列表，迴圈將被跳過[/yellow]")
+                console.print(f"[#DDA0DD]警告：'{list_name}' 不是列表，迴圈將被跳過[/#DDA0DD]")
                 return ""
 
             # 迭代生成內容
@@ -260,7 +260,7 @@ class TemplateEngine:
         missing = [v for v in template.variables if v not in variables]
 
         if missing:
-            console.print(f"[magenta]警告：缺少變數：{', '.join(missing)}[/yellow]")
+            console.print(f"[#DDA0DD]警告：缺少變數：{', '.join(missing)}[/#DDA0DD]")
             return False
 
         return True
@@ -353,7 +353,7 @@ class TemplateLibrary:
 
 def main():
     """測試用主程式"""
-    console.print("[bold magenta]CodeGemini Template Engine 測試[/bold magenta]\n")
+    console.print("[bold #DDA0DD]CodeGemini Template Engine 測試[/bold #DDA0DD]\n")
 
     engine = TemplateEngine()
 

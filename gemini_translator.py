@@ -25,6 +25,7 @@ from typing import Optional, Dict, List, Tuple
 from datetime import datetime
 from dotenv import load_dotenv
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.panel import Panel
 from rich.table import Table
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -112,7 +113,7 @@ class ThinkingTranslator:
             logger.warning(safe_t('translator.install_prompt', fallback="❌ 未安裝 deep-translator，請執行：pip install deep-translator"))
 
             # 使用 Rich UI 顯示錯誤
-            console.print(f"[magenta]{safe_t('translator.engine_missing', fallback='⚠️  翻譯引擎未安裝')}[/yellow]")
+            console.print(f"[#DDA0DD]{safe_t('translator.engine_missing', fallback='⚠️  翻譯引擎未安裝')}[/#DDA0DD]")
 
             # 顯示依賴缺失的修復建議
             if ERROR_FIX_ENABLED:
@@ -120,7 +121,7 @@ class ThinkingTranslator:
         except Exception as e:
             self.engine_status['deep_translator'] = safe_t('translator.test_failed', fallback="❌ 測試失敗: {error}", error=str(e))
             logger.warning(safe_t('translator.test_failed', fallback="deep-translator 測試失敗: {error}", error=str(e)))
-            console.print(f"[dim magenta]{safe_t('translator.load_failed', fallback='❌ 翻譯引擎載入失敗: {error}', error=str(e))}[/red]")
+            console.print(f"[dim #DDA0DD]{safe_t('translator.load_failed', fallback='❌ 翻譯引擎載入失敗: {error}', error=str(e))}[/red]")
 
         # === 備用：返回原文（始終可用）===
         self.engine_status['fallback'] = safe_t('translator.fallback_ready', fallback="✅ 備用方案")
@@ -275,17 +276,17 @@ class ThinkingTranslator:
         status = self.get_status()
 
         # 建立狀態表格
-        table = Table(title="🌐 翻譯器狀態", show_header=True, header_style="bold magenta")
+        table = Table(title="🌐 翻譯器狀態", show_header=True, header_style="bold #DDA0DD")
         console_width = console.width or 120
-        table.add_column("項目", style="magenta", width=max(18, int(console_width * 0.25)))
-        table.add_column("狀態", style="magenta")
+        table.add_column("項目", style="#DDA0DD", width=max(18, int(console_width * 0.25)))
+        table.add_column("狀態", style="#DDA0DD")
 
         # 翻譯功能狀態
         status_icon = "✅ 啟用" if status['translation_enabled'] else "❌ 停用"
         table.add_row("翻譯功能", status_icon)
 
         # 當前引擎
-        table.add_row("當前引擎", f"[bright_magenta]{status['current_engine']}[/green]")
+        table.add_row("當前引擎", f"[#DA70D6]{status['current_engine']}[/green]")
 
         # 引擎狀態
         for engine, state in status['engines'].items():
@@ -293,8 +294,8 @@ class ThinkingTranslator:
             table.add_row(f"  └─ {engine_name}", state)
 
         # 使用統計
-        table.add_row("已翻譯字元數", f"[magenta]{status['translated_chars']:,}[/yellow]")
-        table.add_row("快取項目數", f"[magenta]{status['current_cache_size']}[/yellow]")
+        table.add_row("已翻譯字元數", f"[#DDA0DD]{status['translated_chars']:,}[/#DDA0DD]")
+        table.add_row("快取項目數", f"[#DDA0DD]{status['current_cache_size']}[/#DDA0DD]")
 
         console.print(table)
 
@@ -311,8 +312,8 @@ class ThinkingTranslator:
             # 雙語對照模式
             console.print(Panel(
                 Markdown(f"**原文：**\n{original}\n\n**翻譯：**\n{translated}"),
-                title="[bold magenta]雙語對照[/bold magenta]",
-                border_style="magenta"
+                title="[bold #DDA0DD]雙語對照[/bold #DDA0DD]",
+                border_style="#DDA0DD"
             ))
         else:
             # 僅顯示翻譯（使用 Markdown 渲染）
@@ -335,7 +336,7 @@ class ThinkingTranslator:
             TextColumn("[progress.description]{task.description}"),
             console=console
         ) as progress:
-            task = progress.add_task("[magenta]翻譯中...", total=None)
+            task = progress.add_task("[#DDA0DD]翻譯中...", total=None)
 
             result = self.translate(text, source_lang, target_lang)
 
@@ -415,10 +416,10 @@ if __name__ == "__main__":
 
     # 使用 Rich UI 顯示標題
     console.print(Panel(
-        "[bold magenta]思考過程翻譯器測試 v2.2[/bold magenta]\n\n"
+        "[bold #DDA0DD]思考過程翻譯器測試 v2.2[/bold #DDA0DD]\n\n"
         "[dim]使用 Rich UI 提升使用體驗[/dim]",
         title="🌐 Gemini Translator",
-        border_style="magenta"
+        border_style="#DDA0DD"
     ))
 
     translator = get_translator()
@@ -430,8 +431,8 @@ if __name__ == "__main__":
     # 測試翻譯功能
     console.print("\n")
     console.print(Panel(
-        "[bold yellow]測試翻譯功能[/bold yellow]",
-        border_style="magenta"
+        "[bold #DDA0DD]測試翻譯功能[/bold #DDA0DD]",
+        border_style="#DDA0DD"
     ))
 
     test_cases = [
@@ -441,20 +442,20 @@ if __name__ == "__main__":
     ]
 
     for i, test_text in enumerate(test_cases, 1):
-        console.print(f"\n[bold magenta]{safe_t('translator.test_num', fallback='測試 {num}:', num=i)}[/bold magenta]")
+        console.print(f"\n[bold #DDA0DD]{safe_t('translator.test_num', fallback='測試 {num}:', num=i)}[/bold #DDA0DD]")
         console.print(f"[dim]{safe_t('translator.original', fallback='原文')}：[/dim] {test_text}")
 
         # 使用帶進度提示的翻譯
         result = translator.translate_with_progress(test_text)
 
-        console.print(f"[bright_magenta]翻譯：[/green] {result}")
-        console.print(f"[dim]引擎：{translator.current_engine}[/dim]")
+        console.print(safe_t('common.message', fallback='[#DA70D6]翻譯：[/green] {result}', result=result))
+        console.print(safe_t('common.message', fallback='[dim]引擎：{translator.current_engine}[/dim]', current_engine=translator.current_engine))
 
     # 測試雙語對照
     console.print("\n")
     console.print(Panel(
-        "[bold yellow]測試雙語對照模式[/bold yellow]",
-        border_style="magenta"
+        "[bold #DDA0DD]測試雙語對照模式[/bold #DDA0DD]",
+        border_style="#DDA0DD"
     ))
 
     test_text = "This is a test for bilingual display mode."
@@ -464,23 +465,26 @@ if __name__ == "__main__":
     # 測試翻譯開關
     console.print("\n")
     console.print(Panel(
-        "[bold yellow]測試翻譯開關[/bold yellow]",
-        border_style="magenta"
+        "[bold #DDA0DD]測試翻譯開關[/bold #DDA0DD]",
+        border_style="#DDA0DD"
     ))
 
-    console.print(f"[magenta]當前狀態:[/magenta] {'✅ 啟用' if translator.translation_enabled else '❌ 停用'}")
+    status_text = "✅ 啟用" if translator.translation_enabled else "❌ 停用"
+    console.print(f"[#DDA0DD]當前狀態:[/#DDA0DD] {status_text}")
     translator.toggle_translation()
-    console.print(f"[magenta]切換後:[/magenta] {'✅ 啟用' if translator.translation_enabled else '❌ 停用'}")
+    status_text = "✅ 啟用" if translator.translation_enabled else "❌ 停用"
+    console.print(f"[#DDA0DD]切換後:[/#DDA0DD] {status_text}")
 
     test_text = "Testing translation toggle."
-    console.print(f"\n[dim]原文：[/dim] {test_text}")
+    console.print(safe_t('common.message', fallback='\n[dim]原文：[/dim] {test_text}', test_text=test_text))
     result = translator.translate(test_text)
-    console.print(f"[magenta]結果：[/yellow] {result} [dim](應顯示原文)[/dim]")
+    console.print(safe_t('common.message', fallback='[#DDA0DD]結果：[/#DDA0DD] {result} [dim](應顯示原文)[/dim]', result=result))
 
     translator.toggle_translation()
-    console.print(f"\n[magenta]再次切換:[/magenta] {'✅ 啟用' if translator.translation_enabled else '❌ 停用'}")
+    status_text = "✅ 啟用" if translator.translation_enabled else "❌ 停用"
+    console.print(f"\n[#DDA0DD]再次切換:[/#DDA0DD] {status_text}")
     result = translator.translate(test_text)
-    console.print(f"[magenta]結果：[/yellow] {result} [dim](應顯示翻譯)[/dim]")
+    console.print(safe_t('common.message', fallback='[#DDA0DD]結果：[/#DDA0DD] {result} [dim](應顯示翻譯)[/dim]', result=result))
 
     # 最終狀態
     console.print("\n")
@@ -489,5 +493,5 @@ if __name__ == "__main__":
     console.print("\n")
     console.print(Panel(
         "[bold green]✅ 測試完成！[/bold green]",
-        border_style="magenta"
+        border_style="#DDA0DD"
     ))

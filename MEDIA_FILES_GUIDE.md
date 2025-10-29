@@ -218,7 +218,7 @@ python3 gemini_veo_generator.py --extend video_id "Continue the previous scene"
 ```
 
 ### 輸出
-生成的影片會自動下載到 `MediaOutputs/` 目錄。
+生成的影片會自動下載並儲存。
 
 ### 限制
 - 需要 Google AI Studio 付費專案或 Google AI Ultra 訂閱
@@ -405,7 +405,7 @@ python3 gemini_veo_generator.py --extend video_id "Continue the previous scene"
 ```
 
 ### 5. 媒體檔案管理
-生成的媒體檔案統一存放在 `MediaOutputs/` 目錄。
+生成的媒體檔案會自動儲存並可隨時存取。
 
 ---
 

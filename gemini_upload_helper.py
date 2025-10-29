@@ -28,6 +28,7 @@ from typing import Optional, Any, Dict, List
 from pathlib import Path
 from datetime import datetime
 from rich.console import Console
+from utils.i18n import safe_t
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeRemainingColumn, TransferSpeedColumn
 
 # 整合現有模組 - 避免重複實作
@@ -175,10 +176,10 @@ class ChunkedUploader:
                 if progress.get('file_hash') == current_hash:
                     return progress
                 else:
-                    console.print("[magenta]⚠️ 檔案已被修改，無法續傳[/yellow]")
+                    console.print(safe_t('common.warning', fallback='[#DDA0DD]⚠️ 檔案已被修改，無法續傳[/#DDA0DD]'))
                     return None
         except Exception as e:
-            console.print(f"[magenta]⚠️ 讀取進度檔案失敗：{e}[/yellow]")
+            console.print(safe_t('error.failed', fallback='[#DDA0DD]⚠️ 讀取進度檔案失敗：{e}[/#DDA0DD]', e=e))
             return None
 
         return None
@@ -200,7 +201,7 @@ class ChunkedUploader:
             with open(progress_file, 'w', encoding='utf-8') as f:
                 json.dump(progress, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            console.print(f"[magenta]⚠️ 儲存進度檔案失敗：{e}[/yellow]")
+            console.print(safe_t('error.failed', fallback='[#DDA0DD]⚠️ 儲存進度檔案失敗：{e}[/#DDA0DD]', e=e))
 
     def _delete_progress(self, file_path: str):
         """
@@ -214,7 +215,7 @@ class ChunkedUploader:
             if progress_file.exists():
                 progress_file.unlink()
         except Exception as e:
-            console.print(f"[magenta]⚠️ 刪除進度檔案失敗：{e}[/yellow]")
+            console.print(safe_t('error.failed', fallback='[#DDA0DD]⚠️ 刪除進度檔案失敗：{e}[/#DDA0DD]', e=e))
 
     def _create_new_progress(self, file_path: str, file_size: int) -> Dict:
         """
@@ -275,9 +276,10 @@ class ChunkedUploader:
         file_size = os.path.getsize(file_path)
         file_size_mb = file_size / (1024 ** 2)
 
-        console.print(f"\n[magenta]📦 分塊上傳：{os.path.basename(file_path)}[/magenta]")
-        console.print(f"   大小：{file_size_mb:.2f} MB")
-        console.print(f"   分塊大小：{self.CHUNK_SIZE / (1024 ** 2):.2f} MB")
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📦 分塊上傳：{basename}[/#DDA0DD]', basename=os.path.basename(file_path)))
+        console.print(safe_t('common.message', fallback='   大小：{file_size_mb:.2f} MB', file_size_mb=file_size_mb))
+        chunk_size_mb = self.CHUNK_SIZE / (1024 ** 2)
+        console.print(safe_t('common.message', fallback='   分塊大小：{chunk_size_mb:.2f} MB', chunk_size_mb=chunk_size_mb))
 
         # 2. 檢查是否有未完成的上傳
         progress = self._load_progress(file_path)
@@ -285,11 +287,12 @@ class ChunkedUploader:
         if progress:
             uploaded_count = len(progress['uploaded_chunks'])
             total_count = progress['total_chunks']
-            console.print(f"[bright_magenta]✓ 發現未完成的上傳：{uploaded_count}/{total_count} 分塊已上傳[/green]")
-            console.print(f"   繼續從斷點上傳...\n")
+            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 發現未完成的上傳：{uploaded_count}/{total_count} 分塊已上傳[/green]', uploaded_count=uploaded_count, total_count=total_count))
+            console.print(safe_t('common.message', fallback='   繼續從斷點上傳...\n'))
         else:
-            console.print(f"   總分塊數：{(file_size + self.CHUNK_SIZE - 1) // self.CHUNK_SIZE}")
-            console.print(f"   開始新的上傳...\n")
+            total_chunks = (file_size + self.CHUNK_SIZE - 1) // self.CHUNK_SIZE
+            console.print(safe_t('common.message', fallback='   總分塊數：{total_chunks}', total_chunks=total_chunks))
+            console.print(safe_t('common.message', fallback='   開始新的上傳...\n'))
             progress = self._create_new_progress(file_path, file_size)
 
         # 3. 執行分塊上傳
@@ -299,20 +302,23 @@ class ChunkedUploader:
             # 4. 上傳成功，刪除進度檔案
             self._delete_progress(file_path)
 
-            console.print(f"\n[bright_magenta]✓ 分塊上傳完成！[/green]")
+            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 分塊上傳完成！[/green]'))
             return uploaded_file
 
         except KeyboardInterrupt:
             # 用戶中斷，保存進度
-            console.print(f"\n[magenta]⏸️  上傳已中斷，進度已保存[/yellow]")
-            console.print(f"   已上傳：{len(progress['uploaded_chunks'])}/{progress['total_chunks']} 分塊")
-            console.print(f"   進度檔案：{self._get_progress_file_path(file_path)}")
-            console.print(f"\n   下次執行時將自動從斷點繼續上傳\n")
+            console.print(safe_t('common.saving', fallback='\n[#DDA0DD]⏸️  上傳已中斷，進度已保存[/#DDA0DD]'))
+            uploaded_count = len(progress['uploaded_chunks'])
+            total_count = progress['total_chunks']
+            console.print(safe_t('common.message', fallback='   已上傳：{uploaded_count}/{total_count} 分塊', uploaded_count=uploaded_count, total_count=total_count))
+            progress_file = self._get_progress_file_path(file_path)
+            console.print(safe_t('common.message', fallback='   進度檔案：{progress_file}', progress_file=progress_file))
+            console.print(safe_t('common.message', fallback='\n   下次執行時將自動從斷點繼續上傳\n'))
             raise
         except Exception as e:
             # 其他錯誤，保存進度
-            console.print(f"\n[dim magenta]✗ 上傳失敗：{e}[/red]")
-            console.print(f"   進度已保存，可稍後重試\n")
+            console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]✗ 上傳失敗：{e}[/red]', e=e))
+            console.print(safe_t('common.saving', fallback='   進度已保存，可稍後重試\n'))
             raise
 
     def _upload_chunks(
@@ -347,7 +353,7 @@ class ChunkedUploader:
 
         if not remaining_chunks:
             # 所有分塊已上傳，只需要驗證
-            console.print("[bright_magenta]✓ 所有分塊已上傳，驗證中...[/green]")
+            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 所有分塊已上傳，驗證中...[/green]'))
 
         # 使用 Progress 顯示上傳進度
         with Progress(
@@ -507,17 +513,18 @@ class FileUploadHelper:
         timeout = timeout_override if timeout_override else self.calculate_timeout(file_size)
 
         # 4. 顯示檔案資訊
-        console.print(f"\n[magenta]📤 準備上傳：{os.path.basename(file_path)}[/magenta]")
-        console.print(f"   大小：{file_size_mb:.2f} MB")
-        console.print(f"   類別：{file_category}")
-        console.print(f"   超時：{timeout} 秒")
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📤 準備上傳：{basename}[/#DDA0DD]', basename=os.path.basename(file_path)))
+        console.print(safe_t('common.message', fallback='   大小：{file_size_mb:.2f} MB', file_size_mb=file_size_mb))
+        console.print(safe_t('common.message', fallback='   類別：{file_category}', file_category=file_category))
+        console.print(safe_t('common.message', fallback='   超時：{timeout} 秒', timeout=timeout))
 
         # 5. 選擇上傳策略
         if file_category == 'small':
-            console.print(f"   策略：[bright_magenta]快速上傳（小檔案）[/green]\n")
+            console.print(safe_t('common.message', fallback='   策略：[#DA70D6]快速上傳（小檔案）[/green]\n'))
             return self._upload_small_file(file_path, display_name, mime_type, timeout, max_retries)
         else:
-            console.print(f"   策略：[magenta]優化上傳（{'大' if file_category == 'large' else '中等'}檔案）[/yellow]\n")
+            file_size_text = '大' if file_category == 'large' else '中等'
+            console.print(safe_t('common.message', fallback='   策略：[#DDA0DD]優化上傳（{file_size_text}檔案）[/#DDA0DD]\n', file_size_text=file_size_text))
             return self._upload_large_file(file_path, display_name, mime_type, timeout, max_retries)
 
     def _upload_small_file(
@@ -675,9 +682,9 @@ class FileUploadHelper:
                 actual_time = time.time() - start_time
                 actual_speed = file_size_mb / actual_time if actual_time > 0 else 0
 
-                console.print(f"[bright_magenta]✓ 上傳完成[/green]")
-                console.print(f"   耗時：{actual_time:.1f} 秒")
-                console.print(f"   速度：{actual_speed:.2f} MB/s\n")
+                console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 上傳完成[/green]'))
+                console.print(safe_t('common.message', fallback='   耗時：{actual_time:.1f} 秒', actual_time=actual_time))
+                console.print(safe_t('common.message', fallback='   速度：{actual_speed:.2f} MB/s\n', actual_speed=actual_speed))
 
                 return uploaded_file
 
@@ -769,22 +776,22 @@ def upload_file(
         )
 
         # 顯示檔案上傳成功提示和成本警告
-        console.print(f"[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]")
-        console.print(f"[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]")
+        console.print(safe_t('common.message', fallback='[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]', name=uploaded_file.name))
+        console.print(safe_t('common.analyzing', fallback='[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'))
 
         return uploaded_file
     except Exception as e:
-        console.print(f"\n[dim magenta]✗ 上傳失敗：{e}[/red]\n")
+        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]✗ 上傳失敗：{e}[/red]\n', e=e))
 
         # 智能導航到配置建議
-        console.print("[magenta]💡 建議調整配置：[/magenta]\n")
-        console.print(f"   [dim]檔案大小：{file_size_mb:.2f} MB[/dim]")
-        console.print(f"   [dim]當前分塊：5 MB[/dim]\n")
-        console.print("   [magenta]1. 使用推薦配置（2MB 分塊 + 增加重試）[/magenta]")
-        console.print("   [magenta]2. 取消上傳[/magenta]\n")
+        console.print(safe_t('common.message', fallback='[#DDA0DD]💡 建議調整配置：[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='   [dim]檔案大小：{file_size_mb:.2f} MB[/dim]', file_size_mb=file_size_mb))
+        console.print(safe_t('common.message', fallback='   [dim]當前分塊：5 MB[/dim]\n'))
+        console.print(safe_t('common.message', fallback='   [#DDA0DD]1. 使用推薦配置（2MB 分塊 + 增加重試）[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='   [#DDA0DD]2. 取消上傳[/#DDA0DD]\n'))
 
-        if Confirm.ask("[magenta]是否使用推薦配置重試？[/magenta]", default=True):
-            console.print("[bright_magenta]✓ 使用推薦配置重試中...[/bright_magenta]\n")
+        if Confirm.ask("[#DDA0DD]是否使用推薦配置重試？[/#DDA0DD]", default=True):
+            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 使用推薦配置重試中...[/#DA70D6]\n'))
             # 使用推薦配置：更小的分塊 + 更多重試
             uploader_retry = ChunkedUploader(client)
             uploader_retry.CHUNK_SIZE = 2 * 1024 * 1024  # 降為 2MB
@@ -795,21 +802,21 @@ def upload_file(
             )
 
             # 顯示檔案上傳成功提示和成本警告
-            console.print(f"[dim]📁 檔案已上傳: {uploaded_file_retry.name}[/dim]")
-            console.print(f"[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]")
+            console.print(safe_t('common.message', fallback='[dim]📁 檔案已上傳: {uploaded_file_retry.name}[/dim]', name=uploaded_file_retry.name))
+            console.print(safe_t('common.analyzing', fallback='[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'))
 
             return uploaded_file_retry
         else:
-            console.print("[yellow]已取消上傳[/yellow]")
+            console.print(safe_t('common.message', fallback='[#DDA0DD]已取消上傳[/#DDA0DD]'))
             raise
 
 
 if __name__ == "__main__":
     # 測試模式
-    console.print("[magenta]Gemini Upload Helper - 測試模式[/magenta]\n")
-    console.print("功能檢查：")
-    console.print(f"  - API Retry: {'✅ 可用' if API_RETRY_AVAILABLE else '❌ 不可用'}")
-    console.print(f"  - Error Fix: {'✅ 可用' if ERROR_FIX_AVAILABLE else '❌ 不可用'}")
-    console.print("\n使用範例：")
+    console.print(safe_t('common.message', fallback='[#DDA0DD]Gemini Upload Helper - 測試模式[/#DDA0DD]\n'))
+    console.print(safe_t('common.message', fallback='功能檢查：'))
+    console.print(safe_t('error.failed', fallback='  - API Retry: ✅ 啟用'))
+    console.print(safe_t('error.failed', fallback='  - Error Fix: ✅ 啟用'))
+    console.print(safe_t('common.message', fallback='\n使用範例：'))
     console.print("  from gemini_upload_helper import upload_file")
     console.print("  uploaded = upload_file(client, 'video.mp4', max_retries=3)")

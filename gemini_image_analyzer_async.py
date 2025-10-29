@@ -93,8 +93,8 @@ class AsyncImageAnalyzer(ImageAnalyzer):
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['describe'])
 
-        console.print(safe_t('common.message', fallback='\n[magenta]💭 任務：{task} (異步模式)[/magenta]', task=task))
-        console.print(safe_t('common.analyzing', fallback='[magenta]🤖 Gemini 分析中...[/magenta]\n'))
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 任務：{task} (異步模式)[/#DDA0DD]', task=task))
+        console.print(safe_t('common.analyzing', fallback='[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]\n'))
 
         # 轉換圖片為 Part（使用父類方法）
         image_part = self._image_to_part(image_path)
@@ -129,13 +129,13 @@ class AsyncImageAnalyzer(ImageAnalyzer):
 
         # 處理回應（與父類相同）
         from rich.panel import Panel
-from utils.i18n import safe_t
+        from utils.i18n import safe_t
         from rich.markdown import Markdown
 
         console.print(Panel(
             Markdown(response.text),
-            title="[bright_magenta]📝 Gemini 分析結果[/bright_magenta]",
-            border_style="magenta"
+            title="[#DA70D6]📝 Gemini 分析結果[/#DA70D6]",
+            border_style="#DDA0DD"
         ))
 
         # 提取 tokens 和顯示成本（複用父類邏輯）
@@ -160,10 +160,14 @@ from utils.i18n import safe_t
                     output_tokens,
                     thinking_tokens
                 )
+                cost_twd = cost * USD_TO_TWD
+                total_cost_twd = global_pricing_calculator.total_cost * USD_TO_TWD
+                total_cost_usd = global_pricing_calculator.total_cost
+
                 if thinking_tokens > 0:
-                    console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]', cost * USD_TO_TWD:.2f=cost * USD_TO_TWD:.2f, input_tokens:,=input_tokens:,, thinking_tokens:,=thinking_tokens:,, output_tokens:,=output_tokens:,, global_pricing_calculator.total_cost * USD_TO_TWD:.2f=global_pricing_calculator.total_cost * USD_TO_TWD:.2f, global_pricing_calculator.total_cost:.6f=global_pricing_calculator.total_cost:.6f))
+                    console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost_twd:.2f} (圖片+提示: {input_tokens:,} tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${total_cost_twd:.2f} (${total_cost_usd:.6f})[/dim]', cost_twd=cost_twd, input_tokens=input_tokens, thinking_tokens=thinking_tokens, output_tokens=output_tokens, total_cost_twd=total_cost_twd, total_cost_usd=total_cost_usd))
                 else:
-                    console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]', cost * USD_TO_TWD:.2f=cost * USD_TO_TWD:.2f, input_tokens:,=input_tokens:,, output_tokens:,=output_tokens:,, global_pricing_calculator.total_cost * USD_TO_TWD:.2f=global_pricing_calculator.total_cost * USD_TO_TWD:.2f, global_pricing_calculator.total_cost:.6f=global_pricing_calculator.total_cost:.6f))
+                    console.print(safe_t('common.message', fallback='[dim]💰 本次成本: NT${cost_twd:.2f} (圖片+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${total_cost_twd:.2f} (${total_cost_usd:.6f})[/dim]', cost_twd=cost_twd, input_tokens=input_tokens, output_tokens=output_tokens, total_cost_twd=total_cost_twd, total_cost_usd=total_cost_usd))
             except Exception as e:
                 pass
 
@@ -220,7 +224,7 @@ from utils.i18n import safe_t
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['compare'])
 
-        console.print(safe_t('common.loading', fallback='\n[magenta]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/magenta]', len(image_paths)=len(image_paths)))
+        console.print(safe_t('common.loading', fallback='\n[#DDA0DD]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/#DDA0DD]', image_paths_count=len(image_paths)))
 
         # 並行載入所有圖片
         import os
@@ -233,13 +237,13 @@ from utils.i18n import safe_t
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]', os.path.basename(path)=os.path.basename(path), e=e))
+                console.print(safe_t('error.failed', fallback='   [dim #DDA0DD]✗ {basename} - 載入失敗：{e}[/red]', basename=os.path.basename(path), e=e))
 
         if not parts:
             raise ValueError("沒有成功載入任何圖片")
 
-        console.print(safe_t('common.message', fallback='\n[magenta]💭 任務：{task}[/magenta]', task=task))
-        console.print(safe_t('common.analyzing', fallback='\n[magenta]🤖 Gemini 分析中...[/magenta]\n'))
+        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 任務：{task}[/#DDA0DD]', task=task))
+        console.print(safe_t('common.analyzing', fallback='\n[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]\n'))
 
         # 異步 API 調用
         loop = asyncio.get_running_loop()
@@ -272,12 +276,12 @@ from utils.i18n import safe_t
         # 顯示結果
         from rich.panel import Panel
         from rich.markdown import Markdown
-from utils.i18n import safe_t
+        from utils.i18n import safe_t
 
         console.print(Panel(
             Markdown(response.text),
-            title="[bright_magenta]📝 Gemini 批次分析結果[/bright_magenta]",
-            border_style="magenta"
+            title="[#DA70D6]📝 Gemini 批次分析結果[/#DA70D6]",
+            border_style="#DDA0DD"
         ))
 
         return response.text

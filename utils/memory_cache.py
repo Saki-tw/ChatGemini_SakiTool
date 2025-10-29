@@ -158,8 +158,8 @@ class MemoryLRUCache:
                 # 如果單個項目超過最大限制，記錄警告但仍然存入
                 if size > self.max_size_bytes:
                     console.print(
-                        f"[yellow]⚠️  警告：單個項目大小 ({size / 1024 / 1024:.1f}MB) "
-                        f"超過快取限制 ({self.max_size_bytes / 1024 / 1024:.1f}MB)[/yellow]"
+                        f"[#DDA0DD]⚠️  警告：單個項目大小 ({size / 1024 / 1024:.1f}MB) "
+                        f"超過快取限制 ({self.max_size_bytes / 1024 / 1024:.1f}MB)[/#DDA0DD]"
                     )
                 break
 
@@ -253,7 +253,7 @@ class MemoryLRUCache:
         stats = self.get_stats()
 
         table = Table(title="快取統計資訊", show_header=True)
-        table.add_column("指標", style="cyan")
+        table.add_column("指標", style="#87CEEB")
         table.add_column("值", style="green")
 
         table.add_row("項目數", f"{stats['items']} / {stats['max_items']}")
@@ -404,7 +404,7 @@ def cached(
 
 if __name__ == "__main__":
     # 測試程式碼
-    console.print("[bold cyan]測試 MemoryLRUCache[/bold cyan]\n")
+    console.print("[bold #87CEEB]測試 MemoryLRUCache[/bold #87CEEB]\n")
 
     # 建立快取實例
     cache = MemoryLRUCache(
@@ -415,7 +415,7 @@ if __name__ == "__main__":
     )
 
     # 測試存取
-    console.print("[yellow]測試 1：基本存取[/yellow]")
+    console.print("[#DDA0DD]測試 1：基本存取[/#DDA0DD]")
     cache.put("key1", "value1" * 100)
     cache.put("key2", "value2" * 100)
     cache.put("key3", "value3" * 100)
@@ -425,7 +425,7 @@ if __name__ == "__main__":
     console.print(f"Get key4 (不存在): {cache.get('key4')}")
 
     # 測試 LRU 淘汰
-    console.print("\n[yellow]測試 2：LRU 淘汰（超過項目數限制）[/yellow]")
+    console.print("\n[#DDA0DD]測試 2：LRU 淘汰（超過項目數限制）[/#DDA0DD]")
     cache.put("key4", "value4" * 100)
     cache.put("key5", "value5" * 100)
     cache.put("key6", "value6" * 100)  # 應該淘汰 key1
@@ -434,11 +434,11 @@ if __name__ == "__main__":
     console.print(f"Get key6: {cache.get('key6')[:20]}...")
 
     # 顯示統計
-    console.print("\n[yellow]測試 3：統計資訊[/yellow]")
+    console.print("\n[#DDA0DD]測試 3：統計資訊[/#DDA0DD]")
     cache.display_stats()
 
     # 測試 TTL
-    console.print("\n[yellow]測試 4：TTL 過期[/yellow]")
+    console.print("\n[#DDA0DD]測試 4：TTL 過期[/#DDA0DD]")
     cache.put("temp_key", "temp_value", ttl=2)
     console.print(f"立即讀取: {cache.get('temp_key')}")
     console.print("等待 3 秒...")
@@ -446,5 +446,5 @@ if __name__ == "__main__":
     console.print(f"3 秒後讀取 (應已過期): {cache.get('temp_key')}")
 
     # 最終統計
-    console.print("\n[yellow]最終統計[/yellow]")
+    console.print("\n[#DDA0DD]最終統計[/#DDA0DD]")
     cache.display_stats()

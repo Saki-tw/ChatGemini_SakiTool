@@ -603,9 +603,11 @@ class PricingCalculator:
             格式化字串
         """
         if currency == 'TWD':
-            return f"NT${cost * USD_TO_TWD:.2f}"
+            symbol = t("format.currency_symbol.twd", fallback="NT$")
+            return f"{symbol}{cost * USD_TO_TWD:.2f}"
         elif currency == 'USD':
-            return f"${cost:.6f}"
+            symbol = t("format.currency_symbol.usd", fallback="US$")
+            return f"{symbol}{cost:.6f}"
         else:
             return f"{cost:.6f} {currency}"
 
@@ -631,7 +633,8 @@ class PricingCalculator:
             if show_breakdown:
                 cost_str = f"{self.format_cost(details['planning_cost'])} ({self.format_cost(details['planning_cost'], 'USD')}) - {details['planning_model']}"
                 print(t("pricing.planning_cost_label", cost=cost_str))
-                veo_str = f"{self.format_cost(details['veo_cost'])} ({self.format_cost(details['veo_cost'], 'USD')}) - {details['num_segments']} 段"
+                segment_unit = t("format.unit.segment", fallback="段")
+                veo_str = f"{self.format_cost(details['veo_cost'])} ({self.format_cost(details['veo_cost'], 'USD')}) - {details['num_segments']}{segment_unit}"
                 print(t("pricing.veo_cost_label", cost=veo_str))
                 print("-" * 60)
         elif 'video_duration_seconds' in details:
@@ -821,11 +824,15 @@ def print_cost_comparison(
     savings = method1_cost - method2_cost
     savings_percent = (savings / method1_cost * 100) if method1_cost > 0 else 0
 
+    separator = t("format.separator", fallback="：")
+    twd_symbol = t("format.currency_symbol.twd", fallback="NT$")
+    usd_symbol = t("format.currency_symbol.usd", fallback="$")
+
     print("\n" + "=" * 60)
     print(t("pricing.cost_comparison_title", feature=feature_name))
     print("=" * 60)
-    print(f"❌ {method1_name}：NT${method1_cost * USD_TO_TWD:.2f} (${method1_cost:.6f})")
-    print(f"✅ {method2_name}：NT${method2_cost * USD_TO_TWD:.2f} (${method2_cost:.6f})")
+    print(f"❌ {method1_name}{separator}{twd_symbol}{method1_cost * USD_TO_TWD:.2f} ({usd_symbol}{method1_cost:.6f})")
+    print(f"✅ {method2_name}{separator}{twd_symbol}{method2_cost * USD_TO_TWD:.2f} ({usd_symbol}{method2_cost:.6f})")
     print("-" * 60)
     if savings > 0:
         print(t("pricing.savings_comparison", currency="NT$", twd=f"{savings * USD_TO_TWD:.2f}", usd=f"{savings:.6f}"))

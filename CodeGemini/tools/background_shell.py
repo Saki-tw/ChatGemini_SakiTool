@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
 """
+
+# i18n support
+import sys
+from pathlib import Path
+
+# 確保可以 import utils
+project_root = Path(__file__).parent.parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from utils.i18n import safe_t
 CodeGemini Background Shell Module
 背景 Shell 管理工具 - 支援長時間運行的任務
 
@@ -79,7 +90,7 @@ class BackgroundShellManager:
         self._shell_counter = 0
         self._lock = threading.Lock()
 
-        console.print("[dim]BackgroundShellManager 初始化完成[/dim]")
+        console.print(f"[dim]{safe_t('background_shell.manager_initialized', 'BackgroundShellManager 初始化完成')}[/dim]")
 
     def start_shell(
         self,
@@ -100,8 +111,8 @@ class BackgroundShellManager:
         Returns:
             str: Shell ID
         """
-        console.print(f"\n[magenta]🚀 啟動背景 Shell...[/magenta]")
-        console.print(f"[dim]命令：{command}[/dim]")
+        console.print(f"\n[#DDA0DD]{safe_t('background_shell.starting', '🚀 啟動背景 Shell...')}[/#DDA0DD]")
+        console.print(f"[dim]{safe_t('background_shell.command', '命令')}：{command}[/dim]")
 
         # 生成 Shell ID
         if not shell_id:
@@ -111,7 +122,7 @@ class BackgroundShellManager:
 
         # 檢查 ID 是否已存在
         if shell_id in self.shells:
-            console.print(f"[dim magenta]✗ Shell ID 已存在：{shell_id}[/red]")
+            console.print(f"[dim #DDA0DD]✗ {safe_t('background_shell.id_exists', 'Shell ID 已存在')}：{shell_id}[/red]")
             raise ValueError(f"Shell ID '{shell_id}' already exists")
 
         # 準備環境變數
@@ -146,14 +157,14 @@ class BackgroundShellManager:
             # 啟動輸出監控執行緒
             self._start_output_monitoring(bg_shell)
 
-            console.print(f"[bright_magenta]✓ 背景 Shell 已啟動[/green]")
+            console.print(f"[#DA70D6]✓ {safe_t('background_shell.started', '背景 Shell 已啟動')}[/green]")
             console.print(f"  Shell ID：{shell_id}")
             console.print(f"  PID：{process.pid}")
 
             return shell_id
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 啟動失敗：{e}[/red]")
+            console.print(f"[dim #DDA0DD]✗ {safe_t('background_shell.start_failed', '啟動失敗')}：{e}[/red]")
             raise
 
     def get_output(
@@ -174,7 +185,7 @@ class BackgroundShellManager:
             str: 輸出內容
         """
         if shell_id not in self.shells:
-            console.print(f"[dim magenta]✗ Shell 不存在：{shell_id}[/red]")
+            console.print(f"[dim #DDA0DD]✗ {safe_t('background_shell.shell_not_found', 'Shell 不存在')}：{shell_id}[/red]")
             return ""
 
         bg_shell = self.shells[shell_id]
@@ -207,16 +218,16 @@ class BackgroundShellManager:
         Returns:
             bool: 是否成功終止
         """
-        console.print(f"\n[magenta]⚠️  終止背景 Shell：{shell_id}[/yellow]")
+        console.print(f"\n[#DDA0DD]⚠️  {safe_t('background_shell.killing', '終止背景 Shell')}：{shell_id}[/#DDA0DD]")
 
         if shell_id not in self.shells:
-            console.print(f"[dim magenta]✗ Shell 不存在：{shell_id}[/red]")
+            console.print(f"[dim #DDA0DD]✗ {safe_t('background_shell.shell_not_found', 'Shell 不存在')}：{shell_id}[/red]")
             return False
 
         bg_shell = self.shells[shell_id]
 
         if not bg_shell.is_running:
-            console.print(f"[magenta]⚠️  Shell 已停止[/yellow]")
+            console.print(f"[#DDA0DD]⚠️  {safe_t('background_shell.already_stopped', 'Shell 已停止')}[/#DDA0DD]")
             return True
 
         try:
@@ -233,18 +244,18 @@ class BackgroundShellManager:
             bg_shell.ended_at = datetime.now()
             bg_shell.exit_code = bg_shell.process.returncode
 
-            console.print(f"[bright_magenta]✓ Shell 已終止[/green]")
+            console.print(f"[#DA70D6]✓ {safe_t('background_shell.killed', 'Shell 已終止')}[/green]")
             return True
 
         except subprocess.TimeoutExpired:
-            console.print(f"[magenta]⚠️  終止超時，強制 kill[/yellow]")
+            console.print(f"[#DDA0DD]⚠️  {safe_t('background_shell.kill_timeout', '終止超時，強制 kill')}[/#DDA0DD]")
             bg_shell.process.kill()
             bg_shell.status = ShellStatus.KILLED
             bg_shell.ended_at = datetime.now()
             return True
 
         except Exception as e:
-            console.print(f"[dim magenta]✗ 終止失敗：{e}[/red]")
+            console.print(f"[dim #DDA0DD]✗ {safe_t('background_shell.kill_failed', '終止失敗')}：{e}[/red]")
             return False
 
     def list_shells(self) -> List[Dict[str, Any]]:
@@ -285,29 +296,29 @@ class BackgroundShellManager:
         shells_info = self.list_shells()
 
         if not shells_info:
-            console.print("[magenta]⚠️  無背景 Shell[/yellow]")
+            console.print(f"[#DDA0DD]⚠️  {safe_t('background_shell.no_shells', '無背景 Shell')}[/#DDA0DD]")
             return
 
-        console.print(f"\n[bold]🖥️  背景 Shell 列表（{len(shells_info)} 個）[/bold]\n")
+        console.print(f"\n[bold]🖥️  {safe_t('background_shell.shell_list', '背景 Shell 列表')}（{len(shells_info)} {safe_t('common.count_unit', '個')}）[/bold]\n")
 
-        table = Table(show_header=True, header_style="bold bright_magenta")
-        table.add_column("Shell ID", style="bright_magenta")
-        table.add_column("狀態", style="white")
-        table.add_column("命令", style="dim")
-        table.add_column("運行時間", style="yellow")
-        table.add_column("輸出行數", style="green")
+        table = Table(show_header=True, header_style="bold #DA70D6")
+        table.add_column("Shell ID", style="#DA70D6")
+        table.add_column(safe_t('background_shell.status', '狀態'), style="white")
+        table.add_column(safe_t('background_shell.command', '命令'), style="dim")
+        table.add_column(safe_t('background_shell.runtime', '運行時間'), style="#DDA0DD")
+        table.add_column(safe_t('background_shell.output_lines', '輸出行數'), style="green")
 
         for info in shells_info:
             # 狀態顏色
             status = info["status"]
             if status == "running":
-                status_text = "[bright_magenta]●[/green] 運行中"
+                status_text = f"[#DA70D6]●[/green] {safe_t('background_shell.status_running', '運行中')}"
             elif status == "completed":
-                status_text = "[magenta]✓[/magenta] 已完成"
+                status_text = f"[#DDA0DD]✓[/#DDA0DD] {safe_t('background_shell.status_completed', '已完成')}"
             elif status == "failed":
-                status_text = "[dim magenta]✗[/red] 失敗"
+                status_text = f"[dim #DDA0DD]✗[/red] {safe_t('background_shell.status_failed', '失敗')}"
             else:  # killed
-                status_text = "[magenta]⊗[/yellow] 已終止"
+                status_text = f"[#DDA0DD]⊗[/#DDA0DD] {safe_t('background_shell.status_killed', '已終止')}"
 
             # 命令截斷
             command = info["command"]
@@ -340,7 +351,7 @@ class BackgroundShellManager:
             del self.shells[shell_id]
 
         if to_remove:
-            console.print(f"[bright_magenta]✓ 清理了 {len(to_remove)} 個已完成的 Shell[/green]")
+            console.print(f"[#DA70D6]✓ {safe_t('background_shell.cleaned', '清理了')} {len(to_remove)} {safe_t('common.count_unit', '個')}{safe_t('background_shell.completed_shells', '已完成的 Shell')}[/green]")
 
         return len(to_remove)
 
@@ -380,15 +391,15 @@ def main():
     """Background Shell 命令列工具"""
     import sys
 
-    console.print("\n[bold magenta]CodeGemini Background Shell Manager[/bold magenta]\n")
+    console.print("\n[bold #DDA0DD]CodeGemini Background Shell Manager[/bold #DDA0DD]\n")
 
     if len(sys.argv) < 2:
-        console.print("用法：")
+        console.print(f"{safe_t('common.usage', '用法')}：")
         console.print("  python tools/background_shell.py start <command>")
         console.print("  python tools/background_shell.py output <shell_id> [--filter <regex>]")
         console.print("  python tools/background_shell.py kill <shell_id>")
         console.print("  python tools/background_shell.py list")
-        console.print("\n範例：")
+        console.print(f"\n{safe_t('common.examples', '範例')}：")
         console.print("  python tools/background_shell.py start 'ping -c 10 google.com'")
         console.print("  python tools/background_shell.py output shell_1")
         console.print("  python tools/background_shell.py kill shell_1")
@@ -400,7 +411,7 @@ def main():
     if action == "start" and len(sys.argv) >= 3:
         command = sys.argv[2]
         shell_id = manager.start_shell(command)
-        console.print(f"\n[bright_magenta]✓ Shell ID：{shell_id}[/green]")
+        console.print(f"\n[#DA70D6]✓ Shell ID：{shell_id}[/green]")
 
     elif action == "output" and len(sys.argv) >= 3:
         shell_id = sys.argv[2]
@@ -412,7 +423,7 @@ def main():
                 filter_regex = sys.argv[i + 1]
 
         output = manager.get_output(shell_id, filter_regex=filter_regex)
-        console.print(f"\n[bold]輸出：[/bold]\n")
+        console.print(f"\n[bold]{safe_t('background_shell.output', '輸出')}：[/bold]\n")
         console.print(output)
 
     elif action == "kill" and len(sys.argv) >= 3:
@@ -423,7 +434,7 @@ def main():
         manager.display_shells()
 
     else:
-        console.print("[dim magenta]✗ 無效的命令[/red]")
+        console.print(f"[dim #DDA0DD]✗ {safe_t('common.invalid_command', '無效的命令')}[/red]")
 
 
 if __name__ == "__main__":
