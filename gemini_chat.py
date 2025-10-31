@@ -357,11 +357,13 @@ if config.MODULES.get('video_analyzer', {}).get('enabled', False):
 else:
     VIDEO_ANALYZER_ENABLED = False
 
-# 導入 CodeGemini（Gemini CLI 管理）- 不受 config.py 控制,始終嘗試載入
+# 檢查 CodeGemini 配置管理器是否可用
 try:
-    from CodeGemini import CodeGemini
-    CODEGEMINI_ENABLED = True
-except ImportError:
+    from pathlib import Path
+    codegemini_path = Path(__file__).parent / "CodeGemini"
+    config_manager_file = codegemini_path / "config_manager.py"
+    CODEGEMINI_ENABLED = config_manager_file.exists()
+except Exception:
     CODEGEMINI_ENABLED = False
 
 # ==========================================
@@ -1176,7 +1178,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
         """Enter 在補全菜單打開時：只接受補全,不送出（改善用戶體驗）"""
         # 獲取當前選中的補全項目
         current_completion = event.app.current_buffer.complete_state
-        if current_completion:
+        if current_completion and current_completion.current_completion:
             # 接受當前選中的補全
             event.app.current_buffer.apply_completion(current_completion.current_completion)
         # 不調用 accept_line(),因此不會提交
@@ -2050,7 +2052,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     'help': 'help',
                     'lang': 'lang',
                     'language': 'lang',
-                    'model': 'model',
+                    'model': '/model',  # 保留斜線
                     'cache': 'cache',
                     'clear': 'clear',
                     'media': 'media',
@@ -2062,27 +2064,48 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     'cli': 'cli',
                     'gemini-cli': 'cli',
                     'upgrade': 'upgrade',
-                    'clear-memory': 'clear-memory',
-                    'memory-stats': 'memory-stats',
-                    'help-memory': 'help-memory',
-                    'checkpoints': 'checkpoints',
-                    'checkpoint': 'checkpoint',
-                    'rewind': 'rewind',
-                    'help-checkpoint': 'help-checkpoint',
-                    'search': 'search',
-                    'history': 'history',
-                    'export': 'export',
-                    'stats': 'stats',
+                    'budget': '/budget',  # 保留斜線
+                    'clear-memory': '/clear-memory',  # 保留斜線
+                    'memory-stats': '/memory-stats',  # 保留斜線
+                    'help-memory': '/help-memory',  # 保留斜線
+                    'checkpoints': '/checkpoints',  # 保留斜線
+                    'checkpoint': '/checkpoint',  # 保留斜線
+                    'rewind': '/rewind',  # 保留斜線
+                    'help-checkpoint': '/help-checkpoint',  # 保留斜線
+                    'search': '/search',  # 保留斜線
+                    'history': '/history',  # 保留斜線
+                    'export': '/export',  # 保留斜線
+                    'stats': '/stats',  # 保留斜線
                 }
 
-                # 檢查是否為有效的斜線指令
+                # 檢查是否為有效的斜線指令（包括帶參數的指令）
+                # 先檢查完整指令
                 if slash_cmd_lower in slash_command_whitelist:
                     # 將斜線指令轉換為實際指令
                     user_input = slash_command_whitelist[slash_cmd_lower]
                     # 繼續執行下面的指令處理邏輯
+                # 再檢查指令的第一個字（處理帶參數的指令，如 /model update, /checkpoint 描述）
+                elif slash_cmd_lower.split()[0] in slash_command_whitelist:
+                    # 保留完整輸入（包含參數）
+                    base_cmd = slash_cmd_lower.split()[0]
+                    user_input = '/' + slash_cmd  # 保持原始輸入
+                    # 繼續執行下面的指令處理邏輯
                 else:
-                    # 不是有效指令,當作普通 prompt 處理（繼續往下執行,送給 AI）
-                    pass
+                    # 不是有效指令，嘗試模糊匹配
+                    from difflib import get_close_matches
+                    base_cmd = slash_cmd_lower.split()[0]  # 只匹配基礎指令
+                    suggestions = get_close_matches(base_cmd, slash_command_whitelist.keys(), n=3, cutoff=0.6)
+
+                    if suggestions:
+                        console.print(f"\n[#B565D8]❌ 未知指令: /{slash_cmd}[/#B565D8]")
+                        console.print(f"[#E8C4F0]💡 您是否想要輸入以下指令？[/#E8C4F0]")
+                        for sug in suggestions:
+                            console.print(f"   • /{sug}")
+                        console.print()
+                    else:
+                        console.print(f"\n[#B565D8]❌ 未知指令: /{slash_cmd}[/#B565D8]")
+                        console.print(f"[#E8C4F0]💡 輸入 [bold]/[/bold] 或 [bold]/help[/bold] 查看可用指令[/#E8C4F0]\n")
+                    continue
 
             # 處理指令
             if user_input.lower() in ['exit', 'quit', '退出']:
@@ -3109,22 +3132,24 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 continue
 
             elif user_input.lower() == 'config':
-                # 配置管理選單（使用已載入的配置管理器）
-                if codegemini_config_manager is not None:
+                # 配置管理選單（嘗試載入配置管理器）
+                config_mgr = get_codegemini_config_manager()
+                if config_mgr is not None:
                     try:
                         from config_manager import interactive_config_menu
 
                         # 使用已載入的配置管理器
-                        interactive_config_menu(codegemini_config_manager)
+                        interactive_config_menu(config_mgr)
 
                         # 配置更新後重新載入
-                        codegemini_config = codegemini_config_manager.get_codebase_embedding_config()
+                        global codegemini_config
+                        codegemini_config = config_mgr.get_codebase_embedding_config()
                         console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 配置已更新（重啟程式後生效）[/#B565D8]'))
 
                     except Exception as e:
-                        console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 配置管理錯誤: {e}[/red]', e=e))
+                        console.print(safe_t('error.failed', fallback='[#B565D8]✗ 配置管理錯誤: {e}[/#B565D8]', e=e))
                 else:
-                    console.print(safe_t('common.loading', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ CodeGemini 配置管理器未載入[/red]'))
+                    console.print(safe_t('common.loading', fallback='[#B565D8]✗ CodeGemini 配置管理器未載入[/#B565D8]'))
                     console.print(safe_t('common.message', fallback='[#E8C4F0]請確認：[/#E8C4F0]'))
                     console.print(safe_t('common.message', fallback='[#E8C4F0]  1. CodeGemini 模組已安裝[/#E8C4F0]'))
                     console.print(safe_t('common.message', fallback='[#E8C4F0]  2. CodeGemini/config_manager.py 存在[/#E8C4F0]'))

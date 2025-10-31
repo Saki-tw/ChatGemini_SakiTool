@@ -111,7 +111,7 @@ def __getattr__(name):
                   'get_thinking_config', 'estimate_thinking_cost',
                   'is_thinking_enabled_in_config', 'THINKING_MODELS',
                   'MODEL_GEMINI_2_5_PRO', 'MODEL_GEMINI_2_5_FLASH',
-                  'MODEL_GEMINI_2_5_FLASH_8B', 'MODEL_GEMINI_2_0_FLASH_THINKING'):
+                  'MODEL_GEMINI_2_0_FLASH_THINKING'):
         from .thinking_helpers import (
             supports_thinking,
             create_generation_config,
@@ -121,7 +121,6 @@ def __getattr__(name):
             THINKING_MODELS,
             MODEL_GEMINI_2_5_PRO,
             MODEL_GEMINI_2_5_FLASH,
-            MODEL_GEMINI_2_5_FLASH_8B,
             MODEL_GEMINI_2_0_FLASH_THINKING,
         )
 
@@ -134,7 +133,6 @@ def __getattr__(name):
             'THINKING_MODELS': THINKING_MODELS,
             'MODEL_GEMINI_2_5_PRO': MODEL_GEMINI_2_5_PRO,
             'MODEL_GEMINI_2_5_FLASH': MODEL_GEMINI_2_5_FLASH,
-            'MODEL_GEMINI_2_5_FLASH_8B': MODEL_GEMINI_2_5_FLASH_8B,
             'MODEL_GEMINI_2_0_FLASH_THINKING': MODEL_GEMINI_2_0_FLASH_THINKING,
         })
 
@@ -228,7 +226,6 @@ __all__ = [
     'THINKING_MODELS',
     'MODEL_GEMINI_2_5_PRO',
     'MODEL_GEMINI_2_5_FLASH',
-    'MODEL_GEMINI_2_5_FLASH_8B',
     'MODEL_GEMINI_2_0_FLASH_THINKING',
     # 性能監控
     'get_performance_monitor',
