@@ -10,7 +10,7 @@ Gemini Checkpoint System
 4. 檢查點管理（列表、刪除、清理）
 
 設計理念：
-- 輕量級：僅保存差異，降低儲存空間
+- 輕量級：僅保存差異,降低儲存空間
 - 快速：使用 difflib 進行增量計算
 - 安全：SQLite 事務保證資料完整性
 - 可視化：Rich UI 展示檢查點清單
@@ -205,8 +205,8 @@ class SnapshotEngine:
         """
         應用 unified diff 以恢復內容
 
-        使用狀態機模式解析並應用 unified diff，支援完整的 diff 格式。
-        演算法複雜度：O(n + m)，其中 n 為原始行數，m 為 diff 行數。
+        使用狀態機模式解析並應用 unified diff,支援完整的 diff 格式。
+        演算法複雜度：O(n + m),其中 n 為原始行數,m 為 diff 行數。
 
         Args:
             content_before: 原始內容
@@ -262,7 +262,7 @@ class SnapshotEngine:
             if line.startswith('@@'):
                 match = re.match(r'@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@', line)
                 if not match:
-                    # 無效的 hunk 標頭，跳過
+                    # 無效的 hunk 標頭,跳過
                     i += 1
                     continue
 
@@ -286,7 +286,7 @@ class SnapshotEngine:
                 while i < len(diff_lines):
                     hunk_line = diff_lines[i]
 
-                    # 遇到下一個 hunk 或檔案標頭，結束當前 hunk
+                    # 遇到下一個 hunk 或檔案標頭,結束當前 hunk
                     if hunk_line.startswith('@@') or hunk_line.startswith('---') or hunk_line.startswith('+++'):
                         break
 
@@ -719,7 +719,7 @@ class CheckpointManager:
         # 確認
         if confirm:
             if not Confirm.ask(f"\n確定要回溯至此檢查點嗎？"):
-                console.print(safe_t('common.message', fallback='[#DDA0DD]已取消回溯[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]已取消回溯[/#E8C4F0]'))
                 return False
 
         # 執行回溯
@@ -737,7 +737,7 @@ class CheckpointManager:
                 snapshot_path = self.snapshots_dir / snapshot_filename
 
                 if not snapshot_path.exists():
-                    console.print(safe_t('common.message', fallback='  [#DDA0DD]⚠[/#DDA0DD] 快照檔案不存在: {file_path}', file_path=file_change.file_path))
+                    console.print(safe_t('common.message', fallback='  [#E8C4F0]⚠[/#E8C4F0] 快照檔案不存在: {file_path}', file_path=file_change.file_path))
                     fail_count += 1
                     continue
 
@@ -799,10 +799,10 @@ class CheckpointManager:
 
         # 顯示檔案清單
         if checkpoint.file_changes:
-            table = Table(title="檔案變更清單", show_header=True, header_style="bold #DDA0DD")
+            table = Table(title="檔案變更清單", show_header=True, header_style="bold #E8C4F0")
             table.add_column("變更類型", style="#87CEEB", width=12)
             table.add_column("檔案路徑", style="white")
-            table.add_column("大小變化", justify="right", style="#DDA0DD")
+            table.add_column("大小變化", justify="right", style="#E8C4F0")
 
             for fc in checkpoint.file_changes:
                 change_emoji = {
@@ -823,13 +823,13 @@ class CheckpointManager:
         checkpoints = self.list_checkpoints(limit=limit)
 
         if not checkpoints:
-            console.print(safe_t('common.message', fallback='[#DDA0DD]沒有檢查點[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]沒有檢查點[/#E8C4F0]'))
             return
 
-        table = Table(title=f"檢查點清單（最近 {len(checkpoints)} 個）", show_header=True, header_style="bold #DDA0DD")
+        table = Table(title=f"檢查點清單（最近 {len(checkpoints)} 個）", show_header=True, header_style="bold #E8C4F0")
         table.add_column("ID", style="#87CEEB", width=10)
         table.add_column("時間", style="white", width=20)
-        table.add_column("類型", style="#DDA0DD", width=10)
+        table.add_column("類型", style="#E8C4F0", width=10)
         table.add_column("描述", style="white")
         table.add_column("檔案數", justify="right", style="green", width=8)
 
@@ -896,12 +896,12 @@ class CheckpointManager:
         checkpoints = self.list_checkpoints(limit=1000)
 
         if len(checkpoints) <= keep_count:
-            console.print(safe_t('common.message', fallback='[green]無需清理（共 {len(checkpoints)} 個檢查點，保留 {keep_count} 個）[/green]', checkpoints_count=len(checkpoints), keep_count=keep_count))
+            console.print(safe_t('common.message', fallback='[green]無需清理（共 {len(checkpoints)} 個檢查點,保留 {keep_count} 個）[/green]', checkpoints_count=len(checkpoints), keep_count=keep_count))
             return
 
         to_delete = checkpoints[keep_count:]
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]將刪除 {len(to_delete)} 個舊檢查點:[/#DDA0DD]', to_delete_count=len(to_delete)))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]將刪除 {len(to_delete)} 個舊檢查點:[/#E8C4F0]', to_delete_count=len(to_delete)))
         for cp in to_delete[:10]:  # 顯示前 10 個
             console.print(f"  - {cp.id[:8]} | {cp.timestamp.strftime('%Y-%m-%d %H:%M:%S')} | {cp.description[:40]}")
 
@@ -909,11 +909,11 @@ class CheckpointManager:
             console.print(safe_t('common.message', fallback='  ... 及其他 {remaining_count} 個', remaining_count=len(to_delete) - 10))
 
         if dry_run:
-            console.print(safe_t('common.message', fallback='\n[#87CEEB]（試運行模式，未實際刪除）[/#87CEEB]'))
+            console.print(safe_t('common.message', fallback='\n[#87CEEB]（試運行模式,未實際刪除）[/#87CEEB]'))
             return
 
         if not Confirm.ask("\n確定要刪除這些檢查點嗎？"):
-            console.print(safe_t('common.message', fallback='[#DDA0DD]已取消清理[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]已取消清理[/#E8C4F0]'))
             return
 
         deleted_count = 0

@@ -49,7 +49,7 @@ class MemoryPoolManager:
         初始化記憶體池管理器
 
         Args:
-            max_memory_mb: 最大記憶體使用量 (MB)，預設 2GB
+            max_memory_mb: 最大記憶體使用量 (MB),預設 2GB
         """
         self.max_memory = max_memory_mb * 1024 * 1024  # 轉換為 bytes
         self.process = psutil.Process()
@@ -100,16 +100,16 @@ class MemoryPoolManager:
         report = self.get_memory_report()
 
         console.print(Panel(
-            f"""[bold #DDA0DD]記憶體使用報告[/bold #DDA0DD]
+            f"""[bold #E8C4F0]記憶體使用報告[/bold #E8C4F0]
 
-當前使用: [#DDA0DD]{report['current_mb']} MB[/#DDA0DD]
-峰值使用: [dim #DDA0DD]{report['peak_mb']} MB[/red]
-起始使用: [#DA70D6]{report['start_mb']} MB[/green]
-增量使用: [#DDA0DD]{report['delta_mb']} MB[/#DDA0DD]
+當前使用: [#E8C4F0]{report['current_mb']} MB[/#E8C4F0]
+峰值使用: [dim #E8C4F0]{report['peak_mb']} MB[/red]
+起始使用: [#B565D8]{report['start_mb']} MB[/green]
+增量使用: [#E8C4F0]{report['delta_mb']} MB[/#E8C4F0]
 使用率: [{'red' if report['usage_percent'] > 80 else 'green'}]{report['usage_percent']}%[/]
 記憶體限制: {report['max_limit_mb']} MB""",
             title="💾 Memory Report",
-            border_style="#DA70D6"
+            border_style="#B565D8"
         ))
 
 
@@ -121,7 +121,7 @@ class ConversationManager:
     """對話歷史管理器 - 支援分頁與自動存檔
 
     .. deprecated:: v1.0.3
-        建議使用 gemini_conversation.ConversationManager，該版本提供更完整的功能。
+        建議使用 gemini_conversation.ConversationManager,該版本提供更完整的功能。
         此版本將在 v2.0 移除。
     """
 
@@ -136,7 +136,7 @@ class ConversationManager:
 
         Args:
             max_history: 記憶體中最多保留的對話數
-            archive_path: 存檔路徑，預設為 ~/.gemini_conversations/
+            archive_path: 存檔路徑,預設為 ~/.gemini_conversations/
             auto_archive: 是否自動存檔
         """
         self.max_history = max_history
@@ -226,11 +226,11 @@ def load_image_chunked(
     quality: int = 85
 ) -> bytes:
     """
-    分塊載入圖片，避免記憶體溢出
+    分塊載入圖片,避免記憶體溢出
 
     Args:
         file_path: 圖片檔案路徑
-        max_size: 最大尺寸 (寬, 高)，預設 1920x1080
+        max_size: 最大尺寸 (寬, 高),預設 1920x1080
         quality: JPEG 品質 (1-100)
 
     Returns:
@@ -282,7 +282,7 @@ def load_image_chunked(
             return image_bytes
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 圖片載入失敗: {e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 圖片載入失敗: {e}[/red]', e=e))
         raise
 
 
@@ -313,7 +313,7 @@ def get_video_duration(video_path: str) -> float:
         return float(result.stdout.strip())
 
     except Exception as e:
-        console.print(safe_t('error.cannot_process', fallback='[dim #DDA0DD]❌ 無法取得影片時長: {e}[/red]', e=e))
+        console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]❌ 無法取得影片時長: {e}[/red]', e=e))
         return 0.0
 
 
@@ -325,13 +325,13 @@ def process_video_chunked(
     cleanup: bool = True
 ) -> bool:
     """
-    分段處理影片，避免記憶體溢出
+    分段處理影片,避免記憶體溢出
 
     Args:
         video_path: 輸入影片路徑
         output_path: 輸出影片路徑
-        chunk_duration: 每段時長（秒），預設 60 秒
-        process_func: 處理函數，接收 (chunk_path, chunk_index) 並返回處理後的路徑
+        chunk_duration: 每段時長（秒）,預設 60 秒
+        process_func: 處理函數,接收 (chunk_path, chunk_index) 並返回處理後的路徑
         cleanup: 是否清理臨時檔案
 
     Returns:
@@ -383,7 +383,7 @@ def process_video_chunked(
 
                 subprocess.run(cmd, capture_output=True, check=True)
 
-                # 如果有處理函數，則處理此片段
+                # 如果有處理函數,則處理此片段
                 if process_func:
                     processed_path = process_func(str(chunk_path), i)
                     processed_chunks.append(processed_path)
@@ -396,7 +396,7 @@ def process_video_chunked(
                 gc.collect()
 
         # 合併所有片段
-        console.print(safe_t('common.message', fallback='[#DDA0DD]🔗 合併影片片段...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]🔗 合併影片片段...[/#E8C4F0]'))
         _merge_video_chunks(processed_chunks, output_path)
 
         # 清理臨時檔案
@@ -408,11 +408,11 @@ def process_video_chunked(
             if temp_dir.exists():
                 temp_dir.rmdir()
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 影片處理完成: {output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 影片處理完成: {output_path}[/green]', output_path=output_path))
         return True
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 影片處理失敗: {e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 影片處理失敗: {e}[/red]', e=e))
         return False
 
 
@@ -507,7 +507,7 @@ class ChunkedUploader:
 
         Args:
             file_path: 檔案路徑
-            upload_func: 上傳函數，接收 (chunk_data, chunk_index, total_chunks) 並返回是否成功
+            upload_func: 上傳函數,接收 (chunk_data, chunk_index, total_chunks) 並返回是否成功
             resume: 是否啟用斷點續傳
 
         Returns:
@@ -531,9 +531,9 @@ class ChunkedUploader:
                 "completed": False
             }
 
-            # 如果已完成，直接返回
+            # 如果已完成,直接返回
             if progress.get("completed"):
-                console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 檔案已上傳完成（使用快取）[/green]'))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 檔案已上傳完成（使用快取）[/green]'))
                 return True
 
             uploaded_chunks = set(progress["uploaded_chunks"])
@@ -543,7 +543,7 @@ class ChunkedUploader:
                 BarColumn(),
                 TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
                 TextColumn("•"),
-                TextColumn("[#DDA0DD]{task.completed}/{task.total} chunks"),
+                TextColumn("[#E8C4F0]{task.completed}/{task.total} chunks"),
                 TimeRemainingColumn(),
                 console=console
             ) as progress_bar:
@@ -570,7 +570,7 @@ class ChunkedUploader:
                         success = upload_func(chunk_data, chunk_idx, total_chunks)
 
                         if not success:
-                            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ Chunk {chunk_idx} 上傳失敗[/red]', chunk_idx=chunk_idx))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ Chunk {chunk_idx} 上傳失敗[/red]', chunk_idx=chunk_idx))
                             return False
 
                         # 更新進度
@@ -588,11 +588,11 @@ class ChunkedUploader:
             progress["completed"] = True
             self._save_progress(file_path, progress)
 
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 檔案上傳完成: {file_path}[/green]', file_path=file_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✅ 檔案上傳完成: {file_path}[/green]', file_path=file_path))
             return True
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 上傳失敗: {e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 上傳失敗: {e}[/red]', e=e))
             return False
 
 
@@ -608,7 +608,7 @@ class ParallelProcessor:
         初始化並行處理器
 
         Args:
-            max_workers: 最大執行緒數，預設 4
+            max_workers: 最大執行緒數,預設 4
         """
         self.max_workers = max_workers
 
@@ -623,11 +623,11 @@ class ParallelProcessor:
 
         Args:
             items: 要處理的項目列表
-            process_func: 處理函數，接收單一項目並返回結果
+            process_func: 處理函數,接收單一項目並返回結果
             description: 進度描述
 
         Returns:
-            結果列表，每個結果包含 {"item", "status", "result"/"error"}
+            結果列表,每個結果包含 {"item", "status", "result"/"error"}
 
         Example:
             >>> def process_image(path):
@@ -680,7 +680,7 @@ class ParallelProcessor:
         success_count = sum(1 for r in results if r["status"] == "success")
         error_count = len(results) - success_count
 
-        console.print(safe_t('error.failed', fallback='\n[#DA70D6]✅ 成功: {success_count}[/green] | [dim #DDA0DD]❌ 失敗: {error_count}[/red]', success_count=success_count, error_count=error_count))
+        console.print(safe_t('error.failed', fallback='\n[#B565D8]✅ 成功: {success_count}[/green] | [dim #E8C4F0]❌ 失敗: {error_count}[/red]', success_count=success_count, error_count=error_count))
 
         return results
 
@@ -691,7 +691,7 @@ class ParallelProcessor:
 
 if __name__ == "__main__":
     console.print(Panel(
-        """[bold #DDA0DD]Gemini Memory Manager[/bold #DDA0DD]
+        """[bold #E8C4F0]Gemini Memory Manager[/bold #E8C4F0]
 
 ✅ 記憶體池管理器 (MemoryPoolManager)
 ✅ 對話歷史管理器 (ConversationManager)
@@ -702,7 +702,7 @@ if __name__ == "__main__":
 
 [dim]Author: Saki-tw | Email: Saki@saki-studio.com.tw[/dim]""",
         title="💾 Memory Management Tools",
-        border_style="#DA70D6"
+        border_style="#B565D8"
     ))
 
     # 示範記憶體管理器

@@ -130,14 +130,14 @@ class SubtitleGenerator:
             self.audio_processor = AudioProcessor()
         else:
             self.audio_processor = None
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：gemini_audio_processor 不可用，音訊提取功能受限[/#DDA0DD]'))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：gemini_audio_processor 不可用，音訊提取功能受限[/#E8C4F0]'))
 
         # 初始化翻譯器
         if TRANSLATOR_AVAILABLE:
             self.translator = get_translator()
         else:
             self.translator = None
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：gemini_translator 不可用，翻譯功能已停用[/#DDA0DD]'))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：gemini_translator 不可用，翻譯功能已停用[/#E8C4F0]'))
 
         # 輸出目錄 - 使用統一配置
         from utils.path_manager import get_video_dir
@@ -157,7 +157,7 @@ class SubtitleGenerator:
                 check=True
             )
         except (subprocess.CalledProcessError, FileNotFoundError):
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：未找到 ffmpeg，部分功能可能受限[/#DDA0DD]'))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：未找到 ffmpeg，部分功能可能受限[/#E8C4F0]'))
 
     def generate_subtitles(
         self,
@@ -192,14 +192,14 @@ class SubtitleGenerator:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
                 # 如果沒有修復建議模組，直接拋出錯誤
                 raise FileNotFoundError(f"找不到影片檔案：{video_path}")
 
-        console.print(safe_t('common.generating', fallback='\n[#DDA0DD]📝 生成字幕...[/#DDA0DD]'))
+        console.print(safe_t('common.generating', fallback='\n[#E8C4F0]📝 生成字幕...[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  影片：{basename}', basename=os.path.basename(video_path)))
         console.print(safe_t('common.message', fallback='  格式：{fmt}', fmt=format.upper()))
         translate_text = '是 (' + target_language + ')' if translate else '否'
@@ -231,12 +231,12 @@ class SubtitleGenerator:
         if os.path.exists(audio_path):
             os.remove(audio_path)
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 字幕已生成：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 字幕已生成：{output_path}[/green]', output_path=output_path))
         return output_path
 
     def _extract_audio(self, video_path: str) -> str:
         """提取影片音訊"""
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🎵 步驟 1/4: 提取音訊...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🎵 步驟 1/4: 提取音訊...[/#E8C4F0]'))
 
         if self.audio_processor:
             # 使用 AudioProcessor
@@ -271,7 +271,7 @@ class SubtitleGenerator:
                     stderr=subprocess.PIPE,
                     check=True
                 )
-                console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 音訊已提取[/green]'))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音訊已提取[/green]'))
                 return audio_path
             except subprocess.CalledProcessError as e:
                 stderr = e.stderr.decode() if isinstance(e.stderr, bytes) else str(e.stderr)
@@ -343,7 +343,7 @@ ffmpeg 錯誤碼：{e.returncode}
         Returns:
             List[SubtitleSegment]: 字幕片段列表
         """
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🎤 步驟 2/4: 語音辨識...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🎤 步驟 2/4: 語音辨識...[/#E8C4F0]'))
 
         # 🔧 任務 1.3：使用優化的上傳輔助模組（含重試、超時、進度顯示）
         if UPLOAD_HELPER_AVAILABLE:
@@ -363,7 +363,7 @@ ffmpeg 錯誤碼：{e.returncode}
             ) as progress:
                 task = progress.add_task("上傳音訊...", total=None)
                 uploaded_file = self.client.files.upload(path=audio_path)
-                progress.update(task, completed=100, description="[#DA70D6]✓ 上傳完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 上傳完成[/green]")
 
         # 顯示成本警告
         console.print(safe_t('common.message', fallback='[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]', name=uploaded_file.name))
@@ -428,7 +428,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 ]
             )
 
-            progress.update(task, completed=100, description="[#DA70D6]✓ 辨識完成[/green]")
+            progress.update(task, completed=100, description="[#B565D8]✓ 辨識完成[/green]")
 
         # 顯示成本（在解析結果之前）
         if hasattr(response, 'usage_metadata'):
@@ -471,7 +471,7 @@ ffmpeg 錯誤碼：{e.returncode}
                     text=seg["text"].strip()
                 ))
 
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 共識別 {len(segments)} 個片段[/green]', segments_count=len(segments)))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 共識別 {len(segments)} 個片段[/green]', segments_count=len(segments)))
 
             # 刪除上傳的檔案
             self.client.files.delete(name=uploaded_file.name)
@@ -503,7 +503,7 @@ ffmpeg 錯誤碼：{e.returncode}
                                 text=seg.get("text", "").strip()
                             ))
 
-                        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/green]', segments_count=len(segments)))
+                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/green]', segments_count=len(segments)))
 
                         # 刪除上傳的檔案
                         if 'uploaded_file' in locals():
@@ -511,12 +511,12 @@ ffmpeg 錯誤碼：{e.returncode}
 
                         return segments
                     except Exception as parse_error:
-                        console.print(safe_t('common.message', fallback='[dim #DDA0DD]✗ 修復後的 JSON 仍無法解析：{parse_error}[/red]', parse_error=parse_error))
+                        console.print(safe_t('common.message', fallback='[dim #E8C4F0]✗ 修復後的 JSON 仍無法解析：{parse_error}[/red]', parse_error=parse_error))
 
             except ImportError:
                 # 降級到舊版錯誤顯示
-                console.print(safe_t('error.failed', fallback='[dim #DDA0DD]JSON 解析錯誤：{e}[/red]', e=e))
-                console.print(safe_t('common.message', fallback='[#DDA0DD]原始回應：{result_text}[/#DDA0DD]', result_text=result_text))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]JSON 解析錯誤：{e}[/red]', e=e))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]原始回應：{result_text}[/#E8C4F0]', result_text=result_text))
 
             raise RuntimeError("語音辨識結果解析失敗，請參考上述修復建議")
 
@@ -526,10 +526,10 @@ ffmpeg 錯誤碼：{e.returncode}
         target_language: str
     ) -> List[SubtitleSegment]:
         """翻譯字幕片段"""
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🌐 步驟 3/4: 翻譯字幕（目標：{target_language}）...[/#DDA0DD]', target_language=target_language))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🌐 步驟 3/4: 翻譯字幕（目標：{target_language}）...[/#E8C4F0]', target_language=target_language))
 
         if not self.translator:
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：翻譯功能不可用，跳過翻譯步驟[/#DDA0DD]'))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：翻譯功能不可用，跳過翻譯步驟[/#E8C4F0]'))
             return segments
 
         with Progress(
@@ -550,7 +550,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 segment.translation = translated
                 progress.advance(task)
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 翻譯完成[/green]'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 翻譯完成[/green]'))
         return segments
 
     def _write_subtitle_file(
@@ -560,7 +560,7 @@ ffmpeg 錯誤碼：{e.returncode}
         format: str
     ):
         """寫入字幕檔案"""
-        console.print(safe_t('common.generating', fallback='\n[#DDA0DD]💾 步驟 4/4: 生成 {fmt} 檔案...[/#DDA0DD]', fmt=format.upper()))
+        console.print(safe_t('common.generating', fallback='\n[#E8C4F0]💾 步驟 4/4: 生成 {fmt} 檔案...[/#E8C4F0]', fmt=format.upper()))
 
         format = format.lower()
         if format == "srt":
@@ -576,7 +576,7 @@ ffmpeg 錯誤碼：{e.returncode}
 
             raise ValueError(f"不支援的字幕格式：{format}，請參考上述支援格式")
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 檔案已生成[/green]'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案已生成[/green]'))
 
     def _write_srt(self, segments: List[SubtitleSegment], output_path: str):
         """生成 SRT 格式字幕"""
@@ -665,7 +665,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
@@ -680,14 +680,14 @@ ffmpeg 錯誤碼：{e.returncode}
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     subtitle_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{subtitle_path}[/green]\n', subtitle_path=subtitle_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{subtitle_path}[/green]\n', subtitle_path=subtitle_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
                 # 如果沒有修復建議模組，直接拋出錯誤
                 raise FileNotFoundError(f"找不到字幕檔案：{subtitle_path}")
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🔥 燒錄字幕...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🔥 燒錄字幕...[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  影片：{basename}', basename=os.path.basename(video_path)))
         console.print(safe_t('common.message', fallback='  字幕：{basename}', basename=os.path.basename(subtitle_path)))
 
@@ -731,9 +731,9 @@ ffmpeg 錯誤碼：{e.returncode}
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#DA70D6]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/green]")
 
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 字幕已燒錄：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 字幕已燒錄：{output_path}[/green]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -791,14 +791,14 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print(safe_t('common.message', fallback='[#DDA0DD]用法：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]用法：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  python gemini_subtitle_generator.py <影片路徑> [選項]'))
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]選項：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]選項：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  --translate       啟用翻譯'))
         console.print(safe_t('common.message', fallback='  --lang <語言>     目標語言（預設 zh-TW）'))
         console.print(safe_t('common.message', fallback='  --format <格式>   字幕格式 srt/vtt（預設 srt）'))
         console.print(safe_t('common.message', fallback='  --burn            燒錄字幕到影片'))
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]範例：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]範例：[/#E8C4F0]'))
         console.print("  python gemini_subtitle_generator.py video.mp4")
         console.print("  python gemini_subtitle_generator.py video.mp4 --translate --lang zh-TW")
         console.print("  python gemini_subtitle_generator.py video.mp4 --translate --burn")
@@ -833,15 +833,15 @@ def main():
             target_language=target_lang
         )
 
-        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 字幕檔案：{subtitle_path}[/green]', subtitle_path=subtitle_path))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 字幕檔案：{subtitle_path}[/green]', subtitle_path=subtitle_path))
 
         # 燒錄字幕（如果需要）
         if burn:
             video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
-            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 燒錄影片：{video_with_subs}[/green]', video_with_subs=video_with_subs))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 燒錄影片：{video_with_subs}[/green]', video_with_subs=video_with_subs))
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

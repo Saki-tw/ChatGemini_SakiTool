@@ -25,7 +25,7 @@ except ImportError:
 try:
     from gemini_conversation import ConversationManager
 except ImportError:
-    logger.warning("ConversationManager 不可用，使用簡化版對話記錄")
+    logger.warning("ConversationManager 不可用,使用簡化版對話記錄")
     ConversationManager = None
 
 
@@ -35,8 +35,8 @@ class ChatLogger:
     對話記錄管理器 - 優化版
 
     改良重點：
-    - 使用持久檔案句柄，避免重複開啟/關閉檔案（減少 OS 系統呼叫）
-    - 使用緩衝區，批次寫入（降低 I/O 次數）
+    - 使用持久檔案句柄,避免重複開啟/關閉檔案（減少 OS 系統呼叫）
+    - 使用緩衝區,批次寫入（降低 I/O 次數）
     - 避免長時間會話中的檔案句柄耗盡問題
     """
 
@@ -61,7 +61,7 @@ class ChatLogger:
         else:
             self.conversation_manager = None
 
-        # 優化：保持檔案句柄開啟，使用 64KB 緩衝區
+        # 優化：保持檔案句柄開啟,使用 64KB 緩衝區
         self._log_file_handle = open(self.session_file, 'a', encoding='utf-8', buffering=64*1024)
         self._buffer = []  # 記錄緩衝區
         self._buffer_size = 10  # 每 10 條訊息刷新一次
@@ -101,7 +101,7 @@ class ChatLogger:
         """
         self._log_message("ASSISTANT", message)
 
-        # 如果有思考過程，也記錄到文字檔
+        # 如果有思考過程,也記錄到文字檔
         if thinking_process:
             self._log_message("THINKING", thinking_process)
 

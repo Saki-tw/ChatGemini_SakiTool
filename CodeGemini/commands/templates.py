@@ -13,6 +13,7 @@ import re
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass, field
 from rich.console import Console
+from utils.i18n import safe_t
 
 console = Console()
 
@@ -206,7 +207,7 @@ class TemplateEngine:
             items = variables.get(list_name, [])
 
             if not isinstance(items, list):
-                console.print(f"[#DDA0DD]警告：'{list_name}' 不是列表，迴圈將被跳過[/#DDA0DD]")
+                console.print(f"[#DDA0DD]{safe_t('templates.not_list_warning', '警告：\'{name}\' 不是列表，迴圈將被跳過', name=list_name)}[/#DDA0DD]")
                 return ""
 
             # 迭代生成內容
@@ -260,7 +261,7 @@ class TemplateEngine:
         missing = [v for v in template.variables if v not in variables]
 
         if missing:
-            console.print(f"[#DDA0DD]警告：缺少變數：{', '.join(missing)}[/#DDA0DD]")
+            console.print(f"[#DDA0DD]{safe_t('templates.missing_variables', '警告：缺少變數：{vars}', vars=', '.join(missing))}[/#DDA0DD]")
             return False
 
         return True
@@ -353,38 +354,38 @@ class TemplateLibrary:
 
 def main():
     """測試用主程式"""
-    console.print("[bold #DDA0DD]CodeGemini Template Engine 測試[/bold #DDA0DD]\n")
+    console.print(f"[bold #DDA0DD]{safe_t('templates.test_title', 'CodeGemini Template Engine 測試')}[/bold #DDA0DD]\n")
 
     engine = TemplateEngine()
 
     # 測試 1：簡單變數插值
-    console.print("[bold]測試 1：簡單變數插值[/bold]")
+    console.print(f"[bold]{safe_t('templates.test1', '測試 1：簡單變數插值')}[/bold]")
     template1 = engine.parse_template("你好，{name}！今天是 {day}。")
     result1 = engine.render(template1, {"name": "Saki", "day": "星期一"})
-    console.print(f"結果：{result1}\n")
+    console.print(f"{safe_t('templates.result', '結果')}：{result1}\n")
 
     # 測試 2：預設值
-    console.print("[bold]測試 2：預設值[/bold]")
+    console.print(f"[bold]{safe_t('templates.test2', '測試 2：預設值')}[/bold]")
     template2 = engine.parse_template("語言：{language|default:\"Python\"}")
     result2 = engine.render(template2, {})
-    console.print(f"結果：{result2}\n")
+    console.print(f"{safe_t('templates.result', '結果')}：{result2}\n")
 
     # 測試 3：條件
-    console.print("[bold]測試 3：條件邏輯[/bold]")
+    console.print(f"[bold]{safe_t('templates.test3', '測試 3：條件邏輯')}[/bold]")
     template3 = engine.parse_template("{% if premium %}您是高級會員{% else %}您是普通會員{% endif %}")
     result3_premium = engine.render(template3, {"premium": True})
     result3_normal = engine.render(template3, {"premium": False})
-    console.print(f"高級會員：{result3_premium}")
-    console.print(f"普通會員：{result3_normal}\n")
+    console.print(f"{safe_t('templates.premium_member', '高級會員')}：{result3_premium}")
+    console.print(f"{safe_t('templates.normal_member', '普通會員')}：{result3_normal}\n")
 
     # 測試 4：迴圈
-    console.print("[bold]測試 4：迴圈[/bold]")
+    console.print(f"[bold]{safe_t('templates.test4', '測試 4：迴圈')}[/bold]")
     template4 = engine.parse_template("項目：\n{% for item in items %}  - {item}\n{% endfor %}")
     result4 = engine.render(template4, {"items": ["蘋果", "香蕉", "橘子"]})
-    console.print(f"結果：\n{result4}\n")
+    console.print(f"{safe_t('templates.result', '結果')}：\n{result4}\n")
 
     # 測試 5：模板庫
-    console.print("[bold]測試 5：模板庫[/bold]")
+    console.print(f"[bold]{safe_t('templates.test5', '測試 5：模板庫')}[/bold]")
     library = TemplateLibrary()
     python_func_template = library.get_template('python_function')
     if python_func_template:
@@ -397,9 +398,9 @@ def main():
             "include_docstring": True,
             "include_tests": False
         })
-        console.print(f"結果：\n{result5}")
+        console.print(f"{safe_t('templates.result', '結果')}：\n{result5}")
 
-    console.print("\n[bold green]✅ 所有測試完成[/bold green]")
+    console.print(f"\n[bold green]✅ {safe_t('templates.all_tests_complete', '所有測試完成')}[/bold green]")
 
 
 if __name__ == "__main__":

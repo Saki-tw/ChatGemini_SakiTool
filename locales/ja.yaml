@@ -66,12 +66,181 @@ common:
   lines: 行
   files: ファイル
   bytes: バイト
+
+  # 状態動詞（メディアメニューなどに使用）
+  generating: "生成中"
+  analyzing: "分析中"
+  saving: "保存中"
+
+# ============================================================================
+# マルチメディアメニューカテゴリ (media)
+# ============================================================================
+media_menu:
+  # メニュータイトル
+  title: "[bold COLOR_MACARON_PURPLE]🎬 マルチメディア制作センター[/bold COLOR_MACARON_PURPLE]"
+
+  # セクションタイトル
+  section:
+    ai_generation: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI生成[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    video_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 動画処理[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    audio_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 音声処理[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    ai_analysis: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI分析ツール[/bold COLOR_MACARON_PURPLE_LIGHT]"
+
+  # メニュー項目
+  item:
+    # AI生成
+    flow_video: "  [1] Flow動画生成（1080p長編動画、自然言語）"
+    veo_video: "  [2] Veo動画生成（8秒高速生成）"
+    imagen_generate: "  [12] Imagen画像生成（Text-to-Image）"
+    vision_imagen: "  [13] スマート画像作成（Gemini Vision + Imagen）"
+
+    # 動画処理
+    video_preprocess: "  [3] 動画前処理（分割/キーフレーム/情報）"
+    video_concat: "  [4] 動画結合（無損失）"
+    video_trim: "  [15] 時間トリミング（無損失）"
+    video_filter: "  [16] フィルター効果（7種類）"
+    video_speed: "  [17] 速度調整（早送り/スロー）"
+    video_watermark: "  [18] 透かし追加"
+    subtitle_generate: "  [19] 字幕生成（音声認識＋翻訳）"
+    subtitle_burn: "  [20] 字幕焼き込み（動画埋め込み）"
+
+    # 音声処理
+    audio_extract: "  [7] 音声抽出"
+    audio_merge: "  [8] 音声結合"
+    audio_volume: "  [9] 音量調整"
+    audio_background: "  [10] BGM"
+    audio_fade: "  [11] フェードイン/アウト"
+
+    # AI分析
+    media_analyzer: "  [0] メディアアナライザー（画像/動画AI分析）"
+    video_chat: "  [21] 動画対話（アップロード後連続質問）"
+    video_analysis: "  [5] 動画内容分析"
+    image_analysis: "  [6] 画像内容分析"
+
+  # 組み合わせ項目
+  audio_group: "  [7] 音声抽出  [8] 音声結合  [9] 音量調整"
+  audio_group2: "  [10] BGM  [11] フェードイン/アウト"
+  analysis_group: "  [5] 動画内容分析  [6] 画像内容分析"
+
+  # ナビゲーション
+  back: "\n  [99] メインメニューに戻る\n"
+
+# ============================================================================
+# スラッシュコマンドシステム (slash_commands)
+# / で始まるインタラクティブコマンド
+# ============================================================================
+slash_commands:
+  # 基本コマンド
+  help:
+    cmd: "/help"
+    desc: "📖 詳細なヘルプシステムを表示"
+
+  exit:
+    cmd: "/exit"
+    desc: "🚪 プログラムを終了"
+
+  quit:
+    cmd: "/quit"
+    desc: "🚪 プログラムを終了"
+
+  clear:
+    cmd: "/clear"
+    desc: "🗑️  会話履歴をクリア"
+
+  # 設定関連
+  lang:
+    cmd: "/lang"
+    desc: "🌐 言語を切り替え (zh-TW/en/ja/ko)"
+
+  model:
+    cmd: "/model"
+    desc: "🤖 AIモデルを切り替え"
+
+  cache:
+    cmd: "/cache"
+    desc: "💾 キャッシュ管理メニュー"
+
+  config:
+    cmd: "/config"
+    desc: "⚙️  設定管理"
+
+  # メディア機能
+  media:
+    cmd: "/media"
+    desc: "🎬 メディア機能メニュー"
+
+  image:
+    cmd: "/image"
+    desc: "🖼️  画像分析"
+
+  video:
+    cmd: "/video"
+    desc: "🎥 動画分析"
+
+  # メモリ管理
+  clear_memory:
+    cmd: "/clear-memory"
+    desc: "🧹 メモリをクリア"
+
+  memory_stats:
+    cmd: "/memory-stats"
+    desc: "📊 メモリ統計"
+
+  help_memory:
+    cmd: "/help-memory"
+    desc: "ℹ️  メモリ管理ヘルプ"
+
+  # チェックポイントシステム
+  checkpoints:
+    cmd: "/checkpoints"
+    desc: "📌 全チェックポイントを表示"
+
+  checkpoint:
+    cmd: "/checkpoint"
+    desc: "💾 手動チェックポイント作成"
+
+  rewind:
+    cmd: "/rewind"
+    desc: "⏪ チェックポイントに戻る"
+
+  help_checkpoint:
+    cmd: "/help-checkpoint"
+    desc: "ℹ️  チェックポイントシステムヘルプ"
+
+  # 会話履歴
+  search:
+    cmd: "/search"
+    desc: "🔍 会話履歴を検索"
+
+  history:
+    cmd: "/history"
+    desc: "📜 会話履歴を表示"
+
+  export:
+    cmd: "/export"
+    desc: "📤 会話をエクスポート"
+
+  stats:
+    cmd: "/stats"
+    desc: "📊 会話統計情報"
+
+  # デバッグツール
+  debug:
+    cmd: "/debug"
+    desc: "🐛 デバッグツール"
+
+  test:
+    cmd: "/test"
+    desc: "🧪 テストツール"
+
 chat:
   welcome: ChatGeminiへようこそ！
   welcome_back: おかえりなさい！
   exit_message: ご利用ありがとうございました、さようなら！
   goodbye: さようなら！
   user_prompt: あなた
+  user_prompt_with_hint: "あなた ([ パラメータ)"
+  user_prompt_with_hint_detailed: "あなた ([ を押すと think/max パラメータ表示)"
   model_prompt: モデル
   system_prompt: システム
   assistant_prompt: アシスタント
@@ -93,6 +262,7 @@ chat:
 
     # 機能メニュー
     cache_desc: "キャッシュ管理メニュー"
+    config_desc: "設定管理（データベース設定）"
     media_desc: "メディア機能メニュー"
     cli_desc: "Gemini CLI 管理ツール"
     debug_desc: "デバッグとテストツール"
@@ -111,6 +281,7 @@ chat:
     # 会話履歴
     search_desc: "会話履歴を検索"
     history_desc: "会話履歴を表示"
+    export_desc: "会話をエクスポート (json/md/txt)"
     stats_desc: "会話統計"
 
     # クイック構文
@@ -247,6 +418,16 @@ pricing:
   scene_detection_cost: "[dim]💰 シーン検出コスト: NT${twd} (${usd} USD)[/dim]"
   tokens_detail: "[dim]   入力: {input:,} tokens, 出力: {output:,} tokens, 思考: {thinking:,} tokens[/dim]"
   accumulated_cost: "[dim]   累積コスト: NT${twd} (${usd} USD)[/dim]"
+
+  # 予算管理警告メッセージ
+  budget_exceeded_daily: "1日の予算を超過：${projected} > ${limit}"
+  budget_exceeded_monthly: "月次予算を超過：${projected} > ${limit}"
+  budget_usage_daily: "1日の予算の{percent}%を使用"
+  budget_insufficient: "予算不足：{warning}"
+  budget_warning_prefix: "警告：{warning}"
+
+  # 予算管理状態
+  today_usage: "本日の使用：{percent}%"
 
 translator:
   engine_ready: "✅ deep-translator準備完了（メインエンジン、完全無料）"
@@ -408,7 +589,12 @@ help:
   need_help: ヘルプが必要ですか？/help で利用可能なコマンドを表示
   type_help: /help [トピック] で詳細情報を表示
   no_help_available: このトピックのヘルプはありません
-media:
+
+# ============================================================================
+# Media Common Terms (通用媒體詞彙)
+# Renamed from media_menu to avoid conflict with menu items (line 78)
+# ============================================================================
+media_common:
   image: 画像
   image_analysis: 画像分析
   image_generation: 画像生成
@@ -543,7 +729,7 @@ memory:
 model:
   gemini_pro: Gemini Pro
   gemini_flash: Gemini Flash
-  gemini_flash_8b: Gemini Flash 8B
+  gemini_flash_lite: Gemini Flash Lite
   loading: モデルを読み込み中
   loaded: モデルが読み込まれました
   switching: モデルを切り替え中
@@ -559,7 +745,7 @@ model:
   col_name: モデル名
   col_thinking_range: Thinking Token 範囲
   col_price_range: 価格範囲 (NT$)
-  select_prompt: オプションを入力してください (1-3 または 0)
+  select_prompt: オプションを入力してください (1-{count} または 0)
   validation_warning: ⚠️  モデルの可用性を確認できません。入力されたモデル名を直接使用します
   enter_name: モデル名を入力してください
   name_empty: モデル名は空にできません。再試行してください
@@ -597,3 +783,83 @@ format:
   unit:
     segment: "セグメント"
     second: "秒"
+
+# CodeGemini MCP Detector
+mcp:
+  detector:
+    postgresql_desc: "PostgreSQL データベース操作"
+    puppeteer_desc: "ウェブ自動化とスクレイピング"
+    slack_desc: "Slack チームコラボレーション"
+    drive_desc: "Google Drive ファイル管理"
+    contains_keywords: "キーワードを含む：{keywords}"
+    match_patterns: "{count} 個のパターンに一致"
+    match_rule: "ルールに一致"
+    rule_added: "カスタムルールを追加しました：{name}"
+    rule_removed: "ルールを削除しました：{name}"
+    rules_list: "MCP Server 検出ルール一覧"
+    description: "説明"
+    keywords_count: "キーワード数"
+    patterns_count: "パターン数"
+    confidence_weight: "信頼度の重み"
+    demo_title: "MCP Server スマート検出器デモ"
+    test: "テスト"
+    detected_servers: "{count} 個の関連 Server を検出"
+    confidence: "信頼度"
+    no_servers_detected: "MCP Server が検出されませんでした"
+
+# CodeGemini Templates
+templates:
+  not_list_warning: "警告：'{name}' はリストではありません。ループはスキップされます"
+  missing_variables: "警告：変数が不足しています：{vars}"
+  test_title: "CodeGemini テンプレートエンジン テスト"
+  test1: "テスト 1：シンプルな変数補間"
+  test2: "テスト 2：デフォルト値"
+  test3: "テスト 3：条件ロジック"
+  test4: "テスト 4：ループ"
+  test5: "テスト 5：テンプレートライブラリ"
+  result: "結果"
+  premium_member: "プレミアムメンバー"
+  normal_member: "通常メンバー"
+  all_tests_complete: "すべてのテスト完了"
+
+# CodeGemini Test Generator
+test_gen:
+  analyzing_file: "ファイルを分析中：{path}"
+  analysis_complete: "分析完了"
+  functions: "関数"
+  classes: "クラス"
+  analysis_failed: "分析失敗：{error}"
+  generating_tests: "テストコードを生成中..."
+  unsupported_framework: "サポートされていないテストフレームワーク：{framework}"
+  test_file_saved: "テストファイルを保存しました：{path}"
+  title: "CodeGemini テストジェネレーター"
+  usage: "使用方法"
+  examples: "例"
+  generated_code: "生成されたテストコード"
+
+# CodeGemini Doc Generator
+doc_gen:
+  scanning_project: "プロジェクトをスキャン中：{path}"
+  found_files: "{count} 個の Python ファイルを発見"
+  analysis_complete: "分析完了：{count} モジュール"
+  analysis_warning: "警告：{path} を分析できません - {error}"
+  generating_readme: "README.md を生成中..."
+  readme_saved: "README を保存しました：{path}"
+  generating_api: "API ドキュメントを生成中..."
+  api_saved: "API ドキュメントを保存しました：{path}"
+  title: "CodeGemini ドキュメントジェネレーター"
+  usage: "使用方法"
+  examples: "例"
+  readme_title: "README.md"
+
+# CodeGemini Codebase Embedding
+embedding:
+  faiss_initialized: "✓ FAISS インデックスを初期化（次元: {dim}）"
+  cache_enabled: "✓ EmbeddingCache を有効化（maxsize={size}）"
+  cache_unloaded: "✓ EmbeddingCache をアンロード（解放されたメモリ: ~{mem}MB）"
+  cache_reloaded: "✓ EmbeddingCache を再有効化"
+  db_initialized: "✓ VectorDatabase を初期化: {path} (FAISS 有効)"
+
+# Common
+common:
+  unit: "個"

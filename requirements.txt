@@ -24,6 +24,10 @@ google-cloud-translate>=3.22.0      # 主翻譯引擎 (選用，需要 API key)
 ffmpeg-python>=0.2.0                # ffmpeg Python wrapper
 # opencv-python>=4.8.0              # 場景檢測（選用，未來功能）
 
+# 音訊處理 (Audio Processor)
+# 注意：gemini_audio_processor 使用 ffmpeg (系統依賴) 進行音訊處理
+#       不需要 pydub (pydub 在 Python 3.14 上有相容性問題)
+
 # Codebase Embedding (CodeGemini 核心功能)
 # 注意：使用自建輕量級向量資料庫（SQLite + NumPy + FAISS），不依賴 ChromaDB
 # chromadb>=0.4.0                   # 已棄用：與 Python 3.14 不兼容

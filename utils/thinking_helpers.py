@@ -20,22 +20,77 @@ from functools import lru_cache
 from google.genai import types
 
 # ============================================================================
-# 模型名稱常數（避免 typo，統一管理）
+# 動態模型支援檢測
+# 從 gemini_model_list 模組動態獲取模型列表，確保與 API 同步
 # ============================================================================
 
+# 定義基礎的思考模型常數（用於降級模式）
 MODEL_GEMINI_2_5_PRO = 'gemini-2.5-pro'
 MODEL_GEMINI_2_5_FLASH = 'gemini-2.5-flash'
-MODEL_GEMINI_2_5_FLASH_8B = 'gemini-2.5-flash-8b'
-MODEL_GEMINI_2_0_FLASH_THINKING = 'gemini-2.0-flash-thinking'
+MODEL_GEMINI_2_5_FLASH_LITE = 'gemini-2.5-flash-lite'
+MODEL_GEMINI_2_0_FLASH_THINKING = 'gemini-2.0-flash-thinking-exp'
 
-# 支援思考模式的模型列表
-# 注意：此列表會影響 supports_thinking() 的判斷結果
-THINKING_MODELS = [
+# 後備思考模型列表（當無法從 API 獲取時使用）
+FALLBACK_THINKING_MODELS = [
     MODEL_GEMINI_2_5_PRO,
     MODEL_GEMINI_2_5_FLASH,
-    MODEL_GEMINI_2_5_FLASH_8B,
+    MODEL_GEMINI_2_5_FLASH_LITE,
     MODEL_GEMINI_2_0_FLASH_THINKING,
 ]
+
+
+def _get_thinking_models_from_api() -> list:
+    """
+    從 gemini_model_list 動態獲取支援思考模式的模型列表
+
+    Returns:
+        支援思考模式的模型名稱列表
+    """
+    try:
+        # 嘗試從 gemini_model_list 獲取模型
+        from gemini_model_list import GeminiModelList
+        import os
+
+        # 獲取 API Key
+        api_key = os.environ.get('GOOGLE_API_KEY') or os.environ.get('GEMINI_API_KEY')
+
+        if not api_key:
+            # 無 API Key，使用後備列表
+            return FALLBACK_THINKING_MODELS
+
+        # 獲取可用模型
+        model_manager = GeminiModelList(api_key)
+        all_models = model_manager.get_models()
+
+        # 篩選支援思考的模型（2.5 系列和 2.0-thinking）
+        thinking_models = []
+        for model in all_models:
+            name = model['name']
+            # Gemini 2.5 系列都支援思考模式
+            if '2.5' in name or '2-5' in name:
+                thinking_models.append(name)
+            # Gemini 2.0 thinking 系列
+            elif 'thinking' in name.lower():
+                thinking_models.append(name)
+
+        # 如果成功獲取，返回動態列表
+        if thinking_models:
+            return thinking_models
+
+    except ImportError:
+        # gemini_model_list 模組不可用
+        pass
+    except Exception:
+        # 其他錯誤，靜默降級
+        pass
+
+    # 降級到後備列表
+    return FALLBACK_THINKING_MODELS
+
+
+# 支援思考模式的模型列表（動態獲取或使用後備列表）
+# 注意：此列表會影響 supports_thinking() 的判斷結果
+THINKING_MODELS = _get_thinking_models_from_api()
 
 
 @lru_cache(maxsize=128)
@@ -261,12 +316,18 @@ if __name__ == "__main__":
     # ========================================================================
     print("測試思考模式輔助工具...")
 
+    # 顯示當前使用的思考模型列表
+    print(f"\n當前支援思考模式的模型列表 ({len(THINKING_MODELS)} 個):")
+    for model in THINKING_MODELS:
+        print(f"  - {model}")
+
     # 測試 1: 支援檢查（驗證 supports_thinking 函數）
     print("\n測試 1: 模型支援檢查")
     # 使用常數定義的模型名稱（避免硬編碼）
     test_models = [
         MODEL_GEMINI_2_5_PRO,  # 應該支援
         MODEL_GEMINI_2_5_FLASH,  # 應該支援
+        MODEL_GEMINI_2_5_FLASH_LITE,  # 應該支援
         'gemini-1.5-flash',  # 應該不支援（舊版本）
         MODEL_GEMINI_2_0_FLASH_THINKING,  # 應該支援
     ]

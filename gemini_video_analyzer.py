@@ -23,7 +23,8 @@ from utils import (
     USD_TO_TWD,
     supports_thinking,
     create_generation_config,
-    THINKING_MODELS
+    THINKING_MODELS,
+    get_user_input
 )
 from utils.i18n import safe_t
 
@@ -98,7 +99,7 @@ class VideoAnalyzer:
 
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model_name = model_name
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 已載入模型：{model_name}[/green]', model_name=model_name))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已載入模型：{model_name}[/green]', model_name=model_name))
 
     def upload_video(self, video_path: str, display_name: Optional[str] = None) -> types.File:
         """
@@ -120,7 +121,7 @@ class VideoAnalyzer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到影片檔案，請參考上述建議")
             except ImportError:
@@ -130,7 +131,7 @@ class VideoAnalyzer:
         # 檢查檔案格式
         file_ext = os.path.splitext(video_path)[1].lower()
         if file_ext not in SUPPORTED_VIDEO_FORMATS:
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：{file_ext} 可能不受支援[/#DDA0DD]', file_ext=file_ext))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：{file_ext} 可能不受支援[/#E8C4F0]', file_ext=file_ext))
             console.print(safe_t('common.message', fallback='支援的格式: {formats}', formats=', '.join(SUPPORTED_VIDEO_FORMATS)))
 
         # 設定顯示名稱
@@ -141,26 +142,26 @@ class VideoAnalyzer:
         file_size = os.path.getsize(video_path)
         file_size_mb = file_size / (1024 * 1024)
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📹 影片資訊：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]📹 影片資訊：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='   檔案名稱：{basename}', basename=os.path.basename(video_path)))
         console.print(safe_t('common.message', fallback='   檔案大小：{file_size_mb} MB', file_size_mb=file_size_mb))
         console.print(safe_t('common.message', fallback='   格式：{file_ext}', file_ext=file_ext))
 
         # 檢查是否已上傳（新 SDK）
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🔍 檢查是否已上傳...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🔍 檢查是否已上傳...[/#E8C4F0]'))
         try:
             for existing_file in client.files.list():
                 if existing_file.display_name == display_name:
-                    console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 檔案已存在：{existing_file.name}[/green]', name=existing_file.name))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案已存在：{existing_file.name}[/green]', name=existing_file.name))
                     # 檢查狀態
                     if existing_file.state.name == "ACTIVE":
-                        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 影片已就緒，可以開始分析[/green]'))
+                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已就緒，可以開始分析[/green]'))
                         return existing_file
                     elif existing_file.state.name == "PROCESSING":
-                        console.print(safe_t('common.completed', fallback='[#DDA0DD]⏳ 檔案正在處理中，等待完成...[/#DDA0DD]'))
+                        console.print(safe_t('common.completed', fallback='[#E8C4F0]⏳ 檔案正在處理中，等待完成...[/#E8C4F0]'))
                         return self._wait_for_processing(existing_file)
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[#DDA0DD]檢查已上傳檔案時發生錯誤：{e}[/#DDA0DD]', e=e))
+            console.print(safe_t('error.failed', fallback='[#E8C4F0]檢查已上傳檔案時發生錯誤：{e}[/#E8C4F0]', e=e))
 
         # 🔧 任務 1.3：使用優化的上傳輔助模組（含重試、超時、進度顯示）
         if UPLOAD_HELPER_AVAILABLE:
@@ -189,9 +190,9 @@ class VideoAnalyzer:
                             display_name=display_name
                         )
                     )
-                    progress.update(task, description="[#DA70D6]✓ 上傳完成[/green]")
+                    progress.update(task, description="[#B565D8]✓ 上傳完成[/green]")
                 except Exception as e:
-                    progress.update(task, description="[dim #DDA0DD]✗ 上傳失敗[/red]")
+                    progress.update(task, description="[dim #E8C4F0]✗ 上傳失敗[/red]")
 
                     # 顯示詳細的錯誤修復建議
                     try:
@@ -202,7 +203,7 @@ class VideoAnalyzer:
 
                     raise Exception(f"上傳失敗：{e}，請參考上述解決方案")
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 檔案名稱：{video_file.name}[/green]', name=video_file.name))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案名稱：{video_file.name}[/green]', name=video_file.name))
 
         # 顯示成本警告
         console.print(safe_t('common.analyzing', fallback='[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'))
@@ -214,7 +215,7 @@ class VideoAnalyzer:
 
     def _wait_for_processing(self, video_file: types.File) -> types.File:
         """等待影片處理完成"""
-        console.print(safe_t('common.processing', fallback='\n[#DDA0DD]⏳ 等待影片處理...[/#DDA0DD]'))
+        console.print(safe_t('common.processing', fallback='\n[#E8C4F0]⏳ 等待影片處理...[/#E8C4F0]'))
 
         with Progress(
             SpinnerColumn(),
@@ -240,9 +241,9 @@ class VideoAnalyzer:
 
                 raise ValueError(f"影片處理失敗：{video_file.state.name}")
 
-            progress.update(task, description="[#DA70D6]✓ 處理完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 處理完成[/green]")
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 影片已就緒，可以開始分析[/green]'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已就緒，可以開始分析[/green]'))
         return video_file
 
     @with_retry("影片分析", max_retries=3)
@@ -263,13 +264,13 @@ class VideoAnalyzer:
         Returns:
             分析結果文字
         """
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🤖 使用模型：{self.model_name}[/#DDA0DD]', model_name=self.model_name))
-        console.print(safe_t('common.message', fallback='[#DDA0DD]💭 提示：{prompt}[/#DDA0DD]\n', prompt=prompt))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🤖 使用模型：{self.model_name}[/#E8C4F0]', model_name=self.model_name))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]💭 提示：{prompt}[/#E8C4F0]\n', prompt=prompt))
 
         # 使用工具建立配置（自動判斷思考模式）
         config = create_generation_config(self.model_name, thinking_budget=-1)
 
-        console.print("[#DDA0DD]Gemini：[/#DDA0DD]")
+        console.print("[#E8C4F0]Gemini：[/#E8C4F0]")
 
         try:
             # 使用新 SDK 發送請求
@@ -282,8 +283,8 @@ class VideoAnalyzer:
             # 顯示回應（Markdown 格式化）
             console.print(Panel(
                 Markdown(response.text),
-                title="[#DA70D6]📝 Gemini 影片分析[/#DA70D6]",
-                border_style="#DDA0DD"
+                title="[#B565D8]📝 Gemini 影片分析[/#B565D8]",
+                border_style="#E8C4F0"
             ))
 
             # 提取 tokens
@@ -315,7 +316,7 @@ class VideoAnalyzer:
             return response.text
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 分析失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/red]', e=e))
             raise
 
     def interactive_video_chat(self, video_file: types.File):
@@ -326,9 +327,9 @@ class VideoAnalyzer:
             video_file: 上傳的影片檔案
         """
         console.print("\n" + "=" * 60)
-        console.print(safe_t('common.message', fallback='[bold #DDA0DD]影片互動式對話（模型：{self.model_name}）[/bold #DDA0DD]', model_name=self.model_name))
+        console.print(safe_t('common.message', fallback='[bold #E8C4F0]影片互動式對話（模型：{self.model_name}）[/bold #E8C4F0]', model_name=self.model_name))
         console.print("=" * 60)
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]提示：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]提示：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback="  - 輸入 'exit' 或 'quit' 退出"))
         console.print(safe_t('common.message', fallback="  - 輸入 'info' 顯示影片資訊"))
         console.print(safe_t('common.analyzing', fallback='  - 直接輸入問題開始分析'))
@@ -339,22 +340,22 @@ class VideoAnalyzer:
 
         while True:
             try:
-                user_input = input("你: ").strip()
+                user_input = get_user_input("你: ")
 
                 if not user_input:
                     continue
 
                 if user_input.lower() in ['exit', 'quit', '退出']:
-                    console.print(safe_t('common.message', fallback='\n[#DA70D6]再見！[/green]'))
+                    console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/green]'))
                     break
 
                 if user_input.lower() == 'info':
-                    console.print(safe_t('common.message', fallback='\n[#DDA0DD]影片資訊：[/#DDA0DD]'))
-                    console.print(safe_t('common.message', fallback='  名稱：{video_file.display_name}', display_name=video_file.display_name))
-                    console.print(safe_t('common.message', fallback='  檔案名稱：{video_file.name}', name=video_file.name))
-                    console.print(safe_t('common.message', fallback='  狀態：{video_file.state.name}', video_file.state.name=video_file.state.name))
-                    console.print(safe_t('common.message', fallback='  建立時間：{video_file.create_time}', create_time=video_file.create_time))
-                    console.print(safe_t('common.message', fallback='  過期時間：{video_file.expiration_time}\n', expiration_time=video_file.expiration_time))
+                    console.print(safe_t('common.message', fallback='\n[#E8C4F0]影片資訊：[/#E8C4F0]'))
+                    console.print(safe_t('common.message', fallback='  名稱：{display_name}', display_name=video_file.display_name))
+                    console.print(safe_t('common.message', fallback='  檔案名稱：{name}', name=video_file.name))
+                    console.print(safe_t('common.message', fallback='  狀態：{state_name}', state_name=video_file.state.name))
+                    console.print(safe_t('common.message', fallback='  建立時間：{create_time}', create_time=video_file.create_time))
+                    console.print(safe_t('common.message', fallback='  過期時間：{expiration_time}\n', expiration_time=video_file.expiration_time))
                     continue
 
                 # 配置
@@ -363,7 +364,7 @@ class VideoAnalyzer:
                     config.thinking_config = types.ThinkingConfig(thinking_budget=-1)
 
                 # 發送消息（包含影片）
-                console.print("\n[#DDA0DD]Gemini：[/#DDA0DD]")
+                console.print("\n[#E8C4F0]Gemini：[/#E8C4F0]")
 
                 response = client.models.generate_content(
                     model=self.model_name,
@@ -373,8 +374,8 @@ class VideoAnalyzer:
 
                 console.print(Panel(
                     Markdown(response.text),
-                    title="[#DA70D6]📝 Gemini 影片分析[/#DA70D6]",
-                    border_style="#DDA0DD"
+                    title="[#B565D8]📝 Gemini 影片分析[/#B565D8]",
+                    border_style="#E8C4F0"
                 ))
 
                 # 顯示成本
@@ -399,14 +400,14 @@ class VideoAnalyzer:
                             logger.warning(f"計價顯示失敗 (模型: {self.model_name}, tokens: {input_tokens}): {e}")
 
             except KeyboardInterrupt:
-                console.print(safe_t('common.message', fallback='\n\n[#DA70D6]再見！[/green]'))
+                console.print(safe_t('common.message', fallback='\n\n[#B565D8]再見！[/green]'))
                 break
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]\n', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]\n', e=e))
 
     def list_uploaded_videos(self):
         """列出所有已上傳的影片檔案"""
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📁 已上傳的檔案：[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]📁 已上傳的檔案：[/#E8C4F0]\n'))
 
         try:
             video_files = []
@@ -416,38 +417,38 @@ class VideoAnalyzer:
                     video_files.append(f)
 
             if not video_files:
-                console.print(safe_t('common.message', fallback='[#DDA0DD]沒有找到已上傳的影片檔案[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]沒有找到已上傳的影片檔案[/#E8C4F0]'))
                 return
 
             for i, f in enumerate(video_files, 1):
-                console.print(f"{i}. [#DA70D6]{f.display_name}[/green]")
-                console.print(safe_t('common.message', fallback='   名稱: {f.name}', name=f.name))
-                console.print(safe_t('common.message', fallback='   狀態: {f.state.name}', f.state.name=f.state.name))
-                console.print(safe_t('common.message', fallback='   建立時間: {f.create_time}', create_time=f.create_time))
+                console.print(f"{i}. [#B565D8]{f.display_name}[/green]")
+                console.print(safe_t('common.message', fallback='   名稱: {name}', name=f.name))
+                console.print(safe_t('common.message', fallback='   狀態: {state_name}', state_name=f.state.name))
+                console.print(safe_t('common.message', fallback='   建立時間: {create_time}', create_time=f.create_time))
                 console.print()
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 列出檔案失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 列出檔案失敗：{e}[/red]', e=e))
 
 
 def show_usage():
     """顯示使用方式"""
     console.print(Panel.fit(
-        """[bold #DDA0DD]Gemini 影片分析工具 - 使用方式[/bold #DDA0DD]
+        """[bold #E8C4F0]Gemini 影片分析工具 - 使用方式[/bold #E8C4F0]
 
-[#DDA0DD]1. 互動式分析（推薦）[/#DDA0DD]
+[#E8C4F0]1. 互動式分析（推薦）[/#E8C4F0]
    python3 gemini_video_analyzer.py video.mp4
 
-[#DDA0DD]2. 單次分析[/#DDA0DD]
+[#E8C4F0]2. 單次分析[/#E8C4F0]
    python3 gemini_video_analyzer.py video.mp4 "描述這個影片的內容"
 
-[#DDA0DD]3. 列出已上傳的影片[/#DDA0DD]
+[#E8C4F0]3. 列出已上傳的影片[/#E8C4F0]
    python3 gemini_video_analyzer.py --list
 
-[#DDA0DD]4. 指定模型[/#DDA0DD]
+[#E8C4F0]4. 指定模型[/#E8C4F0]
    python3 gemini_video_analyzer.py --model gemini-2.5-flash video.mp4
         """,
-        border_style="#DDA0DD"
+        border_style="#E8C4F0"
     ))
 
 
@@ -490,7 +491,7 @@ def main():
             analyzer.interactive_video_chat(video_file)
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
         import traceback
         console.print(f"[dim]{traceback.format_exc()}[/dim]")
         sys.exit(1)

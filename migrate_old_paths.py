@@ -46,7 +46,7 @@ def scan_old_paths():
 
             if files:
                 files_to_migrate[key] = files
-                console.print(f"[#DDA0DD]發現舊路徑：{old_path}[/#DDA0DD]")
+                console.print(f"[#E8C4F0]發現舊路徑：{old_path}[/#E8C4F0]")
                 console.print(f"  檔案數量：{len(files)}")
 
     return files_to_migrate
@@ -56,7 +56,7 @@ def migrate_files(files_to_migrate, dry_run=False, backup=False):
     total_files = sum(len(files) for files in files_to_migrate.values())
 
     if dry_run:
-        console.print("\n[#DDA0DD]===== 預覽模式 =====")
+        console.print("\n[#E8C4F0]===== 預覽模式 =====")
         console.print("以下檔案將被遷移：\n")
         for key, files in files_to_migrate.items():
             console.print(f"[#87CEEB]{key}[/#87CEEB]：{len(files)} 個檔案")

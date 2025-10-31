@@ -476,7 +476,7 @@ class UnifiedErrorHandler:
             fix_actions = self._get_fix_actions(error_context)
 
             if not fix_actions:
-                console.print("[#DDA0DD]⚠️  沒有可用的修復動作[/#DDA0DD]")
+                console.print("[#E8C4F0]⚠️  沒有可用的修復動作[/#E8C4F0]")
                 return False
 
             # 5. 顯示修復方案
@@ -565,7 +565,7 @@ class UnifiedErrorHandler:
 
         except Exception as e:
             if RICH_AVAILABLE:
-                console.print(f"[#DDA0DD]⚠️  診斷失敗: {e}[/#DDA0DD]")
+                console.print(f"[#E8C4F0]⚠️  診斷失敗: {e}[/#E8C4F0]")
             else:
                 print(f"⚠️  診斷失敗: {e}", file=sys.stderr)
 
@@ -743,7 +743,7 @@ def handle_error(
 # ==================== 主程式 (測試) ====================
 
 if __name__ == "__main__":
-    console.print("[bold #DDA0DD]統一錯誤處理系統 v1.0.0[/bold #DDA0DD]")
+    console.print("[bold #E8C4F0]統一錯誤處理系統 v1.0.0[/bold #E8C4F0]")
     console.print("=" * 60)
 
     # 測試案例

@@ -5,13 +5,13 @@ Automatic Tool Management System
 
 設計理念：
 1. 完全自動化 - 用戶無需手動配置
-2. 惰性載入 - 需要時才初始化，節省資源
-3. 靜默管理 - 載入/卸載在後台進行，不打擾用戶
+2. 惰性載入 - 需要時才初始化,節省資源
+3. 靜默管理 - 載入/卸載在後台進行,不打擾用戶
 4. 智能偵測 - 根據輸入自動判斷需要哪些工具
 5. 配置驅動 - 所有設定隱藏在 config
 
 特性：
-- 用到時顯示「已載入」，不用時默默卸載
+- 用到時顯示「已載入」,不用時默默卸載
 - 不會有任何配置介面打擾用戶
 - 所有控制都透過 config.py 完成
 
@@ -216,7 +216,7 @@ class AutoToolManager:
         Returns:
             bool: 是否成功載入
         """
-        # 如果已載入，標記為使用並返回
+        # 如果已載入,標記為使用並返回
         if tool_name in self._loaded_tools:
             self._loaded_tools[tool_name].mark_used()
             return True
@@ -295,7 +295,7 @@ class AutoToolManager:
         """卸載工具（靜默操作）"""
         if tool_name in self._loaded_tools:
             del self._loaded_tools[tool_name]
-            # 完全靜默，不顯示任何訊息
+            # 完全靜默,不顯示任何訊息
 
     def force_unload_all(self):
         """強制卸載所有工具（用於程序結束）"""
@@ -352,18 +352,18 @@ class AutoToolManager:
             console.print(safe_t('common.loading', fallback='[dim]目前沒有已載入的工具[/dim]\n'))
             return
 
-        console.print(safe_t('common.loading', fallback='[#DA70D6]已載入工具數：[/#DA70D6]{loaded_count}', loaded_count=stats['loaded_count']))
-        console.print(safe_t('common.message', fallback='[#DA70D6]總調用次數：[/#DA70D6]{total_calls}', total_calls=stats['total_calls']))
-        console.print(safe_t('error.failed', fallback='[#DA70D6]總錯誤次數：[/#DA70D6]{total_errors}', total_errors=stats['total_errors']))
+        console.print(safe_t('common.loading', fallback='[#B565D8]已載入工具數：[/#B565D8]{loaded_count}', loaded_count=stats['loaded_count']))
+        console.print(safe_t('common.message', fallback='[#B565D8]總調用次數：[/#B565D8]{total_calls}', total_calls=stats['total_calls']))
+        console.print(safe_t('error.failed', fallback='[#B565D8]總錯誤次數：[/#B565D8]{total_errors}', total_errors=stats['total_errors']))
 
         if stats['total_calls'] > 0:
             overall_success_rate = ((stats['total_calls'] - stats['total_errors']) / stats['total_calls']) * 100
-            console.print(safe_t('common.message', fallback='[#DA70D6]整體成功率：[/#DA70D6]{overall_success_rate:.1f}%', overall_success_rate=overall_success_rate))
+            console.print(safe_t('common.message', fallback='[#B565D8]整體成功率：[/#B565D8]{overall_success_rate:.1f}%', overall_success_rate=overall_success_rate))
 
         console.print(safe_t('common.message', fallback='\n[bold bright_magenta]各工具詳細資訊：[/bold bright_magenta]\n'))
 
         from rich.table import Table
-        table = Table(show_header=True, header_style="bold #DDA0DD")
+        table = Table(show_header=True, header_style="bold #E8C4F0")
         table.add_column("工具名稱", style="#87CEEB")
         table.add_column("調用次數", justify="right")
         table.add_column("錯誤次數", justify="right")
@@ -405,7 +405,7 @@ class AutoToolManager:
                 from config import SEARCH_ENGINE
                 engine = SearchEngine(SEARCH_ENGINE) if hasattr(SearchEngine, SEARCH_ENGINE.upper()) else SearchEngine.DUCKDUCKGO
             except Exception as e:
-                logger.debug(f"無法載入 SEARCH_ENGINE 配置，使用預設值: {e}")
+                logger.debug(f"無法載入 SEARCH_ENGINE 配置,使用預設值: {e}")
                 engine = SearchEngine.DUCKDUCKGO
 
             return WebSearch(engine=engine)
@@ -426,7 +426,7 @@ class AutoToolManager:
                 timeout = WEB_FETCH_TIMEOUT
                 cache_ttl = WEB_FETCH_CACHE_TTL
             except Exception as e:
-                logger.debug(f"無法載入 WebFetch 配置，使用預設值: {e}")
+                logger.debug(f"無法載入 WebFetch 配置,使用預設值: {e}")
                 timeout = 30
                 cache_ttl = 900
 
@@ -457,7 +457,7 @@ class ToolWrapper:
     """
     工具調用包裝器
 
-    提供更高級的 API，隱藏底層複雜性
+    提供更高級的 API,隱藏底層複雜性
     """
 
     def __init__(self, manager: AutoToolManager):
@@ -622,4 +622,4 @@ if __name__ == "__main__":
     console.print(safe_t('common.message', fallback='[bold]統計資訊:[/bold]'))
     console.print(auto_tool_manager.get_stats())
 
-    console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 測試完成[/green]\n'))
+    console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 測試完成[/green]\n'))

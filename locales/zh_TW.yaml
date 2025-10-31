@@ -84,6 +84,172 @@ common:
   files: "檔案"
   bytes: "位元組"
 
+  # 狀態動詞（用於 media 選單等）
+  generating: "生成中"
+  analyzing: "分析中"
+  saving: "儲存中"
+
+# ============================================================================
+# 多媒體選單分類 (media_menu)
+# ============================================================================
+media_menu:
+  # 選單標題
+  title: "[bold COLOR_MACARON_PURPLE]🎬 多媒體創作中心[/bold COLOR_MACARON_PURPLE]"
+
+  # 區塊標題
+  section:
+    ai_generation: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 創作生成[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    video_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 影片處理[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    audio_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 音訊處理[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    ai_analysis: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 分析工具[/bold COLOR_MACARON_PURPLE_LIGHT]"
+
+  # 選單項目
+  item:
+    # AI 生成
+    flow_video: "  [1] Flow 影片生成（1080p 長影片，自然語言）"
+    veo_video: "  [2] Veo 影片生成（8秒快速生成）"
+    imagen_generate: "  [12] Imagen 圖像生成（Text-to-Image）"
+    vision_imagen: "  [13] 智能圖片創作（Gemini Vision + Imagen）"
+
+    # 影片處理
+    video_preprocess: "  [3] 影片預處理（分割/關鍵幀/資訊）"
+    video_concat: "  [4] 影片合併（無損拼接）"
+    video_trim: "  [15] 時間裁切（無損剪輯）"
+    video_filter: "  [16] 濾鏡特效（7種風格）"
+    video_speed: "  [17] 速度調整（快轉/慢動作）"
+    video_watermark: "  [18] 添加浮水印"
+    subtitle_generate: "  [19] 生成字幕（語音辨識+翻譯）"
+    subtitle_burn: "  [20] 燒錄字幕（嵌入影片）"
+
+    # 音訊處理
+    audio_extract: "  [7] 提取音訊"
+    audio_merge: "  [8] 合併音訊"
+    audio_volume: "  [9] 音量調整"
+    audio_background: "  [10] 背景音樂"
+    audio_fade: "  [11] 淡入淡出"
+
+    # AI 分析
+    media_analyzer: "  [0] 媒體分析器（圖片/影片 AI 分析）"
+    video_chat: "  [21] 影片互動對話（上傳後連續提問）"
+    video_analysis: "  [5] 影片內容分析"
+    image_analysis: "  [6] 圖像內容分析"
+
+  # 組合項目
+  audio_group: "  [7] 提取音訊  [8] 合併音訊  [9] 音量調整"
+  audio_group2: "  [10] 背景音樂  [11] 淡入淡出"
+  analysis_group: "  [5] 影片內容分析  [6] 圖像內容分析"
+
+  # 導航
+  back: "\n  [99] 返回主選單\n"
+
+# ============================================================================
+# 斜線指令系統 (slash_commands)
+# 所有 / 開頭的互動式指令
+# ============================================================================
+slash_commands:
+  # 基本指令
+  help:
+    cmd: "/help"
+    desc: "📖 顯示詳細幫助系統"
+
+  exit:
+    cmd: "/exit"
+    desc: "🚪 退出程式"
+
+  quit:
+    cmd: "/quit"
+    desc: "🚪 退出程式"
+
+  clear:
+    cmd: "/clear"
+    desc: "🗑️  清除對話歷史"
+
+  # 設定相關
+  lang:
+    cmd: "/lang"
+    desc: "🌐 切換語言 (zh-TW/en/ja/ko)"
+
+  model:
+    cmd: "/model"
+    desc: "🤖 切換 AI 模型"
+
+  cache:
+    cmd: "/cache"
+    desc: "💾 快取管理選單"
+
+  config:
+    cmd: "/config"
+    desc: "⚙️  配置管理"
+
+  # 媒體功能
+  media:
+    cmd: "/media"
+    desc: "🎬 影音功能選單"
+
+  image:
+    cmd: "/image"
+    desc: "🖼️  圖片分析"
+
+  video:
+    cmd: "/video"
+    desc: "🎥 影片分析"
+
+  # 記憶體管理
+  clear_memory:
+    cmd: "/clear-memory"
+    desc: "🧹 清理記憶體"
+
+  memory_stats:
+    cmd: "/memory-stats"
+    desc: "📊 記憶體統計"
+
+  help_memory:
+    cmd: "/help-memory"
+    desc: "ℹ️  記憶體管理說明"
+
+  # 檢查點系統
+  checkpoints:
+    cmd: "/checkpoints"
+    desc: "📌 列出所有檢查點"
+
+  checkpoint:
+    cmd: "/checkpoint"
+    desc: "💾 建立手動檢查點"
+
+  rewind:
+    cmd: "/rewind"
+    desc: "⏪ 回溯至檢查點"
+
+  help_checkpoint:
+    cmd: "/help-checkpoint"
+    desc: "ℹ️  檢查點系統說明"
+
+  # 對話歷史
+  search:
+    cmd: "/search"
+    desc: "🔍 搜尋對話歷史"
+
+  history:
+    cmd: "/history"
+    desc: "📜 查看對話歷史"
+
+  export:
+    cmd: "/export"
+    desc: "📤 匯出對話"
+
+  stats:
+    cmd: "/stats"
+    desc: "📊 對話統計資訊"
+
+  # 調試工具
+  debug:
+    cmd: "/debug"
+    desc: "🐛 除錯工具"
+
+  test:
+    cmd: "/test"
+    desc: "🧪 測試工具"
+
 # ============================================================================
 # 對話系統分類 (chat)
 # ============================================================================
@@ -96,6 +262,8 @@ chat:
 
   # 角色標籤
   user_prompt: "你"
+  user_prompt_with_hint: "你 ([ 參數)"
+  user_prompt_with_hint_detailed: "你 (輸入 [ 查看 think/max 參數)"
   model_prompt: "模型"
   system_prompt: "系統"
   assistant_prompt: "助理"
@@ -135,6 +303,7 @@ chat:
 
     # 功能選單
     cache_desc: "快取管理選單"
+    config_desc: "配置管理（資料庫設定）"
     media_desc: "影音功能選單"
     cli_desc: "Gemini CLI 管理工具"
     debug_desc: "除錯與測試工具"
@@ -153,6 +322,7 @@ chat:
     # 對話歷史
     search_desc: "搜尋對話歷史"
     history_desc: "查看對話歷史"
+    export_desc: "匯出對話 (json/md/txt)"
     stats_desc: "對話統計資訊"
 
     # 快捷語法
@@ -190,7 +360,7 @@ chat:
   # 模型選項
   model_gemini_25_pro: "Gemini 2.5 Pro - 最強大（思考模式）"
   model_gemini_25_flash: "Gemini 2.5 Flash - 快速且智慧（推薦）"
-  model_gemini_25_flash_8b: "Gemini 2.5 Flash-8B - 最便宜"
+  model_gemini_25_flash_lite: "Gemini 2.5 Flash Lite - 最便宜"
   model_gemini_20_flash: "Gemini 2.0 Flash - 快速版"
 
   # 貼上文本提示
@@ -258,6 +428,43 @@ chat:
   config_wizard_title: "[bold magenta]互動式配置模式[/bold magenta]"
   config_wizard_message: "\n[dim]此模式將引導您完成配置設定。\n配置完成後，請再次執行程式開始對話。[/dim]"
   config_wizard_panel_title: "[bold magenta]🎛️  配置精靈[/bold magenta]"
+
+  # 快取設定
+  cache:
+    title: "💾 自動快取管理（可節省 75-90% 成本）"
+    current_model: "📌 當前模型：{model}"
+    enable_prompt: |
+      啟用自動快取？
+        [y] 是（推薦，5000 tokens 自動建立）
+        [c] 自訂設定
+        [m] 修改模型選擇
+        [n] 否
+
+      你的選擇 [y]:
+    disabled: "✓ 快取功能已關閉\n"
+    advanced_settings: "\n🔧 進階設定"
+    trigger_mode_prompt: |
+      觸發模式？
+        [a] 自動建立（達到門檻直接建立）
+        [p] 每次詢問（達到門檻時確認）
+
+      選擇 [a]:
+    threshold_prompt_v2: |
+
+      快取門檻？
+        [1] 3000 tokens（約 3 頁文字）
+        [2] 5000 tokens（約 5 頁，推薦）
+        [3] 8000 tokens（約 8 頁文字）
+        [c] 自訂
+
+      選擇 [2]:
+    threshold_custom_prompt: "請輸入門檻（tokens）: "
+    min_tokens_warning: "\n⚠️  {model} 最低需要 {min_tokens} tokens"
+    auto_adjust: "   自動調整為 {min_tokens}"
+    ttl_prompt: "存活時間（小時） [1]: "
+    config_done: "\n✓ 設定完成：{mode} 模式，門檻 {threshold:,} tokens，TTL {ttl}h\n"
+    recommended: "✓ 使用推薦設定：自動模式，5000 tokens，TTL 1 小時\n"
+    auto_enabled: "\n✓ 自動快取：已啟用（{mode} 模式，門檻 {threshold:,} tokens）"
 
   # 其他
   config_source_codegemini: "CodeGemini 配置"
@@ -378,6 +585,16 @@ pricing:
   total_transactions_line: "總交易次數: {count}"
   session_total_cost: "會話總成本: ${cost:.6f}"
   twd_equivalent: "約合台幣: {currency}{amount}"
+
+  # 預算控制警告訊息
+  budget_exceeded_daily: "超過每日預算：${projected} > ${limit}"
+  budget_exceeded_monthly: "超過每月預算：${projected} > ${limit}"
+  budget_usage_daily: "已使用 {percent}% 每日預算"
+  budget_insufficient: "預算不足：{warning}"
+  budget_warning_prefix: "警告：{warning}"
+
+  # 預算控制狀態
+  today_usage: "今日使用：{percent}%"
 
 # ============================================================================
 # 翻譯系統分類 (translator)
@@ -1098,7 +1315,7 @@ model:
   # 模型名稱
   gemini_pro: "Gemini Pro"
   gemini_flash: "Gemini Flash"
-  gemini_flash_8b: "Gemini Flash 8B"
+  gemini_flash_lite: "Gemini Flash Lite"
 
   # 狀態
   loading: "載入模型中"
@@ -1118,7 +1335,7 @@ model:
   col_name: "模型名稱"
   col_thinking_range: "Thinking Token 範圍"
   col_price_range: "價格範圍 (NT$)"
-  select_prompt: "請輸入選項 (1-3 或 0)"
+  select_prompt: "請輸入選項 (1-{count} 或 0)"
   validation_warning: "⚠️  無法驗證模型可用性，將直接使用您輸入的模型名稱"
   enter_name: "請輸入模型名稱"
   name_empty: "模型名稱不能為空，請重試"
@@ -1411,19 +1628,18 @@ codegemini:
   slash_commands.enabled: "✓ Custom Slash Commands 已啟用"
   todo_tracker.initialized: "TodoTracker 已初始化"
 
-common:
-  analyzing: "ℹ️  注意:使用此檔案進行分析時會產生 API 成本"
-  completed: "\n✓ 已設定為動態模式"
-  error: "\n[dim magenta]錯誤：{error}[/red]"
-  generating: "生成字幕（語音辨識+翻譯）"
-  key: "text"
-  language_switched: "語言已切換至 {lang}"
-  loading: "[#DDA0DD]📂 載入了 {len(self.tasks)} 個任務[/#DDA0DD]"
-  # message: "編輯圖片（Image Editing）"  # 已停用 - 此 key 被誤用為通用訊息,導致輸出混亂
-  press_enter: "\n按 Enter 繼續..."
-  processing: "使用異步處理模式（asyncio）\n"
-  saving: "進度已保存，可稍後重試\n"
-  warning: "[#DDA0DD]警告：[/#DDA0DD] {self.warnings}"
+# ============================================================================
+# 注意：不要在此處重複定義 common 區塊，正確定義在文件開頭 (line 105-120)
+# ============================================================================
+# 以下被移除的錯誤定義導致 media 選單顯示重複訊息:
+# - common.generating 被覆蓋為 "生成字幕（語音辨識+翻譯）" 而非 "生成中"
+# - common.processing 被覆蓋為 "使用異步處理模式（asyncio）" 而非 "處理中"
+# - common.analyzing 被覆蓋為 "ℹ️ 注意..." 而非 "分析中"
+#
+# 修復日期: 2025-10-31
+# 問題: Media 選單顯示 11+ 重複訊息
+# 原因: YAML 重複定義導致 safe_t('common.generating') 等返回錯誤的具體訊息
+# ============================================================================
 
 error:
   cannot_process: "[dim magenta]❌ 無法取得影片時長: {e}[/red]"
@@ -1475,12 +1691,7 @@ media:
   video.scenes_detected: "[#DA70D6]✓ 檢測到 {count} 個場景[/green]\n"
   video.unknown_scene: "未知場景"
 
-model:
-  col_name: "模型名稱"
-  col_option: "選項"
-  col_price_range: "價格範圍 (NT$)"
-  col_thinking_range: "Thinking Token 範圍"
-  selector_title: "Gemini 模型選擇"
+# 注意：model 區段已定義在 1314 行，此處重複定義已移除
 
 pricing:
   gemini_planning: "Gemini 分段計畫"
@@ -2808,6 +3019,46 @@ chat:
   msg.黑白: "  [1] 黑白 (grayscale)"
   msg.黑白_2: "  [1] 黑白 (grayscale)"
 
+  # 快取設定（新增於 2025-10-29 - 模型重選功能 + 返回上一頁）
+  cache:
+    title: "💾 自動快取管理（可節省 75-90% 成本）"
+    current_model: "📌 當前模型：{model}"
+    enable_prompt: |
+      啟用自動快取？
+        [y] 是（推薦，5000 tokens 自動建立）
+        [c] 自訂設定
+        [m] 修改模型選擇
+        [n] 否
+        [b] 返回上一頁
+
+      你的選擇 [y]:
+    disabled: "✓ 快取功能已關閉\n"
+    advanced_settings: "\n🔧 進階設定"
+    trigger_mode_prompt: |
+      觸發模式？
+        [a] 自動建立（達到門檻直接建立）
+        [p] 每次詢問（達到門檻時確認）
+        [b] 返回上一頁
+
+      選擇 [a]:
+    threshold_prompt_v2: |
+
+      快取門檻？
+        [1] 3000 tokens（約 3 頁文字）
+        [2] 5000 tokens（約 5 頁，推薦）
+        [3] 8000 tokens（約 8 頁文字）
+        [c] 自訂
+        [b] 返回上一頁
+
+      選擇 [2]:
+    threshold_custom_prompt: "請輸入門檻（tokens）: "
+    min_tokens_warning: "\n⚠️  {model} 最低需要 {min_tokens} tokens"
+    auto_adjust: "   自動調整為 {min_tokens}"
+    ttl_prompt: "存活時間（小時） [1]: "
+    config_done: "\n✓ 設定完成：{mode} 模式，門檻 {threshold:,} tokens，TTL {ttl}h\n"
+    recommended: "✓ 使用推薦設定：自動模式，5000 tokens，TTL 1 小時\n"
+    auto_enabled: "\n✓ 自動快取：已啟用（{mode} 模式，門檻 {threshold:,} tokens）"
+
 checkpoint:
   msg.儲存檢查點失敗: "[red]✗[/red] 儲存檢查點失敗: {e}"
   msg.初始化完成: "[dim]✓ CheckpointManager 初始化完成: {self.checkpoints_dir}[/dim]"
@@ -3902,3 +4153,82 @@ history:
   command_history: "/history - 列出最近對話"
   command_export: "/export <路徑> [格式] - 匯出對話記錄"
   command_stats: "/stats - 顯示統計資訊"
+# CodeGemini MCP Detector
+mcp:
+  detector:
+    postgresql_desc: "PostgreSQL 資料庫操作"
+    puppeteer_desc: "網頁自動化與爬蟲"
+    slack_desc: "Slack 團隊協作"
+    drive_desc: "Google Drive 檔案管理"
+    contains_keywords: "包含關鍵字：{keywords}"
+    match_patterns: "匹配 {count} 個模式"
+    match_rule: "符合規則"
+    rule_added: "已新增自訂規則：{name}"
+    rule_removed: "已移除規則：{name}"
+    rules_list: "MCP Server 偵測規則列表"
+    description: "說明"
+    keywords_count: "關鍵字數量"
+    patterns_count: "模式數量"
+    confidence_weight: "信心度權重"
+    demo_title: "MCP Server 智慧偵測器示範"
+    test: "測試"
+    detected_servers: "偵測到 {count} 個相關 Server"
+    confidence: "信心度"
+    no_servers_detected: "未偵測到需要的 MCP Server"
+
+# CodeGemini Templates
+templates:
+  not_list_warning: "警告：'{name}' 不是列表，迴圈將被跳過"
+  missing_variables: "警告：缺少變數：{vars}"
+  test_title: "CodeGemini Template Engine 測試"
+  test1: "測試 1：簡單變數插值"
+  test2: "測試 2：預設值"
+  test3: "測試 3：條件邏輯"
+  test4: "測試 4：迴圈"
+  test5: "測試 5：模板庫"
+  result: "結果"
+  premium_member: "高級會員"
+  normal_member: "普通會員"
+  all_tests_complete: "所有測試完成"
+
+# CodeGemini Test Generator
+test_gen:
+  analyzing_file: "分析檔案：{path}"
+  analysis_complete: "分析完成"
+  functions: "函數"
+  classes: "類別"
+  analysis_failed: "分析失敗：{error}"
+  generating_tests: "生成測試程式碼..."
+  unsupported_framework: "不支援的測試框架：{framework}"
+  test_file_saved: "測試檔案已儲存：{path}"
+  title: "CodeGemini Test Generator"
+  usage: "用法"
+  examples: "範例"
+  generated_code: "生成的測試程式碼"
+
+# CodeGemini Doc Generator
+doc_gen:
+  scanning_project: "掃描專案：{path}"
+  found_files: "發現 {count} 個 Python 檔案"
+  analysis_complete: "分析完成：{count} 個模組"
+  analysis_warning: "警告：無法分析 {path} - {error}"
+  generating_readme: "生成 README.md..."
+  readme_saved: "README 已儲存：{path}"
+  generating_api: "生成 API 文檔..."
+  api_saved: "API 文檔已儲存：{path}"
+  title: "CodeGemini Documentation Generator"
+  usage: "用法"
+  examples: "範例"
+  readme_title: "README.md"
+
+# CodeGemini Codebase Embedding
+embedding:
+  faiss_initialized: "✓ FAISS 索引已初始化（維度: {dim}）"
+  cache_enabled: "✓ EmbeddingCache 已啟用（maxsize={size}）"
+  cache_unloaded: "✓ EmbeddingCache 已卸載（釋放記憶體: ~{mem}MB）"
+  cache_reloaded: "✓ EmbeddingCache 已重新啟用"
+  db_initialized: "✓ VectorDatabase 已初始化: {path} (FAISS 已啟用)"
+
+# Common
+common:
+  unit: "個"

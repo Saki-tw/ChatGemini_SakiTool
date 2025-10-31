@@ -45,7 +45,7 @@ def show_language_menu(save_to_env: bool = True) -> str:
 
     # 建立語言選擇表格
     table = Table(show_header=True, header_style="bold #87CEEB", box=box.ROUNDED)
-    table.add_column("選項", style="bold #DDA0DD", width=8, justify="center")
+    table.add_column("選項", style="bold #E8C4F0", width=8, justify="center")
     table.add_column("旗幟", width=6, justify="center")
     table.add_column("語言", style="#87CEEB", width=20)
     table.add_column("本地名稱", style="green", width=20)
@@ -106,7 +106,7 @@ def show_language_menu(save_to_env: bool = True) -> str:
 
             # 取消
             if choice == "0":
-                console.print("[#DDA0DD]✖ 已取消 / Cancelled[/#DDA0DD]\n")
+                console.print("[#E8C4F0]✖ 已取消 / Cancelled[/#E8C4F0]\n")
                 return current_lang
 
             # 驗證輸入
@@ -116,7 +116,7 @@ def show_language_menu(save_to_env: bool = True) -> str:
 
                 # 如果選擇相同語言
                 if selected_lang == current_lang:
-                    console.print(f"[#DDA0DD]ℹ️  已經是 {current_native} / Already using {current_native}[/#DDA0DD]\n")
+                    console.print(f"[#E8C4F0]ℹ️  已經是 {current_native} / Already using {current_native}[/#E8C4F0]\n")
                     return current_lang
 
                 # 切換語言
@@ -150,7 +150,7 @@ def show_language_menu(save_to_env: bool = True) -> str:
         except ValueError:
             console.print("[red]❌ 請輸入數字 / Please enter a number[/red]")
         except KeyboardInterrupt:
-            console.print("\n[#DDA0DD]✖ 已取消 / Cancelled[/#DDA0DD]\n")
+            console.print("\n[#E8C4F0]✖ 已取消 / Cancelled[/#E8C4F0]\n")
             return current_lang
 
 def show_quick_switch_hints():
@@ -164,9 +164,9 @@ def show_quick_switch_hints():
 if __name__ == "__main__":
     # 獨立執行時的測試
     console.print("\n")
-    console.print("╔" + "═" * 78 + "╗", style="bold #DDA0DD")
-    console.print("║" + " " * 22 + "互動式語言選單測試" + " " * 32 + "║", style="bold #DDA0DD")
-    console.print("╚" + "═" * 78 + "╝", style="bold #DDA0DD")
+    console.print("╔" + "═" * 78 + "╗", style="bold #E8C4F0")
+    console.print("║" + " " * 22 + "互動式語言選單測試" + " " * 32 + "║", style="bold #E8C4F0")
+    console.print("╚" + "═" * 78 + "╝", style="bold #E8C4F0")
 
     selected = show_language_menu(save_to_env=True)
     show_quick_switch_hints()

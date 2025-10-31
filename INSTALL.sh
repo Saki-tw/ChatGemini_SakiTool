@@ -220,10 +220,10 @@ install_all() {
         cat >> "$SHELL_RC" << ALIASES
 
 # ChatGemini_SakiTool Global Aliases (v${PROJECT_VERSION})
-alias ChatGemini='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
-alias chatgemini='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
-alias CHATGEMINI='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
-alias ChatGEMINI='GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias ChatGemini='GEMINI_ADVANCED_INPUT=true GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias chatgemini='GEMINI_ADVANCED_INPUT=true GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias CHATGEMINI='GEMINI_ADVANCED_INPUT=true GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
+alias ChatGEMINI='GEMINI_ADVANCED_INPUT=true GEMINI_OUTPUT_DIR=claude ${VENV_DIR}/bin/python ${SCRIPT_DIR}/gemini_chat.py'
 
 ALIASES
 
@@ -305,12 +305,24 @@ setup_api_key() {
         else
             echo "GEMINI_API_KEY=${API_KEY_INPUT}" >> "${SCRIPT_DIR}/.env"
         fi
+
+        # 添加進階輸入功能設定（如果不存在）
+        if ! grep -q "GEMINI_ADVANCED_INPUT=" "${SCRIPT_DIR}/.env"; then
+            echo "" >> "${SCRIPT_DIR}/.env"
+            echo "# 進階輸入功能（方向鍵、自動補全、歷史記錄）" >> "${SCRIPT_DIR}/.env"
+            echo "GEMINI_ADVANCED_INPUT=true" >> "${SCRIPT_DIR}/.env"
+        fi
     else
+        # 建立新的 .env 檔案
         echo "GEMINI_API_KEY=${API_KEY_INPUT}" > "${SCRIPT_DIR}/.env"
+        echo "" >> "${SCRIPT_DIR}/.env"
+        echo "# 進階輸入功能（方向鍵、自動補全、歷史記錄）" >> "${SCRIPT_DIR}/.env"
+        echo "GEMINI_ADVANCED_INPUT=true" >> "${SCRIPT_DIR}/.env"
     fi
 
     echo ""
     echo -e "${GREEN}✓ API Key 已儲存${NC}"
+    echo -e "${GREEN}✓ 進階輸入功能已啟用${NC}"
     echo ""
     echo "重新開啟終端機後，在任意位置輸入 'ChatGemini' 即可啟動"
     echo ""

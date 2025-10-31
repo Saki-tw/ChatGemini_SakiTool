@@ -14,6 +14,7 @@ import re
 from typing import List, Dict, Set, Optional
 from dataclasses import dataclass
 from rich.console import Console
+from utils.i18n import safe_t
 
 console = Console()
 
@@ -65,7 +66,7 @@ class MCPServerDetector:
                 r"^SELECT\s",  # SQL 查詢開頭
             ],
             confidence=0.9,
-            description="PostgreSQL 資料庫操作"
+            description=safe_t("mcp.detector.postgresql_desc", "PostgreSQL 資料庫操作")
         ))
 
         # Puppeteer 偵測規則
@@ -92,7 +93,7 @@ class MCPServerDetector:
                 r"網頁.*截圖"
             ],
             confidence=0.85,
-            description="網頁自動化與爬蟲"
+            description=safe_t("mcp.detector.puppeteer_desc", "網頁自動化與爬蟲")
         ))
 
         # Slack 偵測規則
@@ -116,7 +117,7 @@ class MCPServerDetector:
                 r"在\s*Slack"
             ],
             confidence=0.9,
-            description="Slack 團隊協作"
+            description=safe_t("mcp.detector.slack_desc", "Slack 團隊協作")
         ))
 
         # Google Drive 偵測規則
@@ -138,7 +139,7 @@ class MCPServerDetector:
                 r"共享.*文件"
             ],
             confidence=0.85,
-            description="Google Drive 檔案管理"
+            description=safe_t("mcp.detector.drive_desc", "Google Drive 檔案管理")
         ))
 
     def detect(self, user_input: str, threshold: float = 0.6) -> List[Dict[str, any]]:
@@ -199,33 +200,33 @@ class MCPServerDetector:
         reasons = []
 
         if keywords:
-            reasons.append(f"包含關鍵字：{', '.join(keywords[:3])}")
+            reasons.append(safe_t("mcp.detector.contains_keywords", "包含關鍵字：{keywords}").format(keywords=', '.join(keywords[:3])))
 
         if patterns:
-            reasons.append(f"匹配 {len(patterns)} 個模式")
+            reasons.append(safe_t("mcp.detector.match_patterns", "匹配 {count} 個模式").format(count=len(patterns)))
 
-        return " | ".join(reasons) if reasons else "符合規則"
+        return " | ".join(reasons) if reasons else safe_t("mcp.detector.match_rule", "符合規則")
 
     def add_custom_rule(self, rule: DetectionRule):
         """新增自訂偵測規則"""
         self.rules.append(rule)
-        console.print(f"[green]✓ 已新增自訂規則：{rule.server_name}[/green]")
+        console.print(f"[green]✓ {safe_t('mcp.detector.rule_added', '已新增自訂規則：{name}', name=rule.server_name)}[/green]")
 
     def remove_rule(self, server_name: str):
         """移除指定 Server 的規則"""
         self.rules = [r for r in self.rules if r.server_name != server_name]
-        console.print(f"[#DDA0DD]✓ 已移除規則：{server_name}[/#DDA0DD]")
+        console.print(f"[#DDA0DD]✓ {safe_t('mcp.detector.rule_removed', '已移除規則：{name}', name=server_name)}[/#DDA0DD]")
 
     def list_rules(self):
         """列出所有偵測規則"""
-        console.print("\n[bold #87CEEB]📋 MCP Server 偵測規則列表[/bold #87CEEB]\n")
+        console.print(f"\n[bold #87CEEB]📋 {safe_t('mcp.detector.rules_list', 'MCP Server 偵測規則列表')}[/bold #87CEEB]\n")
 
         for i, rule in enumerate(self.rules, 1):
             console.print(f"[#87CEEB]{i}. {rule.server_name}[/#87CEEB]")
-            console.print(f"   說明：{rule.description}")
-            console.print(f"   關鍵字數量：{len(rule.keywords)}")
-            console.print(f"   模式數量：{len(rule.patterns)}")
-            console.print(f"   信心度權重：{rule.confidence}")
+            console.print(f"   {safe_t('mcp.detector.description', '說明')}：{rule.description}")
+            console.print(f"   {safe_t('mcp.detector.keywords_count', '關鍵字數量')}：{len(rule.keywords)}")
+            console.print(f"   {safe_t('mcp.detector.patterns_count', '模式數量')}：{len(rule.patterns)}")
+            console.print(f"   {safe_t('mcp.detector.confidence_weight', '信心度權重')}：{rule.confidence}")
             console.print()
 
 
@@ -246,19 +247,19 @@ def demo():
         "從雲端硬碟下載最新的簡報檔案"
     ]
 
-    console.print("[bold #DDA0DD]🔍 MCP Server 智慧偵測器示範[/bold #DDA0DD]\n")
+    console.print(f"[bold #DDA0DD]🔍 {safe_t('mcp.detector.demo_title', 'MCP Server 智慧偵測器示範')}[/bold #DDA0DD]\n")
 
     for i, test_input in enumerate(test_cases, 1):
-        console.print(f"[bold]測試 {i}:[/bold] {test_input}")
+        console.print(f"[bold]{safe_t('mcp.detector.test', '測試')} {i}:[/bold] {test_input}")
         results = detector.detect(test_input)
 
         if results:
-            console.print(f"[green]✓ 偵測到 {len(results)} 個相關 Server：[/green]")
+            console.print(f"[green]✓ {safe_t('mcp.detector.detected_servers', '偵測到 {count} 個相關 Server', count=len(results))}：[/green]")
             for result in results:
                 console.print(f"  • {result['server_name']} "
-                            f"(信心度: {result['confidence']:.2f}) - {result['reason']}")
+                            f"({safe_t('mcp.detector.confidence', '信心度')}: {result['confidence']:.2f}) - {result['reason']}")
         else:
-            console.print("[dim]✗ 未偵測到需要的 MCP Server[/dim]")
+            console.print(f"[dim]✗ {safe_t('mcp.detector.no_servers_detected', '未偵測到需要的 MCP Server')}[/dim]")
 
         console.print()
 

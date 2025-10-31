@@ -93,8 +93,8 @@ class AsyncImageAnalyzer(ImageAnalyzer):
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['describe'])
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 任務：{task} (異步模式)[/#DDA0DD]', task=task))
-        console.print(safe_t('common.analyzing', fallback='[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💭 任務：{task} (異步模式)[/#E8C4F0]', task=task))
+        console.print(safe_t('common.analyzing', fallback='[#E8C4F0]🤖 Gemini 分析中...[/#E8C4F0]\n'))
 
         # 轉換圖片為 Part（使用父類方法）
         image_part = self._image_to_part(image_path)
@@ -134,8 +134,8 @@ class AsyncImageAnalyzer(ImageAnalyzer):
 
         console.print(Panel(
             Markdown(response.text),
-            title="[#DA70D6]📝 Gemini 分析結果[/#DA70D6]",
-            border_style="#DDA0DD"
+            title="[#B565D8]📝 Gemini 分析結果[/#B565D8]",
+            border_style="#E8C4F0"
         ))
 
         # 提取 tokens 和顯示成本（複用父類邏輯）
@@ -224,7 +224,7 @@ class AsyncImageAnalyzer(ImageAnalyzer):
         if not prompt:
             prompt = PROMPT_TEMPLATES.get(task, PROMPT_TEMPLATES['compare'])
 
-        console.print(safe_t('common.loading', fallback='\n[#DDA0DD]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/#DDA0DD]', image_paths_count=len(image_paths)))
+        console.print(safe_t('common.loading', fallback='\n[#E8C4F0]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/#E8C4F0]', image_paths_count=len(image_paths)))
 
         # 並行載入所有圖片
         import os
@@ -237,13 +237,13 @@ class AsyncImageAnalyzer(ImageAnalyzer):
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='   [dim #DDA0DD]✗ {basename} - 載入失敗：{e}[/red]', basename=os.path.basename(path), e=e))
+                console.print(safe_t('error.failed', fallback='   [dim #E8C4F0]✗ {basename} - 載入失敗：{e}[/red]', basename=os.path.basename(path), e=e))
 
         if not parts:
             raise ValueError("沒有成功載入任何圖片")
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 任務：{task}[/#DDA0DD]', task=task))
-        console.print(safe_t('common.analyzing', fallback='\n[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💭 任務：{task}[/#E8C4F0]', task=task))
+        console.print(safe_t('common.analyzing', fallback='\n[#E8C4F0]🤖 Gemini 分析中...[/#E8C4F0]\n'))
 
         # 異步 API 調用
         loop = asyncio.get_running_loop()
@@ -280,8 +280,8 @@ class AsyncImageAnalyzer(ImageAnalyzer):
 
         console.print(Panel(
             Markdown(response.text),
-            title="[#DA70D6]📝 Gemini 批次分析結果[/#DA70D6]",
-            border_style="#DDA0DD"
+            title="[#B565D8]📝 Gemini 批次分析結果[/#B565D8]",
+            border_style="#E8C4F0"
         ))
 
         return response.text

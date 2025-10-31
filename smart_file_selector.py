@@ -194,7 +194,7 @@ class SmartFileSelector:
                 valid_indices = [i for i in indices if 1 <= i <= len(files)]
 
                 if not valid_indices:
-                    self.console.print("[#DDA0DD]⚠ 未輸入有效編號，請重新輸入[/#DDA0DD]")
+                    self.console.print("[#E8C4F0]⚠ 未輸入有效編號，請重新輸入[/#E8C4F0]")
                     continue
 
                 selected = [files[i - 1] for i in valid_indices]
@@ -214,9 +214,9 @@ class SmartFileSelector:
                     self.console.print("[dim]請重新選擇...[/dim]\n")
 
             except (ValueError, IndexError):
-                self.console.print("[#DDA0DD]⚠ 輸入格式錯誤，請輸入有效編號[/#DDA0DD]")
+                self.console.print("[#E8C4F0]⚠ 輸入格式錯誤，請輸入有效編號[/#E8C4F0]")
             except (KeyboardInterrupt, EOFError):
-                self.console.print("\n[#DDA0DD]已取消[/#DDA0DD]")
+                self.console.print("\n[#E8C4F0]已取消[/#E8C4F0]")
                 return []
 
     def select_high_confidence(
@@ -318,9 +318,9 @@ class SmartFileSelector:
         """
         self.console.print(
             Panel(
-                "[#DDA0DD]⚠ 信心度較低 (<85%)[/#DDA0DD]\n"
+                "[#E8C4F0]⚠ 信心度較低 (<85%)[/#E8C4F0]\n"
                 "[dim]自動顯示多個候選檔案供您選擇[/dim]",
-                border_style="#DDA0DD",
+                border_style="#E8C4F0",
                 box=box.ROUNDED
             )
         )
@@ -400,7 +400,7 @@ class SmartFileSelector:
             選中的檔案列表，若取消則返回 None
         """
         if not similar_files:
-            self.console.print("[#DDA0DD]⚠ 未找到相似檔案[/#DDA0DD]")
+            self.console.print("[#E8C4F0]⚠ 未找到相似檔案[/#E8C4F0]")
             return None
 
         # 確保按信心度排序

@@ -121,7 +121,7 @@ class FileCache:
             if len(self._cache) > self.maxsize:
                 # 移除最舊的（OrderedDict 第一個）
                 oldest_key, oldest_file = self._cache.popitem(last=False)
-                logger.debug(f"⚠ 快取已滿，淘汰: {oldest_file.file_path}")
+                logger.debug(f"⚠ 快取已滿,淘汰: {oldest_file.file_path}")
 
     def invalidate(self, file_path: str):
         """使特定檔案的快取失效"""
@@ -224,7 +224,7 @@ class SmartPreloader:
                 if confidence >= self.min_confidence:
                     candidates.append((related_file, confidence))
 
-            # 按信心度排序，返回 top_k
+            # 按信心度排序,返回 top_k
             candidates.sort(key=lambda x: x[1], reverse=True)
             related_files = [f for f, conf in candidates[:top_k]]
 
@@ -289,7 +289,7 @@ def _read_text_file_with_cache(file_path: str, file_cache: FileCache) -> Optiona
     if cached:
         return cached.content
 
-    # 快取未命中，從檔案系統讀取
+    # 快取未命中,從檔案系統讀取
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -479,11 +479,11 @@ def process_file_attachments(user_input: str, enable_cache: bool = True, enable_
                     except Exception as e:
                         print(f"⚠️  上傳失敗 {file_path}: {e}")
                 else:
-                    print(f"⚠️  檔案管理器未啟用，無法上傳 {file_path}")
+                    print(f"⚠️  檔案管理器未啟用,無法上傳 {file_path}")
 
             else:
                 # 未知類型：嘗試當文字檔讀取
-                print(f"⚠️  未知檔案類型 {ext}，嘗試當文字檔讀取...")
+                print(f"⚠️  未知檔案類型 {ext},嘗試當文字檔讀取...")
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()

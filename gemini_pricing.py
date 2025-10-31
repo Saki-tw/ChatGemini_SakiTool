@@ -4,7 +4,7 @@ Gemini API 即時計價模組
 根據 token 使用量計算成本
 支援新台幣顯示、思考模式 token 計價
 """
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List
 from datetime import datetime
 from utils.i18n import t, _
 
@@ -23,40 +23,49 @@ except ImportError:
             return fallback
 
 # 美元兌新台幣匯率（2025年10月）
-# 若匯率有較大變動，請更新此值
+# 若匯率有較大變動,請更新此值
 USD_TO_TWD = 31.0
 
-# Gemini API 定價表（2025年1月）
+# Gemini API 定價表（2025年10月 - 根據官方文檔更新）
 # 價格單位：美元 / 1000 tokens
+# 資料來源：https://ai.google.dev/gemini-api/docs/pricing
 PRICING_TABLE: Dict[str, Dict[str, float]] = {
-    # Gemini 2.5 系列
+    # Gemini 2.5 系列（付費定價）
     'gemini-2.5-pro': {
-        'input_low': 0.00125,      # ≤200K tokens
-        'output_low': 0.01,
-        'input_high': 0.0025,      # >200K tokens
-        'output_high': 0.015,
+        'input_low': 0.00125,      # ≤200K tokens - $1.25/百萬
+        'output_low': 0.01,         # ≤200K tokens - $10/百萬
+        'input_high': 0.0025,      # >200K tokens - $2.50/百萬
+        'output_high': 0.015,       # >200K tokens - $15/百萬
         'threshold': 200000,
     },
     'gemini-2.5-flash': {
-        'input': 0.00015625,        # $0.15625 / 1M tokens
-        'output': 0.000625,         # $0.625 / 1M tokens
+        'input': 0.0003,            # $0.30 / 1M tokens (文字/圖片/影片)
+        'output': 0.0025,           # $2.50 / 1M tokens
     },
-    'gemini-2.5-flash-8b': {
-        'input': 0.00003125,        # $0.03125 / 1M tokens
-        'output': 0.000125,         # $0.125 / 1M tokens
-    },
-
-    # Gemini 2.0 系列
-    'gemini-2.0-flash-exp': {
+    'gemini-2.5-flash-lite': {
         'input': 0.0001,            # $0.10 / 1M tokens
         'output': 0.0004,           # $0.40 / 1M tokens
     },
+
+    # Gemini 2.0 系列（付費定價）
+    'gemini-2.0-flash': {
+        'input': 0.0001,            # $0.10 / 1M tokens
+        'output': 0.0004,           # $0.40 / 1M tokens
+    },
+    'gemini-2.0-flash-lite': {
+        'input': 0.000075,          # $0.075 / 1M tokens
+        'output': 0.0003,           # $0.30 / 1M tokens
+    },
     'gemini-2.0-flash-thinking-exp': {
-        'input': 0.0001,
-        'output': 0.0004,
+        'input': 0.0001,            # $0.10 / 1M tokens
+        'output': 0.0004,           # $0.40 / 1M tokens
+    },
+    'gemini-2.0-flash-exp': {
+        'input': 0.0,               # 實驗版免費
+        'output': 0.0,
     },
 
-    # Gemini 1.5 系列
+    # Gemini 1.5 系列（向後相容）
     'gemini-1.5-pro': {
         'input_low': 0.00125,       # ≤128K tokens
         'output_low': 0.005,
@@ -65,18 +74,29 @@ PRICING_TABLE: Dict[str, Dict[str, float]] = {
         'threshold': 128000,
     },
     'gemini-1.5-flash': {
-        'input_low': 0.00003125,    # ≤128K tokens
-        'output_low': 0.000125,
-        'input_high': 0.0000625,    # >128K tokens
-        'output_high': 0.00025,
+        'input_low': 0.000075,      # ≤128K tokens - $0.075/1M (2024降價後)
+        'output_low': 0.0003,       # ≤128K tokens - $0.30/1M
+        'input_high': 0.00015,      # >128K tokens - $0.15/1M
+        'output_high': 0.0006,      # >128K tokens - $0.60/1M
         'threshold': 128000,
     },
-    'gemini-1.5-flash-8b': {
-        'input_low': 0.00001875,    # ≤128K tokens
-        'output_low': 0.000075,
-        'input_high': 0.0000375,    # >128K tokens
-        'output_high': 0.00015,
-        'threshold': 128000,
+    # 注意：API 中沒有 gemini-1.5-flash-8b 或 gemini-1.5-flash-lite
+    # 1.5 系列只有 gemini-1.5-flash 和 gemini-1.5-pro
+
+    # 嵌入模型
+    'gemini-embedding-001': {
+        'input': 0.00015,           # $0.15 / 1M tokens
+        'output': 0.0,
+    },
+
+    # Gemma 開源模型（完全免費）
+    'gemma-3': {
+        'input': 0.0,
+        'output': 0.0,
+    },
+    'gemma-3n': {
+        'input': 0.0,
+        'output': 0.0,
     },
 
     # 實驗版模型
@@ -85,10 +105,10 @@ PRICING_TABLE: Dict[str, Dict[str, float]] = {
         'output': 0.0,
     },
 
-    # 預設（Flash 定價）
+    # 預設（使用 Flash 定價）
     'default': {
-        'input': 0.00015625,
-        'output': 0.000625,
+        'input': 0.0003,
+        'output': 0.0025,
     }
 }
 
@@ -120,16 +140,94 @@ IMAGEN_PRICING = {
     'imagen-3.0-capability-edit-001': {
         'per_image': 0.05,          # $0.05 per edit
     },
+    'imagen-4.0-generate-001': {
+        'per_image': 0.04,          # $0.04 per image
+    },
+    'imagen-4.0-ultra-generate-001': {
+        'per_image': 0.08,          # $0.08 per image
+    },
+    'imagen-4.0-fast-generate-001': {
+        'per_image': 0.02,          # $0.02 per image (最便宜)
+    },
 }
+
+# 多模態 Token 轉換率（官方文檔：https://ai.google.dev/gemini-api/docs/tokens）
+# 圖片按 tile 計算,每個 tile = 258 tokens
+IMAGE_TOKEN_BASE = 258  # 小圖 (≤384px 兩個維度) 或每個 tile 的固定 token 數
+
+def calculate_image_tokens(width: int, height: int) -> int:
+    """
+    計算圖片消耗的 token 數量
+
+    官方規則：
+    - 小圖 (寬≤384 且 高≤384): 258 tokens
+    - 大圖: 分割為 768x768 的 tiles,每個 tile = 258 tokens
+
+    Args:
+        width: 圖片寬度（像素）
+        height: 圖片高度（像素）
+
+    Returns:
+        token 數量
+
+    來源: https://ai.google.dev/gemini-api/docs/tokens
+    """
+    if width <= 384 and height <= 384:
+        return IMAGE_TOKEN_BASE
+
+    # 大圖：計算需要多少個 768x768 tiles
+    tiles_width = (width + 767) // 768   # 向上取整
+    tiles_height = (height + 767) // 768
+    return tiles_width * tiles_height * IMAGE_TOKEN_BASE
+
+# 影片 Token 轉換率（每秒約 258 tokens）
+VIDEO_TOKEN_PER_SECOND = 258
+
+# 音訊 Token 轉換率（每秒約 32 tokens）
+AUDIO_TOKEN_PER_SECOND = 32
 
 
 class PricingCalculator:
-    """即時計價計算器"""
+    """
+    即時計價計算器
 
-    def __init__(self):
+    功能：
+    - 計算 Gemini 文字/多模態 token 成本
+    - 計算 Imagen 圖片生成成本
+    - 計算 Gemini + Imagen 組合成本
+    - 預算控制與警告
+    - 成本追蹤與統計
+
+    設計原則：
+    - 完全獨立,不依賴 gemini_chat.py
+    - 提供清晰的公開接口供外部調用
+    - 內部管理所有計價邏輯
+    """
+
+    def __init__(self, enable_budget_control: bool = False,
+                 daily_limit_usd: float = 5.0,
+                 monthly_limit_usd: float = 100.0):
+        """
+        初始化計價計算器
+
+        Args:
+            enable_budget_control: 是否啟用預算控制
+            daily_limit_usd: 每日預算上限（美元）
+            monthly_limit_usd: 每月預算上限（美元）
+        """
         self.total_cost = 0.0
         self.session_start = datetime.now()
         self.transactions = []
+
+        # 預算控制
+        self.enable_budget_control = enable_budget_control
+        self.daily_limit_usd = daily_limit_usd
+        self.monthly_limit_usd = monthly_limit_usd
+        self.daily_cost = 0.0
+        self.monthly_cost = 0.0
+        self.last_reset_date = datetime.now().date()
+        self.last_reset_month = datetime.now().strftime('%Y-%m')
+        self.budget_warnings_sent = set()
 
     def get_model_pricing(self, model_name: str) -> Dict:
         """
@@ -398,6 +496,298 @@ class PricingCalculator:
 
         return total_cost, details
 
+    def calculate_multimodal_cost(
+        self,
+        model_name: str,
+        prompt_tokens: int,
+        images: Optional[List[Tuple[int, int]]] = None,
+        video_seconds: float = 0,
+        audio_seconds: float = 0,
+        output_tokens: int = 0,
+        thinking_tokens: int = 0
+    ) -> Tuple[float, Dict]:
+        """
+        計算多模態請求成本（Gemini Vision/Audio）
+
+        支援：
+        - 文字 + 圖片
+        - 文字 + 影片
+        - 文字 + 音訊
+        - 組合多種模態
+
+        Args:
+            model_name: Gemini 模型名稱
+            prompt_tokens: 文字提示 token 數
+            images: 圖片列表 [(寬, 高), ...] 或 None
+            video_seconds: 影片秒數
+            audio_seconds: 音訊秒數
+            output_tokens: 輸出 token 數
+            thinking_tokens: 思考模式 token 數（僅特定模型）
+
+        Returns:
+            (總成本, 詳細資訊)
+
+        Examples:
+            # 文字 + 1 張圖片
+            cost, details = calc.calculate_multimodal_cost(
+                model_name="gemini-2.5-flash",
+                prompt_tokens=100,
+                images=[(1920, 1080)],  # 1 張 Full HD 圖片
+                output_tokens=200
+            )
+
+            # 文字 + 影片
+            cost, details = calc.calculate_multimodal_cost(
+                model_name="gemini-2.5-pro",
+                prompt_tokens=50,
+                video_seconds=30,  # 30 秒影片
+                output_tokens=500
+            )
+        """
+        # 計算圖片 token
+        image_tokens = 0
+        if images:
+            for width, height in images:
+                image_tokens += calculate_image_tokens(width, height)
+
+        # 計算影片 token
+        video_tokens = int(video_seconds * VIDEO_TOKEN_PER_SECOND)
+
+        # 計算音訊 token
+        audio_tokens = int(audio_seconds * AUDIO_TOKEN_PER_SECOND)
+
+        # 總輸入 token
+        total_input_tokens = prompt_tokens + image_tokens + video_tokens + audio_tokens
+
+        # 使用現有的文字計價方法
+        total_cost, text_details = self.calculate_text_cost(
+            model_name=model_name,
+            input_tokens=total_input_tokens,
+            output_tokens=output_tokens,
+            thinking_tokens=thinking_tokens
+        )
+
+        # 擴展詳細資訊
+        details = {
+            **text_details,
+            'prompt_tokens': prompt_tokens,
+            'image_tokens': image_tokens,
+            'image_count': len(images) if images else 0,
+            'video_tokens': video_tokens,
+            'video_seconds': video_seconds,
+            'audio_tokens': audio_tokens,
+            'audio_seconds': audio_seconds,
+            'total_input_tokens': total_input_tokens,
+        }
+
+        return total_cost, details
+
+    def calculate_gemini_imagen_combo_cost(
+        self,
+        gemini_model: str,
+        imagen_model: str,
+        analysis_prompt_tokens: int,
+        source_images: Optional[List[Tuple[int, int]]] = None,
+        analysis_output_tokens: int = 500,
+        number_of_generated_images: int = 1
+    ) -> Tuple[float, Dict]:
+        """
+        計算 Gemini Vision + Imagen 組合創作成本
+
+        流程：
+        1. Gemini Vision 分析原圖 (多模態成本)
+        2. Imagen 生成新圖片 (圖片生成成本)
+
+        Args:
+            gemini_model: Gemini 模型 (如 'gemini-2.5-flash')
+            imagen_model: Imagen 模型 (如 'imagen-3.0-fast-generate-001')
+            analysis_prompt_tokens: 分析提示 token 數
+            source_images: 原始圖片尺寸列表
+            analysis_output_tokens: Gemini 分析輸出 token 數（預估）
+            number_of_generated_images: 要生成的圖片數量
+
+        Returns:
+            (總成本, 詳細資訊)
+
+        Example:
+            # 分析 1 張圖片 + 生成 1 張新圖片
+            cost, details = calc.calculate_gemini_imagen_combo_cost(
+                gemini_model="gemini-2.5-flash",
+                imagen_model="imagen-4.0-fast-generate-001",
+                analysis_prompt_tokens=150,
+                source_images=[(1920, 1080)],
+                analysis_output_tokens=500,
+                number_of_generated_images=1
+            )
+        """
+        # Step 1: Gemini Vision 分析成本
+        gemini_cost, gemini_details = self.calculate_multimodal_cost(
+            model_name=gemini_model,
+            prompt_tokens=analysis_prompt_tokens,
+            images=source_images,
+            output_tokens=analysis_output_tokens
+        )
+
+        # Step 2: Imagen 生成成本
+        imagen_cost, imagen_details = self.calculate_image_generation_cost(
+            model_name=imagen_model,
+            number_of_images=number_of_generated_images
+        )
+
+        # 總成本
+        total_cost = gemini_cost + imagen_cost
+
+        # 組合詳細資訊
+        details = {
+            'gemini_analysis_cost': gemini_cost,
+            'gemini_details': gemini_details,
+            'imagen_generation_cost': imagen_cost,
+            'imagen_details': imagen_details,
+            'total_cost': total_cost,
+            'operation': 'gemini_imagen_combo'
+        }
+
+        # 記錄組合交易
+        transaction = {
+            'timestamp': datetime.now(),
+            'type': 'gemini_imagen_combo',
+            'gemini_model': gemini_model,
+            'imagen_model': imagen_model,
+            'gemini_cost': gemini_cost,
+            'imagen_cost': imagen_cost,
+            'total_cost': total_cost
+        }
+        self.transactions.append(transaction)
+
+        return total_cost, details
+
+    def check_budget(self, estimated_cost: float) -> Tuple[bool, str, Dict]:
+        """
+        檢查預算是否足夠
+
+        Args:
+            estimated_cost: 預估成本（美元）
+
+        Returns:
+            (是否可執行, 警告訊息, 預算狀態)
+
+        Example:
+            can_proceed, warning, status = calc.check_budget(0.05)
+            if not can_proceed:
+                print(safe_t('pricing.budget_insufficient', fallback="預算不足：{warning}", warning=warning))
+                return
+            if warning:
+                print(safe_t('pricing.budget_warning_prefix', fallback="警告：{warning}", warning=warning))
+        """
+        if not self.enable_budget_control:
+            return True, "", {}
+
+        # 重置每日/每月計數
+        self._reset_budget_if_needed()
+
+        # 預估執行後的成本
+        projected_daily = self.daily_cost + estimated_cost
+        projected_monthly = self.monthly_cost + estimated_cost
+
+        # 檢查每日預算
+        if projected_daily > self.daily_limit_usd:
+            warning = safe_t('pricing.budget_exceeded_daily',
+                           fallback="超過每日預算：${projected} > ${limit}",
+                           projected=f"{projected_daily:.4f}",
+                           limit=f"{self.daily_limit_usd:.2f}")
+            status = self.get_budget_status()
+            return False, warning, status
+
+        # 檢查每月預算
+        if projected_monthly > self.monthly_limit_usd:
+            warning = safe_t('pricing.budget_exceeded_monthly',
+                           fallback="超過每月預算：${projected} > ${limit}",
+                           projected=f"{projected_monthly:.4f}",
+                           limit=f"{self.monthly_limit_usd:.2f}")
+            status = self.get_budget_status()
+            return False, warning, status
+
+        # 檢查警告閾值（80%）
+        warning_threshold = 0.8
+        warning_msg = ""
+
+        if projected_daily > self.daily_limit_usd * warning_threshold:
+            usage_percent = (projected_daily / self.daily_limit_usd * 100)
+            warning_msg = safe_t('pricing.budget_usage_daily',
+                               fallback="已使用 {percent}% 每日預算",
+                               percent=f"{usage_percent:.1f}")
+
+        status = self.get_budget_status()
+        return True, warning_msg, status
+
+    def _reset_budget_if_needed(self):
+        """內部方法：檢查並重置每日/每月預算計數"""
+        today = datetime.now().date()
+        current_month = datetime.now().strftime('%Y-%m')
+
+        # 重置每日
+        if today != self.last_reset_date:
+            self.daily_cost = 0.0
+            self.last_reset_date = today
+            self.budget_warnings_sent.clear()
+
+        # 重置每月
+        if current_month != self.last_reset_month:
+            self.monthly_cost = 0.0
+            self.last_reset_month = current_month
+
+    def record_actual_cost(self, actual_cost: float):
+        """
+        記錄實際成本到預算追蹤
+
+        在請求完成後調用,更新每日/每月成本
+
+        Args:
+            actual_cost: 實際成本（美元）
+        """
+        if self.enable_budget_control:
+            self._reset_budget_if_needed()
+            self.daily_cost += actual_cost
+            self.monthly_cost += actual_cost
+
+    def get_budget_status(self) -> Dict:
+        """
+        取得預算使用狀態
+
+        Returns:
+            預算狀態字典
+
+        Example:
+            status = calc.get_budget_status()
+            print(safe_t('pricing.today_usage', fallback="今日使用：{percent}%", percent=f"{status['daily_usage_percent']:.1f}"))
+        """
+        if not self.enable_budget_control:
+            return {
+                'enabled': False,
+                'daily_cost': 0,
+                'daily_limit': 0,
+                'daily_usage_percent': 0,
+                'monthly_cost': 0,
+                'monthly_limit': 0,
+                'monthly_usage_percent': 0
+            }
+
+        self._reset_budget_if_needed()
+
+        return {
+            'enabled': True,
+            'daily_cost': self.daily_cost,
+            'daily_limit': self.daily_limit_usd,
+            'daily_usage_percent': (self.daily_cost / self.daily_limit_usd * 100)
+                                    if self.daily_limit_usd > 0 else 0,
+            'daily_remaining': max(0, self.daily_limit_usd - self.daily_cost),
+            'monthly_cost': self.monthly_cost,
+            'monthly_limit': self.monthly_limit_usd,
+            'monthly_usage_percent': (self.monthly_cost / self.monthly_limit_usd * 100)
+                                      if self.monthly_limit_usd > 0 else 0,
+            'monthly_remaining': max(0, self.monthly_limit_usd - self.monthly_cost),
+        }
+
     def calculate_video_understanding_cost(
         self,
         model_name: str,
@@ -409,7 +799,7 @@ class PricingCalculator:
         """
         計算影片理解成本
 
-        影片會被處理成 frames + audio，每個 frame 算作 token
+        影片會被處理成 frames + audio,每個 frame 算作 token
 
         Args:
             model_name: 模型名稱
@@ -422,7 +812,7 @@ class PricingCalculator:
             (總成本, 詳細資訊)
         """
         # 估算影片 token 數
-        # 根據 Gemini 文檔，1秒影片 ≈ 258 tokens (1 FPS)
+        # 根據 Gemini 文檔,1秒影片 ≈ 258 tokens (1 FPS)
         tokens_per_second = 258
         video_tokens = int(video_duration_seconds * tokens_per_second)
 
@@ -465,8 +855,8 @@ class PricingCalculator:
 
         Args:
             target_duration: 目標影片時長（秒）
-            segment_duration: 每段時長（秒），預設 8 秒
-            planning_model: 計畫生成模型，預設 gemini-2.0-flash-exp
+            segment_duration: 每段時長（秒）,預設 8 秒
+            planning_model: 計畫生成模型,預設 gemini-2.0-flash-exp
             veo_model: Veo 模型名稱
             estimated_planning_tokens: 估算的計畫生成 token 數（輸入+輸出）
 
@@ -477,7 +867,7 @@ class PricingCalculator:
         num_segments = (target_duration + segment_duration - 1) // segment_duration
 
         # 1. Gemini 分段計畫成本
-        # 估算：輸入約 500 tokens，輸出約 1500 tokens（JSON 格式）
+        # 估算：輸入約 500 tokens,輸出約 1500 tokens（JSON 格式）
         planning_input_tokens = 500
         planning_output_tokens = estimated_planning_tokens - planning_input_tokens
 
@@ -512,7 +902,7 @@ class PricingCalculator:
         }
         self.transactions.append(transaction)
 
-        # 注意：因為已經在子方法中累加了，這裡不需要再累加
+        # 注意：因為已經在子方法中累加了,這裡不需要再累加
         # 但我們需要扣除重複累加的部分
         self.total_cost -= (planning_cost + veo_cost)
         self.total_cost += total_cost
@@ -748,7 +1138,7 @@ def calculate_cache_savings(
     # 不使用快取的成本（每次查詢都要付全額）
     without_cache = base_cost_per_token * cached_tokens * query_count
 
-    # 使用快取的成本（第一次全額，後續打折）
+    # 使用快取的成本（第一次全額,後續打折）
     first_query_cost = base_cost_per_token * cached_tokens
     subsequent_queries_cost = base_cost_per_token * cached_tokens * (query_count - 1) * (1 - discount)
     with_cache = first_query_cost + subsequent_queries_cost

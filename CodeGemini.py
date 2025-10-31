@@ -1087,7 +1087,7 @@ class PricingDisplay:
             'input': 0.15625,
             'output': 0.625,
         },
-        'gemini-2.5-flash-8b': {
+        'gemini-2.5-flash-lite': {
             'input': 0.03125,
             'output': 0.125,
         },
@@ -1315,7 +1315,7 @@ class PricingDisplay:
             if pricing['cost_per_1000'] == 0:
                 print(safe_t("codegemini.pricing.free", fallback="  價格：✅ 完全免費"))
             else:
-                print(safe_t("codegemini.pricing.cost_per_query", fallback="  價格：${cost}/1000 queries ").format(cost=pricing['cost_per_1000']) 
+                print(safe_t("codegemini.pricing.cost_per_query", fallback="  價格：${cost}/1000 queries ").format(cost=pricing['cost_per_1000']) +
                       f"(NT${pricing['cost_per_1000'] * self.exchange_rate:.2f}/1000 queries)")
 
             if pricing['free_tier'] != float('inf'):

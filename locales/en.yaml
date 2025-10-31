@@ -66,12 +66,181 @@ common:
   lines: lines
   files: files
   bytes: bytes
+
+  # Status verbs (for media menu, etc.)
+  generating: "Generating"
+  analyzing: "Analyzing"
+  saving: "Saving"
+
+# ============================================================================
+# Multimedia Menu Category (media_menu)
+# ============================================================================
+media_menu:
+  # Menu Title
+  title: "[bold COLOR_MACARON_PURPLE]🎬 Multimedia Creation Center[/bold COLOR_MACARON_PURPLE]"
+
+  # Section Titles
+  section:
+    ai_generation: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI Generation[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    video_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> Video Processing[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    audio_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> Audio Processing[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    ai_analysis: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI Analysis Tools[/bold COLOR_MACARON_PURPLE_LIGHT]"
+
+  # Menu Items
+  item:
+    # AI Generation
+    flow_video: "  [1] Flow Video Generation (1080p Long Video, Natural Language)"
+    veo_video: "  [2] Veo Video Generation (8-second Quick Generation)"
+    imagen_generate: "  [12] Imagen Image Generation (Text-to-Image)"
+    vision_imagen: "  [13] Smart Image Creation (Gemini Vision + Imagen)"
+
+    # Video Processing
+    video_preprocess: "  [3] Video Preprocessing (Split/Keyframes/Info)"
+    video_concat: "  [4] Video Concatenation (Lossless)"
+    video_trim: "  [15] Time Trimming (Lossless)"
+    video_filter: "  [16] Filter Effects (7 Styles)"
+    video_speed: "  [17] Speed Adjustment (Fast/Slow Motion)"
+    video_watermark: "  [18] Add Watermark"
+    subtitle_generate: "  [19] Generate Subtitles (Speech Recognition + Translation)"
+    subtitle_burn: "  [20] Burn Subtitles (Embed to Video)"
+
+    # Audio Processing
+    audio_extract: "  [7] Extract Audio"
+    audio_merge: "  [8] Merge Audio"
+    audio_volume: "  [9] Volume Adjustment"
+    audio_background: "  [10] Background Music"
+    audio_fade: "  [11] Fade In/Out"
+
+    # AI Analysis
+    media_analyzer: "  [0] Media Analyzer (Image/Video AI Analysis)"
+    video_chat: "  [21] Video Interactive Chat (Upload & Continuous Q&A)"
+    video_analysis: "  [5] Video Content Analysis"
+    image_analysis: "  [6] Image Content Analysis"
+
+  # Combined Items
+  audio_group: "  [7] Extract Audio  [8] Merge Audio  [9] Volume Adjustment"
+  audio_group2: "  [10] Background Music  [11] Fade In/Out"
+  analysis_group: "  [5] Video Content Analysis  [6] Image Content Analysis"
+
+  # Navigation
+  back: "\n  [99] Return to Main Menu\n"
+
+# ============================================================================
+# Slash Command System (slash_commands)
+# All interactive commands starting with /
+# ============================================================================
+slash_commands:
+  # Basic Commands
+  help:
+    cmd: "/help"
+    desc: "📖 Show detailed help system"
+
+  exit:
+    cmd: "/exit"
+    desc: "🚪 Exit program"
+
+  quit:
+    cmd: "/quit"
+    desc: "🚪 Exit program"
+
+  clear:
+    cmd: "/clear"
+    desc: "🗑️  Clear chat history"
+
+  # Settings
+  lang:
+    cmd: "/lang"
+    desc: "🌐 Switch language (zh-TW/en/ja/ko)"
+
+  model:
+    cmd: "/model"
+    desc: "🤖 Switch AI model"
+
+  cache:
+    cmd: "/cache"
+    desc: "💾 Cache management menu"
+
+  config:
+    cmd: "/config"
+    desc: "⚙️  Configuration management"
+
+  # Media Functions
+  media:
+    cmd: "/media"
+    desc: "🎬 Media functions menu"
+
+  image:
+    cmd: "/image"
+    desc: "🖼️  Image analysis"
+
+  video:
+    cmd: "/video"
+    desc: "🎥 Video analysis"
+
+  # Memory Management
+  clear_memory:
+    cmd: "/clear-memory"
+    desc: "🧹 Clear memory"
+
+  memory_stats:
+    cmd: "/memory-stats"
+    desc: "📊 Memory statistics"
+
+  help_memory:
+    cmd: "/help-memory"
+    desc: "ℹ️  Memory management help"
+
+  # Checkpoint System
+  checkpoints:
+    cmd: "/checkpoints"
+    desc: "📌 List all checkpoints"
+
+  checkpoint:
+    cmd: "/checkpoint"
+    desc: "💾 Create manual checkpoint"
+
+  rewind:
+    cmd: "/rewind"
+    desc: "⏪ Rewind to checkpoint"
+
+  help_checkpoint:
+    cmd: "/help-checkpoint"
+    desc: "ℹ️  Checkpoint system help"
+
+  # Chat History
+  search:
+    cmd: "/search"
+    desc: "🔍 Search chat history"
+
+  history:
+    cmd: "/history"
+    desc: "📜 View chat history"
+
+  export:
+    cmd: "/export"
+    desc: "📤 Export conversation"
+
+  stats:
+    cmd: "/stats"
+    desc: "📊 Conversation statistics"
+
+  # Debug Tools
+  debug:
+    cmd: "/debug"
+    desc: "🐛 Debug tools"
+
+  test:
+    cmd: "/test"
+    desc: "🧪 Test tools"
+
 chat:
   welcome: Welcome to ChatGemini!
   welcome_back: Welcome back!
   exit_message: Thank you for using, goodbye!
   goodbye: Goodbye!
   user_prompt: You
+  user_prompt_with_hint: "You ([ for params)"
+  user_prompt_with_hint_detailed: "You (press [ for think/max params)"
   model_prompt: Model
   system_prompt: System
   assistant_prompt: Assistant
@@ -93,6 +262,7 @@ chat:
 
     # Feature Menus
     cache_desc: "Cache management menu"
+    config_desc: "Configuration management (database settings)"
     media_desc: "Media functions menu"
     cli_desc: "Gemini CLI management tool"
     debug_desc: "Debug and test tools"
@@ -111,6 +281,7 @@ chat:
     # Conversation History
     search_desc: "Search conversation history"
     history_desc: "View conversation history"
+    export_desc: "Export conversation (json/md/txt)"
     stats_desc: "Conversation statistics"
 
     # Quick Syntax
@@ -246,6 +417,16 @@ pricing:
   scene_detection_cost: "[dim]💰 Scene detection cost: NT${twd} (${usd} USD)[/dim]"
   tokens_detail: "[dim]   Input: {input:,} tokens, Output: {output:,} tokens, Thinking: {thinking:,} tokens[/dim]"
   accumulated_cost: "[dim]   Accumulated cost: NT${twd} (${usd} USD)[/dim]"
+
+  # Budget control warning messages
+  budget_exceeded_daily: "Daily budget exceeded: ${projected} > ${limit}"
+  budget_exceeded_monthly: "Monthly budget exceeded: ${projected} > ${limit}"
+  budget_usage_daily: "Used {percent}% of daily budget"
+  budget_insufficient: "Insufficient budget: {warning}"
+  budget_warning_prefix: "Warning: {warning}"
+
+  # Budget control status
+  today_usage: "Today's usage: {percent}%"
 
 translator:
   engine_ready: "✅ deep-translator ready (main engine, completely free)"
@@ -407,7 +588,12 @@ help:
   need_help: Need help? Type /help to see available commands
   type_help: Type /help [topic] for detailed info
   no_help_available: No help available for this topic
-media:
+
+# ============================================================================
+# Media Common Terms (通用媒體詞彙)
+# Renamed from media_menu to avoid conflict with menu items (line 78)
+# ============================================================================
+media_common:
   image: Image
   image_analysis: Image analysis
   image_generation: Image generation
@@ -549,7 +735,7 @@ memory:
 model:
   gemini_pro: Gemini Pro
   gemini_flash: Gemini Flash
-  gemini_flash_8b: Gemini Flash 8B
+  gemini_flash_lite: Gemini Flash Lite
   loading: Loading model
   loaded: Model loaded
   switching: Switching model
@@ -565,7 +751,7 @@ model:
   col_name: Model Name
   col_thinking_range: Thinking Token Range
   col_price_range: Price Range (NT$)
-  select_prompt: Please enter option (1-3 or 0)
+  select_prompt: Please enter option (1-{count} or 0)
   validation_warning: ⚠️  Cannot validate model availability, will use your input directly
   enter_name: Please enter model name
   name_empty: Model name cannot be empty, please try again
@@ -2808,3 +2994,83 @@ format:
   unit:
     segment: " segment(s)"
     second: " second(s)"
+
+# CodeGemini MCP Detector
+mcp:
+  detector:
+    postgresql_desc: "PostgreSQL database operations"
+    puppeteer_desc: "Web automation and scraping"
+    slack_desc: "Slack team collaboration"
+    drive_desc: "Google Drive file management"
+    contains_keywords: "Contains keywords: {keywords}"
+    match_patterns: "Matched {count} patterns"
+    match_rule: "Matched rule"
+    rule_added: "Added custom rule: {name}"
+    rule_removed: "Removed rule: {name}"
+    rules_list: "MCP Server Detection Rules"
+    description: "Description"
+    keywords_count: "Keywords Count"
+    patterns_count: "Patterns Count"
+    confidence_weight: "Confidence Weight"
+    demo_title: "MCP Server Smart Detector Demo"
+    test: "Test"
+    detected_servers: "Detected {count} relevant servers"
+    confidence: "Confidence"
+    no_servers_detected: "No MCP servers detected"
+
+# CodeGemini Templates
+templates:
+  not_list_warning: "Warning: '{name}' is not a list, loop will be skipped"
+  missing_variables: "Warning: Missing variables: {vars}"
+  test_title: "CodeGemini Template Engine Test"
+  test1: "Test 1: Simple Variable Interpolation"
+  test2: "Test 2: Default Values"
+  test3: "Test 3: Conditional Logic"
+  test4: "Test 4: Loops"
+  test5: "Test 5: Template Library"
+  result: "Result"
+  premium_member: "Premium Member"
+  normal_member: "Normal Member"
+  all_tests_complete: "All tests complete"
+
+# CodeGemini Test Generator
+test_gen:
+  analyzing_file: "Analyzing file: {path}"
+  analysis_complete: "Analysis complete"
+  functions: "Functions"
+  classes: "Classes"
+  analysis_failed: "Analysis failed: {error}"
+  generating_tests: "Generating test code..."
+  unsupported_framework: "Unsupported test framework: {framework}"
+  test_file_saved: "Test file saved: {path}"
+  title: "CodeGemini Test Generator"
+  usage: "Usage"
+  examples: "Examples"
+  generated_code: "Generated Test Code"
+
+# CodeGemini Doc Generator
+doc_gen:
+  scanning_project: "Scanning project: {path}"
+  found_files: "Found {count} Python files"
+  analysis_complete: "Analysis complete: {count} modules"
+  analysis_warning: "Warning: Cannot analyze {path} - {error}"
+  generating_readme: "Generating README.md..."
+  readme_saved: "README saved: {path}"
+  generating_api: "Generating API documentation..."
+  api_saved: "API documentation saved: {path}"
+  title: "CodeGemini Documentation Generator"
+  usage: "Usage"
+  examples: "Examples"
+  readme_title: "README.md"
+
+# CodeGemini Codebase Embedding
+embedding:
+  faiss_initialized: "✓ FAISS index initialized (dimension: {dim})"
+  cache_enabled: "✓ EmbeddingCache enabled (maxsize={size})"
+  cache_unloaded: "✓ EmbeddingCache unloaded (freed memory: ~{mem}MB)"
+  cache_reloaded: "✓ EmbeddingCache re-enabled"
+  db_initialized: "✓ VectorDatabase initialized: {path} (FAISS enabled)"
+
+# Common
+common:
+  unit: "item(s)"

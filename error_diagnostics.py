@@ -31,6 +31,7 @@ class Solution:
     manual_steps: Optional[List[str]] = None  # 手動步驟
     priority: int = 1  # 優先級（1=最高）
     auto_fixable: bool = False  # 是否可自動修復
+    fix_function: Optional[callable] = None  # 自動修復函數
 
 
 class ErrorDiagnostics:
@@ -95,6 +96,22 @@ class ErrorDiagnostics:
         # 8. 記憶體不足
         elif "out of memory" in error_str.lower() or "cannot allocate" in error_str.lower():
             solutions = self._solve_memory_issue(context)
+
+        # 9. Python 參數錯誤（TypeError: unexpected keyword argument）
+        elif "unexpected keyword argument" in error_str or isinstance(error, TypeError):
+            solutions = self._solve_python_argument_error(error_str, context)
+
+        # 10. Python 導入錯誤（ModuleNotFoundError, ImportError）
+        elif "No module named" in error_str or isinstance(error, (ModuleNotFoundError, ImportError)):
+            solutions = self._solve_python_import_error(error_str, context)
+
+        # 11. Python 屬性錯誤（AttributeError）
+        elif "has no attribute" in error_str or isinstance(error, AttributeError):
+            solutions = self._solve_python_attribute_error(error_str, context)
+
+        # 12. API 相關錯誤
+        elif any(kw in error_str for kw in ["API", "quota", "rate limit", "401", "403", "429", "500", "503"]):
+            solutions = self._solve_api_error(error_str, context)
 
         # 生成錯誤訊息
         error_message = self._format_error_message(error, operation, context)
@@ -368,6 +385,222 @@ class ErrorDiagnostics:
 
         return solutions
 
+    def _solve_python_argument_error(self, error_str: str, context: dict) -> List[Solution]:
+        """解決 Python 參數錯誤"""
+        solutions = []
+
+        # 分析錯誤訊息，提取不支援的參數名稱
+        if "unexpected keyword argument" in error_str:
+            # 提取參數名稱，例如：got an unexpected keyword argument 'flush'
+            import re
+            match = re.search(r"unexpected keyword argument '(\w+)'", error_str)
+            param_name = match.group(1) if match else "unknown"
+
+            # 提取函數名稱
+            func_match = re.search(r"(\w+\.?\w+)\(\)", error_str)
+            func_name = func_match.group(1) if func_match else "函數"
+
+            solutions.append(Solution(
+                title=f"移除不支援的參數 '{param_name}'",
+                description=f"{func_name} 不支援 '{param_name}' 參數，這通常是因為版本不相容",
+                manual_steps=[
+                    f"1. 檢查 {func_name} 的版本和文檔",
+                    f"2. 移除或替換 '{param_name}' 參數",
+                    "3. 或升級相關套件到支援該參數的版本"
+                ],
+                priority=1
+            ))
+
+            # 針對 Rich Console.print(flush=True) 的特殊處理
+            if "console.print" in error_str.lower() and param_name == "flush":
+                def fix_console_flush():
+                    """自動修復 console.print(flush=True) 問題"""
+                    import re
+                    import glob
+
+                    # 搜尋所有 Python 檔案
+                    files_modified = []
+                    pattern = r'console\.print\(([^)]*),\s*flush=True\)'
+
+                    for py_file in glob.glob('**/*.py', recursive=True):
+                        if 'venv' in py_file or '__pycache__' in py_file:
+                            continue
+
+                        try:
+                            with open(py_file, 'r', encoding='utf-8') as f:
+                                content = f.read()
+
+                            # 檢查是否有需要修復的地方
+                            if re.search(pattern, content):
+                                # 移除 flush=True 參數
+                                new_content = re.sub(pattern, r'console.print(\1)', content)
+
+                                with open(py_file, 'w', encoding='utf-8') as f:
+                                    f.write(new_content)
+
+                                files_modified.append(py_file)
+                        except Exception as e:
+                            console.print(f"[yellow]⚠️  無法處理 {py_file}: {e}[/yellow]")
+
+                    return files_modified
+
+                solutions.append(Solution(
+                    title="Rich Console 不支援 flush 參數",
+                    description="Rich 的 console.print() 會自動處理輸出緩衝，不需要 flush 參數",
+                    manual_steps=[
+                        "1. 移除 console.print() 中的 flush=True 參數",
+                        "2. 如需立即輸出，Rich 會自動處理",
+                        "3. 或改用標準 print() 函數（支援 flush 參數）"
+                    ],
+                    command="# 自動搜尋並修復所有 console.print(flush=True)",
+                    priority=1,
+                    auto_fixable=True,
+                    fix_function=fix_console_flush
+                ))
+
+        return solutions
+
+    def _solve_python_import_error(self, error_str: str, context: dict) -> List[Solution]:
+        """解決 Python 導入錯誤"""
+        solutions = []
+
+        # 提取模組名稱
+        import re
+        match = re.search(r"No module named '(\S+)'", error_str)
+        module_name = match.group(1) if match else "unknown"
+
+        # 特殊處理：config_manager 導入錯誤（ChatGemini 內部模組）
+        if module_name == "config_manager" and context.get('command') == 'config':
+            solutions.append(Solution(
+                title="CodeGemini 配置管理器路徑問題",
+                description="config_manager 是 CodeGemini 內部模組，應該從 CodeGemini.config_manager 導入",
+                manual_steps=[
+                    "1. 檢查 CodeGemini/ 目錄是否存在",
+                    "2. 檢查 CodeGemini/config_manager.py 是否存在",
+                    "3. 系統將自動嘗試重新載入配置管理器"
+                ],
+                priority=1,
+                auto_fixable=True
+            ))
+            return solutions
+
+        # 一般的模組導入錯誤
+        solutions.append(Solution(
+            title=f"安裝缺少的模組 '{module_name}'",
+            description=f"系統找不到模組 '{module_name}'，需要安裝",
+            command=f"pip install {module_name}",
+            priority=1,
+            auto_fixable=False
+        ))
+
+        # 常見套件的特殊處理
+        package_map = {
+            "prompt_toolkit": "prompt-toolkit",
+            "google.genai": "google-generativeai",
+            "PIL": "Pillow",
+            "cv2": "opencv-python",
+            "interactive_config_menu": "CodeGemini.config_manager"
+        }
+
+        if module_name in package_map:
+            actual_package = package_map[module_name]
+            if module_name == "interactive_config_menu":
+                solutions[0].title = "導入路徑錯誤"
+                solutions[0].description = f"'{module_name}' 應該從 '{actual_package}' 導入"
+                solutions[0].command = None
+                solutions[0].manual_steps = [
+                    f"將 'from {module_name} import ...' 改為 'from {actual_package} import ...'"
+                ]
+            else:
+                solutions[0].command = f"pip install {actual_package}"
+                solutions[0].description = f"模組 '{module_name}' 需要安裝套件 '{actual_package}'"
+
+        return solutions
+
+    def _solve_python_attribute_error(self, error_str: str, context: dict) -> List[Solution]:
+        """解決 Python 屬性錯誤"""
+        solutions = []
+
+        # 提取物件和屬性名稱
+        import re
+        match = re.search(r"'(\w+)' object has no attribute '(\w+)'", error_str)
+        if match:
+            object_type, attr_name = match.groups()
+
+            solutions.append(Solution(
+                title=f"'{object_type}' 物件缺少屬性 '{attr_name}'",
+                description="這可能是因為版本不相容或 API 變更",
+                manual_steps=[
+                    "1. 檢查相關套件的版本",
+                    "2. 查看最新的 API 文檔",
+                    "3. 確認屬性名稱是否正確",
+                    "4. 考慮更新或降級相關套件"
+                ],
+                priority=1
+            ))
+
+        return solutions
+
+    def _solve_api_error(self, error_str: str, context: dict) -> List[Solution]:
+        """解決 API 相關錯誤"""
+        solutions = []
+
+        # API 金鑰錯誤
+        if "401" in error_str or "unauthorized" in error_str.lower():
+            solutions.append(Solution(
+                title="API 金鑰無效",
+                description="請檢查 API 金鑰是否正確設定",
+                manual_steps=[
+                    "1. 確認環境變數 GEMINI_API_KEY 已設定",
+                    "2. 檢查 API 金鑰是否正確",
+                    "3. 確認 API 金鑰尚未過期",
+                    "4. 到 https://makersuite.google.com/app/apikey 重新生成金鑰"
+                ],
+                command="echo $GEMINI_API_KEY",
+                priority=1
+            ))
+
+        # 速率限制
+        elif "429" in error_str or "rate limit" in error_str.lower():
+            solutions.append(Solution(
+                title="API 速率限制",
+                description="請求過於頻繁，需要降低請求頻率",
+                manual_steps=[
+                    "1. 等待一段時間後重試",
+                    "2. 在請求間加入延遲",
+                    "3. 考慮升級 API 配額"
+                ],
+                priority=1
+            ))
+
+        # 配額用盡
+        elif "quota" in error_str.lower() or "resource exhausted" in error_str.lower():
+            solutions.append(Solution(
+                title="API 配額已用盡",
+                description="已達到 API 使用限制",
+                manual_steps=[
+                    "1. 檢查配額使用情況",
+                    "2. 等待配額重置（通常為每分鐘或每日）",
+                    "3. 考慮升級到付費方案"
+                ],
+                priority=1
+            ))
+
+        # 伺服器錯誤
+        elif any(code in error_str for code in ["500", "503", "502", "504"]):
+            solutions.append(Solution(
+                title="API 伺服器錯誤",
+                description="Gemini API 伺服器暫時無法使用",
+                manual_steps=[
+                    "1. 等待幾分鐘後重試",
+                    "2. 檢查 Google Cloud 服務狀態",
+                    "3. 如持續發生，請回報問題"
+                ],
+                priority=1
+            ))
+
+        return solutions
+
     def _format_error_message(
         self,
         error: Exception,
@@ -390,6 +623,18 @@ class ErrorDiagnostics:
             return f"{operation}失敗：不支援的編碼格式"
         elif isinstance(error, FileNotFoundError):
             return f"{operation}失敗：找不到指定檔案"
+        elif "unexpected keyword argument" in error_str:
+            return f"{operation}失敗：函數參數不相容（可能是套件版本問題）"
+        elif "No module named" in error_str:
+            return f"{operation}失敗：缺少必要的 Python 模組"
+        elif "has no attribute" in error_str:
+            return f"{operation}失敗：API 不相容（可能是版本問題）"
+        elif any(kw in error_str for kw in ["401", "403", "API key"]):
+            return f"{operation}失敗：API 金鑰無效或權限不足"
+        elif any(kw in error_str for kw in ["429", "rate limit"]):
+            return f"{operation}失敗：API 請求頻率過高"
+        elif any(kw in error_str for kw in ["500", "503", "502", "504"]):
+            return f"{operation}失敗：API 伺服器錯誤"
         else:
             return f"{operation}失敗：{error_str}"
 
@@ -406,7 +651,7 @@ class ErrorDiagnostics:
             solutions: 解決方案列表
         """
         # 顯示錯誤訊息
-        console.print(f"\n[dim #DDA0DD]✗ {error_message}[/red]\n")
+        console.print(f"\n[dim #E8C4F0]✗ {error_message}[/red]\n")
 
         if not solutions:
             console.print("[dim]無可用的自動解決方案[/dim]")
@@ -416,16 +661,16 @@ class ErrorDiagnostics:
         solutions.sort(key=lambda s: s.priority)
 
         # 顯示解決方案
-        console.print("[#DDA0DD]💡 建議的解決方案：[/#DDA0DD]\n")
+        console.print("[#E8C4F0]💡 建議的解決方案：[/#E8C4F0]\n")
 
         for i, solution in enumerate(solutions, 1):
             # 解決方案標題
             if solution.auto_fixable:
                 icon = "🔧"
-                auto_tag = " [#DA70D6](可自動修復)[/green]"
+                auto_tag = " [#B565D8](可自動修復)[/green]"
             elif solution.command:
                 icon = "⚡"
-                auto_tag = " [#DDA0DD](一鍵執行)[/#DDA0DD]"
+                auto_tag = " [#E8C4F0](一鍵執行)[/#E8C4F0]"
             else:
                 icon = "📝"
                 auto_tag = ""
@@ -435,7 +680,7 @@ class ErrorDiagnostics:
 
             # 顯示指令
             if solution.command:
-                console.print(f"   [#DA70D6]執行指令：[/green]")
+                console.print(f"   [#B565D8]執行指令：[/green]")
                 console.print(Panel(
                     solution.command,
                     border_style="green",
@@ -444,11 +689,40 @@ class ErrorDiagnostics:
 
             # 顯示手動步驟
             if solution.manual_steps:
-                console.print(f"   [#DDA0DD]手動步驟：[/#DDA0DD]")
+                console.print(f"   [#E8C4F0]手動步驟：[/#E8C4F0]")
                 for step in solution.manual_steps:
                     console.print(f"   {step}")
 
             console.print()  # 空行
+
+        # 互動式修復提示（僅針對可自動修復的方案）
+        auto_fixable_solutions = [s for s in solutions if s.auto_fixable and s.fix_function]
+        if auto_fixable_solutions:
+            console.print("\n[#B565D8]🔧 自動修復選項：[/#B565D8]")
+            try:
+                response = input("是否要自動修復此問題？(y/n): ").strip().lower()
+                if response in ['y', 'yes', 'Y', 'YES']:
+                    # 執行第一個可自動修復的方案
+                    solution = auto_fixable_solutions[0]
+                    console.print(f"\n[#B565D8]執行修復：{solution.title}[/#B565D8]")
+
+                    try:
+                        result = solution.fix_function()
+                        if result:
+                            console.print(f"\n[#B565D8]✅ 修復完成！[/green]")
+                            if isinstance(result, list):
+                                console.print(f"   已修改 {len(result)} 個檔案：")
+                                for file in result[:5]:  # 只顯示前 5 個
+                                    console.print(f"   - {file}")
+                                if len(result) > 5:
+                                    console.print(f"   ... 以及其他 {len(result) - 5} 個檔案")
+                        else:
+                            console.print("\n[yellow]⚠️  未找到需要修復的項目[/yellow]")
+                    except Exception as fix_error:
+                        console.print(f"\n[red]✗ 自動修復失敗：{fix_error}[/red]")
+                        console.print("[dim]請嘗試手動修復[/dim]")
+            except (KeyboardInterrupt, EOFError):
+                console.print("\n[dim]已取消自動修復[/dim]")
 
 
 def diagnose_error(
@@ -491,7 +765,7 @@ def display_error_with_solutions(
 
 if __name__ == "__main__":
     # 測試範例
-    console.print("[bold #DDA0DD]智能錯誤診斷系統 - 測試範例[/bold #DDA0DD]\n")
+    console.print("[bold #E8C4F0]智能錯誤診斷系統 - 測試範例[/bold #E8C4F0]\n")
 
     # 模擬磁碟空間不足錯誤
     error = RuntimeError("ffmpeg: Disk quota exceeded")

@@ -17,6 +17,7 @@ CodeGemini Codebase Embedding Module
 
 import logging
 import sqlite3
+from utils.i18n import safe_t
 import json
 import numpy as np
 from pathlib import Path
@@ -86,7 +87,7 @@ class FaissIndexManager:
         self.next_id = 0
         self._lock = threading.Lock()
 
-        logger.info(f"✓ FAISS 索引已初始化（維度: {dimension}）")
+        logger.info(safe_t("embedding.faiss_initialized", "✓ FAISS 索引已初始化（維度: {dim}）", dim=dimension))
 
     def add_vectors(self, chunk_ids: List[str], embeddings: List[List[float]]):
         """批次添加向量到索引
@@ -234,7 +235,7 @@ class EmbeddingCache:
         self._misses = 0
         self.enabled = True  # 預設啟用
 
-        logger.info(f"✓ EmbeddingCache 已啟用（maxsize={maxsize}）")
+        logger.info(safe_t("embedding.cache_enabled", "✓ EmbeddingCache 已啟用（maxsize={size}）", size=maxsize))
 
     def _generate_cache_key(self, text: str) -> str:
         """生成快取鍵（使用 SHA256 hash）"""
@@ -276,13 +277,14 @@ class EmbeddingCache:
         with self._lock:
             self._cache.clear()
             self.enabled = False
-            logger.info(f"✓ EmbeddingCache 已卸載（釋放記憶體: ~{self.maxsize * 768 * 4 / 1024 / 1024:.1f}MB）")
+            mem_mb = self.maxsize * 768 * 4 / 1024 / 1024
+            logger.info(safe_t("embedding.cache_unloaded", "✓ EmbeddingCache 已卸載（釋放記憶體: ~{mem}MB）", mem=f"{mem_mb:.1f}"))
 
     def reload(self):
         """重新啟用快取"""
         with self._lock:
             self.enabled = True
-            logger.info("✓ EmbeddingCache 已重新啟用")
+            logger.info(safe_t("embedding.cache_reloaded", "✓ EmbeddingCache 已重新啟用"))
 
     def get_stats(self) -> Dict[str, Any]:
         """獲取快取統計資訊"""
@@ -337,7 +339,7 @@ class VectorDatabase:
         # 從 SQLite 載入現有向量到 FAISS
         self._rebuild_faiss_index()
 
-        logger.info(f"✓ VectorDatabase 已初始化: {self.db_path} (FAISS 已啟用)")
+        logger.info(safe_t("embedding.db_initialized", "✓ VectorDatabase 已初始化: {path} (FAISS 已啟用)", path=self.db_path))
 
     def _create_tables(self):
         """建立資料表"""

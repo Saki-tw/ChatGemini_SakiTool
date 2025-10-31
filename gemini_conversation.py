@@ -62,7 +62,7 @@ class ConversationManager:
         添加訊息到對話歷史
 
         Args:
-            message: 訊息字典，格式：
+            message: 訊息字典,格式：
                 {
                     "role": "user" | "assistant" | "system",
                     "content": "訊息內容",
@@ -80,7 +80,7 @@ class ConversationManager:
         """
         存檔舊對話並清理記憶體
 
-        策略：保留最新的 50 條，存檔前 50 條
+        策略：保留最新的 50 條,存檔前 50 條
         """
         archive_count = len(self.history) - 50
 
@@ -90,7 +90,7 @@ class ConversationManager:
         # 取出要存檔的訊息
         to_archive = self.history[:archive_count]
 
-        # 寫入存檔檔案（JSONL 格式，每行一條訊息）
+        # 寫入存檔檔案（JSONL 格式,每行一條訊息）
         try:
             with open(self.archive_file, 'a', encoding='utf-8') as f:
                 for msg in to_archive:
@@ -148,7 +148,7 @@ class ConversationManager:
 
         Args:
             keyword: 搜尋關鍵字
-            role: 篩選角色 ("user", "assistant", "system")，None=所有角色
+            role: 篩選角色 ("user", "assistant", "system"),None=所有角色
             limit: 最大返回數量
 
         Returns:
@@ -171,7 +171,7 @@ class ConversationManager:
             if isinstance(content, str) and keyword_lower in content.lower():
                 results.append(msg.copy())
 
-        # 如果還需要更多結果，搜尋存檔
+        # 如果還需要更多結果,搜尋存檔
         if len(results) < limit and os.path.exists(self.archive_file):
             try:
                 with open(self.archive_file, 'r', encoding='utf-8') as f:

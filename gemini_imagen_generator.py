@@ -43,7 +43,7 @@ OUTPUT_DIR = str(get_image_dir('imagen'))
 
 def select_model() -> str:
     """選擇 Imagen 模型"""
-    console.print(safe_t('common.message', fallback='\n[#DDA0DD]請選擇 Imagen 模型：[/#DDA0DD]'))
+    console.print(safe_t('common.message', fallback='\n[#E8C4F0]請選擇 Imagen 模型：[/#E8C4F0]'))
     for key, (model_name, description) in MODELS.items():
         console.print(f"  {key}. {description}")
 
@@ -52,7 +52,7 @@ def select_model() -> str:
     if choice in MODELS:
         return MODELS[choice][0]
     else:
-        console.print(safe_t('common.message', fallback='[#DDA0DD]無效選擇，使用預設模型[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]無效選擇，使用預設模型[/#E8C4F0]'))
         return DEFAULT_MODEL
 
 
@@ -82,16 +82,16 @@ def generate_image(
     Returns:
         生成的圖片檔案路徑列表
     """
-    console.print("\n[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]")
-    console.print(safe_t('common.generating', fallback='[bold #DDA0DD]🎨 Imagen 圖片生成[/bold #DDA0DD]'))
-    console.print("[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]\n")
+    console.print("\n[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]")
+    console.print(safe_t('common.generating', fallback='[bold #E8C4F0]🎨 Imagen 圖片生成[/bold #E8C4F0]'))
+    console.print("[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]\n")
 
-    console.print(safe_t('common.message', fallback='[#DDA0DD]模型：[/#DDA0DD] {model}', model=model))
-    console.print(safe_t('common.message', fallback='[#DDA0DD]提示：[/#DDA0DD] {prompt}', prompt=prompt))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]模型：[/#E8C4F0] {model}', model=model))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]提示：[/#E8C4F0] {prompt}', prompt=prompt))
     if negative_prompt:
-        console.print(safe_t('common.message', fallback='[#DDA0DD]負面提示：[/#DDA0DD] {negative_prompt}', negative_prompt=negative_prompt))
-    console.print(safe_t('common.message', fallback='[#DDA0DD]長寬比：[/#DDA0DD] {aspect_ratio}', aspect_ratio=aspect_ratio))
-    console.print(safe_t('common.message', fallback='[#DDA0DD]數量：[/#DDA0DD] {number_of_images}', number_of_images=number_of_images))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]負面提示：[/#E8C4F0] {negative_prompt}', negative_prompt=negative_prompt))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]長寬比：[/#E8C4F0] {aspect_ratio}', aspect_ratio=aspect_ratio))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]數量：[/#E8C4F0] {number_of_images}', number_of_images=number_of_images))
 
     # 計價預估（如果啟用）
     pricing_calc = None
@@ -102,7 +102,7 @@ def generate_image(
             number_of_images=number_of_images,
             operation='generate'
         )
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💰 費用預估：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 費用預估：[/#E8C4F0]'))
         cost_twd = cost * USD_TO_TWD
         console.print(safe_t('common.message', fallback='  總費用：NT${cost_twd:.2f} (${cost:.4f} USD)', cost_twd=cost_twd, cost=cost))
         per_image_twd = details['per_image_rate'] * USD_TO_TWD
@@ -124,7 +124,7 @@ def generate_image(
     config = types.GenerateImagesConfig(**config_params)
 
     # 開始生成
-    console.print(safe_t('common.generating', fallback='\n[#DDA0DD]⏳ 開始生成圖片...[/#DDA0DD]\n'))
+    console.print(safe_t('common.generating', fallback='\n[#E8C4F0]⏳ 開始生成圖片...[/#E8C4F0]\n'))
 
     try:
         with Progress(
@@ -141,13 +141,13 @@ def generate_image(
                 config=config
             )
 
-            progress.update(task, description="[#DA70D6]✓ 生成完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 生成完成[/green]")
 
         # 確保輸出目錄存在
         os.makedirs(OUTPUT_DIR, exist_ok=True)
 
         # 保存圖片
-        console.print(safe_t('common.saving', fallback='\n[#DDA0DD]💾 保存圖片中...[/#DDA0DD]'))
+        console.print(safe_t('common.saving', fallback='\n[#E8C4F0]💾 保存圖片中...[/#E8C4F0]'))
 
         output_paths = []
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -165,7 +165,7 @@ def generate_image(
             console.print(f"  [{i+1}] {output_path}")
 
         # 顯示圖片資訊
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📊 圖片資訊：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 圖片資訊：[/#E8C4F0]'))
         console.print(safe_t('common.generating', fallback='  生成數量：{len(output_paths)}', output_paths_count=len(output_paths)))
         console.print(safe_t('common.saving', fallback='  儲存目錄：{OUTPUT_DIR}', OUTPUT_DIR=OUTPUT_DIR))
 
@@ -175,14 +175,14 @@ def generate_image(
 
         # 顯示實際成本
         if pricing_calc:
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]💰 實際費用：[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 實際費用：[/#E8C4F0]'))
             actual_cost = details['per_image_rate'] * len(output_paths)
             console.print(f"  NT${actual_cost * USD_TO_TWD:.2f} (${actual_cost:.4f} USD)")
 
         return output_paths
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]❌ 生成失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 生成失敗：{e}[/red]', e=e))
         raise
 
 
@@ -212,13 +212,13 @@ def generate_images_batch(
         - 3 個 prompts，max_workers=3 → 3x 提升
         - 避免 API rate limit（Imagen API 有速率限制）
     """
-    console.print("\n[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]")
-    console.print(safe_t('common.processing', fallback='[bold #DDA0DD]🎨 Imagen 批次圖片生成（並行處理）[/bold #DDA0DD]'))
-    console.print("[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]\n")
+    console.print("\n[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]")
+    console.print(safe_t('common.processing', fallback='[bold #E8C4F0]🎨 Imagen 批次圖片生成（並行處理）[/bold #E8C4F0]'))
+    console.print("[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]\n")
 
-    console.print(safe_t('common.message', fallback='[#DDA0DD]模型：[/#DDA0DD] {model}', model=model))
-    console.print(safe_t('common.message', fallback='[#DDA0DD]Prompt 數量：[/#DDA0DD] {len(prompts)}', prompts_count=len(prompts)))
-    console.print(safe_t('common.message', fallback='[#DDA0DD]並行數量：[/#DDA0DD] {max_workers}', max_workers=max_workers))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]模型：[/#E8C4F0] {model}', model=model))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]Prompt 數量：[/#E8C4F0] {len(prompts)}', prompts_count=len(prompts)))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]並行數量：[/#E8C4F0] {max_workers}', max_workers=max_workers))
 
     # 準備參數列表
     if negative_prompts is None:
@@ -239,12 +239,12 @@ def generate_images_batch(
             number_of_images=total_images,
             operation='generate'
         )
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💰 總費用預估：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 總費用預估：[/#E8C4F0]'))
         console.print(f"  NT${cost * USD_TO_TWD:.2f} (${cost:.4f} USD)")
         per_image_twd = details["per_image_rate"] * USD_TO_TWD
         console.print(safe_t('common.message', fallback='  單價：NT${per_image_twd:.2f}/張\n', per_image_twd=per_image_twd))
 
-    console.print(safe_t('common.generating', fallback='[#DDA0DD]⏳ 開始並行生成 {len(prompts)} 組圖片...[/#DDA0DD]\n', prompts_count=len(prompts)))
+    console.print(safe_t('common.generating', fallback='[#E8C4F0]⏳ 開始並行生成 {len(prompts)} 組圖片...[/#E8C4F0]\n', prompts_count=len(prompts)))
 
     results: Dict[str, List[str]] = {}
 
@@ -273,7 +273,7 @@ def generate_images_batch(
             console=console
         ) as progress:
             task = progress.add_task(
-                f"[#DDA0DD]生成中...",
+                f"[#E8C4F0]生成中...",
                 total=len(prompts)
             )
 
@@ -285,24 +285,24 @@ def generate_images_batch(
                     results[prompt] = output_paths
                     progress.update(task, advance=1)
                 except Exception as e:
-                    console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]❌ Prompt "{prompt_short}..." 生成失敗：{e}[/red]', prompt_short=prompt[:30], e=e))
+                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ Prompt "{prompt_short}..." 生成失敗：{e}[/red]', prompt_short=prompt[:30], e=e))
                     results[prompt] = []
                     progress.update(task, advance=1)
 
     # 顯示總結
-    console.print(f"\n[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]")
+    console.print(f"\n[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]")
     console.print(safe_t('common.completed', fallback='[bold green]✓ 批次生成完成[/bold green]'))
-    console.print(f"[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]\n")
+    console.print(f"[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]\n")
 
     total_images = sum(len(paths) for paths in results.values())
-    console.print(safe_t('common.message', fallback='[#DDA0DD]📊 總結：[/#DDA0DD]'))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]📊 總結：[/#E8C4F0]'))
     console.print(safe_t('common.generating', fallback='  成功生成：{total_images} 張圖片', total_images=total_images))
     failed_count = len(prompts) - len([p for p in results.values() if p])
     console.print(safe_t('error.failed', fallback='  失敗數量：{failed_count}', failed_count=failed_count))
 
     # 顯示實際成本
     if PRICING_ENABLED and show_cost:
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💰 實際費用：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 實際費用：[/#E8C4F0]'))
         actual_cost = details['per_image_rate'] * total_images
         console.print(f"  NT${actual_cost * USD_TO_TWD:.2f} (${actual_cost:.4f} USD)")
 
@@ -316,7 +316,19 @@ def edit_image(
     show_cost: bool = True
 ) -> str:
     """
-    編輯圖片
+    ⚠️ 已廢棄 (DEPRECATED) - Imagen API 不支援此功能
+
+    編輯圖片 - 此功能無法使用
+
+    原因：Google Imagen API 不提供 edit_image() 方法
+    官方文檔：https://ai.google.dev/gemini-api/docs/imagen
+    API 僅支援：generate_images() (文字生成圖片)
+
+    替代方案：
+    1. 使用 generate_image() 重新生成圖片
+    2. 使用 Gemini Vision 分析圖片 + Imagen 生成新圖片
+
+    移除日期：2025-10-31
 
     Args:
         image_path: 原始圖片路徑
@@ -326,11 +338,32 @@ def edit_image(
 
     Returns:
         編輯後的圖片路徑
-    """
-    console.print("\n[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]")
-    console.print(safe_t('common.message', fallback='[bold #DDA0DD]✏️ Imagen 圖片編輯[/bold #DDA0DD]'))
-    console.print("[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]\n")
 
+    Raises:
+        NotImplementedError: API 不支援此功能
+    """
+    # ==========================================
+    # API 限制錯誤：Imagen 不支援圖片編輯
+    # ==========================================
+    console.print("\n[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]")
+    console.print(safe_t('common.message', fallback='[bold red]⚠️  Imagen 圖片編輯 - 功能不可用[/bold red]'))
+    console.print("[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]\n")
+
+    console.print(safe_t('error.api_not_supported',
+                        fallback='[dim #E8C4F0]❌ Imagen API 不支援圖片編輯功能[/dim #E8C4F0]\n'
+                                 '[dim #E8C4F0]📚 官方文檔：https://ai.google.dev/gemini-api/docs/imagen[/dim #E8C4F0]\n'
+                                 '[dim #E8C4F0]✅ API 僅支援：generate_images() (文字生成圖片)[/dim #E8C4F0]\n'))
+    console.print(safe_t('common.message', fallback='[#B565D8]💡 替代方案：[/#B565D8]'))
+    console.print(safe_t('common.message', fallback='  1. 使用 Imagen 圖像生成 (選項 [12]) 重新創作'))
+    console.print(safe_t('common.message', fallback='  2. 使用 Gemini Vision 分析圖片後，用 Imagen 生成新圖片\n'))
+
+    raise NotImplementedError(
+        "Imagen API does not support edit_image() method. "
+        "Only generate_images() is available. "
+        "See: https://ai.google.dev/gemini-api/docs/imagen"
+    )
+
+    # 以下代碼已無效（保留用於未來 API 更新）
     if not os.path.isfile(image_path):
         # 🎯 一鍵修復：顯示修復建議並嘗試自動修復
         try:
@@ -340,18 +373,18 @@ def edit_image(
             if alternative_path and os.path.isfile(alternative_path):
                 # 用戶選擇了替代檔案，使用新路徑
                 image_path = alternative_path
-                console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
             else:
                 raise FileNotFoundError(f"找不到檔案，請參考上述建議")
         except ImportError:
             # 如果沒有修復建議模組，直接拋出錯誤
             raise FileNotFoundError(f"圖片檔案不存在: {image_path}")
 
-    console.print(safe_t('common.message', fallback='[#DDA0DD]原始圖片：[/#DDA0DD] {image_path}', image_path=image_path))
-    console.print(safe_t('common.message', fallback='[#DDA0DD]編輯提示：[/#DDA0DD] {prompt}', prompt=prompt))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]原始圖片：[/#E8C4F0] {image_path}', image_path=image_path))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]編輯提示：[/#E8C4F0] {prompt}', prompt=prompt))
 
     # 上傳圖片
-    console.print(safe_t('common.message', fallback='\n[#DDA0DD]📤 上傳圖片...[/#DDA0DD]'))
+    console.print(safe_t('common.message', fallback='\n[#E8C4F0]📤 上傳圖片...[/#E8C4F0]'))
     uploaded_image = client.files.upload(file=image_path)
 
     # 計價預估
@@ -362,7 +395,7 @@ def edit_image(
             number_of_images=1,
             operation='edit'
         )
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💰 費用預估：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 費用預估：[/#E8C4F0]'))
         console.print(f"  NT${cost * USD_TO_TWD:.2f} (${cost:.4f} USD)")
 
     try:
@@ -380,7 +413,7 @@ def edit_image(
                 image=uploaded_image,
             )
 
-            progress.update(task, description="[#DA70D6]✓ 編輯完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 編輯完成[/green]")
 
         # 保存編輯後的圖片
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -392,16 +425,16 @@ def edit_image(
         with open(output_path, 'wb') as f:
             f.write(image_data)
 
-        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 圖片已儲存：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 圖片已儲存：{output_path}[/green]', output_path=output_path))
 
         file_size = os.path.getsize(output_path) / (1024 * 1024)
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📊 圖片資訊：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 圖片資訊：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  檔案大小：{file_size:.2f} MB', file_size=file_size))
 
         return output_path
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]❌ 編輯失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 編輯失敗：{e}[/red]', e=e))
         raise
 
 
@@ -411,7 +444,19 @@ def upscale_image(
     show_cost: bool = True
 ) -> str:
     """
-    放大圖片
+    ⚠️ 已廢棄 (DEPRECATED) - 僅 Vertex AI 支援此功能
+
+    放大圖片 - 此功能在 Gemini Developer API 無法使用
+
+    原因：upscale_image() 方法僅在 Vertex AI 客戶端可用
+    錯誤訊息："This method is only supported in the Vertex AI client."
+    測試結果：test_imagen_upscale.py (2025-10-31)
+
+    替代方案：
+    1. 使用 Vertex AI 客戶端（需要 Google Cloud 專案配置）
+    2. 使用第三方圖片放大工具
+
+    移除日期：2025-10-31
 
     Args:
         image_path: 原始圖片路徑
@@ -420,11 +465,32 @@ def upscale_image(
 
     Returns:
         放大後的圖片路徑
-    """
-    console.print("\n[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]")
-    console.print(safe_t('common.message', fallback='[bold #DDA0DD]🔍 Imagen 圖片放大[/bold #DDA0DD]'))
-    console.print("[#DDA0DD]" + "=" * 60 + "[/#DDA0DD]\n")
 
+    Raises:
+        NotImplementedError: Gemini Developer API 不支援此功能
+    """
+    # ==========================================
+    # API 限制錯誤：upscale_image 僅 Vertex AI 支援
+    # ==========================================
+    console.print("\n[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]")
+    console.print(safe_t('common.message', fallback='[bold red]⚠️  Imagen 圖片放大 - 功能不可用[/bold red]'))
+    console.print("[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]\n")
+
+    console.print(safe_t('error.api_not_supported',
+                        fallback='[dim #E8C4F0]❌ upscale_image 僅 Vertex AI 客戶端支援[/dim #E8C4F0]\n'
+                                 '[dim #E8C4F0]📚 錯誤訊息："This method is only supported in the Vertex AI client."[/dim #E8C4F0]\n'
+                                 '[dim #E8C4F0]✅ 本專案使用 Gemini Developer API，不支援此功能[/dim #E8C4F0]\n'))
+    console.print(safe_t('common.message', fallback='[#B565D8]💡 替代方案：[/#B565D8]'))
+    console.print(safe_t('common.message', fallback='  1. 配置 Vertex AI 客戶端（需要 Google Cloud 專案）'))
+    console.print(safe_t('common.message', fallback='  2. 使用第三方圖片放大工具\n'))
+
+    raise NotImplementedError(
+        "upscale_image() is only supported in the Vertex AI client. "
+        "Gemini Developer API does not support this method. "
+        "Error: 'This method is only supported in the Vertex AI client.'"
+    )
+
+    # 以下代碼已無效（保留用於 Vertex AI 遷移參考）
     if not os.path.isfile(image_path):
         # 🎯 一鍵修復：顯示修復建議並嘗試自動修復
         try:
@@ -434,17 +500,17 @@ def upscale_image(
             if alternative_path and os.path.isfile(alternative_path):
                 # 用戶選擇了替代檔案，使用新路徑
                 image_path = alternative_path
-                console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
             else:
                 raise FileNotFoundError(f"找不到檔案，請參考上述建議")
         except ImportError:
             # 如果沒有修復建議模組，直接拋出錯誤
             raise FileNotFoundError(f"圖片檔案不存在: {image_path}")
 
-    console.print(safe_t('common.message', fallback='[#DDA0DD]原始圖片：[/#DDA0DD] {image_path}', image_path=image_path))
+    console.print(safe_t('common.message', fallback='[#E8C4F0]原始圖片：[/#E8C4F0] {image_path}', image_path=image_path))
 
     # 上傳圖片
-    console.print(safe_t('common.message', fallback='\n[#DDA0DD]📤 上傳圖片...[/#DDA0DD]'))
+    console.print(safe_t('common.message', fallback='\n[#E8C4F0]📤 上傳圖片...[/#E8C4F0]'))
     uploaded_image = client.files.upload(file=image_path)
 
     # 計價預估
@@ -455,7 +521,7 @@ def upscale_image(
             number_of_images=1,
             operation='upscale'
         )
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]💰 費用預估：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 費用預估：[/#E8C4F0]'))
         console.print(f"  NT${cost * USD_TO_TWD:.2f} (${cost:.4f} USD)")
 
     try:
@@ -472,7 +538,7 @@ def upscale_image(
                 image=uploaded_image,
             )
 
-            progress.update(task, description="[#DA70D6]✓ 放大完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 放大完成[/green]")
 
         # 保存放大後的圖片
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -484,29 +550,29 @@ def upscale_image(
         with open(output_path, 'wb') as f:
             f.write(image_data)
 
-        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 圖片已儲存：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 圖片已儲存：{output_path}[/green]', output_path=output_path))
 
         file_size = os.path.getsize(output_path) / (1024 * 1024)
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📊 圖片資訊：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 圖片資訊：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  檔案大小：{file_size:.2f} MB', file_size=file_size))
 
         return output_path
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]❌ 放大失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 放大失敗：{e}[/red]', e=e))
         raise
 
 
 def interactive_mode():
     """互動式圖片生成模式"""
-    console.print(safe_t('common.generating', fallback='\n[bold #DDA0DD]🎨 Imagen 互動式圖片生成[/bold #DDA0DD]\n'))
+    console.print(safe_t('common.generating', fallback='\n[bold #E8C4F0]🎨 Imagen 互動式圖片生成[/bold #E8C4F0]\n'))
 
     # 選擇模型
     model = select_model()
 
     while True:
         console.print("\n" + "=" * 60)
-        console.print(safe_t('imagen.menu_title', fallback='\n[#DDA0DD]功能選擇：[/#DDA0DD]'))
+        console.print(safe_t('imagen.menu_title', fallback='\n[#E8C4F0]功能選擇：[/#E8C4F0]'))
         console.print(safe_t('imagen.menu_generate', fallback='  [1] 生成圖片（Text-to-Image）'))
         console.print(safe_t('imagen.menu_batch', fallback='  [2] 批次生成圖片（Batch Generation - 並行處理）'))
         console.print(safe_t('imagen.menu_edit', fallback='  [3] 編輯圖片（Image Editing）'))
@@ -516,23 +582,23 @@ def interactive_mode():
         choice = console.input("請選擇: ").strip()
 
         if choice == '0':
-            console.print(safe_t('common.message', fallback='\n[#DA70D6]再見！[/green]'))
+            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/green]'))
             break
 
         elif choice == '1':
             # 生成圖片
-            prompt = console.input("\n[#DDA0DD]請描述您想生成的圖片（或輸入 'back' 返回）：[/#DDA0DD]\n").strip()
+            prompt = console.input("\n[#E8C4F0]請描述您想生成的圖片（或輸入 'back' 返回）：[/#E8C4F0]\n").strip()
 
             if not prompt or prompt.lower() == 'back':
                 continue
 
             # 負面提示
-            negative_prompt = console.input("\n[#DDA0DD]負面提示（避免的內容，可留空）：[/#DDA0DD]\n").strip()
+            negative_prompt = console.input("\n[#E8C4F0]負面提示（避免的內容，可留空）：[/#E8C4F0]\n").strip()
             if not negative_prompt:
                 negative_prompt = None
 
             # 長寬比
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]選擇長寬比：[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]選擇長寬比：[/#E8C4F0]'))
             console.print(safe_t('common.message', fallback='  1. 1:1 (正方形，預設)'))
             console.print(safe_t('common.message', fallback='  2. 16:9 (橫向)'))
             console.print(safe_t('common.message', fallback='  3. 9:16 (直向)'))
@@ -544,7 +610,7 @@ def interactive_mode():
             aspect_ratio = aspect_ratios.get(aspect_choice, '1:1')
 
             # 生成數量
-            num_input = console.input("\n[#DDA0DD]生成數量（1-8，預設=1）：[/#DDA0DD] ").strip()
+            num_input = console.input("\n[#E8C4F0]生成數量（1-8，預設=1）：[/#E8C4F0] ").strip()
             number_of_images = int(num_input) if num_input.isdigit() and 1 <= int(num_input) <= 8 else 1
 
             try:
@@ -557,18 +623,18 @@ def interactive_mode():
                 )
 
                 # 詢問是否開啟圖片
-                open_img = console.input("\n[#DDA0DD]要開啟圖片嗎？(y/N): [/#DDA0DD]").strip().lower()
+                open_img = console.input("\n[#E8C4F0]要開啟圖片嗎？(y/N): [/#E8C4F0]").strip().lower()
                 if open_img == 'y' and output_paths:
                     for path in output_paths:
                         os.system(f'open "{path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
 
         elif choice == '2':
             # 批次生成圖片（並行處理）
-            console.print(safe_t('common.processing', fallback='\n[#DDA0DD]批次圖片生成模式（輸入多個 prompt，並行處理）[/#DDA0DD]'))
-            console.print(safe_t('common.message', fallback='[#DDA0DD]每行一個 prompt，輸入空行結束：[/#DDA0DD]\n'))
+            console.print(safe_t('common.processing', fallback='\n[#E8C4F0]批次圖片生成模式（輸入多個 prompt，並行處理）[/#E8C4F0]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]每行一個 prompt，輸入空行結束：[/#E8C4F0]\n'))
 
             prompts = []
             while True:
@@ -578,11 +644,11 @@ def interactive_mode():
                 prompts.append(line)
 
             if not prompts:
-                console.print(safe_t('common.message', fallback='[#DDA0DD]未輸入任何 prompt[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]未輸入任何 prompt[/#E8C4F0]'))
                 continue
 
             # 長寬比選擇（全部統一）
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]選擇長寬比（套用至所有圖片）：[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]選擇長寬比（套用至所有圖片）：[/#E8C4F0]'))
             console.print(safe_t('common.message', fallback='  1. 1:1 (正方形，預設)'))
             console.print(safe_t('common.message', fallback='  2. 16:9 (橫向)'))
             console.print(safe_t('common.message', fallback='  3. 9:16 (直向)'))
@@ -594,7 +660,7 @@ def interactive_mode():
             aspect_ratio = aspect_ratios_map.get(aspect_choice, '1:1')
 
             # 並行數量
-            max_workers_input = console.input("\n[#DDA0DD]並行數量（1-5，預設=3）：[/#DDA0DD] ").strip()
+            max_workers_input = console.input("\n[#E8C4F0]並行數量（1-5，預設=3）：[/#E8C4F0] ").strip()
             max_workers = int(max_workers_input) if max_workers_input.isdigit() and 1 <= int(max_workers_input) <= 5 else 3
 
             try:
@@ -606,38 +672,38 @@ def interactive_mode():
                 )
 
                 # 顯示結果摘要
-                console.print(safe_t('common.generating', fallback='\n[#DDA0DD]📋 生成結果摘要：[/#DDA0DD]'))
+                console.print(safe_t('common.generating', fallback='\n[#E8C4F0]📋 生成結果摘要：[/#E8C4F0]'))
                 for i, (prompt, paths) in enumerate(results.items(), 1):
                     if paths:
                         console.print(safe_t('common.message', fallback='  [{i}] {prompt[:50]}... → {len(paths)} 張圖片', i=i, prompt_short=prompt[:50], paths_count=len(paths)))
                     else:
-                        console.print(safe_t('error.failed', fallback='  [{i}] {prompt[:50]}... → [dim #DDA0DD]失敗[/red]', i=i, prompt_short=prompt[:50]))
+                        console.print(safe_t('error.failed', fallback='  [{i}] {prompt[:50]}... → [dim #E8C4F0]失敗[/red]', i=i, prompt_short=prompt[:50]))
 
                 # 詢問是否開啟圖片
-                open_img = console.input("\n[#DDA0DD]要開啟所有圖片嗎？(y/N): [/#DDA0DD]").strip().lower()
+                open_img = console.input("\n[#E8C4F0]要開啟所有圖片嗎？(y/N): [/#E8C4F0]").strip().lower()
                 if open_img == 'y':
                     for paths in results.values():
                         for path in paths:
                             os.system(f'open "{path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
 
         elif choice == '3':
             # 編輯圖片
-            image_path = console.input("\n[#DDA0DD]圖片路徑（或輸入 'back' 返回）：[/#DDA0DD]\n").strip()
+            image_path = console.input("\n[#E8C4F0]圖片路徑（或輸入 'back' 返回）：[/#E8C4F0]\n").strip()
 
             if not image_path or image_path.lower() == 'back':
                 continue
 
             if not os.path.isfile(image_path):
-                console.print(safe_t('common.message', fallback='[#DDA0DD]檔案不存在[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
                 continue
 
-            prompt = console.input("\n[#DDA0DD]請描述如何編輯此圖片：[/#DDA0DD]\n").strip()
+            prompt = console.input("\n[#E8C4F0]請描述如何編輯此圖片：[/#E8C4F0]\n").strip()
 
             if not prompt:
-                console.print(safe_t('common.message', fallback='[#DDA0DD]未輸入編輯描述[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]未輸入編輯描述[/#E8C4F0]'))
                 continue
 
             try:
@@ -647,22 +713,22 @@ def interactive_mode():
                     model=model
                 )
 
-                open_img = console.input("\n[#DDA0DD]要開啟圖片嗎？(y/N): [/#DDA0DD]").strip().lower()
+                open_img = console.input("\n[#E8C4F0]要開啟圖片嗎？(y/N): [/#E8C4F0]").strip().lower()
                 if open_img == 'y':
                     os.system(f'open "{output_path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
 
         elif choice == '4':
             # 放大圖片
-            image_path = console.input("\n[#DDA0DD]圖片路徑（或輸入 'back' 返回）：[/#DDA0DD]\n").strip()
+            image_path = console.input("\n[#E8C4F0]圖片路徑（或輸入 'back' 返回）：[/#E8C4F0]\n").strip()
 
             if not image_path or image_path.lower() == 'back':
                 continue
 
             if not os.path.isfile(image_path):
-                console.print(safe_t('common.message', fallback='[#DDA0DD]檔案不存在[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
                 continue
 
             try:
@@ -670,20 +736,20 @@ def interactive_mode():
                     image_path=image_path
                 )
 
-                open_img = console.input("\n[#DDA0DD]要開啟圖片嗎？(y/N): [/#DDA0DD]").strip().lower()
+                open_img = console.input("\n[#E8C4F0]要開啟圖片嗎？(y/N): [/#E8C4F0]").strip().lower()
                 if open_img == 'y':
                     os.system(f'open "{output_path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
 
         else:
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]無效選項[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]無效選項[/#E8C4F0]'))
 
 
 def main():
     """主程式"""
-    console.print(safe_t('common.generating', fallback='[bold #DDA0DD]Gemini Imagen 3 圖片生成工具[/bold #DDA0DD]\n'))
+    console.print(safe_t('common.generating', fallback='[bold #E8C4F0]Gemini Imagen 3 圖片生成工具[/bold #E8C4F0]\n'))
 
     # 檢查命令行參數
     if len(sys.argv) < 2:
@@ -700,12 +766,12 @@ def main():
             output_paths = generate_image(prompt=prompt, model=model)
 
             # 自動開啟圖片
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]🖼️ 開啟圖片中...[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]🖼️ 開啟圖片中...[/#E8C4F0]'))
             for path in output_paths:
                 os.system(f'open "{path}"')
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
             sys.exit(1)
 
 

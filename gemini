@@ -1,28 +1,22 @@
 #!/bin/bash
 # Gemini Chat 啟動腳本
-# 使用 Saki_Studio/Claude 目錄下的虛擬環境
+# 使用 ChatGemini_SakiTool 目錄下的虛擬環境
 
-# 固定使用 Saki_Studio/Claude 目錄
-PROJECT_DIR="/Users/hc1034/Saki_Studio/Claude"
+# 取得腳本所在目錄
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# 進入專案目錄
-cd "$PROJECT_DIR" || {
-    echo "錯誤：無法進入專案目錄 $PROJECT_DIR"
-    exit 1
-}
-
-# 檢查虛擬環境是否存在
-if [ ! -d "venv" ]; then
+# 檢查虛擬環境是否存在（venv_py314 或上層目錄的 .venv）
+if [ -d "$SCRIPT_DIR/venv_py314" ]; then
+    VENV_DIR="$SCRIPT_DIR/venv_py314"
+elif [ -d "$SCRIPT_DIR/../.venv" ]; then
+    VENV_DIR="$SCRIPT_DIR/../.venv"
+else
     echo "錯誤：找不到虛擬環境"
-    echo "位置: $PROJECT_DIR/venv"
-    echo ""
-    echo "請先執行以下指令建立虛擬環境："
-    echo "  cd $PROJECT_DIR"
-    echo "  python3 -m venv venv"
-    echo "  source venv/bin/activate"
-    echo "  pip install google-genai python-dotenv rich"
+    echo "請先執行: ./INSTALL.sh"
     exit 1
 fi
 
-# 啟用虛擬環境並執行
-source "$PROJECT_DIR/venv/bin/activate" && python3 "$PROJECT_DIR/gemini_chat.py" "$@"
+# 啟用進階輸入功能並執行
+export GEMINI_ADVANCED_INPUT=true
+export GEMINI_OUTPUT_DIR=claude
+"$VENV_DIR/bin/python" "$SCRIPT_DIR/gemini_chat.py" "$@"

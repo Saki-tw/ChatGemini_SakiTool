@@ -17,6 +17,7 @@ from typing import List, Dict, Optional, Any
 from pathlib import Path
 from dataclasses import dataclass
 from rich.console import Console
+from utils.i18n import safe_t
 
 console = Console()
 
@@ -69,7 +70,7 @@ class TestGenerator:
         Returns:
             Dict: 分析結果
         """
-        console.print(f"\n[#DDA0DD]🔍 分析檔案：{file_path}[/#DDA0DD]")
+        console.print(f"\n[#DDA0DD]🔍 {safe_t('test_gen.analyzing_file', '分析檔案：{path}', path=file_path)}[/#DDA0DD]")
 
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -101,9 +102,9 @@ class TestGenerator:
                 elif isinstance(node, (ast.Import, ast.ImportFrom)):
                     imports.append(ast.unparse(node))
 
-            console.print(f"[#DA70D6]✓ 分析完成[/green]")
-            console.print(f"  函數：{len(functions)} 個")
-            console.print(f"  類別：{len(classes)} 個")
+            console.print(f"[#DA70D6]✓ {safe_t('test_gen.analysis_complete', '分析完成')}[/green]")
+            console.print(f"  {safe_t('test_gen.functions', '函數')}：{len(functions)} {safe_t('common.unit', '個')}")
+            console.print(f"  {safe_t('test_gen.classes', '類別')}：{len(classes)} {safe_t('common.unit', '個')}")
 
             return {
                 "file_path": file_path,
@@ -113,7 +114,7 @@ class TestGenerator:
             }
 
         except Exception as e:
-            console.print(f"[dim #DDA0DD]✗ 分析失敗：{e}[/red]")
+            console.print(f"[dim #DDA0DD]✗ {safe_t('test_gen.analysis_failed', '分析失敗：{error}', error=e)}[/red]")
             return None
 
     def _extract_function_info(self, node: ast.FunctionDef) -> FunctionInfo:
@@ -173,19 +174,19 @@ class TestGenerator:
         Returns:
             str: 測試程式碼
         """
-        console.print(f"\n[#DDA0DD]📝 生成測試程式碼...[/#DDA0DD]")
+        console.print(f"\n[#DDA0DD]📝 {safe_t('test_gen.generating_tests', '生成測試程式碼...')}[/#DDA0DD]")
 
         if self.framework == "pytest":
             test_code = self._generate_pytest(analysis)
         elif self.framework == "unittest":
             test_code = self._generate_unittest(analysis)
         else:
-            raise ValueError(f"不支援的測試框架：{self.framework}")
+            raise ValueError(safe_t('test_gen.unsupported_framework', '不支援的測試框架：{framework}', framework=self.framework))
 
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(test_code)
-            console.print(f"[#DA70D6]✓ 測試檔案已儲存：{output_path}[/green]")
+            console.print(f"[#DA70D6]✓ {safe_t('test_gen.test_file_saved', '測試檔案已儲存：{path}', path=output_path)}[/green]")
 
         return test_code
 
@@ -412,12 +413,12 @@ def main():
     """測試生成器命令列工具"""
     import sys
 
-    console.print("\n[bold #DDA0DD]CodeGemini Test Generator[/bold #DDA0DD]\n")
+    console.print(f"\n[bold #DDA0DD]{safe_t('test_gen.title', 'CodeGemini Test Generator')}[/bold #DDA0DD]\n")
 
     if len(sys.argv) < 2:
-        console.print("用法：")
+        console.print(safe_t('test_gen.usage', '用法') + "：")
         console.print("  python generators/test_gen.py <file_path> [--framework pytest|unittest] [--output <path>]")
-        console.print("\n範例：")
+        console.print(f"\n{safe_t('test_gen.examples', '範例')}：")
         console.print("  python generators/test_gen.py mymodule.py")
         console.print("  python generators/test_gen.py mymodule.py --framework unittest --output test_mymodule.py")
         return
@@ -442,7 +443,7 @@ def main():
         test_code = generator.generate_test(analysis, output_path)
 
         if not output_path:
-            console.print(f"\n[#DDA0DD]生成的測試程式碼：[/#DDA0DD]\n")
+            console.print(f"\n[#DDA0DD]{safe_t('test_gen.generated_code', '生成的測試程式碼')}：[/#DDA0DD]\n")
             console.print(test_code)
 
 

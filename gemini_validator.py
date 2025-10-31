@@ -57,18 +57,18 @@ class PreflightReport:
         status_icon = "✅" if self.overall_passed else "❌"
         status_text = "通過" if self.overall_passed else "失敗"
 
-        console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]🔍 飛行前檢查報告 {status_icon} {status_text}[/bold #DDA0DD]\n', status_icon=status_icon, status_text=status_text))
+        console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]🔍 飛行前檢查報告 {status_icon} {status_text}[/bold #E8C4F0]\n', status_icon=status_icon, status_text=status_text))
 
         # 統計
-        console.print(safe_t('common.message', fallback='[#DDA0DD]總檢查項目：[/#DDA0DD] {checks_count}', checks_count=len(self.checks)))
-        console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：[/#DDA0DD] {warnings}', warnings=self.warnings))
-        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]錯誤：[/red] {self.errors}', errors=self.errors))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]總檢查項目：[/#E8C4F0] {checks_count}', checks_count=len(self.checks)))
+        console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：[/#E8C4F0] {warnings}', warnings=self.warnings))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：[/red] {self.errors}', errors=self.errors))
         console.print()
 
         # 詳細結果
         for check in self.checks:
             icon = "✅" if check.passed else "❌"
-            color = "green" if check.passed else "#DDA0DD" if check.level == ValidationLevel.WARNING else "red"
+            color = "green" if check.passed else "#E8C4F0" if check.level == ValidationLevel.WARNING else "red"
 
             console.print(f"{icon} [{color}]{check.message}[/{color}]")
 
@@ -382,7 +382,7 @@ class ParameterValidator:
                 },
                 suggestions=[
                     f"推薦格式：{', '.join(valid_extensions.get(file_type, []))}",
-                    "如果遇到問題，請轉換格式"
+                    "如果遇到問題,請轉換格式"
                 ]
             )
 
@@ -564,35 +564,35 @@ class PreflightChecker:
         checks = []
 
         # 1. API 健康檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]🔍 檢查 API 狀態...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]🔍 檢查 API 狀態...[/#E8C4F0]'))
         checks.append(self.api_health.check_api_key())
         checks.append(self.api_health.check_network())
         checks.append(self.api_health.check_api_connectivity())
 
         # 2. 依賴檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]🔍 檢查依賴工具...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]🔍 檢查依賴工具...[/#E8C4F0]'))
         checks.append(self.dependency_checker.check_ffmpeg())
         checks.append(self.dependency_checker.check_python_packages())
 
         # 3. 參數驗證
-        console.print(safe_t('common.message', fallback='[#DDA0DD]🔍 驗證參數...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]🔍 驗證參數...[/#E8C4F0]'))
         checks.extend(self.param_validator.validate_veo_parameters(
             prompt, duration, resolution, aspect_ratio
         ))
 
         # 4. 內容政策檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]🔍 檢查內容政策...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]🔍 檢查內容政策...[/#E8C4F0]'))
         checks.append(self.content_checker.check_prompt_safety(prompt))
 
         # 5. 檔案檢查
         if reference_image:
-            console.print(safe_t('common.message', fallback='[#DDA0DD]🔍 檢查參考圖片...[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]🔍 檢查參考圖片...[/#E8C4F0]'))
             checks.append(self.param_validator.validate_file(
                 reference_image, file_type="image"
             ))
 
         if video_to_extend:
-            console.print(safe_t('common.message', fallback='[#DDA0DD]🔍 檢查延伸影片...[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]🔍 檢查延伸影片...[/#E8C4F0]'))
             checks.append(self.param_validator.validate_file(
                 video_to_extend, file_type="video"
             ))
@@ -630,7 +630,7 @@ class PreflightChecker:
             checks.append(ValidationResult(
                 passed=False,
                 level=ValidationLevel.WARNING,
-                message="描述過於簡短，可能影響分段品質",
+                message="描述過於簡短,可能影響分段品質",
                 suggestions=["提供更詳細的場景描述", "至少 20 個字元"]
             ))
 
@@ -642,7 +642,7 @@ class PreflightChecker:
             checks.append(ValidationResult(
                 passed=False,
                 level=ValidationLevel.WARNING,
-                message=f"片段數量較多（{num_segments} 段），生成時間較長",
+                message=f"片段數量較多（{num_segments} 段）,生成時間較長",
                 details={"estimated_time": f"{num_segments * 3}-{num_segments * 5} 分鐘"},
                 suggestions=[
                     "考慮縮短目標時長",
@@ -710,7 +710,7 @@ def main():
         "--duration",
         type=int,
         default=8,
-        help="影片時長（秒），預設 8"
+        help="影片時長（秒）,預設 8"
     )
 
     parser.add_argument(
@@ -718,7 +718,7 @@ def main():
         type=str,
         default="1080p",
         choices=["720p", "1080p"],
-        help="影片解析度，預設 1080p"
+        help="影片解析度,預設 1080p"
     )
 
     parser.add_argument(
@@ -726,7 +726,7 @@ def main():
         type=str,
         default="16:9",
         choices=["16:9", "9:16", "1:1"],
-        help="影片長寬比，預設 16:9"
+        help="影片長寬比,預設 16:9"
     )
 
     parser.add_argument(
@@ -752,20 +752,20 @@ def main():
     args = parser.parse_args()
 
     # 顯示標題
-    console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]🔍 Gemini 預防性驗證系統[/bold #DDA0DD]\n'))
+    console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]🔍 Gemini 預防性驗證系統[/bold #E8C4F0]\n'))
 
     checker = PreflightChecker()
 
     # 執行對應的檢查
     if args.full_check:
         # 完整系統檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]執行完整系統檢查...[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]執行完整系統檢查...[/#E8C4F0]\n'))
         report = checker.run_full_check()
         report.display()
 
         # 🎯 智能引導：自動修復常見問題
         if not report.overall_passed:
-            console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]💡 智能修復建議[/bold #DDA0DD]\n'))
+            console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]💡 智能修復建議[/bold #E8C4F0]\n'))
 
             # 收集錯誤
             api_key_missing = False
@@ -786,22 +786,22 @@ def main():
             # 1. 安裝缺少的套件
             if missing_packages:
                 packages_list = ', '.join(missing_packages)
-                console.print(safe_t('common.message', fallback='[#DDA0DD]發現缺少的套件：[/#DDA0DD] {packages_list}', packages_list=packages_list))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]發現缺少的套件：[/#E8C4F0] {packages_list}', packages_list=packages_list))
                 if Confirm.ask("是否立即安裝？", default=True):
                     import subprocess
                     try:
-                        console.print("\n[#DDA0DD]執行：[/#DDA0DD] pip install " + " ".join(missing_packages))
+                        console.print("\n[#E8C4F0]執行：[/#E8C4F0] pip install " + " ".join(missing_packages))
                         subprocess.run(
                             ["pip", "install"] + missing_packages,
                             check=True
                         )
-                        console.print(safe_t('common.completed', fallback='[#DA70D6]✅ 套件安裝成功！[/green]\n'))
+                        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 套件安裝成功！[/green]\n'))
                     except subprocess.CalledProcessError as e:
-                        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 安裝失敗：{e}[/red]\n', e=e))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 安裝失敗：{e}[/red]\n', e=e))
 
             # 2. 設定 API 金鑰
             if api_key_missing:
-                console.print(safe_t('common.message', fallback='[#DDA0DD]API 金鑰未設定[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]API 金鑰未設定[/#E8C4F0]'))
 
                 # 顯示申請資訊
                 console.print(safe_t('common.message', fallback='\n[dim]💡 申請 API 金鑰：https://aistudio.google.com/app/apikey[/dim]\n'))
@@ -833,7 +833,7 @@ def main():
                         api_key = Prompt.ask("請輸入 API 金鑰", password=True)
 
                         # 儲存選項
-                        console.print(safe_t('common.saving', fallback='\n[#DA70D6]儲存位置：[/#DA70D6]'))
+                        console.print(safe_t('common.saving', fallback='\n[#B565D8]儲存位置：[/#B565D8]'))
                         console.print(safe_t('common.message', fallback='  1. .env 檔案（推薦）'))
                         console.print(safe_t('common.message', fallback='  2. 環境變數（本次會話）'))
                         console.print(safe_t('common.message', fallback='  3. 僅顯示設定指令'))
@@ -844,13 +844,13 @@ def main():
                             env_path = os.path.join(os.getcwd(), ".env")
                             with open(env_path, "a") as f:
                                 f.write(f"\nGEMINI_API_KEY={api_key}\n")
-                            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ 已儲存到 {env_path}[/#DA70D6]', env_path=env_path))
-                            console.print(safe_t('common.loading', fallback='[#DDA0DD]提示：請重新啟動程式以載入設定[/#DDA0DD]'))
+                            console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已儲存到 {env_path}[/#B565D8]', env_path=env_path))
+                            console.print(safe_t('common.loading', fallback='[#E8C4F0]提示：請重新啟動程式以載入設定[/#E8C4F0]'))
                         elif save_choice == 2:
                             os.environ["GEMINI_API_KEY"] = api_key
-                            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ 已設定（本次會話有效）[/#DA70D6]'))
+                            console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已設定（本次會話有效）[/#B565D8]'))
                         else:
-                            console.print(safe_t('common.message', fallback='\n[#DA70D6]請執行：[/#DA70D6]'))
+                            console.print(safe_t('common.message', fallback='\n[#B565D8]請執行：[/#B565D8]'))
                             console.print(f"export GEMINI_API_KEY='{api_key}'")
 
                     elif config_choice == 2:
@@ -866,10 +866,10 @@ def main():
                                         if line.strip().startswith('GEMINI_API_KEY='):
                                             api_key = line.strip().split('=', 1)[1].strip('\'"')
                                             os.environ["GEMINI_API_KEY"] = api_key
-                                            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ 已從 {env_file_path} 載入[/#DA70D6]', env_file_path=env_file_path))
+                                            console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已從 {env_file_path} 載入[/#B565D8]', env_file_path=env_file_path))
                                             break
                                 if not api_key:
-                                    console.print(safe_t('common.message', fallback='[#DDA0DD]⚠ 檔案中未找到 GEMINI_API_KEY[/#DDA0DD]'))
+                                    console.print(safe_t('common.message', fallback='[#E8C4F0]⚠ 檔案中未找到 GEMINI_API_KEY[/#E8C4F0]'))
                             except Exception as e:
                                 console.print(safe_t('error.failed', fallback='[red]❌ 讀取失敗：{e}[/red]', e=e))
                         else:
@@ -882,16 +882,16 @@ def main():
 
                         if api_key:
                             os.environ["GEMINI_API_KEY"] = api_key
-                            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ 已從環境變數 {env_var_name} 載入[/#DA70D6]', env_var_name=env_var_name))
+                            console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已從環境變數 {env_var_name} 載入[/#B565D8]', env_var_name=env_var_name))
                         else:
-                            console.print(safe_t('common.message', fallback='[#DDA0DD]⚠ 環境變數 {env_var_name} 未設定[/#DDA0DD]', env_var_name=env_var_name))
-                            console.print(safe_t('common.message', fallback='\n[#DA70D6]請先執行：[/#DA70D6]'))
+                            console.print(safe_t('common.message', fallback='[#E8C4F0]⚠ 環境變數 {env_var_name} 未設定[/#E8C4F0]', env_var_name=env_var_name))
+                            console.print(safe_t('common.message', fallback='\n[#B565D8]請先執行：[/#B565D8]'))
                             console.print(f"export {env_var_name}='your_api_key_here'")
 
             # 3. 安裝 ffmpeg
             if ffmpeg_missing:
-                console.print(safe_t('common.message', fallback='[#DDA0DD]ffmpeg 未安裝[/#DDA0DD]'))
-                console.print(safe_t('common.message', fallback='\n[#DDA0DD]安裝指令（依平台選擇）：[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]ffmpeg 未安裝[/#E8C4F0]'))
+                console.print(safe_t('common.message', fallback='\n[#E8C4F0]安裝指令（依平台選擇）：[/#E8C4F0]'))
                 console.print("  macOS:   brew install ffmpeg")
                 console.print("  Ubuntu:  sudo apt install ffmpeg")
                 console.print("  Windows: choco install ffmpeg")
@@ -902,15 +902,15 @@ def main():
 
             # 重新檢查
             if missing_packages or api_key_missing:
-                console.print("\n[#DDA0DD]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/#DDA0DD]")
+                console.print("\n[#E8C4F0]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/#E8C4F0]")
                 if Confirm.ask("是否重新執行檢查？", default=True):
-                    console.print(safe_t('common.message', fallback='\n[#DDA0DD]重新執行系統檢查...[/#DDA0DD]\n'))
+                    console.print(safe_t('common.message', fallback='\n[#E8C4F0]重新執行系統檢查...[/#E8C4F0]\n'))
                     report = checker.run_full_check()
                     report.display()
 
     elif args.check_veo:
         # Veo 參數檢查
-        console.print(safe_t('common.generating', fallback='[#DDA0DD]檢查 Veo 影片生成參數...[/#DDA0DD]\n'))
+        console.print(safe_t('common.generating', fallback='[#E8C4F0]檢查 Veo 影片生成參數...[/#E8C4F0]\n'))
         console.print(safe_t('common.message', fallback='  提示詞: {check_veo_value}', check_veo_value=args.check_veo))
         console.print(safe_t('common.message', fallback='  時長: {args.duration} 秒', duration_value=args.duration))
         console.print(safe_t('common.message', fallback='  解析度: {args.resolution}', resolution_value=args.resolution))
@@ -932,14 +932,14 @@ def main():
                 break
 
         if duration_error and args.duration > 8:
-            console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]💡 智能建議[/bold #DDA0DD]'))
-            console.print(safe_t('common.generating', fallback='[#DDA0DD]您想要生成 {args.duration} 秒的影片，但 Veo 3.1 限制為 8 秒。[/#DDA0DD]', duration_value=args.duration))
-            console.print(safe_t('common.generating', fallback='[#DDA0DD]我可以幫您使用 Flow Engine 自動分段生成！[/#DDA0DD]\n'))
+            console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]💡 智能建議[/bold #E8C4F0]'))
+            console.print(safe_t('common.generating', fallback='[#E8C4F0]您想要生成 {args.duration} 秒的影片,但 Veo 3.1 限制為 8 秒。[/#E8C4F0]', duration_value=args.duration))
+            console.print(safe_t('common.generating', fallback='[#E8C4F0]我可以幫您使用 Flow Engine 自動分段生成！[/#E8C4F0]\n'))
 
             from rich.prompt import Confirm
-            # ✅ M1 修復：合併為單次確認，移除後續的「立即執行」重複確認
+            # ✅ M1 修復：合併為單次確認,移除後續的「立即執行」重複確認
             if Confirm.ask("是否使用 Flow Engine 立即生成長影片？", default=True):
-                console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ 正在啟動 Flow Engine...[/green]\n'))
+                console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 正在啟動 Flow Engine...[/green]\n'))
 
                 # 計算分段數量
                 num_segments = (args.duration + 7) // 8  # 向上取整
@@ -947,41 +947,41 @@ def main():
                 # 生成 Flow Engine 指令
                 flow_command = f"python3 gemini_flow_demo.py --prompt \"{check_veo_value}\" --duration {args.duration}"
 
-                console.print(safe_t('common.message', fallback='[#DDA0DD]執行指令：[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]執行指令：[/#E8C4F0]'))
                 console.print(f"[bold]{flow_command}[/bold]\n")
 
-                # ✅ M1 修復：移除重複確認，直接執行（已在上方確認過）
+                # ✅ M1 修復：移除重複確認,直接執行（已在上方確認過）
                 import subprocess
                 try:
-                    console.print(safe_t('common.message', fallback='[#DDA0DD]啟動 Flow Engine...[/#DDA0DD]\n'))
+                    console.print(safe_t('common.message', fallback='[#E8C4F0]啟動 Flow Engine...[/#E8C4F0]\n'))
                     result = subprocess.run(
                         flow_command.split(),
                         check=True,
                         capture_output=False
                     )
-                    console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ Flow Engine 執行完成！[/green]'))
+                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ Flow Engine 執行完成！[/green]'))
                     return 0
                 except FileNotFoundError:
-                    console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]❌ gemini_flow_demo.py 不存在[/red]'))
-                    console.print(safe_t('common.message', fallback='[#DDA0DD]請手動執行上述指令[/#DDA0DD]'))
+                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ gemini_flow_demo.py 不存在[/red]'))
+                    console.print(safe_t('common.message', fallback='[#E8C4F0]請手動執行上述指令[/#E8C4F0]'))
                 except subprocess.CalledProcessError as e:
-                    console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]❌ 執行失敗：{e}[/red]', e=e))
+                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 執行失敗：{e}[/red]', e=e))
             else:
-                console.print(safe_t('common.message', fallback='\n[#DDA0DD]好的，請調整參數後重試[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='\n[#E8C4F0]好的,請調整參數後重試[/#E8C4F0]'))
 
     elif args.check_prompt:
         # 提示詞檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]檢查提示詞內容政策...[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]檢查提示詞內容政策...[/#E8C4F0]\n'))
         results = ContentPolicyChecker.check_prompt(args.check_prompt)
 
         has_error = False
         for result in results:
             if result.passed:
-                console.print(f"[#DA70D6]✅ {result.message}[/green]")
+                console.print(f"[#B565D8]✅ {result.message}[/green]")
             else:
                 has_error = True
                 level_color = {
-                    ValidationLevel.WARNING: "#DDA0DD",
+                    ValidationLevel.WARNING: "#E8C4F0",
                     ValidationLevel.ERROR: "red"
                 }.get(result.level, "white")
 
@@ -993,10 +993,10 @@ def main():
 
         # 🎯 智能引導：提示詞問題
         if has_error:
-            console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]💡 智能建議[/bold #DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]💡 智能建議[/bold #E8C4F0]'))
             if len(args.check_prompt) < 10:
-                console.print(safe_t('common.message', fallback='[#DDA0DD]您的提示詞太短，我可以幫您擴展！[/#DDA0DD]\n'))
-                console.print(safe_t('common.message', fallback='[#DDA0DD]原始提示詞：[/#DDA0DD] {args.check_prompt}', check_prompt_value=args.check_prompt))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]您的提示詞太短,我可以幫您擴展！[/#E8C4F0]\n'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]原始提示詞：[/#E8C4F0] {args.check_prompt}', check_prompt_value=args.check_prompt))
 
                 examples = [
                     f"{args.check_prompt}, cinematic lighting, high quality, 4K",
@@ -1004,7 +1004,7 @@ def main():
                     f"{args.check_prompt}, professional photography, stunning visuals"
                 ]
 
-                console.print(safe_t('common.message', fallback='\n[#DDA0DD]建議的擴展版本：[/#DDA0DD]'))
+                console.print(safe_t('common.message', fallback='\n[#E8C4F0]建議的擴展版本：[/#E8C4F0]'))
                 for i, ex in enumerate(examples, 1):
                     console.print(f"  {i}. {ex}")
 
@@ -1013,8 +1013,8 @@ def main():
 
                 if choice in [1, 2, 3]:
                     selected = examples[choice - 1]
-                    console.print(safe_t('common.completed', fallback='\n[#DA70D6]✅ 已選擇：[/green] {selected}', selected=selected))
-                    console.print(safe_t('common.message', fallback='\n[#DDA0DD]重新執行驗證...[/#DDA0DD]\n'))
+                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已選擇：[/green] {selected}', selected=selected))
+                    console.print(safe_t('common.message', fallback='\n[#E8C4F0]重新執行驗證...[/#E8C4F0]\n'))
 
                     # 重新驗證
                     import sys
@@ -1023,21 +1023,21 @@ def main():
                 elif choice == 0:
                     from rich.prompt import Prompt
                     new_prompt = Prompt.ask("\n請輸入新的提示詞")
-                    console.print(safe_t('common.message', fallback='\n[#DDA0DD]重新執行驗證...[/#DDA0DD]\n'))
+                    console.print(safe_t('common.message', fallback='\n[#E8C4F0]重新執行驗證...[/#E8C4F0]\n'))
                     import sys
                     sys.argv = ["gemini_validator.py", "--check-prompt", new_prompt]
                     return main()
 
     elif args.check_file:
         # 檔案檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]檢查檔案...[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]檢查檔案...[/#E8C4F0]\n'))
         results = ParameterValidator.validate_file(args.check_file)
 
         for result in results:
             if result.passed:
-                console.print(f"[#DA70D6]✅ {result.message}[/green]")
+                console.print(f"[#B565D8]✅ {result.message}[/green]")
             else:
-                console.print(f"[dim #DDA0DD]❌ {result.message}[/red]")
+                console.print(f"[dim #E8C4F0]❌ {result.message}[/red]")
                 if result.suggestions:
                     console.print(safe_t('common.message', fallback='   建議：'))
                     for sug in result.suggestions:
@@ -1045,22 +1045,22 @@ def main():
 
     elif args.check_api:
         # API 檢查
-        console.print(safe_t('common.message', fallback='[#DDA0DD]檢查 API 連接狀態...[/#DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]檢查 API 連接狀態...[/#E8C4F0]\n'))
         api_checks = APIHealthChecker.check_api_status()
 
         for check in api_checks:
             if check.passed:
-                console.print(f"[#DA70D6]✅ {check.message}[/green]")
+                console.print(f"[#B565D8]✅ {check.message}[/green]")
             else:
-                console.print(f"[dim #DDA0DD]❌ {check.message}[/red]")
+                console.print(f"[dim #E8C4F0]❌ {check.message}[/red]")
                 if check.suggestions:
                     console.print(safe_t('common.message', fallback='   建議：'))
                     for sug in check.suggestions:
                         console.print(f"   → {sug}")
 
     else:
-        # 沒有指定任何選項，執行簡單測試
-        console.print(safe_t('common.message', fallback='[#DDA0DD]執行基本測試...[/#DDA0DD]\n'))
+        # 沒有指定任何選項,執行簡單測試
+        console.print(safe_t('common.message', fallback='[#E8C4F0]執行基本測試...[/#E8C4F0]\n'))
         console.print(safe_t('common.message', fallback='[dim]提示：使用 --help 查看所有選項[/dim]\n'))
 
         report = checker.check_veo_generation(
@@ -1075,10 +1075,10 @@ def main():
     console.print()
     if hasattr(locals().get('report'), 'overall_passed'):
         if report.overall_passed:
-            console.print(safe_t('common.completed', fallback='[bold green]✅ 所有檢查通過，可以安全執行！[/bold green]\n'))
+            console.print(safe_t('common.completed', fallback='[bold green]✅ 所有檢查通過,可以安全執行！[/bold green]\n'))
             return 0
         else:
-            console.print(safe_t('error.failed', fallback='[bold red]❌ 檢查失敗，請修正錯誤後再執行[/bold red]\n'))
+            console.print(safe_t('error.failed', fallback='[bold red]❌ 檢查失敗,請修正錯誤後再執行[/bold red]\n'))
             return 1
 
     return 0

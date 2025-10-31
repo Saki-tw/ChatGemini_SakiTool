@@ -172,6 +172,27 @@ def __getattr__(name):
         return _module_cache[name]
 
     # ========================================================================
+    # 輸入輔助（prompt-toolkit 整合）
+    # ========================================================================
+    elif name in ('get_user_input', 'clear_input_history',
+                  'is_advanced_input_available', 'PROMPT_TOOLKIT_AVAILABLE'):
+        from .input_helpers import (
+            get_user_input,
+            clear_input_history,
+            is_advanced_input_available,
+            PROMPT_TOOLKIT_AVAILABLE
+        )
+
+        _module_cache.update({
+            'get_user_input': get_user_input,
+            'clear_input_history': clear_input_history,
+            'is_advanced_input_available': is_advanced_input_available,
+            'PROMPT_TOOLKIT_AVAILABLE': PROMPT_TOOLKIT_AVAILABLE,
+        })
+
+        return _module_cache[name]
+
+    # ========================================================================
     # 屬性不存在
     # ========================================================================
     raise AttributeError(f"module 'utils' has no attribute '{name}'")
@@ -218,6 +239,11 @@ __all__ = [
     'print_bottleneck_report',
     'export_performance_report',
     'PerformanceMonitor',
+    # 輸入輔助
+    'get_user_input',
+    'clear_input_history',
+    'is_advanced_input_available',
+    'PROMPT_TOOLKIT_AVAILABLE',
 ]
 
 __version__ = '2.0.0'

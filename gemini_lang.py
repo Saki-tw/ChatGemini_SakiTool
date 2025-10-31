@@ -51,7 +51,7 @@ def update_env_file(lang: str):
                 found = True
                 break
 
-        # 如果沒有，添加到檔案末尾
+        # 如果沒有,添加到檔案末尾
         if not found:
             lines.append(f'\nGEMINI_LANG={lang}\n')
 
@@ -59,7 +59,7 @@ def update_env_file(lang: str):
         with open(env_file, 'w', encoding='utf-8') as f:
             f.writelines(lines)
     else:
-        # 如果 .env 不存在，創建新檔案
+        # 如果 .env 不存在,創建新檔案
         with open(env_file, 'w', encoding='utf-8') as f:
             f.write(f'GEMINI_LANG={lang}\n')
 
@@ -153,7 +153,7 @@ def set_language(lang: str, interactive: bool = False):
         update_env_file(lang)
     except Exception as e:
         print(f"⚠️  無法更新 .env: {e}")
-        print(f"   語言已切換，但下次啟動可能需要重新設定")
+        print(f"   語言已切換,但下次啟動可能需要重新設定")
 
     # 顯示成功訊息
     info = get_language_info(lang)

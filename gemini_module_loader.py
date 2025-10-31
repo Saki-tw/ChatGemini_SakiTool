@@ -61,7 +61,7 @@ class ModuleLoader:
 
     設計理念:
     - 極簡核心：gemini_chat.py 只保留最小邏輯
-    - 動態載入：模組按需載入，減少啟動時間
+    - 動態載入：模組按需載入,減少啟動時間
     - 自動卸載：閒置模組自動釋放記憶體
     - 資源優化：最大化資源使用效率
     """
@@ -118,10 +118,10 @@ class ModuleLoader:
     def is_enabled(self, module_name: str) -> bool:
         """檢查模組是否啟用（從 config 讀取）
 
-        注意：預載入模組 (PRELOAD_MODULES) 默認視為已啟用，
-        因為它們是核心模組，不應受配置控制。
+        注意：預載入模組 (PRELOAD_MODULES) 默認視為已啟用,
+        因為它們是核心模組,不應受配置控制。
         """
-        # 預載入模組默認啟用（核心模組，常駐記憶體）
+        # 預載入模組默認啟用（核心模組,常駐記憶體）
         if module_name in self.PRELOAD_MODULES:
             return True
 
@@ -140,13 +140,13 @@ class ModuleLoader:
         """動態載入模組
 
         Args:
-            module_name: 模組名稱（簡稱，如 'smart_triggers'）
+            module_name: 模組名稱（簡稱,如 'smart_triggers'）
             force_reload: 是否強制重新載入
 
         Returns:
-            LoadedModule 實例，失敗返回 None
+            LoadedModule 實例,失敗返回 None
         """
-        # 如果已載入且不強制重載，直接返回
+        # 如果已載入且不強制重載,直接返回
         if module_name in self._loaded_modules and not force_reload:
             loaded = self._loaded_modules[module_name]
             loaded.mark_used()
@@ -201,7 +201,7 @@ class ModuleLoader:
 
         # 檢查是否可以卸載
         if not force and loaded.idle_time() < self.IDLE_UNLOAD_TIME:
-            logger.debug(f"模組仍在活躍期，暫不卸載: {module_name}")
+            logger.debug(f"模組仍在活躍期,暫不卸載: {module_name}")
             return
 
         try:
@@ -231,7 +231,7 @@ class ModuleLoader:
             module_name: 模組名稱
 
         Returns:
-            模組實例，失敗返回 None
+            模組實例,失敗返回 None
         """
         # 檢查是否啟用
         if not self.is_enabled(module_name):
@@ -250,7 +250,7 @@ class ModuleLoader:
             function_name: 函數名稱
 
         Returns:
-            函數對象，失敗返回 None
+            函數對象,失敗返回 None
         """
         module = self.get(module_name)
         if module is None:

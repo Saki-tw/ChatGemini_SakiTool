@@ -57,12 +57,12 @@ MODULES = {
     },
 
     'video_analyzer': {
-        'enabled': False,
+        'enabled': True,
         'required': False,
         'description': '影片分析（最長 2 小時）',
         'dependencies': [],
         'file': 'gemini_video_analyzer.py',
-        'notes': '獨立工具，可從命令列調用'
+        'notes': '獨立工具，可從命令列調用，已整合到 /media 選單'
     },
 
     'veo_generator': {
@@ -77,12 +77,12 @@ MODULES = {
     # ========== 影音功能模組 ==========
 
     'flow_engine': {
-        'enabled': False,
+        'enabled': True,
         'required': False,
         'description': 'Flow 引擎（自然語言影片生成，突破 8 秒限制）',
         'dependencies': ['ffmpeg-python'],
         'file': 'gemini_flow_engine.py',
-        'notes': '需要系統安裝 ffmpeg，且需要 Veo API 權限'
+        'notes': '需要系統安裝 ffmpeg，且需要 Veo API 權限，已整合到 /media 選單'
     },
 
     'video_preprocessor': {
@@ -393,7 +393,7 @@ DEFAULT_MODEL = "gemini-2.5-flash"  # 預設使用的 Gemini 模型
 AVAILABLE_MODELS = [
     "gemini-2.5-pro",           # 最強大，支援思考模式
     "gemini-2.5-flash",         # 推薦，快速且智慧
-    "gemini-2.5-flash-8b",      # 最便宜
+    "gemini-2.5-flash-lite",      # 最便宜
     "gemini-2.0-flash-exp",     # 實驗性
 ]
 
@@ -401,7 +401,7 @@ AVAILABLE_MODELS = [
 MODEL_CONTEXT_LIMITS = {
     'gemini-2.5-pro': 2_097_152,        # 2,097,152 tokens (2^21, 約 200萬)
     'gemini-2.5-flash': 1_048_576,      # 1,048,576 tokens (2^20, 約 100萬)
-    'gemini-2.5-flash-8b': 1_048_576,   # 1,048,576 tokens (2^20, 約 100萬)
+    'gemini-2.5-flash-lite': 1_048_576,   # 1,048,576 tokens (2^20, 約 100萬)
     'gemini-2.0-flash-exp': 1_048_576,  # 1,048,576 tokens (2^20, 約 100萬)
     'gemini-1.5-pro': 2_097_152,        # 2,097,152 tokens (2^21, 約 200萬)
     'gemini-1.5-flash': 1_048_576,      # 1,048,576 tokens (2^20, 約 100萬)
@@ -533,17 +533,18 @@ for dir_path in MEDIA_SUBDIRS.values():
 
 # 最低快取要求（tokens）
 MIN_CACHE_TOKENS = {
-    'gemini-2.5-pro': 4096,
-    'gemini-2.5-flash': 1024,
-    'gemini-2.5-flash-8b': 1024,
-    'gemini-2.0-flash-exp': 1024,
+    'gemini-2.5-pro': 4096,        # 官方文檔驗證：最低 4096 tokens
+    'gemini-2.5-flash': 1024,      # 官方文檔驗證：最低 1024 tokens
+    'gemini-2.5-flash-lite': 1024,   # 同 Flash
+    'gemini-2.0-flash-exp': 32768, # 實測：2.0 系列需要更高
+    'gemini-2.0-flash': 32768,     # 2.0 標準版同 exp
 }
 
 # 思考模式支援的模型
 THINKING_MODELS = [
     'gemini-2.5-pro',
     'gemini-2.5-flash',
-    'gemini-2.5-flash-8b',
+    'gemini-2.5-flash-lite',
 ]
 
 # 檔案類型定義（用於智慧檔案附加）
@@ -655,9 +656,9 @@ class UnifiedConfig:
         # Tier 1: 系統預設值（從本檔案讀取）
         self._system_defaults = self._load_system_defaults()
 
-        # Tier 2: 使用者配置（從 ConfigManager 載入）
+        # Tier 2: 使用者配置（從 ConfigManager 載入）- 延遲載入以加速啟動
         self._user_config = {}
-        self._load_user_config()
+        self._user_config_loaded = False  # 標記是否已載入使用者配置
 
         # Tier 3: 環境變數映射
         self._env_mapping = {
@@ -747,8 +748,15 @@ class UnifiedConfig:
             'MODULES': MODULES,
         }
 
+    def _ensure_user_config_loaded(self):
+        """確保使用者配置已載入（延遲載入）"""
+        if self._user_config_loaded:
+            return
+        self._load_user_config()
+        self._user_config_loaded = True
+
     def _load_user_config(self):
-        """載入使用者配置（Tier 2）"""
+        """載入使用者配置（Tier 2）- 僅在首次存取時呼叫"""
         try:
             from CodeGemini.config_manager import ConfigManager, SystemConfig
             config_manager = ConfigManager()
@@ -819,7 +827,8 @@ class UnifiedConfig:
             # 類型轉換
             return self._convert_env_value(env_value, key)
 
-        # Tier 2: 檢查使用者配置
+        # Tier 2: 檢查使用者配置（延遲載入）
+        self._ensure_user_config_loaded()
         if key in self._user_config:
             return self._user_config[key]
 
@@ -874,6 +883,7 @@ class UnifiedConfig:
     def reload(self):
         """重新載入所有配置"""
         self._load_user_config()
+        self._user_config_loaded = True
 
     def get_config_summary(self) -> dict:
         """獲取配置摘要（用於除錯）"""
@@ -984,9 +994,9 @@ if __name__ == "__main__":
 
 # 馬卡龍紫色系定義
 MACARON_PURPLE_PALETTE = {
-    'plum': '#DDA0DD',           # 主紫色 - 標題、框線
-    'orchid': '#DA70D6',         # 蘭花紫 - 次要元素
-    'medium_purple': '#BA55D3',  # 中度紫 - 強調色
+    'plum': '#E8C4F0',           # 主紫色 - 標題、框線
+    'orchid': '#B565D8',         # 蘭花紫 - 次要元素
+    'medium_purple': '#B565D8',  # 中度紫 - 強調色
     'thistle': '#D8BFD8',        # 薊紫 - 柔和背景
     'lavender': '#E6E6FA',       # 薰衣草 - 淡雅襯托
 }
@@ -1004,7 +1014,7 @@ FORGET_ME_NOT_PALETTE = {
 SEMANTIC_COLORS = {
     'success': 'green',          # 成功 ✅
     'error': 'red',              # 錯誤 ❌
-    'warning': '#DDA0DD',        # 警告 ⚠️ (使用馬卡龍紫而非黃色)
+    'warning': '#E8C4F0',        # 警告 ⚠️ (使用馬卡龍紫而非黃色)
     'info': '#87CEEB',           # 訊息 💡 (使用勿忘草藍)
 }
 
@@ -1016,9 +1026,9 @@ MARKDOWN_THEME = {
     'name': 'macaron_purple_forget_me_not',
     'colors': {
         # 主要顏色：馬卡龍紫色系
-        'primary': 'plum',              # 主標題、重點文字 (#DDA0DD)
-        'secondary': 'orchid1',         # 次標題 (#DA70D6)
-        'accent': 'medium_purple3',     # 強調色 (#BA55D3)
+        'primary': 'plum',              # 主標題、重點文字 (#E8C4F0)
+        'secondary': 'orchid1',         # 次標題 (#B565D8)
+        'accent': 'medium_purple3',     # 強調色 (#B565D8)
 
         # 輔助顏色：勿忘草藍色系
         'info': '#87CEEB',              # 訊息提示
@@ -1091,8 +1101,18 @@ MARKDOWN_THEME = {
 # - 層次分明：深淺搭配,確保可讀性
 #
 # 【色碼速查】
-# 馬卡龍紫: #DDA0DD (主) | #DA70D6 (次) | #BA55D3 (強調)
+# 馬卡龍紫: #E8C4F0 (主) | #B565D8 (次) | #B565D8 (強調)
 # 勿忘草藍: #87CEEB (主) | #7EC8E3 (輔) | #B0E0E6 (淡)
 #
 # ==========================================
 
+
+# ==========================================
+# 自動更新設定
+# ==========================================
+
+UPDATE_CHECK_ENABLED = True              # 是否啟用更新檢查
+UPDATE_CHECK_ON_STARTUP = True           # 啟動時檢查 (非阻塞)
+UPDATE_CHECK_INTERVAL = 86400            # 檢查間隔 (秒, 86400 = 1天)
+UPDATE_GITHUB_REPO = "Saki-tw/ChatGemini_SakiTool"
+UPDATE_BRANCH = "main"                   # 追蹤的分支

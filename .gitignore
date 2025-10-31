@@ -117,3 +117,45 @@ experimental/
 tests/
 test_*.py
 *_test.py
+
+# === 2025-10-30 加強隱私保護 ===
+
+# Phase 開發文檔與腳本
+*Phase*.md
+*phase*.py
+*phase*.txt
+*phase*.yaml
+*phase*.json
+batch_convert_*.py
+update_i18n_*.py
+
+# 色彩配置文檔（個人偏好）
+色彩配置*.md
+*色彩*.md
+
+# 開發診斷腳本
+analyze_*.py
+diagnose_*.py
+profile_*.py
+trace_*.py
+verify_*.sh
+verify_*.py
+
+# 個人資訊（防止意外洩露）
+*hc1034*
+*@icloud.com*
+
+# 開發報告（額外保護）
+*報告*.md
+*計畫*.md
+*日誌*.md
+*_PLAN*.md
+*_CHECKLIST*.md
+*_SUMMARY*.md
+*REPORT.md
+
+# 新功能開發中
+gemini_streaming_display.py
+slash_command_completer.py
+update_max_token_support.py
+utils/input_helpers.py

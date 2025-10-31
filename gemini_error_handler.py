@@ -3,17 +3,17 @@
 Gemini 錯誤處理模組
 提供統一的錯誤處理、重試機制、詳細錯誤訊息、失敗恢復功能
 
-本模組提供：
-- 6 種自定義異常類別（API、檔案、FFmpeg、網路、驗證錯誤）
-- retry_on_error 裝飾器（指數退避 + 隨機抖動）
+本模組提供:
+- 6 種自定義異常類別(API、檔案、FFmpeg、網路、驗證錯誤)
+- retry_on_error 裝飾器(指數退避 + 隨機抖動)
 - RecoveryManager 失敗恢復管理
 - ErrorLogger 錯誤日誌記錄
 - ErrorFormatter 錯誤訊息格式化
 
-設計原則：
+設計原則:
 - 統一的錯誤處理介面
 - 詳細的錯誤上下文資訊
-- 自動重試機制（避免驚群效應）
+- 自動重試機制(避免驚群效應)
 - 失敗恢復與checkpoint支援
 """
 import os
@@ -38,7 +38,7 @@ console = Console()
 # ============================================================================
 # 錯誤類別定義
 # ============================================================================
-# 提供 6 種自定義異常，涵蓋影音處理的常見錯誤場景：
+# 提供 6 種自定義異常,涵蓋影音處理的常見錯誤場景:
 # - GeminiVideoError: 基礎錯誤類別
 # - APIError: Gemini API 呼叫錯誤
 # - FileProcessingError: 檔案讀寫、格式錯誤
@@ -52,7 +52,7 @@ class ErrorSeverity(Enum):
     LOW = "low"          # 可忽略的警告
     MEDIUM = "medium"       # 需要注意但不影響主要功能
     HIGH = "high"         # 影響功能但可恢復
-    CRITICAL = "critical"   # 致命錯誤，需要立即處理
+    CRITICAL = "critical"   # 致命錯誤,需要立即處理
 
     def localized(self) -> str:
         """返回本地化的嚴重程度名稱"""
@@ -63,7 +63,7 @@ class GeminiVideoError(Exception):
     """
     Gemini 影音處理基礎錯誤類別
 
-    所有自定義異常的基類，提供統一的錯誤資訊結構：
+    所有自定義異常的基類,提供統一的錯誤資訊結構:
     - 嚴重程度分級
     - 錯誤原因鏈
     - 上下文資訊
@@ -82,8 +82,8 @@ class GeminiVideoError(Exception):
         super().__init__(message)
         self.message = message  # 錯誤訊息
         self.severity = severity  # 嚴重程度
-        self.cause = cause  # 原始異常（如有）
-        self.context = context or {}  # 上下文資訊（檔案路徑、參數等）
+        self.cause = cause  # 原始異常(如有)
+        self.context = context or {}  # 上下文資訊(檔案路徑、參數等)
         self.suggestions = suggestions or []  # 修復建議列表
         self.timestamp = datetime.now()  # 發生時間
 
@@ -150,21 +150,21 @@ class ValidationError(GeminiVideoError):
 
 
 # ============================================================================
-# 錯誤訊息格式化器（Rich Formatting）
+# 錯誤訊息格式化器(Rich Formatting)
 # ============================================================================
-# 將錯誤轉換為美觀的 Rich 格式化輸出：
+# 將錯誤轉換為美觀的 Rich 格式化輸出:
 # - 彩色錯誤類型標示
 # - 嚴重程度標記
 # - 上下文資訊展示
 # - 修復建議列表
-# - 堆疊追蹤（可選）
+# - 堆疊追蹤(可選)
 # ============================================================================
 
 class ErrorFormatter:
     """
     錯誤訊息格式化器
 
-    使用 Rich 函式庫提供彩色、結構化的錯誤輸出，
+    使用 Rich 函式庫提供彩色、結構化的錯誤輸出,
     提升錯誤訊息的可讀性與除錯效率。
     """
 
@@ -187,41 +187,41 @@ class ErrorFormatter:
         """
         lines = []
 
-        # === 第 1 部分：錯誤類型與基本訊息 ===
+        # === 第 1 部分:錯誤類型與基本訊息 ===
         error_type = error.__class__.__name__
         lines.append(f"[bold red]❌ {error_type}[/bold red]")
         lines.append(f"[red]{str(error)}[/red]")
 
-        # === 第 2 部分：自訂錯誤的額外資訊 ===
+        # === 第 2 部分:自訂錯誤的額外資訊 ===
         # 只有繼承自 GeminiVideoError 的異常才有這些屬性
         if isinstance(error, GeminiVideoError):
-            # 顯示嚴重程度（LOW/MEDIUM/HIGH/CRITICAL）
-            lines.append(f"\n[#DDA0DD]嚴重程度：{error.severity.value}[/#DDA0DD]")
+            # 顯示嚴重程度(LOW/MEDIUM/HIGH/CRITICAL)
+            lines.append(f"\n[#E8C4F0]嚴重程度:{error.severity.value}[/#E8C4F0]")
             # 顯示錯誤發生時間
-            lines.append(f"[dim]時間：{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
+            lines.append(f"[dim]時間:{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
 
-            # 上下文資訊（檔案路徑、API 名稱、命令等）
+            # 上下文資訊(檔案路徑、API 名稱、命令等)
             if error.context:
-                lines.append("\n[#87CEEB]上下文資訊：[/#87CEEB]")
+                lines.append("\n[#87CEEB]上下文資訊:[/#87CEEB]")
                 for key, value in error.context.items():
                     lines.append(f"  • {key}: {value}")
 
             # 修復建議列表
             if show_suggestions and error.suggestions:
-                lines.append("\n[green]建議的解決方案：[/green]")
+                lines.append("\n[green]建議的解決方案:[/green]")
                 for i, suggestion in enumerate(error.suggestions, 1):
                     lines.append(f"  {i}. {suggestion}")
 
-        # === 第 3 部分：堆疊追蹤（Stack Trace）===
-        # 堆疊追蹤對於除錯非常重要，顯示錯誤發生的完整呼叫鏈
+        # === 第 3 部分:堆疊追蹤(Stack Trace)===
+        # 堆疊追蹤對於除錯非常重要,顯示錯誤發生的完整呼叫鏈
         if show_traceback:
             tb = traceback.format_exc()
             # 過濾掉空的或無意義的追蹤
             if tb and tb != "NoneType: None\n":
-                lines.append("\n[dim]堆疊追蹤：[/dim]")
+                lines.append("\n[dim]堆疊追蹤:[/dim]")
                 lines.append(f"[dim]{tb}[/dim]")
 
-        # 將所有行合併為單一字串，用換行分隔
+        # 將所有行合併為單一字串,用換行分隔
         return "\n".join(lines)
 
     @staticmethod
@@ -232,11 +232,11 @@ class ErrorFormatter:
 
 
 # ============================================================================
-# 重試裝飾器（Exponential Backoff）
+# 重試裝飾器(Exponential Backoff)
 # ============================================================================
-# 實作指數退避演算法，避免瞬間大量重試造成系統負載
-# 重試間隔：delay, delay*backoff, delay*backoff^2, ...
-# 例如：1s, 2s, 4s, 8s...
+# 實作指數退避演算法,避免瞬間大量重試造成系統負載
+# 重試間隔:delay, delay*backoff, delay*backoff^2, ...
+# 例如:1s, 2s, 4s, 8s...
 # ============================================================================
 
 def retry_on_error(
@@ -247,20 +247,20 @@ def retry_on_error(
     on_retry: Optional[Callable[[Exception, int], None]] = None
 ) -> Callable:
     """
-    重試裝飾器（支援指數退避）
+    重試裝飾器(支援指數退避)
 
-    提供自動重試機制，使用指數退避演算法避免系統過載。
+    提供自動重試機制,使用指數退避演算法避免系統過載。
     適用於 API 呼叫、網路請求、FFmpeg 執行等可能暫時失敗的操作。
 
     Args:
-        max_retries: 最大重試次數（預設 3）
-        delay: 初始延遲時間，單位秒（預設 1.0）
-        backoff: 延遲倍數，用於指數退避（預設 2.0）
-            - 第 1 次重試：delay 秒
-            - 第 2 次重試：delay * backoff 秒
-            - 第 3 次重試：delay * backoff^2 秒
-        exceptions: 要重試的異常類型（預設所有 Exception）
-        on_retry: 重試時的回調函數，接收 (exception, attempt_number)
+        max_retries: 最大重試次數(預設 3)
+        delay: 初始延遲時間,單位秒(預設 1.0)
+        backoff: 延遲倍數,用於指數退避(預設 2.0)
+            - 第 1 次重試:delay 秒
+            - 第 2 次重試:delay * backoff 秒
+            - 第 3 次重試:delay * backoff^2 秒
+        exceptions: 要重試的異常類型(預設所有 Exception)
+        on_retry: 重試時的回調函數,接收 (exception, attempt_number)
 
     Returns:
         裝飾器函數
@@ -271,12 +271,12 @@ def retry_on_error(
             # API 呼叫可能因網路問題失敗
             return client.generate_content(...)
 
-        # 重試時間序列：2s, 4s, 8s
+        # 重試時間序列:2s, 4s, 8s
 
-    注意：
+    注意:
         - 使用指數退避避免瞬間大量重試
-        - 適合暫時性錯誤（網路、限流、暫時忙碌）
-        - 不適合永久性錯誤（金鑰錯誤、檔案不存在）
+        - 適合暫時性錯誤(網路、限流、暫時忙碌)
+        - 不適合永久性錯誤(金鑰錯誤、檔案不存在)
     """
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
@@ -284,7 +284,7 @@ def retry_on_error(
             current_delay = delay
             last_exception = None
 
-            # 重試迴圈：嘗試 max_retries + 1 次（初始嘗試 + 重試）
+            # 重試迴圈:嘗試 max_retries + 1 次(初始嘗試 + 重試)
             for attempt in range(max_retries + 1):
                 try:
                     # 執行目標函數
@@ -302,24 +302,24 @@ def retry_on_error(
                         else:
                             console.print(
                                 safe_t('error.retry.attempting',
-                                       fallback=f"[#DDA0DD]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗，{{delay:.1f}} 秒後重試...[/#DDA0DD]",
+                                       fallback=f"[#E8C4F0]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗,{{delay:.1f}} 秒後重試...[/#E8C4F0]",
                                        attempt=attempt + 1,
                                        max_retries=max_retries,
                                        delay=current_delay)
                             )
-                            console.print(safe_t('error.message', fallback=f"[dim]錯誤：{{error}}[/dim]", error=str(e)))
+                            console.print(safe_t('error.message', fallback=f"[dim]錯誤:{{error}}[/dim]", error=str(e)))
 
                         time.sleep(current_delay)
-                        # 指數退避：下次延遲時間 = 當前延遲 * backoff
+                        # 指數退避:下次延遲時間 = 當前延遲 * backoff
                         current_delay *= backoff
                     else:
                         # 最後一次嘗試失敗
                         console.print(
-                            f"[red]❌ 已達到最大重試次數 ({max_retries})，操作失敗[/red]"
+                            f"[red]❌ 已達到最大重試次數 ({max_retries}),操作失敗[/red]"
                         )
                         raise
 
-            # 理論上不會到這裡，但為了型別安全
+            # 理論上不會到這裡,但為了型別安全
             if last_exception:
                 raise last_exception
 
@@ -328,13 +328,13 @@ def retry_on_error(
 
 
 # ============================================================================
-# 失敗恢復管理器（Checkpoint & Recovery）
+# 失敗恢復管理器(Checkpoint & Recovery)
 # ============================================================================
-# 提供長時間任務的失敗恢復機制：
-# - 定期儲存檢查點（checkpoint）
+# 提供長時間任務的失敗恢復機制:
+# - 定期儲存檢查點(checkpoint)
 # - 失敗後從上次檢查點恢復
 # - 避免重新執行已完成的步驟
-# 適用場景：影片批次處理、多步驟轉換流程
+# 適用場景:影片批次處理、多步驟轉換流程
 # ============================================================================
 
 @dataclass
@@ -342,11 +342,11 @@ class RecoveryCheckpoint:
     """
     恢復檢查點資料結構
 
-    儲存任務執行狀態，用於失敗後恢復。每個檢查點包含：
+    儲存任務執行狀態,用於失敗後恢復。每個檢查點包含:
     - 任務識別資訊
     - 當前執行狀態
     - 已完成的步驟列表
-    - 錯誤資訊（如有）
+    - 錯誤資訊(如有)
     """
     task_id: str
     task_type: str
@@ -365,7 +365,7 @@ class RecoveryManager:
         初始化恢復管理器
 
         Args:
-            recovery_dir: 恢復檔案目錄，預設為 ~/gemini_videos/.recovery
+            recovery_dir: 恢復檔案目錄,預設為 ~/gemini_videos/.recovery
         """
         if recovery_dir is None:
             recovery_dir = os.path.join(
@@ -394,7 +394,7 @@ class RecoveryManager:
             state: 當前狀態
             completed_steps: 已完成步驟
             total_steps: 總步驟數
-            error: 錯誤資訊（選用）
+            error: 錯誤資訊(選用)
 
         Returns:
             檢查點檔案路徑
@@ -409,16 +409,16 @@ class RecoveryManager:
             error=error.to_dict() if isinstance(error, GeminiVideoError) else None
         )
 
-        # 檢查點檔案命名：{task_id}.json
+        # 檢查點檔案命名:{task_id}.json
         checkpoint_path = self.recovery_dir / f"{task_id}.json"
 
         # 將 dataclass 轉換為字典並儲存為 JSON
-        # indent=2 讓檔案可讀性更高（方便手動檢查）
+        # indent=2 讓檔案可讀性更高(方便手動檢查)
         with open(checkpoint_path, 'w', encoding='utf-8') as f:
             json.dump(asdict(checkpoint), f, ensure_ascii=False, indent=2)
 
         console.print(safe_t('recovery.checkpoint.saved',
-                             fallback=f"[#87CEEB]💾 已保存恢復檢查點：{{name}}[/#87CEEB]",
+                             fallback=f"[#87CEEB]💾 已保存恢復檢查點:{{name}}[/#87CEEB]",
                              name=checkpoint_path.name))
         return str(checkpoint_path)
 
@@ -430,7 +430,7 @@ class RecoveryManager:
             task_id: 任務 ID
 
         Returns:
-            恢復檢查點，若不存在則回傳 None
+            恢復檢查點,若不存在則回傳 None
         """
         checkpoint_path = self.recovery_dir / f"{task_id}.json"
 
@@ -446,13 +446,13 @@ class RecoveryManager:
             # 將字典還原為 RecoveryCheckpoint 物件
             checkpoint = RecoveryCheckpoint(**data)
             console.print(safe_t('recovery.checkpoint.loaded',
-                                 fallback=f"[#87CEEB]📂 已載入恢復檢查點：{{name}}[/#87CEEB]",
+                                 fallback=f"[#87CEEB]📂 已載入恢復檢查點:{{name}}[/#87CEEB]",
                                  name=checkpoint_path.name))
             return checkpoint
 
         except Exception as e:
             console.print(safe_t('recovery.checkpoint.load_failed',
-                                 fallback=f"[red]載入檢查點失敗：{{error}}[/red]",
+                                 fallback=f"[red]載入檢查點失敗:{{error}}[/red]",
                                  error=str(e)))
             return None
 
@@ -471,7 +471,7 @@ class RecoveryManager:
         if checkpoint_path.exists():
             checkpoint_path.unlink()
             console.print(safe_t('recovery.checkpoint.deleted',
-                                 fallback=f"[green]🗑️  已刪除恢復檢查點：{{name}}[/green]",
+                                 fallback=f"[green]🗑️  已刪除恢復檢查點:{{name}}[/green]",
                                  name=checkpoint_path.name))
             return True
         return False
@@ -487,7 +487,7 @@ class RecoveryManager:
                 checkpoints.append(RecoveryCheckpoint(**data))
             except Exception as e:
                 console.print(safe_t('recovery.checkpoint.read_warning',
-                                     fallback=f"[#DDA0DD]警告：無法讀取檢查點 {{name}}: {{error}}[/#DDA0DD]",
+                                     fallback=f"[#E8C4F0]警告:無法讀取檢查點 {{name}}: {{error}}[/#E8C4F0]",
                                      name=checkpoint_file.name,
                                      error=str(e)))
 
@@ -498,15 +498,15 @@ class RecoveryManager:
         checkpoints = self.list_checkpoints()
 
         if not checkpoints:
-            console.print(safe_t('recovery.checkpoint.none', fallback='[#DDA0DD]沒有可恢復的檢查點[/#DDA0DD]'))
+            console.print(safe_t('recovery.checkpoint.none', fallback='[#E8C4F0]沒有可恢復的檢查點[/#E8C4F0]'))
             return
 
         table = Table(title=safe_t('recovery.checkpoint.table_title', fallback='可恢復的檢查點'))
         table.add_column(safe_t('recovery.checkpoint.col_task_id', fallback='任務 ID'), style="#87CEEB")
         table.add_column(safe_t('recovery.checkpoint.col_type', fallback='類型'), style="green")
-        table.add_column(safe_t('recovery.checkpoint.col_progress', fallback='進度'), style="#DDA0DD")
+        table.add_column(safe_t('recovery.checkpoint.col_progress', fallback='進度'), style="#E8C4F0")
         table.add_column(safe_t('recovery.checkpoint.col_time', fallback='時間'), style="dim")
-        table.add_column(safe_t('recovery.checkpoint.col_status', fallback='狀態'), style="#DDA0DD")
+        table.add_column(safe_t('recovery.checkpoint.col_status', fallback='狀態'), style="#E8C4F0")
 
         for cp in checkpoints:
             progress = f"{len(cp.completed_steps)}/{cp.total_steps}"
@@ -526,7 +526,7 @@ class RecoveryManager:
         清理舊的恢復檢查點
 
         Args:
-            days: 保留天數，超過此天數的檢查點將被刪除
+            days: 保留天數,超過此天數的檢查點將被刪除
         """
         cutoff_time = datetime.now().timestamp() - (days * 24 * 60 * 60)
         deleted = 0
@@ -543,10 +543,10 @@ class RecoveryManager:
 
 
 # ============================================================================
-# 錯誤記錄器（Structured Logging）
+# 錯誤記錄器(Structured Logging)
 # ============================================================================
-# 提供結構化錯誤日誌功能：
-# - JSONL 格式儲存（每行一個 JSON 物件）
+# 提供結構化錯誤日誌功能:
+# - JSONL 格式儲存(每行一個 JSON 物件)
 # - 包含完整堆疊追蹤
 # - 支援上下文資訊
 # - 易於後續分析與除錯
@@ -556,7 +556,7 @@ class ErrorLogger:
     """
     錯誤記錄器
 
-    使用 JSONL（JSON Lines）格式記錄錯誤，方便後續分析。
+    使用 JSONL(JSON Lines)格式記錄錯誤,方便後續分析。
     每個錯誤記錄包含時間戳、錯誤類型、訊息、堆疊追蹤等資訊。
     """
 
@@ -565,7 +565,7 @@ class ErrorLogger:
         初始化錯誤記錄器
 
         Args:
-            log_dir: 日誌目錄，預設為 ~/gemini_videos/.logs
+            log_dir: 日誌目錄,預設為 ~/gemini_videos/.logs
         """
         if log_dir is None:
             log_dir = os.path.join(
@@ -598,12 +598,12 @@ class ErrorLogger:
             'context': context or {}
         }
 
-        # 如果是自訂錯誤，包含額外資訊
+        # 如果是自訂錯誤,包含額外資訊
         if isinstance(error, GeminiVideoError):
             log_entry.update(error.to_dict())
 
-        # 寫入日誌檔案（JSONL 格式：每行一個 JSON 物件）
-        # 使用 append 模式，不會覆蓋現有日誌
+        # 寫入日誌檔案(JSONL 格式:每行一個 JSON 物件)
+        # 使用 append 模式,不會覆蓋現有日誌
         # ensure_ascii=False 保留中文字符
         with open(self.error_log_path, 'a', encoding='utf-8') as f:
             f.write(json.dumps(log_entry, ensure_ascii=False) + '\n')
@@ -618,11 +618,11 @@ class ErrorLogger:
         Returns:
             錯誤統計資料
         """
-        # 如果日誌檔案不存在，返回空統計
+        # 如果日誌檔案不存在,返回空統計
         if not self.error_log_path.exists():
             return {'total': 0, 'by_type': {}, 'by_severity': {}}
 
-        # 計算時間截止點（只統計最近 N 天的錯誤）
+        # 計算時間截止點(只統計最近 N 天的錯誤)
         cutoff_time = datetime.now().timestamp() - (days * 24 * 60 * 60)
 
         # 初始化統計結構
@@ -644,11 +644,11 @@ class ErrorLogger:
                     if entry_time >= cutoff_time:
                         stats['total'] += 1
 
-                        # 統計錯誤類型（APIError, FileProcessingError...）
+                        # 統計錯誤類型(APIError, FileProcessingError...)
                         error_type = entry.get('type', 'Unknown')
                         stats['by_type'][error_type] = stats['by_type'].get(error_type, 0) + 1
 
-                        # 統計嚴重程度（LOW, MEDIUM, HIGH, CRITICAL）
+                        # 統計嚴重程度(LOW, MEDIUM, HIGH, CRITICAL)
                         severity = entry.get('severity', 'Unknown')
                         stats['by_severity'][severity] = stats['by_severity'].get(severity, 0) + 1
 
@@ -663,19 +663,19 @@ class ErrorLogger:
         stats = self.get_error_stats(days)
 
         console.print(safe_t('error.stats.title',
-                             fallback=f"\n[bold #87CEEB]📊 錯誤統計（最近 {{days}} 天）[/bold #87CEEB]\n",
+                             fallback=f"\n[bold #87CEEB]📊 錯誤統計(最近 {{days}} 天)[/bold #87CEEB]\n",
                              days=days))
         console.print(safe_t('error.stats.total',
-                             fallback=f"總錯誤數：{{total}}",
+                             fallback=f"總錯誤數:{{total}}",
                              total=stats['total']))
 
         if stats['by_type']:
-            console.print(safe_t('error.stats.by_type', fallback="\n[#DDA0DD]錯誤類型分佈：[/#DDA0DD]"))
+            console.print(safe_t('error.stats.by_type', fallback="\n[#E8C4F0]錯誤類型分佈:[/#E8C4F0]"))
             for error_type, count in sorted(stats['by_type'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {error_type}: {count}")
 
         if stats['by_severity']:
-            console.print(safe_t('error.stats.by_severity', fallback="\n[#DDA0DD]嚴重程度分佈：[/#DDA0DD]"))
+            console.print(safe_t('error.stats.by_severity', fallback="\n[#E8C4F0]嚴重程度分佈:[/#E8C4F0]"))
             for severity, count in sorted(stats['by_severity'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {severity}: {count}")
 
@@ -722,7 +722,7 @@ def suggest_solutions(error: Exception) -> List[str]:
         ])
     elif isinstance(error, FFmpegError):
         suggestions.extend([
-            "確認 ffmpeg 已安裝：brew install ffmpeg",
+            "確認 ffmpeg 已安裝:brew install ffmpeg",
             "檢查 ffmpeg 版本是否符合要求",
             "確認影片格式是否支援",
             "檢查影片檔案是否損壞"
@@ -731,10 +731,10 @@ def suggest_solutions(error: Exception) -> List[str]:
     return suggestions
 
 
-# ==================== 使用範例（僅供參考，不會執行）====================
+# ==================== 使用範例(僅供參考,不會執行)====================
 
 if __name__ == "__main__":
-    # 範例 1：使用重試裝飾器
+    # 範例 1:使用重試裝飾器
     @retry_on_error(max_retries=3, delay=1.0, backoff=2.0)
     def risky_api_call():
         """可能失敗的 API 呼叫"""
@@ -743,7 +743,7 @@ if __name__ == "__main__":
             raise APIError("API 暫時無法使用", api_name="Gemini")
         return "成功"
 
-    # 範例 2：使用自訂錯誤與建議
+    # 範例 2:使用自訂錯誤與建議
     try:
         raise FileProcessingError(
             "無法處理影片檔案",
@@ -757,7 +757,7 @@ if __name__ == "__main__":
     except GeminiVideoError as e:
         ErrorFormatter.display_error(e)
 
-    # 範例 3：使用恢復管理器
+    # 範例 3:使用恢復管理器
     recovery_mgr = RecoveryManager()
 
     # 保存檢查點
@@ -772,7 +772,7 @@ if __name__ == "__main__":
     # 顯示檢查點
     recovery_mgr.display_checkpoints()
 
-    # 範例 4：使用錯誤記錄器
+    # 範例 4:使用錯誤記錄器
     error_logger = ErrorLogger()
 
     try:

@@ -66,12 +66,181 @@ common:
   lines: 줄
   files: 파일
   bytes: 바이트
+
+  # 상태 동사 (미디어 메뉴 등에 사용)
+  generating: "생성 중"
+  analyzing: "분석 중"
+  saving: "저장 중"
+
+# ============================================================================
+# 멀티미디어 메뉴 카테고리 (media)
+# ============================================================================
+media_menu:
+  # 메뉴 제목
+  title: "[bold COLOR_MACARON_PURPLE]🎬 멀티미디어 제작 센터[/bold COLOR_MACARON_PURPLE]"
+
+  # 섹션 제목
+  section:
+    ai_generation: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 생성[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    video_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 비디오 처리[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    audio_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 오디오 처리[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    ai_analysis: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 분석 도구[/bold COLOR_MACARON_PURPLE_LIGHT]"
+
+  # 메뉴 항목
+  item:
+    # AI 생성
+    flow_video: "  [1] Flow 비디오 생성 (1080p 장편 비디오, 자연어)"
+    veo_video: "  [2] Veo 비디오 생성 (8초 빠른 생성)"
+    imagen_generate: "  [12] Imagen 이미지 생성 (Text-to-Image)"
+    vision_imagen: "  [13] 스마트 이미지 제작 (Gemini Vision + Imagen)"
+
+    # 비디오 처리
+    video_preprocess: "  [3] 비디오 전처리 (분할/키프레임/정보)"
+    video_concat: "  [4] 비디오 결합 (무손실)"
+    video_trim: "  [15] 시간 트리밍 (무손실)"
+    video_filter: "  [16] 필터 효과 (7가지 스타일)"
+    video_speed: "  [17] 속도 조정 (빨리감기/슬로우모션)"
+    video_watermark: "  [18] 워터마크 추가"
+    subtitle_generate: "  [19] 자막 생성 (음성 인식 + 번역)"
+    subtitle_burn: "  [20] 자막 삽입 (비디오 포함)"
+
+    # 오디오 처리
+    audio_extract: "  [7] 오디오 추출"
+    audio_merge: "  [8] 오디오 병합"
+    audio_volume: "  [9] 볼륨 조정"
+    audio_background: "  [10] 배경 음악"
+    audio_fade: "  [11] 페이드 인/아웃"
+
+    # AI 분석
+    media_analyzer: "  [0] 미디어 분석기 (이미지/비디오 AI 분석)"
+    video_chat: "  [21] 비디오 대화형 채팅 (업로드 후 연속 질문)"
+    video_analysis: "  [5] 비디오 콘텐츠 분석"
+    image_analysis: "  [6] 이미지 콘텐츠 분석"
+
+  # 결합 항목
+  audio_group: "  [7] 오디오 추출  [8] 오디오 병합  [9] 볼륨 조정"
+  audio_group2: "  [10] 배경 음악  [11] 페이드 인/아웃"
+  analysis_group: "  [5] 비디오 콘텐츠 분석  [6] 이미지 콘텐츠 분석"
+
+  # 내비게이션
+  back: "\n  [99] 메인 메뉴로 돌아가기\n"
+
+# ============================================================================
+# 슬래시 명령 시스템 (slash_commands)
+# / 로 시작하는 인터랙티브 명령
+# ============================================================================
+slash_commands:
+  # 기본 명령
+  help:
+    cmd: "/help"
+    desc: "📖 자세한 도움말 시스템 표시"
+
+  exit:
+    cmd: "/exit"
+    desc: "🚪 프로그램 종료"
+
+  quit:
+    cmd: "/quit"
+    desc: "🚪 프로그램 종료"
+
+  clear:
+    cmd: "/clear"
+    desc: "🗑️  대화 기록 지우기"
+
+  # 설정 관련
+  lang:
+    cmd: "/lang"
+    desc: "🌐 언어 전환 (zh-TW/en/ja/ko)"
+
+  model:
+    cmd: "/model"
+    desc: "🤖 AI 모델 전환"
+
+  cache:
+    cmd: "/cache"
+    desc: "💾 캐시 관리 메뉴"
+
+  config:
+    cmd: "/config"
+    desc: "⚙️  구성 관리"
+
+  # 미디어 기능
+  media:
+    cmd: "/media"
+    desc: "🎬 미디어 기능 메뉴"
+
+  image:
+    cmd: "/image"
+    desc: "🖼️  이미지 분석"
+
+  video:
+    cmd: "/video"
+    desc: "🎥 동영상 분석"
+
+  # 메모리 관리
+  clear_memory:
+    cmd: "/clear-memory"
+    desc: "🧹 메모리 정리"
+
+  memory_stats:
+    cmd: "/memory-stats"
+    desc: "📊 메모리 통계"
+
+  help_memory:
+    cmd: "/help-memory"
+    desc: "ℹ️  메모리 관리 도움말"
+
+  # 체크포인트 시스템
+  checkpoints:
+    cmd: "/checkpoints"
+    desc: "📌 모든 체크포인트 나열"
+
+  checkpoint:
+    cmd: "/checkpoint"
+    desc: "💾 수동 체크포인트 생성"
+
+  rewind:
+    cmd: "/rewind"
+    desc: "⏪ 체크포인트로 되감기"
+
+  help_checkpoint:
+    cmd: "/help-checkpoint"
+    desc: "ℹ️  체크포인트 시스템 도움말"
+
+  # 대화 기록
+  search:
+    cmd: "/search"
+    desc: "🔍 대화 기록 검색"
+
+  history:
+    cmd: "/history"
+    desc: "📜 대화 기록 보기"
+
+  export:
+    cmd: "/export"
+    desc: "📤 대화 내보내기"
+
+  stats:
+    cmd: "/stats"
+    desc: "📊 대화 통계 정보"
+
+  # 디버그 도구
+  debug:
+    cmd: "/debug"
+    desc: "🐛 디버그 도구"
+
+  test:
+    cmd: "/test"
+    desc: "🧪 테스트 도구"
+
 chat:
   welcome: ChatGemini에 오신 것을 환영합니다!
   welcome_back: 돌아오신 것을 환영합니다!
   exit_message: 이용해 주셔서 감사합니다, 안녕히 가세요!
   goodbye: 안녕히 가세요!
   user_prompt: 당신
+  user_prompt_with_hint: "당신 ([ 매개변수)"
+  user_prompt_with_hint_detailed: "당신 ([ 누르면 think/max 매개변수 표시)"
   model_prompt: 모델
   system_prompt: 시스템
   assistant_prompt: 어시스턴트
@@ -93,6 +262,7 @@ chat:
 
     # 기능 메뉴
     cache_desc: "캐시 관리 메뉴"
+    config_desc: "구성 관리（데이터베이스 설정）"
     media_desc: "미디어 기능 메뉴"
     cli_desc: "Gemini CLI 관리 도구"
     debug_desc: "디버그 및 테스트 도구"
@@ -111,6 +281,7 @@ chat:
     # 대화 기록
     search_desc: "대화 기록 검색"
     history_desc: "대화 기록 보기"
+    export_desc: "대화 내보내기 (json/md/txt)"
     stats_desc: "대화 통계"
 
     # 빠른 구문
@@ -247,6 +418,16 @@ pricing:
   scene_detection_cost: "[dim]💰 장면 감지 비용: NT${twd} (${usd} USD)[/dim]"
   tokens_detail: "[dim]   입력: {input:,} tokens, 출력: {output:,} tokens, 씽킹: {thinking:,} tokens[/dim]"
   accumulated_cost: "[dim]   누적 비용: NT${twd} (${usd} USD)[/dim]"
+
+  # 예산 관리 경고 메시지
+  budget_exceeded_daily: "일일 예산 초과：${projected} > ${limit}"
+  budget_exceeded_monthly: "월간 예산 초과：${projected} > ${limit}"
+  budget_usage_daily: "일일 예산의 {percent}% 사용"
+  budget_insufficient: "예산 부족：{warning}"
+  budget_warning_prefix: "경고：{warning}"
+
+  # 예산 관리 상태
+  today_usage: "오늘 사용량：{percent}%"
 
 translator:
   engine_ready: "✅ deep-translator 준비 완료 (메인 엔진, 완전 무료)"
@@ -408,7 +589,12 @@ help:
   need_help: 도움이 필요하십니까? /help로 사용 가능한 명령 표시
   type_help: /help [주제]로 자세한 정보 표시
   no_help_available: 이 주제에 대한 도움말이 없습니다
-media:
+
+# ============================================================================
+# Media Common Terms (通用媒體詞彙)
+# Renamed from media_menu to avoid conflict with menu items (line 78)
+# ============================================================================
+media_common:
   image: 이미지
   image_analysis: 이미지 분석
   image_generation: 이미지 생성
@@ -543,7 +729,7 @@ memory:
 model:
   gemini_pro: Gemini Pro
   gemini_flash: Gemini Flash
-  gemini_flash_8b: Gemini Flash 8B
+  gemini_flash_lite: Gemini Flash Lite
   loading: 모델 로딩 중
   loaded: 모델이 로드되었습니다
   switching: 모델 전환 중
@@ -559,7 +745,7 @@ model:
   col_name: 모델 이름
   col_thinking_range: Thinking Token 범위
   col_price_range: 가격 범위 (NT$)
-  select_prompt: 옵션을 입력하세요 (1-3 또는 0)
+  select_prompt: 옵션을 입력하세요 (1-{count} 또는 0)
   validation_warning: ⚠️  모델 가용성을 확인할 수 없습니다. 입력한 모델 이름을 직접 사용합니다
   enter_name: 모델 이름을 입력하세요
   name_empty: 모델 이름은 비워둘 수 없습니다. 다시 시도하세요
@@ -597,3 +783,83 @@ format:
   unit:
     segment: "세그먼트"
     second: "초"
+
+# CodeGemini MCP Detector
+mcp:
+  detector:
+    postgresql_desc: "PostgreSQL 데이터베이스 작업"
+    puppeteer_desc: "웹 자동화 및 스크래핑"
+    slack_desc: "Slack 팀 협업"
+    drive_desc: "Google Drive 파일 관리"
+    contains_keywords: "키워드 포함: {keywords}"
+    match_patterns: "{count}개 패턴 일치"
+    match_rule: "규칙 일치"
+    rule_added: "사용자 정의 규칙 추가됨: {name}"
+    rule_removed: "규칙 제거됨: {name}"
+    rules_list: "MCP Server 감지 규칙 목록"
+    description: "설명"
+    keywords_count: "키워드 수"
+    patterns_count: "패턴 수"
+    confidence_weight: "신뢰도 가중치"
+    demo_title: "MCP Server 스마트 감지기 데모"
+    test: "테스트"
+    detected_servers: "{count}개의 관련 Server 감지됨"
+    confidence: "신뢰도"
+    no_servers_detected: "MCP Server가 감지되지 않았습니다"
+
+# CodeGemini Templates
+templates:
+  not_list_warning: "경고: '{name}'은(는) 리스트가 아닙니다. 루프를 건너뜁니다"
+  missing_variables: "경고: 변수 누락: {vars}"
+  test_title: "CodeGemini 템플릿 엔진 테스트"
+  test1: "테스트 1: 간단한 변수 보간"
+  test2: "테스트 2: 기본값"
+  test3: "테스트 3: 조건 로직"
+  test4: "테스트 4: 루프"
+  test5: "테스트 5: 템플릿 라이브러리"
+  result: "결과"
+  premium_member: "프리미엄 회원"
+  normal_member: "일반 회원"
+  all_tests_complete: "모든 테스트 완료"
+
+# CodeGemini Test Generator
+test_gen:
+  analyzing_file: "파일 분석 중: {path}"
+  analysis_complete: "분석 완료"
+  functions: "함수"
+  classes: "클래스"
+  analysis_failed: "분석 실패: {error}"
+  generating_tests: "테스트 코드 생성 중..."
+  unsupported_framework: "지원하지 않는 테스트 프레임워크: {framework}"
+  test_file_saved: "테스트 파일 저장됨: {path}"
+  title: "CodeGemini 테스트 생성기"
+  usage: "사용법"
+  examples: "예제"
+  generated_code: "생성된 테스트 코드"
+
+# CodeGemini Doc Generator
+doc_gen:
+  scanning_project: "프로젝트 스캔 중: {path}"
+  found_files: "{count}개의 Python 파일 발견"
+  analysis_complete: "분석 완료: {count}개 모듈"
+  analysis_warning: "경고: {path}를 분석할 수 없음 - {error}"
+  generating_readme: "README.md 생성 중..."
+  readme_saved: "README 저장됨: {path}"
+  generating_api: "API 문서 생성 중..."
+  api_saved: "API 문서 저장됨: {path}"
+  title: "CodeGemini 문서 생성기"
+  usage: "사용법"
+  examples: "예제"
+  readme_title: "README.md"
+
+# CodeGemini Codebase Embedding
+embedding:
+  faiss_initialized: "✓ FAISS 인덱스 초기화됨 (차원: {dim})"
+  cache_enabled: "✓ EmbeddingCache 활성화됨 (maxsize={size})"
+  cache_unloaded: "✓ EmbeddingCache 언로드됨 (해제된 메모리: ~{mem}MB)"
+  cache_reloaded: "✓ EmbeddingCache 재활성화됨"
+  db_initialized: "✓ VectorDatabase 초기화됨: {path} (FAISS 활성화)"
+
+# Common
+common:
+  unit: "개"

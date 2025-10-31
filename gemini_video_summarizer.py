@@ -109,13 +109,13 @@ class VideoSummarizer:
         Returns:
             VideoSummary 物件
         """
-        console.print(safe_t('common.analyzing', fallback='\n[bold #DDA0DD]📝 智能影片摘要分析[/bold #DDA0DD]\n'))
+        console.print(safe_t('common.analyzing', fallback='\n[bold #E8C4F0]📝 智能影片摘要分析[/bold #E8C4F0]\n'))
         console.print(safe_t('common.message', fallback='📁 影片：{basename}', basename=os.path.basename(video_path)))
 
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print(safe_t('error.cannot_process', fallback='[dim #DDA0DD]錯誤：無法獲取影片資訊[/red]'))
+            console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]錯誤：無法獲取影片資訊[/red]'))
             return None
 
         duration = info['duration']
@@ -126,18 +126,18 @@ class VideoSummarizer:
         # 2. 場景檢測
         scenes = []
         if self.use_scene_detection:
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]📦 執行場景檢測...[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]📦 執行場景檢測...[/#E8C4F0]'))
             # 根據影片長度調整關鍵幀數
             num_keyframes = min(30, max(10, int(duration / 10)))
             scenes = self.scene_detector.detect_scenes(video_path, num_keyframes=num_keyframes)
             console.print(safe_t('common.completed', fallback='✓ 檢測到 {len(scenes)} 個場景', scenes_count=len(scenes)))
 
         # 3. 生成內容概覽
-        console.print(safe_t('common.analyzing', fallback='\n[#DDA0DD]🔍 分析影片內容...[/#DDA0DD]'))
+        console.print(safe_t('common.analyzing', fallback='\n[#E8C4F0]🔍 分析影片內容...[/#E8C4F0]'))
         content_overview = self._analyze_content_overview(video_path, scenes, duration)
 
         # 4. 生成摘要
-        console.print(safe_t('common.generating', fallback='\n[#DDA0DD]✍️  生成多層次摘要...[/#DDA0DD]'))
+        console.print(safe_t('common.generating', fallback='\n[#E8C4F0]✍️  生成多層次摘要...[/#E8C4F0]'))
         summaries = self._generate_multilevel_summaries(
             video_path,
             scenes,
@@ -146,11 +146,11 @@ class VideoSummarizer:
         )
 
         # 5. 提取主題和標籤
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🏷️  提取主題和標籤...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🏷️  提取主題和標籤...[/#E8C4F0]'))
         topics_and_tags = self._extract_topics_and_tags(scenes, content_overview)
 
         # 6. 創建章節
-        console.print(safe_t('common.generating', fallback='\n[#DDA0DD]📑 生成章節標記...[/#DDA0DD]'))
+        console.print(safe_t('common.generating', fallback='\n[#E8C4F0]📑 生成章節標記...[/#E8C4F0]'))
         chapters = self._create_chapters(video_path, scenes, num_chapters)
         console.print(safe_t('common.completed', fallback='✓ 已生成 {len(chapters)} 個章節', chapters_count=len(chapters)))
 
@@ -172,7 +172,7 @@ class VideoSummarizer:
             confidence=content_overview.get('confidence', 0.8)
         )
 
-        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 摘要生成完成！[/green]'))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 摘要生成完成！[/green]'))
 
         return summary
 
@@ -286,7 +286,7 @@ class VideoSummarizer:
             return summaries
 
         except Exception as e:
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：生成摘要時出錯，使用預設摘要: {e}[/#DDA0DD]', e=e))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：生成摘要時出錯，使用預設摘要: {e}[/#E8C4F0]', e=e))
             return self._generate_default_summaries(scenes, overview)
 
     def _build_summary_prompt(
@@ -520,45 +520,45 @@ LONG: [長摘要]
     def display_summary(self, summary: VideoSummary):
         """顯示摘要"""
         if not summary:
-            console.print(safe_t('common.message', fallback='[#DDA0DD]沒有可顯示的摘要[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]沒有可顯示的摘要[/#E8C4F0]'))
             return
 
         console.print("\n" + "=" * 80)
-        console.print(safe_t('common.message', fallback='[bold #DDA0DD]📝 影片摘要：{summary.video_name}[/bold #DDA0DD]', video_name=summary.video_name))
+        console.print(safe_t('common.message', fallback='[bold #E8C4F0]📝 影片摘要：{summary.video_name}[/bold #E8C4F0]', video_name=summary.video_name))
         console.print("=" * 80 + "\n")
 
         # 1. 基本資訊
         info_panel = f"""
-[#DDA0DD]影片名稱：[/#DDA0DD] {summary.video_name}
-[#DDA0DD]總長度：[/#DDA0DD] {self._format_time(summary.duration)}
-[#DDA0DD]類別：[/#DDA0DD] {summary.category}
-[#DDA0DD]語言：[/#DDA0DD] {summary.language}
-[#DDA0DD]章節數：[/#DDA0DD] {len(summary.chapters)}
-[#DDA0DD]置信度：[/#DDA0DD] {summary.confidence:.1%}
+[#E8C4F0]影片名稱：[/#E8C4F0] {summary.video_name}
+[#E8C4F0]總長度：[/#E8C4F0] {self._format_time(summary.duration)}
+[#E8C4F0]類別：[/#E8C4F0] {summary.category}
+[#E8C4F0]語言：[/#E8C4F0] {summary.language}
+[#E8C4F0]章節數：[/#E8C4F0] {len(summary.chapters)}
+[#E8C4F0]置信度：[/#E8C4F0] {summary.confidence:.1%}
 """
-        console.print(Panel(info_panel, title="📊 基本資訊", border_style="#DDA0DD"))
+        console.print(Panel(info_panel, title="📊 基本資訊", border_style="#E8C4F0"))
 
         # 2. 建議標題
-        console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]💡 建議標題：[/bold #DDA0DD] {summary.title}\n', title=summary.title))
+        console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]💡 建議標題：[/bold #E8C4F0] {summary.title}\n', title=summary.title))
 
         # 3. 多層次摘要
-        console.print(safe_t('common.message', fallback='[bold #DDA0DD]📄 摘要內容：[/bold #DDA0DD]\n'))
+        console.print(safe_t('common.message', fallback='[bold #E8C4F0]📄 摘要內容：[/bold #E8C4F0]\n'))
 
-        console.print(Panel(Markdown(summary.short_summary), title="短摘要（社群媒體）", border_style="#DDA0DD"))
-        console.print(Panel(Markdown(summary.medium_summary), title="中摘要（影片描述）", border_style="#DDA0DD"))
-        console.print(Panel(Markdown(summary.long_summary), title="長摘要（詳細說明）", border_style="#DDA0DD"))
+        console.print(Panel(Markdown(summary.short_summary), title="短摘要（社群媒體）", border_style="#E8C4F0"))
+        console.print(Panel(Markdown(summary.medium_summary), title="中摘要（影片描述）", border_style="#E8C4F0"))
+        console.print(Panel(Markdown(summary.long_summary), title="長摘要（詳細說明）", border_style="#E8C4F0"))
 
         # 4. 主題和標籤
         key_topics_str = ', '.join(summary.key_topics)
-        console.print(safe_t('common.message', fallback='\n[bold #DDA0DD]🏷️  主要話題：[/bold #DDA0DD] {key_topics_str}', key_topics_str=key_topics_str))
+        console.print(safe_t('common.message', fallback='\n[bold #E8C4F0]🏷️  主要話題：[/bold #E8C4F0] {key_topics_str}', key_topics_str=key_topics_str))
         tags_str = ', '.join(summary.tags[:10])
-        console.print(safe_t('common.message', fallback='[bold #DDA0DD]🔖 標籤：[/bold #DDA0DD] {tags_str}\n', tags_str=tags_str))
+        console.print(safe_t('common.message', fallback='[bold #E8C4F0]🔖 標籤：[/bold #E8C4F0] {tags_str}\n', tags_str=tags_str))
 
         # 5. 章節列表
         if summary.chapters:
-            console.print(safe_t('common.message', fallback='[bold #DDA0DD]📑 章節標記：[/bold #DDA0DD]\n'))
+            console.print(safe_t('common.message', fallback='[bold #E8C4F0]📑 章節標記：[/bold #E8C4F0]\n'))
 
-            table = Table(show_header=True, header_style="bold #DDA0DD")
+            table = Table(show_header=True, header_style="bold #E8C4F0")
             console_width = console.width or 120
             table.add_column("#", width=max(4, int(console_width * 0.03)))
             table.add_column("標題", width=max(25, int(console_width * 0.30)))
@@ -607,7 +607,7 @@ LONG: [長摘要]
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ JSON 已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ JSON 已保存：{output_file}[/green]', output_file=output_file))
 
         # TXT 格式
         if format in ['txt', 'all']:
@@ -640,7 +640,7 @@ LONG: [長摘要]
                         f.write(f"     關鍵要點：{', '.join(chapter.key_points)}\n\n")
 
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ TXT 已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ TXT 已保存：{output_file}[/green]', output_file=output_file))
 
         # Markdown 格式
         if format in ['md', 'all']:
@@ -670,7 +670,7 @@ LONG: [長摘要]
                         f.write(f"**關鍵要點：** {', '.join(chapter.key_points)}  \n\n")
 
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ Markdown 已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ Markdown 已保存：{output_file}[/green]', output_file=output_file))
 
         # YouTube 描述格式
         if format in ['youtube', 'all']:
@@ -688,7 +688,7 @@ LONG: [長摘要]
                 f.write(f"#{'  #'.join(summary.tags[:10])}\n")
 
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ YouTube 描述已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ YouTube 描述已保存：{output_file}[/green]', output_file=output_file))
 
         return str(saved_files[0]) if saved_files else ""
 
@@ -719,7 +719,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(safe_t('error.not_found', fallback='[dim #DDA0DD]錯誤：找不到影片檔案：{args.video}[/red]', video=args.video))
+        console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{args.video}[/red]', video=args.video))
         return
 
     # 創建摘要器

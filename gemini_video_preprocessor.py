@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Gemini 影片預處理模組
-提供影片壓縮、關鍵幀提取、分割等功能，支援 Veo 影片生成
+提供影片壓縮、關鍵幀提取、分割等功能,支援 Veo 影片生成
 """
 import os
 import json
@@ -47,7 +47,7 @@ class VideoPreprocessor:
         初始化預處理器
 
         Args:
-            output_dir: 輸出目錄，預設為 ~/gemini_videos/preprocessed
+            output_dir: 輸出目錄,預設為 ~/gemini_videos/preprocessed
         """
         if output_dir is None:
             # 使用統一輸出目錄配置
@@ -87,10 +87,10 @@ class VideoPreprocessor:
                     )
             else:
                 # 降級方案：顯示基本錯誤訊息
-                console.print(safe_t('error.not_found', fallback='[dim #DDA0DD]錯誤：未找到 ffmpeg 或 ffprobe[/red]'))
-                console.print(safe_t('common.message', fallback='[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'))
+                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg 或 ffprobe[/red]'))
+                console.print(safe_t('common.message', fallback='[#E8C4F0]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#E8C4F0]'))
 
-            raise RuntimeError("ffmpeg 未安裝，請按照上述步驟安裝後重試")
+            raise RuntimeError(safe_t("video_preprocessor.msg_9300_ffmpeg_未安裝_請按照上述步驟安裝", fallback="ffmpeg 未安裝,請按照上述步驟安裝後重試"))
 
     def get_video_info(self, video_path: str) -> Dict:
         """
@@ -100,7 +100,7 @@ class VideoPreprocessor:
             video_path: 影片檔案路徑
 
         Returns:
-            影片資訊字典，包含：
+            影片資訊字典,包含：
             - duration: 時長（秒）
             - width: 寬度
             - height: 高度
@@ -116,10 +116,10 @@ class VideoPreprocessor:
                 from error_fix_suggestions import suggest_video_file_not_found
                 suggest_video_file_not_found(video_path)
             except ImportError:
-                # 如果沒有修復建議模組，使用基本錯誤訊息
+                # 如果沒有修復建議模組,使用基本錯誤訊息
                 pass
 
-            raise FileNotFoundError(f"找不到影片檔案：{video_path}")
+            raise FileNotFoundError(safe_t("video_preprocessor.msg_12200_找不到影片檔案", fallback="找不到影片檔案: {video_path}").format(video_path=video_path))
 
         try:
             # 使用 ffprobe 獲取 JSON 格式的資訊
@@ -158,7 +158,7 @@ class VideoPreprocessor:
                     # 降級方案：顯示基本錯誤訊息
                     pass
 
-                raise ValueError("找不到影片流")
+                raise ValueError(safe_t("video_preprocessor.msg_16100_找不到影片流", fallback="找不到影片流"))
 
             # 組織資訊
             format_data = data.get("format", {})
@@ -185,7 +185,7 @@ class VideoPreprocessor:
             except ImportError:
                 pass
 
-            raise RuntimeError(f"ffprobe 執行失敗：{e.stderr}")
+            raise RuntimeError(safe_t("video_preprocessor.msg_18800_ffprobe_執行失敗", fallback="ffprobe 執行失敗: {stderr}").format(stderr=e.stderr))
         except json.JSONDecodeError as e:
             try:
                 from error_fix_suggestions import suggest_ffprobe_parse_failed
@@ -193,7 +193,7 @@ class VideoPreprocessor:
             except ImportError:
                 pass
 
-            raise RuntimeError(f"解析 ffprobe 輸出失敗：{e}")
+            raise RuntimeError(safe_t("video_preprocessor.msg_19600_解析_ffprobe_輸出失敗", fallback="解析 ffprobe 輸出失敗: {e}").format(e=e))
 
     def _parse_fps(self, fps_str: str) -> float:
         """解析幀率字串（如 '30/1'）"""
@@ -212,12 +212,12 @@ class VideoPreprocessor:
         """
         檢查影片是否符合 API 大小限制（< 2GB）
 
-        ⚠️ 此方法禁止有損壓縮，僅檢查檔案大小
-        若檔案過大，建議使用 split_by_duration() 分割影片
+        ⚠️ 此方法禁止有損壓縮,僅檢查檔案大小
+        若檔案過大,建議使用 split_by_duration() 分割影片
 
         Args:
             video_path: 原始影片路徑
-            target_size_mb: 目標大小（MB），預設 1900MB
+            target_size_mb: 目標大小（MB）,預設 1900MB
             output_filename: 未使用（保留相容性）
 
         Returns:
@@ -232,16 +232,16 @@ class VideoPreprocessor:
                 from error_fix_suggestions import suggest_video_file_not_found
                 suggest_video_file_not_found(video_path)
             except ImportError:
-                # 如果沒有修復建議模組，使用基本錯誤訊息
+                # 如果沒有修復建議模組,使用基本錯誤訊息
                 pass
 
-            raise FileNotFoundError(f"找不到影片檔案：{video_path}")
+            raise FileNotFoundError(safe_t("video_preprocessor.msg_23800_找不到影片檔案", fallback="找不到影片檔案: {video_path}").format(video_path=video_path))
 
         # 獲取影片資訊
         info = self.get_video_info(video_path)
         current_size_mb = info["size_mb"]
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]📊 影片資訊：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 影片資訊：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  檔案大小：{current_size_mb:.2f} MB', current_size_mb=current_size_mb))
         console.print(safe_t('common.message', fallback='  解析度：{width}x{height}', width=info['width'], height=info['height']))
         console.print(safe_t('common.message', fallback='  時長：{duration:.2f} 秒', duration=info["duration"]))
@@ -249,22 +249,20 @@ class VideoPreprocessor:
 
         # 檢查是否符合大小要求
         if current_size_mb <= target_size_mb:
-            console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/green]', current_size_mb=current_size_mb, target_size_mb=target_size_mb))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/green]', current_size_mb=current_size_mb, target_size_mb=target_size_mb))
             return video_path
 
-        # 檔案過大，拒絕處理
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]✗ 錯誤：影片檔案過大[/red]'))
+        # 檔案過大,拒絕處理
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 錯誤：影片檔案過大[/red]'))
         console.print(safe_t('common.message', fallback='  當前大小：{current_size_mb:.2f} MB', current_size_mb=current_size_mb))
         console.print(safe_t('common.message', fallback='  限制大小：{target_size_mb} MB', target_size_mb=target_size_mb))
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]建議解決方案：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]建議解決方案：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  1. 使用 split_by_duration() 分割影片為多個小片段'))
         console.print(safe_t('common.message', fallback='  2. 在影片編輯軟體中預先分割影片'))
         console.print(safe_t('common.message', fallback='  3. 使用較短的影片片段'))
 
         raise RuntimeError(
-            f"影片檔案過大（{current_size_mb:.2f} MB > {target_size_mb} MB）。"
-            f"請使用 split_by_duration() 分割影片，或使用較小的影片檔案。"
-            f"系統禁止有損壓縮以保持影片品質。"
+            safe_t("video_preprocessor.msg_26500_影片檔案過大", fallback="影片檔案過大 ({current_size_mb:.2f} MB > {target_size_mb} MB)。請使用 split_by_duration() 分割影片,或使用較小的影片檔案。系統禁止有損壓縮以保持影片品質。").format(current_size_mb=current_size_mb, target_size_mb=target_size_mb)
         )
 
     def extract_keyframes(
@@ -278,7 +276,7 @@ class VideoPreprocessor:
 
         Args:
             video_path: 影片路徑
-            num_frames: 提取幀數，預設 3（Veo 最多支援 3 張）
+            num_frames: 提取幀數,預設 3（Veo 最多支援 3 張）
             method: 提取方法
                 - 'uniform': 等距提取（開頭、中間、結尾）
                 - 'scene': 場景檢測（未實作）
@@ -292,20 +290,20 @@ class VideoPreprocessor:
                 from error_fix_suggestions import suggest_video_file_not_found
                 suggest_video_file_not_found(video_path)
             except ImportError:
-                # 如果沒有修復建議模組，使用基本錯誤訊息
+                # 如果沒有修復建議模組,使用基本錯誤訊息
                 pass
 
-            raise FileNotFoundError(f"找不到影片檔案：{video_path}")
+            raise FileNotFoundError(safe_t("video_preprocessor.msg_29800_找不到影片檔案", fallback="找不到影片檔案: {video_path}").format(video_path=video_path))
 
         if num_frames > 3:
-            console.print(safe_t('common.warning', fallback='[#DDA0DD]警告：Veo 最多支援 3 張參考圖片，將限制為 3 張[/#DDA0DD]'))
+            console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：Veo 最多支援 3 張參考圖片,將限制為 3 張[/#E8C4F0]'))
             num_frames = 3
 
         # 獲取影片資訊
         info = self.get_video_info(video_path)
         duration = info["duration"]
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]🖼️  提取關鍵幀...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]🖼️  提取關鍵幀...[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  影片時長：{duration:.2f} 秒', duration=duration))
         console.print(safe_t('common.message', fallback='  提取數量：{num_frames} 幀', num_frames=num_frames))
 
@@ -345,7 +343,7 @@ class VideoPreprocessor:
             except subprocess.CalledProcessError as e:
                 console.print(safe_t('error.failed', fallback='  ✗ 提取幀 {i+1} 失敗：{e}', frame_num=i+1, e=e))
 
-        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 已提取 {len(frame_paths)} 幀[/green]', frame_paths_count=len(frame_paths)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已提取 {len(frame_paths)} 幀[/green]', frame_paths_count=len(frame_paths)))
         for path in frame_paths:
             console.print(f"  - {path}")
 
@@ -379,8 +377,8 @@ class VideoPreprocessor:
 
         Args:
             video_path: 影片路徑
-            segment_duration: 片段時長（秒），預設 8 秒（Veo 限制）
-            output_prefix: 輸出檔名前綴，預設為原檔名
+            segment_duration: 片段時長（秒）,預設 8 秒（Veo 限制）
+            output_prefix: 輸出檔名前綴,預設為原檔名
 
         Returns:
             分割後的影片路徑列表
@@ -391,10 +389,10 @@ class VideoPreprocessor:
                 from error_fix_suggestions import suggest_video_file_not_found
                 suggest_video_file_not_found(video_path)
             except ImportError:
-                # 如果沒有修復建議模組，使用基本錯誤訊息
+                # 如果沒有修復建議模組,使用基本錯誤訊息
                 pass
 
-            raise FileNotFoundError(f"找不到影片檔案：{video_path}")
+            raise FileNotFoundError(safe_t("video_preprocessor.msg_39700_找不到影片檔案", fallback="找不到影片檔案: {video_path}").format(video_path=video_path))
 
         # 獲取影片資訊
         info = self.get_video_info(video_path)
@@ -403,7 +401,7 @@ class VideoPreprocessor:
         # 計算片段數量
         num_segments = int(duration / segment_duration) + (1 if duration % segment_duration > 0 else 0)
 
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]✂️  分割影片...[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]✂️  分割影片...[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  影片時長：{duration:.2f} 秒', duration=duration))
         console.print(safe_t('common.message', fallback='  片段時長：{segment_duration} 秒', segment_duration=segment_duration))
         console.print(safe_t('common.message', fallback='  片段數量：{num_segments}', num_segments=num_segments))
@@ -422,7 +420,7 @@ class VideoPreprocessor:
             TaskProgressColumn(),
             console=console,
         ) as progress:
-            task = progress.add_task("分割中...", total=num_segments)
+            task = progress.add_task(safe_t("video_preprocessor.msg_42500_分割中", fallback="分割中..."), total=num_segments)
 
             for i in range(num_segments):
                 start_time = i * segment_duration
@@ -450,16 +448,16 @@ class VideoPreprocessor:
                     progress.update(task, advance=1)
                 except subprocess.CalledProcessError as e:
                     stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
-                    console.print(safe_t('error.failed', fallback='[dim #DDA0DD]✗ 分割片段 {i+1} 失敗[/red]', frame_num=i+1))
+                    console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分割片段 {i+1} 失敗[/red]', frame_num=i+1))
 
                     # 顯示轉碼失敗修復建議
                     try:
                         from error_fix_suggestions import suggest_video_transcode_failed
                         suggest_video_transcode_failed(video_path, output_path, stderr)
                     except ImportError:
-                        console.print(safe_t('error.failed', fallback='[dim #DDA0DD]錯誤：{stderr[:200]}[/red]', stderr_short=stderr[:200]))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：{stderr[:200]}[/red]', stderr_short=stderr[:200]))
 
-        console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 已分割為 {len(segment_paths)} 個片段[/green]', segment_paths_count=len(segment_paths)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已分割為 {len(segment_paths)} 個片段[/green]', segment_paths_count=len(segment_paths)))
         for i, path in enumerate(segment_paths, 1):
             segment_info = self.get_video_info(path)
             console.print(f"  {i}. {os.path.basename(path)} ({segment_info['duration']:.2f}s)")
@@ -472,9 +470,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print(safe_t('common.message', fallback='[#DDA0DD]用法：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='[#E8C4F0]用法：[/#E8C4F0]'))
         console.print("  python gemini_video_preprocessor.py <video_path> [command]")
-        console.print(safe_t('common.message', fallback='\n[#DDA0DD]命令：[/#DDA0DD]'))
+        console.print(safe_t('common.message', fallback='\n[#E8C4F0]命令：[/#E8C4F0]'))
         console.print(safe_t('common.message', fallback='  info         - 顯示影片資訊（預設）'))
         console.print(safe_t('common.message', fallback='  compress     - 壓縮影片'))
         console.print(safe_t('common.message', fallback='  keyframes    - 提取關鍵幀'))
@@ -489,28 +487,28 @@ def main():
     try:
         if command == "info":
             info = preprocessor.get_video_info(video_path)
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]📊 影片資訊：[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 影片資訊：[/#E8C4F0]'))
             for key, value in info.items():
                 console.print(f"  {key}: {value}")
 
         elif command == "compress":
             output = preprocessor.compress_for_api(video_path)
-            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 壓縮完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 壓縮完成：{output}[/green]', output=output))
 
         elif command == "keyframes":
             frames = preprocessor.extract_keyframes(video_path)
-            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 已提取 {len(frames)} 幀[/green]', frames_count=len(frames)))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已提取 {len(frames)} 幀[/green]', frames_count=len(frames)))
 
         elif command == "split":
             segments = preprocessor.split_by_duration(video_path)
-            console.print(safe_t('common.completed', fallback='\n[#DA70D6]✓ 已分割為 {len(segments)} 個片段[/green]', segments_count=len(segments)))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已分割為 {len(segments)} 個片段[/green]', segments_count=len(segments)))
 
         else:
-            console.print(safe_t('common.message', fallback='[dim #DDA0DD]未知命令：{command}[/red]', command=command))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知命令：{command}[/red]', command=command))
             sys.exit(1)
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #DDA0DD]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
         sys.exit(1)
 
 

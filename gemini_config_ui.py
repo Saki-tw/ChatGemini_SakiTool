@@ -34,10 +34,10 @@ CODEBASE_EMBEDDING_ENABLED = False
 
 # 從 gemini_chat.py 導入必要的常量
 RECOMMENDED_MODELS = {
-    "1": ("gemini-2.5-pro", "最強大模型，適合複雜任務"),
+    "1": ("gemini-2.5-pro", "最強大模型,適合複雜任務"),
     "2": ("gemini-2.5-flash", "推薦：平衡速度與品質"),
-    "3": ("gemini-2.5-flash-8b", "最快速，適合簡單任務"),
-    "4": ("gemini-2.0-flash-exp", "實驗版本，免費但不穩定"),
+    "3": ("gemini-2.5-flash-lite", "最快速,適合簡單任務"),
+    "4": ("gemini-2.0-flash-exp", "實驗版本,免費但不穩定"),
 }
 
 # ==========================================
@@ -46,7 +46,7 @@ RECOMMENDED_MODELS = {
 class ConfigUI:
     """
     互動式配置 UI
-    提供友善的配置引導介面，降低新使用者配置門檻
+    提供友善的配置引導介面,降低新使用者配置門檻
 
     功能：
     - 模型選擇（使用 Rich Prompt）
@@ -67,18 +67,18 @@ class ConfigUI:
             配置字典
         """
         self.console.print(Panel(
-            "[bold #DDA0DD]🎛️  歡迎使用 ChatGemini 互動式配置[/bold #DDA0DD]\n\n"
-            "[dim]此工具將引導您完成初始配置，讓您快速開始使用。\n"
+            "[bold #E8C4F0]🎛️  歡迎使用 ChatGemini 互動式配置[/bold #E8C4F0]\n\n"
+            "[dim]此工具將引導您完成初始配置,讓您快速開始使用。\n"
             "您可以隨時修改 config.py 來調整這些設定。[/dim]",
-            title="[bold #DDA0DD]互動式配置精靈[/bold #DDA0DD]",
-            border_style="#DDA0DD"
+            title="[bold #E8C4F0]互動式配置精靈[/bold #E8C4F0]",
+            border_style="#E8C4F0"
         ))
 
-        # 提供最佳預設值，避免多餘互動
+        # 提供最佳預設值,避免多餘互動
         config_dict = {}
 
         # ========================================
-        # 步驟 1：模型選擇（必要，涉及費用）
+        # 步驟 1：模型選擇（必要,涉及費用）
         # ========================================
         config_dict['DEFAULT_MODEL'] = self._prompt_model_selection()
 
@@ -86,11 +86,11 @@ class ConfigUI:
         # 步驟 2：詢問是否需要調整進階設定
         # ========================================
         self.console.print("\n" + "─" * 60)
-        self.console.print("[bold #DDA0DD]進階設定（可選）[/bold #DDA0DD]")
+        self.console.print("[bold #E8C4F0]進階設定（可選）[/bold #E8C4F0]")
         self.console.print("[dim]包含：模組啟用/停用、匯率、快取門檻等參數[/dim]\n")
 
         customize = self.console.input(
-            "[bold #DDA0DD]是否需要調整進階設定？[/bold #DDA0DD] y/[#DA70D6]N[/green] [dim](直接按 Enter 使用最佳預設值)[/dim]: "
+            "[bold #E8C4F0]是否需要調整進階設定？[/bold #E8C4F0] y/[#B565D8]N[/green] [dim](直接按 Enter 使用最佳預設值)[/dim]: "
         ).strip().lower()
 
         if customize in ['y', 'yes', '是', '1']:
@@ -98,8 +98,8 @@ class ConfigUI:
             config_dict['MODULES'] = self._prompt_module_toggles()
             config_dict.update(self._prompt_advanced_settings())
         else:
-            # 使用者跳過，使用最佳預設值
-            self.console.print("[#DA70D6]✓ 使用最佳預設值[/green]\n")
+            # 使用者跳過,使用最佳預設值
+            self.console.print("[#B565D8]✓ 使用最佳預設值[/green]\n")
             config_dict['MODULES'] = self._get_default_modules()
             config_dict.update(self._get_default_advanced_settings())
 
@@ -113,7 +113,7 @@ class ConfigUI:
 
     def _get_default_modules(self) -> Dict:
         """
-        返回推薦的預設模組配置（核心模組全開，實驗性模組關閉）
+        返回推薦的預設模組配置（核心模組全開,實驗性模組關閉）
         """
         return {
             'pricing': {'enabled': True},
@@ -145,12 +145,12 @@ class ConfigUI:
         """
         from rich.table import Table
 
-        self.console.print("\n[bold #DDA0DD]步驟 1: 選擇預設模型（涉及費用，請確認）[/bold #DDA0DD]")
+        self.console.print("\n[bold #E8C4F0]步驟 1: 選擇預設模型（涉及費用,請確認）[/bold #E8C4F0]")
 
         # 建立模型比較表
-        table = Table(title="可用的 Gemini 模型", show_header=True, header_style="bold #DDA0DD")
+        table = Table(title="可用的 Gemini 模型", show_header=True, header_style="bold #E8C4F0")
         console_width = self.console.width or 120
-        table.add_column("選項", style="#DDA0DD", width=max(6, int(console_width * 0.05)))
+        table.add_column("選項", style="#E8C4F0", width=max(6, int(console_width * 0.05)))
         table.add_column("模型名稱", style="green", width=max(22, int(console_width * 0.30)))
         table.add_column("描述", style="white", width=max(30, int(console_width * 0.45)))
 
@@ -161,17 +161,17 @@ class ConfigUI:
 
         # 使用 Rich Prompt 選擇
         while True:
-            choice = self.console.input("\n[bold #DDA0DD]請選擇模型 (1-4)[/bold #DDA0DD] [dim][預設: 2][/dim]: ").strip()
+            choice = self.console.input("\n[bold #E8C4F0]請選擇模型 (1-4)[/bold #E8C4F0] [dim][預設: 2][/dim]: ").strip()
 
             if not choice:
                 choice = '2'  # 預設選擇 gemini-2.5-flash
 
             if choice in RECOMMENDED_MODELS:
                 model_name, description = RECOMMENDED_MODELS[choice]
-                self.console.print(f"[#DA70D6]✓ 已選擇: {model_name}[/green]")
+                self.console.print(f"[#B565D8]✓ 已選擇: {model_name}[/green]")
                 return model_name
             else:
-                self.console.print("[dim #DDA0DD]❌ 無效的選項，請輸入 1-4[/red]")
+                self.console.print("[dim #E8C4F0]❌ 無效的選項,請輸入 1-4[/red]")
 
     def _prompt_module_toggles(self) -> Dict:
         """
@@ -182,8 +182,8 @@ class ConfigUI:
         """
         from rich.table import Table
 
-        self.console.print("\n[bold #DDA0DD]模組配置[/bold #DDA0DD]")
-        self.console.print("[dim]按 Enter 接受預設值，輸入 y/n 來啟用/停用[/dim]\n")
+        self.console.print("\n[bold #E8C4F0]模組配置[/bold #E8C4F0]")
+        self.console.print("[dim]按 Enter 接受預設值,輸入 y/n 來啟用/停用[/dim]\n")
 
         modules_config = {}
 
@@ -199,7 +199,7 @@ class ConfigUI:
         ]
 
         for module_name, description, default in module_options:
-            default_text = "[#DA70D6]Y[/green]/n" if default else "y/[dim #DDA0DD]N[/red]"
+            default_text = "[#B565D8]Y[/green]/n" if default else "y/[dim #E8C4F0]N[/red]"
             user_input = self.console.input(
                 f"  {description} [{default_text}]: "
             ).strip().lower()
@@ -212,7 +212,7 @@ class ConfigUI:
             elif user_input in ['n', 'no', '否', '0']:
                 enabled = False
             else:
-                self.console.print(f"    [#DDA0DD]⚠️  無效輸入，使用預設值: {'啟用' if default else '停用'}[/#DDA0DD]")
+                self.console.print(f"    [#E8C4F0]⚠️  無效輸入,使用預設值: {'啟用' if default else '停用'}[/#E8C4F0]")
                 enabled = default
 
             modules_config[module_name] = {'enabled': enabled}
@@ -228,7 +228,7 @@ class ConfigUI:
         Returns:
             進階配置字典
         """
-        self.console.print("\n[bold #DDA0DD]進階參數[/bold #DDA0DD]")
+        self.console.print("\n[bold #E8C4F0]進階參數[/bold #E8C4F0]")
         self.console.print("[dim]一般使用者可直接按 Enter 使用預設值[/dim]\n")
 
         config = {}
@@ -253,11 +253,11 @@ class ConfigUI:
 
         # 啟動時翻譯
         trans_input = self.console.input(
-            "  🌐 啟動時啟用翻譯功能 [#DA70D6]Y[/green]/n: "
+            "  🌐 啟動時啟用翻譯功能 [#B565D8]Y[/green]/n: "
         ).strip().lower()
         config['TRANSLATION_ON_STARTUP'] = trans_input not in ['n', 'no', '否', '0']
 
-        self.console.print("\n[#DA70D6]✓ 進階設定完成[/green]")
+        self.console.print("\n[#B565D8]✓ 進階設定完成[/green]")
 
         return config
 
@@ -270,11 +270,11 @@ class ConfigUI:
         """
         from rich.table import Table
 
-        self.console.print("\n[bold #DDA0DD]配置預覽[/bold #DDA0DD]")
+        self.console.print("\n[bold #E8C4F0]配置預覽[/bold #E8C4F0]")
 
-        table = Table(show_header=True, header_style="bold #DDA0DD")
+        table = Table(show_header=True, header_style="bold #E8C4F0")
         console_width = self.console.width or 120
-        table.add_column("設定項目", style="#DDA0DD", width=max(25, int(console_width * 0.30)))
+        table.add_column("設定項目", style="#E8C4F0", width=max(25, int(console_width * 0.30)))
         table.add_column("數值", style="green")
 
         # 基本設定
@@ -287,9 +287,9 @@ class ConfigUI:
         self.console.print(table)
 
         # 模組狀態
-        modules_table = Table(title="功能模組", show_header=True, header_style="bold #DDA0DD")
+        modules_table = Table(title="功能模組", show_header=True, header_style="bold #E8C4F0")
         console_width = self.console.width or 120
-        modules_table.add_column("模組名稱", style="#DDA0DD", width=max(22, int(console_width * 0.30)))
+        modules_table.add_column("模組名稱", style="#E8C4F0", width=max(22, int(console_width * 0.30)))
         modules_table.add_column("狀態", style="green", width=max(10, int(console_width * 0.10)))
 
         for module_name, module_config in config_dict.get('MODULES', {}).items():
@@ -354,7 +354,7 @@ CACHE_TTL_HOURS = {config_dict.get('CACHE_TTL_HOURS', 1)}
 # 啟動時啟用翻譯
 TRANSLATION_ON_STARTUP = {config_dict.get('TRANSLATION_ON_STARTUP', True)}
 
-# 預設顯示思考過程（由 Ctrl+T 即時切換，不需配置）
+# 預設顯示思考過程（由 Ctrl+T 即時切換,不需配置）
 SHOW_THINKING_PROCESS = False
 
 # ==========================================
@@ -377,14 +377,14 @@ EMBEDDING_VECTOR_DB_PATH = "./codebase_vectors"
             self.console.print("[dim]您可以隨時編輯此檔案來調整配置[/dim]\n")
         except Exception as e:
             self.console.print(f"\n[bold red]❌ 建立配置檔案失敗：{e}[/bold red]")
-            self.console.print("[#DDA0DD]⚠️  將使用預設配置繼續執行[/#DDA0DD]\n")
+            self.console.print("[#E8C4F0]⚠️  將使用預設配置繼續執行[/#E8C4F0]\n")
 
 # 各模型的最低快取門檻要求（tokens）
 # 根據 Gemini API Context Caching 規範
 MIN_TOKENS = {
     'gemini-2.5-pro': 4096,           # Pro 版本需要更多
     'gemini-2.5-flash': 1024,         # Flash 版本標準
-    'gemini-2.5-flash-8b': 1024,      # Flash-8B 版本標準
+    'gemini-2.5-flash-lite': 1024,      # Flash-8B 版本標準
     'gemini-2.0-flash-exp': 32768,    # 2.0 實驗版需要較多
     'gemini-2.0-flash': 32768,        # 2.0 標準版
 }
@@ -455,7 +455,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
 
         # 沒有思考過程時提示
         if not LAST_THINKING_PROCESS:
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 尚未產生思考過程[/#DDA0DD]\n'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]💭 尚未產生思考過程[/#E8C4F0]\n'))
             event.app.current_buffer.insert_text("")
             return
 
@@ -465,39 +465,39 @@ if PROMPT_TOOLKIT_AVAILABLE:
         if CTRL_T_PRESS_COUNT == 1:
             # 第一次按下：顯示翻譯（或原文）
             SHOW_THINKING_PROCESS = True
-            console.print(safe_t('common.message', fallback='\n[#DA70D6]━━━ 🧠 思考過程（翻譯） ━━━[/#DA70D6]'))
+            console.print(safe_t('common.message', fallback='\n[#B565D8]━━━ 🧠 思考過程（翻譯） ━━━[/#B565D8]'))
 
-            # 如果有翻譯且翻譯功能啟用，顯示翻譯；否則顯示原文
+            # 如果有翻譯且翻譯功能啟用,顯示翻譯；否則顯示原文
             if TRANSLATOR_ENABLED and global_translator and LAST_THINKING_TRANSLATED:
                 console.print(f"[dim]{LAST_THINKING_TRANSLATED}[/dim]")
             else:
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
                 if TRANSLATOR_ENABLED and global_translator:
-                    console.print(safe_t('common.message', fallback='[dim #DDA0DD]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #DDA0DD]'))
+                    console.print(safe_t('common.message', fallback='[dim #E8C4F0]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #E8C4F0]'))
 
-            console.print("[#DA70D6]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#DA70D6]\n")
+            console.print("[#B565D8]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#B565D8]\n")
 
         elif CTRL_T_PRESS_COUNT == 2:
             # 第二次按下：顯示雙語對照
-            console.print(safe_t('common.message', fallback='\n[#DA70D6]━━━ 🧠 思考過程（雙語對照） ━━━[/#DA70D6]'))
+            console.print(safe_t('common.message', fallback='\n[#B565D8]━━━ 🧠 思考過程（雙語對照） ━━━[/#B565D8]'))
 
             if TRANSLATOR_ENABLED and global_translator and LAST_THINKING_TRANSLATED:
-                console.print(safe_t('common.message', fallback='[bold #DA70D6]🇹🇼 繁體中文：[/bold #DA70D6]'))
+                console.print(safe_t('common.message', fallback='[bold #B565D8]🇹🇼 繁體中文：[/bold #B565D8]'))
                 console.print(f"[dim]{LAST_THINKING_TRANSLATED}[/dim]\n")
-                console.print(safe_t('common.message', fallback='[bold #DA70D6]🇬🇧 英文原文：[/bold #DA70D6]'))
+                console.print(safe_t('common.message', fallback='[bold #B565D8]🇬🇧 英文原文：[/bold #B565D8]'))
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
             else:
-                console.print(safe_t('common.message', fallback='[bold #DA70D6]🇬🇧 英文原文：[/bold #DA70D6]'))
+                console.print(safe_t('common.message', fallback='[bold #B565D8]🇬🇧 英文原文：[/bold #B565D8]'))
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
                 if TRANSLATOR_ENABLED and global_translator:
-                    console.print(safe_t('common.message', fallback='[dim #DDA0DD]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #DDA0DD]'))
+                    console.print(safe_t('common.message', fallback='[dim #E8C4F0]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #E8C4F0]'))
 
-            console.print("[#DA70D6]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#DA70D6]\n")
+            console.print("[#B565D8]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#B565D8]\n")
 
         else:
             # 第三次按下：隱藏
             SHOW_THINKING_PROCESS = False
-            console.print(safe_t('common.message', fallback='\n[#DDA0DD]💭 思考過程已隱藏[/#DDA0DD]\n'))
+            console.print(safe_t('common.message', fallback='\n[#E8C4F0]💭 思考過程已隱藏[/#E8C4F0]\n'))
 
         event.app.current_buffer.insert_text("")  # 保持輸入狀態
 
@@ -509,7 +509,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
     @key_bindings.add('c-d')
     def show_help_hint(event):
         """Ctrl+D: 顯示輸入提示"""
-        console.print(safe_t('common.message', fallback='\n[#DA70D6]💡 輸入提示：[/#DA70D6]'))
+        console.print(safe_t('common.message', fallback='\n[#B565D8]💡 輸入提示：[/#B565D8]'))
         console.print(safe_t('common.message', fallback='  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'))
         console.print(safe_t('common.message', fallback='  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'))
         console.print(safe_t('common.message', fallback='  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'))
@@ -527,7 +527,7 @@ def extract_thinking_process(response) -> Optional[str]:
         response: Gemini API 回應物件
 
     Returns:
-        思考過程文字，如果不存在則回傳 None
+        思考過程文字,如果不存在則回傳 None
     """
     try:
         if not hasattr(response, 'candidates') or not response.candidates:
@@ -537,7 +537,7 @@ def extract_thinking_process(response) -> Optional[str]:
         if not hasattr(candidate, 'content') or not hasattr(candidate.content, 'parts'):
             return None
 
-        # 遍歷所有 parts，查找思考內容
+        # 遍歷所有 parts,查找思考內容
         thinking_parts = []
         for part in candidate.content.parts:
             # 檢查是否有 thought 或 thinking 欄位
@@ -569,9 +569,9 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
     - [no-think] 或 [think:0] 不思考（部分模型支援）
 
     各模型限制：
-    - gemini-2.5-pro: -1 (動態) 或 128-32768 tokens，無法停用
-    - gemini-2.5-flash: -1 (動態) 或 0-24576 tokens，0=停用
-    - gemini-2.5-flash-8b (lite): -1 (動態) 或 512-24576 tokens，0=停用
+    - gemini-2.5-pro: -1 (動態) 或 128-32768 tokens,無法停用
+    - gemini-2.5-flash: -1 (動態) 或 0-24576 tokens,0=停用
+    - gemini-2.5-flash-lite (lite): -1 (動態) 或 512-24576 tokens,0=停用
 
     Args:
         user_input: 使用者輸入
@@ -607,7 +607,7 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
     no_think_pattern = r'\[no-think\]'
     if re.search(no_think_pattern, user_input, re.IGNORECASE):
         if not ALLOW_DISABLE:
-            print(f"⚠️  {model_name} 不支援停用思考，將使用動態模式")
+            print(f"⚠️  {model_name} 不支援停用思考,將使用動態模式")
             thinking_budget = -1
         else:
             thinking_budget = 0
@@ -630,23 +630,23 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
             # 驗證思考預算範圍
             if thinking_budget == 0:
                 if not ALLOW_DISABLE:
-                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens")
+                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens）,已調整為最小值 {MIN_TOKENS} tokens")
                     thinking_budget = MIN_TOKENS
             elif thinking_budget == -1:
                 pass  # 保持 -1
             elif thinking_budget < MIN_TOKENS:
-                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整")
+                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens,已調整")
                 thinking_budget = MIN_TOKENS
             elif thinking_budget > MAX_TOKENS:
-                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值")
+                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens,已調整為最大值")
                 thinking_budget = MAX_TOKENS
 
         # 設定輸出 tokens（最大 8192）
         if response_tokens < 1:
-            print(f"⚠️  回應 tokens 至少為 1，已調整")
+            print(f"⚠️  回應 tokens 至少為 1,已調整")
             max_output_tokens = 1
         elif response_tokens > 8192:
-            print(f"⚠️  回應 tokens 超過上限 8192，已調整為最大值")
+            print(f"⚠️  回應 tokens 超過上限 8192,已調整為最大值")
             max_output_tokens = 8192
         else:
             max_output_tokens = response_tokens
@@ -667,7 +667,7 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
             # 處理停用請求 (0)
             if thinking_budget == 0:
                 if not ALLOW_DISABLE:
-                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens")
+                    print(f"⚠️  {model_name} 不支援停用思考（0 tokens）,已調整為最小值 {MIN_TOKENS} tokens")
                     thinking_budget = MIN_TOKENS
                 # else: thinking_budget = 0 保持不變
             # 處理動態請求 (-1)
@@ -675,10 +675,10 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
                 pass  # 保持 -1
             # 處理指定 tokens
             elif thinking_budget < MIN_TOKENS:
-                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整")
+                print(f"⚠️  思考預算低於最小值 {MIN_TOKENS} tokens,已調整")
                 thinking_budget = MIN_TOKENS
             elif thinking_budget > MAX_TOKENS:
-                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值")
+                print(f"⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens,已調整為最大值")
                 thinking_budget = MAX_TOKENS
 
         user_input = re.sub(think_pattern, '', user_input, flags=re.IGNORECASE).strip()
@@ -777,11 +777,11 @@ def process_file_attachments(user_input: str) -> tuple:
                     except Exception as e:
                         print(f"⚠️  上傳失敗 {file_path}: {e}")
                 else:
-                    print(f"⚠️  檔案管理器未啟用，無法上傳 {file_path}")
+                    print(f"⚠️  檔案管理器未啟用,無法上傳 {file_path}")
 
             else:
                 # 未知類型：嘗試當文字檔讀取
-                print(f"⚠️  未知檔案類型 {ext}，嘗試當文字檔讀取...")
+                print(f"⚠️  未知檔案類型 {ext},嘗試當文字檔讀取...")
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
@@ -820,8 +820,8 @@ def get_user_input(prompt_text: str = "你: ") -> str:
     """
     if PROMPT_TOOLKIT_AVAILABLE:
         try:
-            # 使用 HTML 格式化提示文字，支援顏色
-            formatted_prompt = HTML(f'<#DA70D6><b>{prompt_text}</b></#DA70D6>')  # 馬卡龍紫色
+            # 使用 HTML 格式化提示文字,支援顏色
+            formatted_prompt = HTML(f'<#B565D8><b>{prompt_text}</b></#B565D8>')  # 馬卡龍紫色
 
             return prompt(
                 formatted_prompt,
@@ -831,7 +831,7 @@ def get_user_input(prompt_text: str = "你: ") -> str:
                 key_bindings=key_bindings,
                 enable_suspend=True,  # 允許 Ctrl+Z 暫停
                 mouse_support=False,  # 禁用滑鼠支援避免衝突
-                multiline=False,  # 預設單行，使用 Alt+Enter 可插入新行
+                multiline=False,  # 預設單行,使用 Alt+Enter 可插入新行
                 prompt_continuation=lambda width, line_number, is_soft_wrap: '... ',  # 多行續行提示
                 complete_while_typing=True,  # 打字時即時補全
                 style=input_style,  # 應用自訂樣式
@@ -840,7 +840,7 @@ def get_user_input(prompt_text: str = "你: ") -> str:
             return ""
         except Exception as e:
             # 降級到標準 input()
-            logger.debug(f"prompt_toolkit 錯誤，降級到標準 input(): {e}")
+            logger.debug(f"prompt_toolkit 錯誤,降級到標準 input(): {e}")
             try:
                 return input(prompt_text).strip()
             except (KeyboardInterrupt, EOFError):

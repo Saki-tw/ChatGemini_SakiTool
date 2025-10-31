@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Gemini 異步批次處理模組（性能優化版本）
-使用 asyncio 替代 threading，提供 5-10x 效能提升
+使用 asyncio 替代 threading,提供 5-10x 效能提升
 
 特性：
 1. 完全向後相容 gemini_batch_processor.BatchProcessor
@@ -42,12 +42,12 @@ class AsyncBatchProcessor:
     """
     異步批次處理器（向後相容版本）
 
-    使用 asyncio 替代 threading，提供顯著的效能提升：
+    使用 asyncio 替代 threading,提供顯著的效能提升：
     - 並行效率：+300-500%（無 GIL 鎖）
     - CPU 使用率：-40%（協程調度）
     - 記憶體峰值：-20%（協程 vs 執行緒）
 
-    完全相容 BatchProcessor 的公開介面，無需修改現有程式碼。
+    完全相容 BatchProcessor 的公開介面,無需修改現有程式碼。
     """
 
     def __init__(
@@ -115,9 +115,9 @@ class AsyncBatchProcessor:
                         self.tasks[task.task_id] = task
 
                 if len(self.tasks) > 0:
-                    console.print(safe_t('common.loading', fallback='[#DDA0DD]📂 載入了 {tasks_count} 個任務[/#DDA0DD]', tasks_count=len(self.tasks)))
+                    console.print(safe_t('common.loading', fallback='[#E8C4F0]📂 載入了 {tasks_count} 個任務[/#E8C4F0]', tasks_count=len(self.tasks)))
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='[#DDA0DD]載入任務失敗：{e}[/#DDA0DD]', e=e))
+                console.print(safe_t('error.failed', fallback='[#E8C4F0]載入任務失敗：{e}[/#E8C4F0]', e=e))
 
     def _save_tasks(self):
         """保存任務到檔案（與 BatchProcessor 相同）"""
@@ -136,7 +136,7 @@ class AsyncBatchProcessor:
             with open(tasks_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #DDA0DD]保存任務失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]保存任務失敗：{e}[/red]', e=e))
 
     def register_handler(self, task_type: str, handler: Callable):
         """
@@ -152,7 +152,7 @@ class AsyncBatchProcessor:
         is_async = inspect.iscoroutinefunction(handler)
         handler_type = "異步" if is_async else "同步"
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 註冊任務處理器：{task_type} ({handler_type})[/green]', task_type=task_type, handler_type=handler_type))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 註冊任務處理器：{task_type} ({handler_type})[/green]', task_type=task_type, handler_type=handler_type))
 
     def add_task(
         self,
@@ -168,7 +168,7 @@ class AsyncBatchProcessor:
             task_type: 任務類型
             parameters: 任務參數
             priority: 優先級
-            task_id: 任務 ID（可選，自動生成）
+            task_id: 任務 ID（可選,自動生成）
 
         Returns:
             任務 ID
@@ -186,7 +186,7 @@ class AsyncBatchProcessor:
         self.tasks[task_id] = task
         self._save_tasks()
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 已添加任務：{task_id}[/green]', task_id=task_id))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已添加任務：{task_id}[/green]', task_id=task_id))
         return task_id
 
     def add_tasks_batch(
@@ -211,7 +211,7 @@ class AsyncBatchProcessor:
             )
             task_ids.append(task_id)
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 已批次添加 {len(task_ids)} 個任務[/green]', task_ids_count=len(task_ids)))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已批次添加 {len(task_ids)} 個任務[/green]', task_ids_count=len(task_ids)))
         return task_ids
 
     async def _execute_task_async(self, task: BatchTask, semaphore: asyncio.Semaphore):
@@ -237,14 +237,14 @@ class AsyncBatchProcessor:
 
                 # 執行任務
                 if self.verbose:
-                    console.print(safe_t('common.message', fallback='\n[#DDA0DD]▶️  開始執行任務：{task.task_id}[/#DDA0DD]', task_id=task.task_id))
+                    console.print(safe_t('common.message', fallback='\n[#E8C4F0]▶️  開始執行任務：{task.task_id}[/#E8C4F0]', task_id=task.task_id))
 
                 # 智能適配：檢測是同步還是異步函數
                 if inspect.iscoroutinefunction(handler):
                     # 異步處理器
                     result = await handler(**task.parameters)
                 else:
-                    # 同步處理器（在執行緒池中執行，避免阻塞事件循環）
+                    # 同步處理器（在執行緒池中執行,避免阻塞事件循環）
                     loop = asyncio.get_running_loop()
                     result = await loop.run_in_executor(
                         None,
@@ -261,17 +261,17 @@ class AsyncBatchProcessor:
                 self.stats['completed_tasks'] += 1
                 self.stats['total_time'] += elapsed
 
-                console.print(f"[#DA70D6]✅ 任務完成：{task.task_id}[/green]" +
+                console.print(f"[#B565D8]✅ 任務完成：{task.task_id}[/green]" +
                             (f" ({elapsed:.2f}s)" if self.verbose else ""))
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='[dim #DDA0DD]❌ 任務失敗：{task.task_id} - {e}[/red]', task_id=task.task_id, e=e))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 任務失敗：{task.task_id} - {e}[/red]', task_id=task.task_id, e=e))
 
                 # 重試邏輯
                 if task.retry_count < task.max_retries:
                     task.retry_count += 1
                     task.status = TaskStatus.PENDING
-                    console.print(safe_t('common.message', fallback='[#DDA0DD]🔄 重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/#DDA0DD]', retry_count=task.retry_count, max_retries=task.max_retries, task_id=task.task_id))
+                    console.print(safe_t('common.message', fallback='[#E8C4F0]🔄 重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/#E8C4F0]', retry_count=task.retry_count, max_retries=task.max_retries, task_id=task.task_id))
                 else:
                     task.status = TaskStatus.FAILED
                     task.error = str(e)
@@ -291,7 +291,7 @@ class AsyncBatchProcessor:
         total_tasks = len(pending_tasks)
 
         if total_tasks == 0:
-            console.print(safe_t('common.processing', fallback='[#DDA0DD]沒有待處理的任務[/#DDA0DD]'))
+            console.print(safe_t('common.processing', fallback='[#E8C4F0]沒有待處理的任務[/#E8C4F0]'))
             return
 
         # 統計
@@ -346,7 +346,7 @@ class AsyncBatchProcessor:
         Args:
             blocking: 是否阻塞直到所有任務完成
         """
-        console.print(safe_t('common.processing', fallback='\n[bold #DDA0DD]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold #DDA0DD]', max_concurrent=self.max_concurrent))
+        console.print(safe_t('common.processing', fallback='\n[bold #E8C4F0]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold #E8C4F0]', max_concurrent=self.max_concurrent))
         if self.verbose:
             console.print(safe_t('common.processing', fallback='[dim]使用異步處理模式（asyncio）[/dim]\n'))
 
@@ -355,10 +355,10 @@ class AsyncBatchProcessor:
             try:
                 # 檢查是否已在事件循環中
                 loop = asyncio.get_running_loop()
-                # 如果已在事件循環中，建立任務
+                # 如果已在事件循環中,建立任務
                 asyncio.create_task(self._run_async())
             except RuntimeError:
-                # 沒有執行中的事件循環，建立新的
+                # 沒有執行中的事件循環,建立新的
                 asyncio.run(self._run_async())
         else:
             # 非阻塞式執行（在背景執行緒中運行事件循環）
@@ -380,18 +380,18 @@ class AsyncBatchProcessor:
         """
         task = self.tasks.get(task_id)
         if not task:
-            console.print(safe_t('common.message', fallback='[dim #DDA0DD]未找到任務：{task_id}[/red]', task_id=task_id))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未找到任務：{task_id}[/red]', task_id=task_id))
             return False
 
         if task.status == TaskStatus.RUNNING:
-            console.print(safe_t('common.message', fallback='[#DDA0DD]無法取消正在執行的任務：{task_id}[/#DDA0DD]', task_id=task_id))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]無法取消正在執行的任務：{task_id}[/#E8C4F0]', task_id=task_id))
             return False
 
         task.status = TaskStatus.CANCELLED
         task.completed_at = datetime.now().isoformat()
         self._save_tasks()
 
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 已取消任務：{task_id}[/green]', task_id=task_id))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已取消任務：{task_id}[/green]', task_id=task_id))
         return True
 
     def get_task(self, task_id: str) -> Optional[BatchTask]:
@@ -432,16 +432,16 @@ class AsyncBatchProcessor:
         tasks = self.list_tasks(status=status, task_type=task_type)
 
         if not tasks:
-            console.print(safe_t('common.message', fallback='[#DDA0DD]沒有符合條件的任務[/#DDA0DD]'))
+            console.print(safe_t('common.message', fallback='[#E8C4F0]沒有符合條件的任務[/#E8C4F0]'))
             return
 
         table = Table(title=f"批次任務列表（共 {len(tasks)} 個）")
-        table.add_column("任務 ID", style="#DA70D6")
+        table.add_column("任務 ID", style="#B565D8")
         table.add_column("類型", style="green")
-        table.add_column("狀態", style="#DDA0DD")
-        table.add_column("優先級", style="#DDA0DD")
+        table.add_column("狀態", style="#E8C4F0")
+        table.add_column("優先級", style="#E8C4F0")
         table.add_column("建立時間", style="dim")
-        table.add_column("重試次數", style="#DDA0DD")
+        table.add_column("重試次數", style="#E8C4F0")
 
         for task in tasks:
             status_emoji = {
@@ -477,7 +477,7 @@ class AsyncBatchProcessor:
             stats[task.status] = stats.get(task.status, 0) + 1
 
         summary_text = f"""
-[bold #DDA0DD]批次任務統計[/bold #DDA0DD]
+[bold #E8C4F0]批次任務統計[/bold #E8C4F0]
 
   總任務數：{len(self.tasks)}
   ✅ 已完成：{stats[TaskStatus.COMPLETED]}
@@ -489,14 +489,14 @@ class AsyncBatchProcessor:
 
         if self.verbose and self.stats['total_tasks'] > 0:
             summary_text += f"""
-[bold #DDA0DD]效能統計[/bold #DDA0DD]
+[bold #E8C4F0]效能統計[/bold #E8C4F0]
 
   總耗時：{self.stats['total_time']:.2f}s
   平均任務時間：{self.stats['avg_task_time']:.2f}s
   並行效率：{(self.stats['avg_task_time'] * self.stats['total_tasks'] / self.stats['total_time']):.1f}x
             """
 
-        console.print(Panel(summary_text, border_style="#DA70D6"))
+        console.print(Panel(summary_text, border_style="#B565D8"))
 
     def clear_completed(self):
         """清理已完成的任務（與 BatchProcessor 相同介面）"""
@@ -509,7 +509,7 @@ class AsyncBatchProcessor:
             del self.tasks[task_id]
 
         self._save_tasks()
-        console.print(safe_t('common.completed', fallback='[#DA70D6]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]', completed_ids_count=len(completed_ids)))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]', completed_ids_count=len(completed_ids)))
 
     def get_stats(self) -> Dict[str, Any]:
         """

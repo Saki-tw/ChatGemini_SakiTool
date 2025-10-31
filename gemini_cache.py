@@ -125,7 +125,7 @@ class AutoCacheManager:
             return False
 
         try:
-            # 組合對話歷史 - 優化：使用 list 累積，單次 join（避免 O(n²) 記憶體使用）
+            # 組合對話歷史 - 優化：使用 list 累積,單次 join（避免 O(n²) 記憶體使用）
             cache_lines = []
             for user_msg, ai_msg, _ in self.conversation_pairs:
                 cache_lines.append("User: ")

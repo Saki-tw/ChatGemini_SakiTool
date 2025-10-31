@@ -3,14 +3,14 @@
 智能觸發器模組 - 無痕整合 CodeGemini 功能
 
 此模組負責：
-1. 分析使用者輸入，檢測意圖（任務規劃、網頁搜尋、程式碼分析等）
+1. 分析使用者輸入,檢測意圖（任務規劃、網頁搜尋、程式碼分析等）
 2. 自動觸發相應的 CodeGemini 功能
 3. 將功能結果無縫整合到對話上下文中
 
 設計理念：
 - 使用者無需明確指定功能
 - 根據語義自動判斷並增強提示
-- 所有功能在背景運行，不打斷對話流程
+- 所有功能在背景運行,不打斷對話流程
 """
 
 import re
@@ -171,7 +171,7 @@ def trigger_task_planning(user_input: str, api_key: str) -> Optional[tuple]:
         api_key: API 金鑰
 
     Returns:
-        (任務分析結果, token使用量) 如果成功，否則 None
+        (任務分析結果, token使用量) 如果成功,否則 None
         token使用量格式: {'api_input': int, 'api_output': int, 'model': str}
     """
     try:
@@ -186,7 +186,7 @@ def trigger_task_planning(user_input: str, api_key: str) -> Optional[tuple]:
             logger.info(f"✓ 任務規劃完成：{analysis.get('task_type', 'unknown')}")
 
             # 估算 token 使用量
-            # TaskPlanner 通常使用 Flash 模型，估算：
+            # TaskPlanner 通常使用 Flash 模型,估算：
             # - 輸入：user_input + system prompt ≈ len(user_input)//3 + 200
             # - 輸出：JSON 格式任務分析 ≈ 500-1000 tokens
             estimated_input = len(user_input) // 3 + 200
@@ -459,14 +459,14 @@ def auto_enhance_prompt(
             if not total_hidden_tokens['model']:
                 total_hidden_tokens['model'] = token_usage['model']
 
-    # 2. 網頁搜尋（目前無額外 API 呼叫，僅添加文字）
+    # 2. 網頁搜尋（目前無額外 API 呼叫,僅添加文字）
     if enable_web_search and detect_web_search_intent(user_input):
         search_results = trigger_web_search(user_input)
         if search_results:
             enhanced_input = enhance_prompt_with_search_results(enhanced_input, search_results)
-            # web_search 本身不呼叫 Gemini API，無額外 token 成本
+            # web_search 本身不呼叫 Gemini API,無額外 token 成本
 
-    # 3. 程式碼分析（本地分析，無額外 API 成本）
+    # 3. 程式碼分析（本地分析,無額外 API 成本）
     if enable_code_analysis and uploaded_files:
         for file_obj in uploaded_files:
             # 假設 file_obj 有 name 或 path 屬性
@@ -478,9 +478,9 @@ def auto_enhance_prompt(
                     enhanced_input = enhance_prompt_with_code_analysis(
                         enhanced_input, code_analysis, file_path
                     )
-                    # CodeScanner 是本地分析，無額外 token 成本
+                    # CodeScanner 是本地分析,無額外 token 成本
 
-    # 如果 prompt 有被增強，記錄日誌
+    # 如果 prompt 有被增強,記錄日誌
     if enhanced_input != user_input:
         logger.info("✨ Prompt 已自動增強")
         if total_hidden_tokens['api_input'] > 0 or total_hidden_tokens['api_output'] > 0:
@@ -499,12 +499,12 @@ class BackgroundTodoTracker:
     """
     背景待辦事項追蹤器
 
-    此類別在對話過程中靜默運行，自動追蹤：
+    此類別在對話過程中靜默運行,自動追蹤：
     - 提到的任務
     - 待完成的工作
     - 討論的問題
 
-    不會顯示任何 UI，僅在後台記錄
+    不會顯示任何 UI,僅在後台記錄
     """
 
     def __init__(self):

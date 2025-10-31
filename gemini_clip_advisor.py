@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Gemini AI 驅動的剪輯建議模組
-使用 AI 分析影片內容，提供智能剪輯建議和編輯推薦
+使用 AI 分析影片內容,提供智能剪輯建議和編輯推薦
 """
 import os
 import json
@@ -81,20 +81,20 @@ class ClipAdvisor:
 
         Args:
             video_path: 影片檔案路徑
-            target_duration: 目標總長度（秒），None 表示不限制
-            clip_types: 要生成的片段類型列表，None 表示全部
+            target_duration: 目標總長度（秒）,None 表示不限制
+            clip_types: 要生成的片段類型列表,None 表示全部
             num_suggestions: 建議數量
 
         Returns:
             剪輯建議列表
         """
-        console.print(safe_t('media.clip.analysis_title', fallback='\n[bold #DDA0DD]🎬 AI 剪輯建議分析[/bold #DDA0DD]\n'))
+        console.print(safe_t('media.clip.analysis_title', fallback='\n[bold #E8C4F0]🎬 AI 剪輯建議分析[/bold #E8C4F0]\n'))
         console.print(safe_t('media.clip.video_file', fallback='📁 影片：{name}', name=os.path.basename(video_path)))
 
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print(safe_t('error.video_info_failed', fallback='[dim #DDA0DD]錯誤：無法獲取影片資訊[/red]'))
+            console.print(safe_t('error.video_info_failed', fallback='[dim #E8C4F0]錯誤：無法獲取影片資訊[/red]'))
             return []
 
         duration = info['duration']
@@ -106,16 +106,16 @@ class ClipAdvisor:
         # 2. 場景檢測（如果啟用）
         scenes = []
         if self.use_scene_detection:
-            console.print(safe_t('media.clip.scene_detection', fallback='\n[#DDA0DD]📦 執行場景檢測...[/#DDA0DD]'))
+            console.print(safe_t('media.clip.scene_detection', fallback='\n[#E8C4F0]📦 執行場景檢測...[/#E8C4F0]'))
             scenes = self.scene_detector.detect_scenes(video_path, num_keyframes=20)
             console.print(safe_t('media.clip.scenes_found', fallback='✓ 檢測到 {count} 個場景', count=len(scenes)))
 
         # 3. 分析內容特徵
-        console.print(safe_t('media.clip.analyzing_features', fallback='\n[#DDA0DD]🔍 分析影片內容特徵...[/#DDA0DD]'))
+        console.print(safe_t('media.clip.analyzing_features', fallback='\n[#E8C4F0]🔍 分析影片內容特徵...[/#E8C4F0]'))
         content_features = self._analyze_content_features(video_path, scenes, duration)
 
         # 4. 生成剪輯建議
-        console.print(safe_t('media.clip.generating_suggestions', fallback='\n[#DDA0DD]💡 生成剪輯建議...[/#DDA0DD]'))
+        console.print(safe_t('media.clip.generating_suggestions', fallback='\n[#E8C4F0]💡 生成剪輯建議...[/#E8C4F0]'))
         suggestions = self._generate_suggestions(
             video_path,
             scenes,
@@ -129,7 +129,7 @@ class ClipAdvisor:
         # 5. 排序並篩選
         suggestions = self._rank_and_filter_suggestions(suggestions, num_suggestions)
 
-        console.print(safe_t('media.clip.suggestions_generated', fallback='\n[#DA70D6]✓ 已生成 {count} 個剪輯建議[/green]', count=len(suggestions)))
+        console.print(safe_t('media.clip.suggestions_generated', fallback='\n[#B565D8]✓ 已生成 {count} 個剪輯建議[/green]', count=len(suggestions)))
 
         return suggestions
 
@@ -266,7 +266,7 @@ class ClipAdvisor:
             duration=duration,
             clip_type="intro",
             description="影片開場片段",
-            reasoning="開場片段可以吸引觀眾注意，建立影片基調",
+            reasoning="開場片段可以吸引觀眾注意,建立影片基調",
             confidence=0.9,
             engagement_score=8.0,
             tags=["opening", "intro", "start"],
@@ -301,7 +301,7 @@ class ClipAdvisor:
             duration=clip_duration,
             clip_type="outro",
             description="影片結尾片段",
-            reasoning="結尾片段可以總結內容，引導後續行動",
+            reasoning="結尾片段可以總結內容,引導後續行動",
             confidence=0.9,
             engagement_score=7.5,
             tags=["ending", "outro", "conclusion"],
@@ -392,7 +392,7 @@ class ClipAdvisor:
                 duration=scene_duration,
                 clip_type="highlight",
                 description=scene.description,
-                reasoning=f"高質量場景：{analysis.get('reasoning', '視覺效果好，內容豐富')}",
+                reasoning=f"高質量場景：{analysis.get('reasoning', '視覺效果好,內容豐富')}",
                 confidence=score,
                 engagement_score=analysis.get('engagement_score', score * 10),
                 tags=scene.key_elements + analysis.get('extra_tags', []),
@@ -491,7 +491,7 @@ class ClipAdvisor:
     def _analyze_scene_for_highlight(self, scene: Scene) -> Dict:
         """分析場景作為精彩片段的潛力"""
         analysis = {
-            'reasoning': '視覺效果好，內容豐富',
+            'reasoning': '視覺效果好,內容豐富',
             'engagement_score': scene.confidence * 10,
             'extra_tags': [],
             'tips': [
@@ -502,14 +502,14 @@ class ClipAdvisor:
 
         # 根據場景元素調整
         if len(scene.key_elements) > 5:
-            analysis['reasoning'] = '內容元素豐富，視覺層次多'
+            analysis['reasoning'] = '內容元素豐富,視覺層次多'
             analysis['engagement_score'] += 0.5
 
         # 根據場景長度調整
         duration = scene.end_time - scene.start_time
         if 8 <= duration <= 12:
             analysis['extra_tags'].append('optimal_length')
-            analysis['tips'].append("長度適中，適合各平台")
+            analysis['tips'].append("長度適中,適合各平台")
         elif duration > 15:
             analysis['tips'].append("可考慮剪輯為多個片段")
 
@@ -551,7 +551,7 @@ class ClipAdvisor:
             subprocess.run(cmd, capture_output=True, check=True)
             return str(frame_path)
         except Exception as e:
-            console.print(safe_t('media.clip.preview_frame_warning', fallback='[#DDA0DD]警告：提取預覽幀失敗 ({time}s): {error}[/#DDA0DD]', time=timestamp, error=e))
+            console.print(safe_t('media.clip.preview_frame_warning', fallback='[#E8C4F0]警告：提取預覽幀失敗 ({time}s): {error}[/#E8C4F0]', time=timestamp, error=e))
             return ""
 
     def _rank_and_filter_suggestions(
@@ -576,13 +576,13 @@ class ClipAdvisor:
     def display_suggestions(self, suggestions: List[ClipSuggestion]):
         """顯示剪輯建議"""
         if not suggestions:
-            console.print(safe_t('media.clip.no_suggestions', fallback='[#DDA0DD]沒有生成剪輯建議[/#DDA0DD]'))
+            console.print(safe_t('media.clip.no_suggestions', fallback='[#E8C4F0]沒有生成剪輯建議[/#E8C4F0]'))
             return
 
-        console.print(safe_t('media.clip.suggestions_list', fallback='\n[bold #DDA0DD]📋 剪輯建議列表（{count} 個）[/bold #DDA0DD]\n', count=len(suggestions)))
+        console.print(safe_t('media.clip.suggestions_list', fallback='\n[bold #E8C4F0]📋 剪輯建議列表（{count} 個）[/bold #E8C4F0]\n', count=len(suggestions)))
 
         # 創建表格
-        table = Table(show_header=True, header_style="bold #DA70D6")
+        table = Table(show_header=True, header_style="bold #B565D8")
         console_width = console.width or 120
         table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
         table.add_column("類型", width=max(10, int(console_width * 0.10)))
@@ -593,11 +593,11 @@ class ClipAdvisor:
         for suggestion in suggestions:
             # 類型顏色
             type_colors = {
-                'intro': '#DDA0DD',
-                'outro': '#DDA0DD',
+                'intro': '#E8C4F0',
+                'outro': '#E8C4F0',
                 'highlight': 'green',
-                'key_moment': '#DDA0DD',
-                'transition': '#DDA0DD'
+                'key_moment': '#E8C4F0',
+                'transition': '#E8C4F0'
             }
             type_color = type_colors.get(suggestion.clip_type, 'white')
 
@@ -609,7 +609,7 @@ class ClipAdvisor:
             if score >= 8:
                 score_style = "bold green"
             elif score >= 6:
-                score_style = "#DDA0DD"
+                score_style = "#E8C4F0"
             else:
                 score_style = "dim"
 
@@ -624,26 +624,26 @@ class ClipAdvisor:
         console.print(table)
 
         # 顯示詳細資訊
-        console.print(safe_t('media.clip.detailed_suggestions', fallback='\n[bold #DDA0DD]💡 詳細建議：[/bold #DDA0DD]\n'))
+        console.print(safe_t('media.clip.detailed_suggestions', fallback='\n[bold #E8C4F0]💡 詳細建議：[/bold #E8C4F0]\n'))
         for suggestion in suggestions[:5]:  # 只顯示前 5 個的詳細資訊
             self._display_suggestion_detail(suggestion)
 
     def _display_suggestion_detail(self, suggestion: ClipSuggestion):
         """顯示單個建議的詳細資訊"""
         content = f"""
-[#DDA0DD]時間：[/#DDA0DD] {self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)
-[#DDA0DD]類型：[/#DDA0DD] {suggestion.clip_type}
-[#DDA0DD]描述：[/#DDA0DD] {suggestion.description}
-[#DDA0DD]推薦理由：[/#DDA0DD] {suggestion.reasoning}
-[#DDA0DD]評分：[/#DDA0DD] {suggestion.engagement_score:.1f}/10
-[#DDA0DD]標籤：[/#DDA0DD] {', '.join(suggestion.tags)}
+[#E8C4F0]時間：[/#E8C4F0] {self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)
+[#E8C4F0]類型：[/#E8C4F0] {suggestion.clip_type}
+[#E8C4F0]描述：[/#E8C4F0] {suggestion.description}
+[#E8C4F0]推薦理由：[/#E8C4F0] {suggestion.reasoning}
+[#E8C4F0]評分：[/#E8C4F0] {suggestion.engagement_score:.1f}/10
+[#E8C4F0]標籤：[/#E8C4F0] {', '.join(suggestion.tags)}
 
-[#DDA0DD]編輯建議：[/#DDA0DD]
+[#E8C4F0]編輯建議：[/#E8C4F0]
 """
         for tip in suggestion.editing_tips:
             content += f"  • {tip}\n"
 
-        console.print(Panel(content, title=f"[bold]#{suggestion.id} - {suggestion.clip_type.upper()}[/bold]", border_style="#DA70D6"))
+        console.print(Panel(content, title=f"[bold]#{suggestion.id} - {suggestion.clip_type.upper()}[/bold]", border_style="#B565D8"))
         console.print()
 
     def save_suggestions(
@@ -714,10 +714,10 @@ class ClipAdvisor:
                     f.write(f"* COMMENT: {suggestion.clip_type} - {suggestion.reasoning}\n\n")
 
         else:
-            console.print(safe_t('error.unsupported_format', fallback='[dim #DDA0DD]不支援的格式：{format}[/red]', format=format))
+            console.print(safe_t('error.unsupported_format', fallback='[dim #E8C4F0]不支援的格式：{format}[/red]', format=format))
             return ""
 
-        console.print(safe_t('media.clip.suggestions_saved', fallback='[#DA70D6]✓ 剪輯建議已保存：{file}[/green]', file=output_file))
+        console.print(safe_t('media.clip.suggestions_saved', fallback='[#B565D8]✓ 剪輯建議已保存：{file}[/green]', file=output_file))
         return str(output_file)
 
     def _format_time(self, seconds: float) -> str:
@@ -755,7 +755,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(safe_t('error.video_not_found', fallback='[dim #DDA0DD]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
+        console.print(safe_t('error.video_not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
         return
 
     # 創建建議器

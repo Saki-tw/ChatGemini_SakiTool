@@ -16,6 +16,7 @@ from typing import List, Dict, Optional, Any
 from pathlib import Path
 from dataclasses import dataclass
 from rich.console import Console
+from utils.i18n import safe_t
 
 # 重用 test_gen 的資料結構
 import sys
@@ -60,7 +61,7 @@ class DocumentationGenerator:
         Args:
             exclude_dirs: 要排除的目錄列表
         """
-        console.print(f"\n[#DDA0DD]🔍 掃描專案：{self.project_path}[/#DDA0DD]")
+        console.print(f"\n[#DDA0DD]🔍 {safe_t('doc_gen.scanning_project', '掃描專案：{path}', path=self.project_path)}[/#DDA0DD]")
 
         if exclude_dirs is None:
             exclude_dirs = [
@@ -77,7 +78,7 @@ class DocumentationGenerator:
 
             python_files.append(py_file)
 
-        console.print(f"[#DA70D6]✓ 發現 {len(python_files)} 個 Python 檔案[/green]")
+        console.print(f"[#DA70D6]✓ {safe_t('doc_gen.found_files', '發現 {count} 個 Python 檔案', count=len(python_files))}[/green]")
 
         # 分析每個檔案
         for py_file in python_files:
@@ -85,7 +86,7 @@ class DocumentationGenerator:
             if module_info:
                 self.modules.append(module_info)
 
-        console.print(f"[#DA70D6]✓ 分析完成：{len(self.modules)} 個模組[/green]")
+        console.print(f"[#DA70D6]✓ {safe_t('doc_gen.analysis_complete', '分析完成：{count} 個模組', count=len(self.modules))}[/green]")
 
     def _analyze_module(self, file_path: Path) -> Optional[ModuleInfo]:
         """分析單個模組"""
@@ -130,7 +131,7 @@ class DocumentationGenerator:
             )
 
         except Exception as e:
-            console.print(f"[#DDA0DD]警告：無法分析 {file_path} - {e}[/#DDA0DD]")
+            console.print(f"[#DDA0DD]{safe_t('doc_gen.analysis_warning', '警告：無法分析 {path} - {error}', path=file_path, error=e)}[/#DDA0DD]")
             return None
 
     def _extract_function_info(self, node: ast.FunctionDef) -> FunctionInfo:
@@ -184,7 +185,7 @@ class DocumentationGenerator:
         Returns:
             str: README 內容
         """
-        console.print(f"\n[#DDA0DD]📝 生成 README.md...[/#DDA0DD]")
+        console.print(f"\n[#DDA0DD]📝 {safe_t('doc_gen.generating_readme', '生成 README.md...')}[/#DDA0DD]")
 
         lines = []
 
@@ -264,7 +265,7 @@ class DocumentationGenerator:
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(readme_content)
-            console.print(f"[#DA70D6]✓ README 已儲存：{output_path}[/green]")
+            console.print(f"[#DA70D6]✓ {safe_t('doc_gen.readme_saved', 'README 已儲存：{path}', path=output_path)}[/green]")
 
         return readme_content
 
@@ -278,7 +279,7 @@ class DocumentationGenerator:
         Returns:
             str: API 文檔內容
         """
-        console.print(f"\n[#DDA0DD]📝 生成 API 文檔...[/#DDA0DD]")
+        console.print(f"\n[#DDA0DD]📝 {safe_t('doc_gen.generating_api', '生成 API 文檔...')}[/#DDA0DD]")
 
         lines = []
 
@@ -324,7 +325,7 @@ class DocumentationGenerator:
         if output_path:
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(api_docs)
-            console.print(f"[#DA70D6]✓ API 文檔已儲存：{output_path}[/green]")
+            console.print(f"[#DA70D6]✓ {safe_t('doc_gen.api_saved', 'API 文檔已儲存：{path}', path=output_path)}[/green]")
 
         return api_docs
 
@@ -427,12 +428,12 @@ def main():
     """文檔生成器命令列工具"""
     import sys
 
-    console.print("\n[bold #DDA0DD]CodeGemini Documentation Generator[/bold #DDA0DD]\n")
+    console.print(f"\n[bold #DDA0DD]{safe_t('doc_gen.title', 'CodeGemini Documentation Generator')}[/bold #DDA0DD]\n")
 
     if len(sys.argv) < 2:
-        console.print("用法：")
+        console.print(safe_t('doc_gen.usage', '用法') + "：")
         console.print("  python generators/doc_gen.py <project_path> [--readme <path>] [--api <path>]")
-        console.print("\n範例：")
+        console.print(f"\n{safe_t('doc_gen.examples', '範例')}：")
         console.print("  python generators/doc_gen.py ./myproject")
         console.print("  python generators/doc_gen.py ./myproject --readme README.md --api API.md")
         return
@@ -456,7 +457,7 @@ def main():
     if readme_path or not api_path:
         readme = generator.generate_readme(readme_path)
         if not readme_path:
-            console.print(f"\n[#DDA0DD]README.md：[/#DDA0DD]\n")
+            console.print(f"\n[#DDA0DD]{safe_t('doc_gen.readme_title', 'README.md')}：[/#DDA0DD]\n")
             console.print(readme)
 
     if api_path:
