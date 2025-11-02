@@ -1,14 +1,3 @@
-# Korean Language Pack
-# ChatGemini_SakiTool v1.1.0
-#
-# Version: 1.0.0
-# Author: Saki-tw (with Claude Code)
-# Date: 2025-10-25
-# Locale: Korean (Korea)
-#
-# Translated from zh-TW.yaml
-# Total coverage: 100%
-
 meta:
   language: ko
   name: 한국어
@@ -29,11 +18,13 @@ common:
   close: 닫기
   success: 성공
   error: 오류
-  warning: 경고
+  warning: '[#E8C4F0]⚠️  경고가 감지되었습니다(실행을 계속할 수 있습니다):[/#E8C4F0]'
   info: 정보
   loading: 로딩 중
-  processing: 처리 중
-  completed: 완료
+  processing: '[#E8C4F0]대기 중인 작업이 없습니다[/#E8C4F0]'
+  completed: '
+
+    [bold green]✅ 배치 처리가 완료되었습니다![/bold green]'
   failed: 실패
   pending: 대기 중
   save: 저장
@@ -66,236 +57,183 @@ common:
   lines: 줄
   files: 파일
   bytes: 바이트
+  generating: '
 
-  # 상태 동사 (미디어 메뉴 등에 사용)
-  generating: "생성 중"
-  analyzing: "분석 중"
-  saving: "저장 중"
+    [#E8C4F0]🎬 동영상 생성을 시작합니다...[/#E8C4F0]'
+  analyzing: '
 
-# ============================================================================
-# 멀티미디어 메뉴 카테고리 (media)
-# ============================================================================
+    [#E8C4F0]🤖 사용자 설명을 분석 중...[/#E8C4F0]'
+  saving: '
+
+    [#E8C4F0]⏸️  업로드가 중단되었습니다, 진행 상황 저장 중[/#E8C4F0]'
+  unit: 개
+  file_reference_loaded: 📁 참조된 파일 내용을 불러왔습니다
+  file_reference_error: 파일 참조 오류
+  file_not_found: '파일을 찾을 수 없음: {path}'
+  file_too_large: '파일이 너무 큼 ({size} MB > {limit} MB): {path}'
+  file_type_not_supported: '지원되지 않는 파일 형식 [{ext}]: {path}'
+  file_read_error: '파일 읽기 실패: {path}'
+  too_many_file_references: 파일 참조가 너무 많음 (최대 {max}개, {count}개 발견)
+  message: '[#E8C4F0]일치하는 작업이 없습니다[/#E8C4F0]'
 media_menu:
-  # 메뉴 제목
-  title: "[bold COLOR_MACARON_PURPLE]🎬 멀티미디어 제작 센터[/bold COLOR_MACARON_PURPLE]"
-
-  # 섹션 제목
+  title: '[bold COLOR_MACARON_PURPLE]🎬 멀티미디어 제작 센터[/bold COLOR_MACARON_PURPLE]'
   section:
-    ai_generation: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 생성[/bold COLOR_MACARON_PURPLE_LIGHT]"
-    video_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 비디오 처리[/bold COLOR_MACARON_PURPLE_LIGHT]"
-    audio_processing: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 오디오 처리[/bold COLOR_MACARON_PURPLE_LIGHT]"
-    ai_analysis: "\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 분석 도구[/bold COLOR_MACARON_PURPLE_LIGHT]"
+    ai_generation: '
 
-  # 메뉴 항목
+      [bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 생성[/bold COLOR_MACARON_PURPLE_LIGHT]'
+    video_processing: '
+
+      [bold COLOR_MACARON_PURPLE_LIGHT]>>> 비디오 처리[/bold COLOR_MACARON_PURPLE_LIGHT]'
+    audio_processing: '
+
+      [bold COLOR_MACARON_PURPLE_LIGHT]>>> 오디오 처리[/bold COLOR_MACARON_PURPLE_LIGHT]'
+    ai_analysis: '
+
+      [bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 분석 도구[/bold COLOR_MACARON_PURPLE_LIGHT]'
   item:
-    # AI 생성
-    flow_video: "  [1] Flow 비디오 생성 (1080p 장편 비디오, 자연어)"
-    veo_video: "  [2] Veo 비디오 생성 (8초 빠른 생성)"
-    imagen_generate: "  [12] Imagen 이미지 생성 (Text-to-Image)"
-    vision_imagen: "  [13] 스마트 이미지 제작 (Gemini Vision + Imagen)"
-
-    # 비디오 처리
-    video_preprocess: "  [3] 비디오 전처리 (분할/키프레임/정보)"
-    video_concat: "  [4] 비디오 결합 (무손실)"
-    video_trim: "  [15] 시간 트리밍 (무손실)"
-    video_filter: "  [16] 필터 효과 (7가지 스타일)"
-    video_speed: "  [17] 속도 조정 (빨리감기/슬로우모션)"
-    video_watermark: "  [18] 워터마크 추가"
-    subtitle_generate: "  [19] 자막 생성 (음성 인식 + 번역)"
-    subtitle_burn: "  [20] 자막 삽입 (비디오 포함)"
-
-    # 오디오 처리
-    audio_extract: "  [7] 오디오 추출"
-    audio_merge: "  [8] 오디오 병합"
-    audio_volume: "  [9] 볼륨 조정"
-    audio_background: "  [10] 배경 음악"
-    audio_fade: "  [11] 페이드 인/아웃"
-
-    # AI 분석
-    media_analyzer: "  [0] 미디어 분석기 (이미지/비디오 AI 분석)"
-    video_chat: "  [21] 비디오 대화형 채팅 (업로드 후 연속 질문)"
-    video_analysis: "  [5] 비디오 콘텐츠 분석"
-    image_analysis: "  [6] 이미지 콘텐츠 분석"
-
-  # 결합 항목
-  audio_group: "  [7] 오디오 추출  [8] 오디오 병합  [9] 볼륨 조정"
-  audio_group2: "  [10] 배경 음악  [11] 페이드 인/아웃"
-  analysis_group: "  [5] 비디오 콘텐츠 분석  [6] 이미지 콘텐츠 분석"
-
-  # 내비게이션
+    flow_video: '  [1] Flow 비디오 생성 (1080p 장편 비디오, 자연어)'
+    veo_video: '  [2] Veo 비디오 생성 (8초 빠른 생성)'
+    imagen_generate: '  [12] Imagen 이미지 생성 (Text-to-Image)'
+    vision_imagen: '  [13] 스마트 이미지 제작 (Gemini Vision + Imagen)'
+    video_preprocess: '  [3] 비디오 전처리 (분할/키프레임/정보)'
+    video_concat: '  [4] 비디오 결합 (무손실)'
+    video_trim: '  [15] 시간 트리밍 (무손실)'
+    video_filter: '  [16] 필터 효과 (7가지 스타일)'
+    video_speed: '  [17] 속도 조정 (빨리감기/슬로우모션)'
+    video_watermark: '  [18] 워터마크 추가'
+    subtitle_generate: '  [19] 자막 생성 (음성 인식 + 번역)'
+    subtitle_burn: '  [20] 자막 삽입 (비디오 포함)'
+    audio_extract: '  [7] 오디오 추출'
+    audio_merge: '  [8] 오디오 병합'
+    audio_volume: '  [9] 볼륨 조정'
+    audio_background: '  [10] 배경 음악'
+    audio_fade: '  [11] 페이드 인/아웃'
+    media_analyzer: '  [0] 미디어 분석기 (이미지/비디오 AI 분석)'
+    video_chat: '  [21] 비디오 대화형 채팅 (업로드 후 연속 질문)'
+    video_analysis: '  [5] 비디오 콘텐츠 분석'
+    image_analysis: '  [6] 이미지 콘텐츠 분석'
+  audio_group: '  [7] 오디오 추출  [8] 오디오 병합  [9] 볼륨 조정'
+  audio_group2: '  [10] 배경 음악  [11] 페이드 인/아웃'
+  analysis_group: '  [5] 비디오 콘텐츠 분석  [6] 이미지 콘텐츠 분석'
   back: "\n  [99] 메인 메뉴로 돌아가기\n"
-
-# ============================================================================
-# 슬래시 명령 시스템 (slash_commands)
-# / 로 시작하는 인터랙티브 명령
-# ============================================================================
 slash_commands:
-  # 기본 명령
   help:
-    cmd: "/help"
-    desc: "📖 자세한 도움말 시스템 표시"
-
+    cmd: /help
+    desc: 📖 자세한 도움말 시스템 표시
   exit:
-    cmd: "/exit"
-    desc: "🚪 프로그램 종료"
-
+    cmd: /exit
+    desc: 🚪 프로그램 종료
   quit:
-    cmd: "/quit"
-    desc: "🚪 프로그램 종료"
-
+    cmd: /quit
+    desc: 🚪 프로그램 종료
   clear:
-    cmd: "/clear"
-    desc: "🗑️  대화 기록 지우기"
-
-  # 설정 관련
+    cmd: /clear
+    desc: 🗑️  대화 기록 지우기
   lang:
-    cmd: "/lang"
-    desc: "🌐 언어 전환 (zh-TW/en/ja/ko)"
-
+    cmd: /lang
+    desc: 🌐 언어 전환 (zh-TW/en/ja/ko)
   model:
-    cmd: "/model"
-    desc: "🤖 AI 모델 전환"
-
+    cmd: /model
+    desc: 🤖 AI 모델 전환
   cache:
-    cmd: "/cache"
-    desc: "💾 캐시 관리 메뉴"
-
+    cmd: /cache
+    desc: 💾 캐시 관리 메뉴
   config:
-    cmd: "/config"
-    desc: "⚙️  구성 관리"
-
-  # 미디어 기능
+    cmd: /config
+    desc: ⚙️  구성 관리
   media:
-    cmd: "/media"
-    desc: "🎬 미디어 기능 메뉴"
-
+    cmd: /media
+    desc: 🎬 미디어 기능 메뉴
   image:
-    cmd: "/image"
-    desc: "🖼️  이미지 분석"
-
+    cmd: /image
+    desc: 🖼️  이미지 분석
   video:
-    cmd: "/video"
-    desc: "🎥 동영상 분석"
-
-  # 메모리 관리
+    cmd: /video
+    desc: 🎥 동영상 분석
   clear_memory:
-    cmd: "/clear-memory"
-    desc: "🧹 메모리 정리"
-
+    cmd: /clear-memory
+    desc: 🧹 메모리 정리
   memory_stats:
-    cmd: "/memory-stats"
-    desc: "📊 메모리 통계"
-
+    cmd: /memory-stats
+    desc: 📊 메모리 통계
   help_memory:
-    cmd: "/help-memory"
-    desc: "ℹ️  메모리 관리 도움말"
-
-  # 체크포인트 시스템
+    cmd: /help-memory
+    desc: ℹ️  메모리 관리 도움말
   checkpoints:
-    cmd: "/checkpoints"
-    desc: "📌 모든 체크포인트 나열"
-
+    cmd: /checkpoints
+    desc: 📌 모든 체크포인트 나열
   checkpoint:
-    cmd: "/checkpoint"
-    desc: "💾 수동 체크포인트 생성"
-
+    cmd: /checkpoint
+    desc: 💾 수동 체크포인트 생성
   rewind:
-    cmd: "/rewind"
-    desc: "⏪ 체크포인트로 되감기"
-
+    cmd: /rewind
+    desc: ⏪ 체크포인트로 되감기
   help_checkpoint:
-    cmd: "/help-checkpoint"
-    desc: "ℹ️  체크포인트 시스템 도움말"
-
-  # 대화 기록
+    cmd: /help-checkpoint
+    desc: ℹ️  체크포인트 시스템 도움말
   search:
-    cmd: "/search"
-    desc: "🔍 대화 기록 검색"
-
+    cmd: /search
+    desc: 🔍 대화 기록 검색
   history:
-    cmd: "/history"
-    desc: "📜 대화 기록 보기"
-
+    cmd: /history
+    desc: 📜 대화 기록 보기
   export:
-    cmd: "/export"
-    desc: "📤 대화 내보내기"
-
+    cmd: /export
+    desc: 📤 대화 내보내기
   stats:
-    cmd: "/stats"
-    desc: "📊 대화 통계 정보"
-
-  # 디버그 도구
+    cmd: /stats
+    desc: 📊 대화 통계 정보
   debug:
-    cmd: "/debug"
-    desc: "🐛 디버그 도구"
-
+    cmd: /debug
+    desc: 🐛 디버그 도구
   test:
-    cmd: "/test"
-    desc: "🧪 테스트 도구"
-
+    cmd: /test
+    desc: 🧪 테스트 도구
 chat:
   welcome: ChatGemini에 오신 것을 환영합니다!
   welcome_back: 돌아오신 것을 환영합니다!
   exit_message: 이용해 주셔서 감사합니다, 안녕히 가세요!
   goodbye: 안녕히 가세요!
   user_prompt: 당신
-  user_prompt_with_hint: "당신 ([ 매개변수)"
-  user_prompt_with_hint_detailed: "당신 ([ 누르면 think/max 매개변수 표시)"
+  user_prompt_with_hint: 당신 ([ 매개변수)
+  user_prompt_with_hint_detailed: 당신 ([ 누르면 think/max 매개변수 표시)
   model_prompt: 모델
   system_prompt: 시스템
   assistant_prompt: 어시스턴트
   thinking: 생각 중
   generating: 생성 중
-
-  # 명령 메뉴 (추가됨 - / 명령 목록 지원)
   commands_menu:
-    title: "[bold #DA70D6]📋 사용 가능한 명령[/bold #DA70D6]"
-    command: "명령"
-    description: "설명"
-
-    # 기본 명령
-    help_desc: "상세한 도움말 시스템 표시"
-    lang_desc: "언어 전환 (zh-TW/en/ja/ko)"
-    model_desc: "AI 모델 전환"
-    clear_desc: "대화 기록 지우기"
-    exit_desc: "프로그램 종료"
-
-    # 기능 메뉴
-    cache_desc: "캐시 관리 메뉴"
-    config_desc: "구성 관리（데이터베이스 설정）"
-    media_desc: "미디어 기능 메뉴"
-    cli_desc: "Gemini CLI 관리 도구"
-    debug_desc: "디버그 및 테스트 도구"
-
-    # 메모리 관리
-    clear_memory_desc: "메모리 지우기"
-    memory_stats_desc: "메모리 통계"
-    help_memory_desc: "메모리 관리 가이드"
-
-    # 체크포인트 시스템
-    checkpoints_desc: "모든 체크포인트 나열"
-    checkpoint_desc: "수동 체크포인트 생성"
-    rewind_desc: "체크포인트로 되감기"
-    help_checkpoint_desc: "체크포인트 시스템 가이드"
-
-    # 대화 기록
-    search_desc: "대화 기록 검색"
-    history_desc: "대화 기록 보기"
-    export_desc: "대화 내보내기 (json/md/txt)"
-    stats_desc: "대화 통계"
-
-    # 빠른 구문
-    think_auto_desc: "동적 사고 모드"
-    think_budget_desc: "사고 예산 지정"
-    no_think_desc: "사고 모드 비활성화"
-    file_attach_desc: "파일 첨부"
-    cache_now_desc: "즉시 캐시 생성"
-
-    # 키보드 단축키
-    ctrl_t_desc: "사고 과정 표시 전환（숨김→번역→이중 언어）"
-
-    tip: "[dim #DDA0DD]💡 팁: 자세한 설명은 \"help\"를 입력하세요[/dim #DDA0DD]"
-
+    title: '[bold #DA70D6]📋 사용 가능한 명령[/bold #DA70D6]'
+    command: 명령
+    description: 설명
+    help_desc: 상세한 도움말 시스템 표시
+    lang_desc: 언어 전환 (zh-TW/en/ja/ko)
+    model_desc: AI 모델 전환
+    clear_desc: 대화 기록 지우기
+    exit_desc: 프로그램 종료
+    cache_desc: 캐시 관리 메뉴
+    config_desc: 구성 관리（데이터베이스 설정）
+    media_desc: 미디어 기능 메뉴
+    cli_desc: Gemini CLI 관리 도구
+    debug_desc: 디버그 및 테스트 도구
+    clear_memory_desc: 메모리 지우기
+    memory_stats_desc: 메모리 통계
+    help_memory_desc: 메모리 관리 가이드
+    checkpoints_desc: 모든 체크포인트 나열
+    checkpoint_desc: 수동 체크포인트 생성
+    rewind_desc: 체크포인트로 되감기
+    help_checkpoint_desc: 체크포인트 시스템 가이드
+    search_desc: 대화 기록 검색
+    history_desc: 대화 기록 보기
+    export_desc: 대화 내보내기 (json/md/txt)
+    stats_desc: 대화 통계
+    think_auto_desc: 동적 사고 모드
+    think_budget_desc: 사고 예산 지정
+    no_think_desc: 사고 모드 비활성화
+    file_attach_desc: 파일 첨부
+    cache_now_desc: 즉시 캐시 생성
+    ctrl_t_desc: 사고 과정 표시 전환（숨김→번역→이중 언어）
+    tip: '[dim #DDA0DD]💡 팁: 자세한 설명은 "help"를 입력하세요[/dim #DDA0DD]'
   streaming: 스트리밍 중
   waiting: 응답 대기 중
   analyzing: 분석 중
@@ -322,6 +260,1772 @@ chat:
   image_message: 이미지 메시지
   file_message: 파일 메시지
   multimodal_message: 멀티모달 메시지
+  model_gemini_25_pro: Gemini 2.5 Pro - 最強大（思考模式）
+  model_gemini_25_flash: Gemini 2.5 Flash - 快速且智慧（推薦）
+  model_gemini_25_flash_lite: Gemini 2.5 Flash Lite - 最便宜
+  model_gemini_20_flash: Gemini 2.0 Flash - 快速版
+  pasted_text_multiline: '[📋 已貼上文本 +{extra_lines} 行] {preview}'
+  pasted_text_long: '[📋 已貼上長文本 ({char_count} 字元)] {preview}'
+  formatted_output_title: '[bright_magenta]📝 格式化輸出[/bright_magenta]'
+  current_cost: '💰 本次成本: NT${cost:.2f}'
+  current_cost_detail: '💰 本次成本: NT${twd:.2f} | 累計: NT${total_twd:.2f} (${total_usd:.6f})'
+  tokens_input: '輸入: {count:,} tokens'
+  tokens_thinking: '思考: {count:,} tokens'
+  tokens_output: '輸出: {count:,} tokens'
+  tokens_smart_enhance: '🤖智能增強: {count:,} tokens'
+  clear_memory_confirm_title: '[bright_magenta]清空記憶體快取嗎？[/bright_magenta]'
+  clear_memory_confirm_desc1: '[dim]· 只清除 RAM 中的對話（釋放記憶體）'
+  clear_memory_confirm_desc2: · 硬碟儲存的對話記錄不受影響[/dim]
+  memory_stats_title: '[plum]📊 記憶體統計[/plum]'
+  memory_stats_active: 活躍訊息
+  memory_stats_archived: 已存檔訊息
+  memory_stats_total: 總訊息數
+  memory_stats_limit: 記憶體上限
+  memory_stats_unlimited: 無限 ⚠️
+  memory_stats_current: 當前記憶體
+  memory_stats_threshold: 警告閾值
+  memory_stats_status: 記憶體狀態
+  memory_status_warning: '[yellow]⚠️ 警告[/yellow]'
+  memory_status_normal: '[green]✓ 正常[/green]'
+  memory_item_unit_messages: '{count} 條'
+  memory_item_unit_gb: '{value:.2f} GB'
+  checkpoint_description_prompt: '
+
+    [#87CEEB]請輸入檢查點描述[/#87CEEB]'
+  checkpoint_default_name: 手動檢查點
+  unlimited_memory_warning_title: ⚠️ 危險模式警告
+  unlimited_memory_warning_header: '[bold red]🔴 警告：無限記憶體模式已啟用！[/bold red]
+
+
+    [yellow]您已選擇「我就是要用爆記憶體」模式。[/yellow]'
+  unlimited_memory_warning_disabled: "\n記憶體管理功能已完全停用：\n  ❌ 自動清理機制已停用\n  ❌ 記憶體警告已停用\n\
+    \  ❌ 對話歷史限制已移除"
+  unlimited_memory_warning_risks: "\n[bold]風險：[/bold]\n  • 長時間運行可能導致記憶體溢出（OOM）\n \
+    \ • 可能導致系統變慢或程式崩潰\n  • 記憶體使用可能超過 4GB+"
+  unlimited_memory_warning_howto: '
+
+    [dim]如需停用無限模式，請在 config.py 中設定：[/dim]
+
+    UNLIMITED_MEMORY_MODE = False'
+  unlimited_memory_warning_monitor: '
+
+    [bright_magenta]使用 /memory-stats 命令監控記憶體使用[/bright_magenta]'
+  status_enabled: ✅ 啟用
+  status_disabled: ❌ 停用
+  status_active: ✅ 已啟用
+  status_inactive: ❌ 已停用
+  test_environment: 環境檢查
+  test_chat_features: 主程式功能測試
+  test_flow_engine: Flow Engine 測試
+  test_terminal: 終端輸入測試
+  app_title: ChatGemini_SakiTool - Gemini 對話工具
+  config_wizard_desc: 啟動互動式配置精靈（首次使用或調整設定時使用）
+  config_wizard_title: '[bold magenta]互動式配置模式[/bold magenta]'
+  config_wizard_message: '
+
+    [dim]此模式將引導您完成配置設定。
+
+    配置完成後，請再次執行程式開始對話。[/dim]'
+  config_wizard_panel_title: '[bold magenta]🎛️  配置精靈[/bold magenta]'
+  config_source_codegemini: CodeGemini 配置
+  thinking_mode_syntax: 思考模式語法
+  confirm_clear_memory: '[plum]確定要清理記憶體嗎？[/plum]'
+  msg.上傳到伺服器小時有效: '  1. 上傳到 Gemini 伺服器（48 小時有效）'
+  msg.上傳圖片影片音訊讓分: '上傳圖片、影片、音訊讓 AI 分析
+
+    '
+  msg.上傳明確上傳: '  上傳 video.mp4  - 明確上傳
+
+    '
+  msg.上傳檔案上傳媒體: '  上傳 檔案    - 上傳媒體'
+  msg.不使用快取每次: '  不使用快取：每次 5000 tokens → NT$ 0.16'
+  msg.不使用思考模式: '  [no-think]   - 不使用思考模式
+
+    '
+  msg.不影響已保存的對話日: '  • 不影響已保存的對話日誌
+
+    '
+  msg.不影響已保存的對話日_2: '  • 不影響已保存的對話日誌
+
+    '
+  msg.不透明度必須在之間: '[#DDA0DD]不透明度必須在 0.0-1.0 之間[/#DDA0DD]'
+  msg.不透明度必須在之間_2: '[#DDA0DD]不透明度必須在 0.0-1.0 之間[/#DDA0DD]'
+  msg.中品質預設: '  [2] 中品質 (CRF 23, medium, 預設)'
+  msg.中品質預設_2: '  [2] 中品質 (CRF 23, medium, 預設)'
+  msg.中品質預設_3: '  [2] 中品質 (CRF 23, medium, 預設)'
+  msg.中品質預設_4: '  [2] 中品質 (CRF 23, medium, 預設)'
+  msg.中央: '  [5] 中央'
+  msg.中央_2: '  [5] 中央'
+  msg.中度思考: '  [3] 中度思考 (5,000 tokens)'
+  msg.中度思考_2: '  [3] 中度思考 (5,000 tokens)'
+  msg.主程式功能測試: '  [2] 主程式功能測試'
+  msg.主程式功能測試_2: '  [2] 主程式功能測試'
+  msg.互動式語言選單不可用: ℹ️  互動式語言選單不可用（可使用 gemini_lang.py）
+  msg.互動式語言選單不可用_2: '[#DDA0DD]⚠️  互動式語言選單不可用[/#DDA0DD]'
+  msg.互動式語言選單不可用_3: '[#DDA0DD]⚠️  互動式語言選單不可用[/#DDA0DD]'
+  msg.互動式語言選單已啟用: ✅ 互動式語言選單已啟用
+  msg.低品質: '  [3] 低品質 (CRF 28, fast)'
+  msg.低品質_2: '  [3] 低品質 (CRF 28, fast)'
+  msg.低品質_3: '  [3] 低品質 (CRF 28, fast)'
+  msg.低品質_4: '  [3] 低品質 (CRF 28, fast)'
+  msg.你: '  你: [no-think] 1+1=?'
+  msg.你_2: '  你: cli'
+  msg.你上傳總結影片內容: '  你: 上傳 demo.mp4 總結影片內容
+
+    '
+  msg.你上傳附加比較差異: '  你: 上傳 photo1.jpg 附加 photo2.jpg 比較差異'
+  msg.你圖中的人穿什麼可以: '     你: 圖中的人穿什麼？← AI 可以回答'
+  msg.你圖中的人穿什麼看不: '     你: 圖中的人穿什麼？← AI 看不到圖片'
+  msg.你建立快取鎖定圖片: '     你: [cache:now]  ← 建立快取鎖定圖片'
+  msg.你後續可多次詢問省成: '     你: [後續可多次詢問，省 90% 成本]'
+  msg.你後續問題使用快取: '     你: [後續問題使用快取]'
+  msg.你深入分析這個演算法: '  你: [think:5000] 深入分析這個演算法的時間複雜度'
+  msg.你解釋相對論讓自行決: '  你: [think:auto] 解釋相對論（讓 AI 自行決定）
+
+    '
+  msg.你解釋這個程式: '  你: @main.py 解釋這個程式'
+  msg.你解釋量子計算原理: '  你: [think:5000] 解釋量子計算原理'
+  msg.你讀取: '     你: 讀取 main.py'
+  msg.你讀取_2: '     你: 讀取 spec.md'
+  msg.你讀取檢查設定: '  你: 讀取 config.json 檢查設定'
+  msg.你讀取附加診斷問題: '  你: 讀取 error.log 附加 screenshot.png 診斷問題'
+  msg.你這段程式碼有什麼問: '  你: @code.py 這段程式碼有什麼問題？'
+  msg.你鎖定程式碼上下文: '     你: [cache:now]  ← 鎖定程式碼上下文'
+  msg.你附加描述圖片: '     你: 附加 image.jpg 描述圖片'
+  msg.你附加描述圖片_2: '     你: 附加 image.jpg 描述圖片'
+  msg.你附加描述這張圖片: '  你: 附加 image.jpg 描述這張圖片'
+  msg.你附加總結會議重點: '  你: 附加 meeting.mp4 總結會議重點'
+  msg.你附加這個錯誤是什麼: '  你: 附加 screenshot.png 這個錯誤是什麼？'
+  msg.使用回溯至指定檢查點: '
+
+    [dim]使用 /rewind <ID> 回溯至指定檢查點[/dim]'
+  msg.使用回溯至指定檢查點_2: '
+
+    [dim]使用 /rewind <ID> 回溯至指定檢查點[/dim]'
+  msg.使用場景: 使用場景：
+  msg.使用快取每次省: '  使用快取：每次 5000 tokens → NT$ 0.016（省 90%）'
+  msg.使用思考預算: '  [think:2000] - 使用 2000 tokens 思考預算'
+  msg.使用推薦設定自動模式: '✓ 使用推薦設定：自動模式，5000 tokens，TTL 1 小時
+
+    '
+  msg.使用描述建立手動檢查: '[dim]使用 /checkpoint <描述> 建立手動檢查點[/dim]
+
+    '
+  msg.使用描述建立手動檢查_2: '[dim]使用 /checkpoint <描述> 建立手動檢查點[/dim]
+
+    '
+  msg.使用方式: 使用方式：
+  msg.使用方式_2: 使用方式：
+  msg.使用方式_3: 使用方式：
+  msg.使用方式_4: 使用方式：
+  msg.使用查看所有檢查點: '[dim]使用 /checkpoints 查看所有檢查點[/dim]
+
+    '
+  msg.使用獨立工具: 使用獨立工具：
+  msg.使用獨立工具_2: 使用獨立工具：
+  msg.使用獨立工具_3: 使用獨立工具：
+  msg.使用獨立工具_4: 使用獨立工具：
+  msg.使用獨立工具_5: 使用獨立工具：
+  msg.使用獨立工具_6: 使用獨立工具：
+  msg.使用範例: 使用範例：
+  msg.使用範例_2: 使用範例：
+  msg.使用範例_3: 使用範例：
+  msg.使用統計: '
+
+    【使用統計】'
+  msg.保持原始品質禁止有損: '  - 保持原始品質（禁止有損壓縮）'
+  msg.保持原始品質禁止有損_2: '  - 保持原始品質（禁止有損壓縮）'
+  msg.保留當前對話到磁碟: '  • 保留當前對話到磁碟'
+  msg.保留當前對話到磁碟_2: '  • 保留當前對話到磁碟'
+  msg.停用思考: '  [7] 停用思考 (0 tokens)'
+  msg.停用思考_2: '  [7] 停用思考 (0 tokens)'
+  msg.偵測到代碼分析需求增: '[dim magenta]💡 偵測到代碼分析需求，增強提示中...[/dim magenta]'
+  msg.偵測到代碼分析需求增_2: '[dim magenta]💡 偵測到代碼分析需求，增強提示中...[/dim magenta]'
+  msg.偵測到任務規劃需求增: '[dim magenta]💡 偵測到任務規劃需求，增強提示中...[/dim magenta]'
+  msg.偵測到任務規劃需求增_2: '[dim magenta]💡 偵測到任務規劃需求，增強提示中...[/dim magenta]'
+  msg.偵測到網頁搜尋需求增: '[dim magenta]💡 偵測到網頁搜尋需求，增強提示中...[/dim magenta]'
+  msg.偵測到網頁搜尋需求增_2: '[dim magenta]💡 偵測到網頁搜尋需求，增強提示中...[/dim magenta]'
+  msg.優化成本與效能的關鍵: '優化成本與效能的關鍵設定！
+
+    '
+  msg.優化成本與效能的關鍵_2: '優化成本與效能的關鍵設定！
+
+    '
+  msg.儲存路徑: 儲存路徑：{video_path}
+  msg.免費額度剩餘: '  免費額度剩餘: {trans_status['
+  msg.分割影片固定時長分段: '  2. 分割影片（固定時長分段）'
+  msg.分割影片固定時長分段_2: '  2. 分割影片（固定時長分段）'
+  msg.分塊類型分布: '
+
+    [#DA70D6]分塊類型分布：[/#DA70D6]'
+  msg.分析工具: '
+
+    [bold magenta]>>> AI 分析工具[/bold magenta]'
+  msg.分析工具_2: '
+
+    [bold magenta]>>> AI 分析工具[/bold magenta]'
+  msg.分析影片內容: '  - Gemini 分析影片內容'
+  msg.分析影片內容_2: '  - Gemini 分析影片內容'
+  msg.切換思考翻譯當前: '  6. 切換思考翻譯 (當前: {trans_status})'
+  msg.切換思考過程顯示: '  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'
+  msg.切換思考過程顯示_2: '  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'
+  msg.切換模型: '  [#DA70D6]model[/#DA70D6] - 切換模型'
+  msg.切換模型_2: '  [#DA70D6]model[/#DA70D6] - 切換模型'
+  msg.切換模型_3: '  model       - 切換模型'
+  msg.切換翻譯功能啟用停用: '  [1] 切換翻譯功能（啟用/停用）'
+  msg.切換翻譯功能啟用停用_2: '  [1] 切換翻譯功能（啟用/停用）'
+  msg.切換語言: '  [#DA70D6]lang, language[/#DA70D6] - 切換語言（zh-TW/en/ja/ko）🆕'
+  msg.切換語言_2: '  [#DA70D6]lang, language[/#DA70D6] - 切換語言（zh-TW/en/ja/ko）🆕'
+  msg.切換語言_3: '  lang        - 切換語言（zh-TW/en/ja/ko）🆕'
+  msg.列出所有快取: '  1. 列出所有快取'
+  msg.列出所有快取_2: '  1. 列出所有快取'
+  msg.刪除快取: '  3. 刪除快取'
+  msg.刪除快取_2: '  3. 刪除快取'
+  msg.創作生成: '
+
+    [bold magenta]>>> AI 創作生成[/bold magenta]'
+  msg.創作生成_2: '
+
+    [bold magenta]>>> AI 創作生成[/bold magenta]'
+  msg.功能: 功能：
+  msg.功能_10: 功能：
+  msg.功能_11: 功能：
+  msg.功能_2: 功能：
+  msg.功能_3: 功能：
+  msg.功能_4: 功能：
+  msg.功能_5: 功能：
+  msg.功能_6: 功能：
+  msg.功能_7: 功能：
+  msg.功能_8: 功能：
+  msg.功能_9: 功能：
+  msg.功能未啟用未找到: '[#DDA0DD]CodeGemini 功能未啟用（CodeGemini.py 未找到）[/#DDA0DD]'
+  msg.功能未啟用未找到_2: '[#DDA0DD]CodeGemini 功能未啟用（CodeGemini.py 未找到）[/#DDA0DD]'
+  msg.動態思考預設: '  [#DDA0DD][think:auto][/#DDA0DD] - 動態思考（預設）'
+  msg.動態思考預設_2: '  [#DDA0DD][think:auto][/#DDA0DD] - 動態思考（預設）'
+  msg.動態思考預設_3: '  [think:auto] - 動態思考（預設）'
+  msg.動態模式推薦自動決定: '  [1] 動態模式（推薦）- AI 自動決定思考量'
+  msg.動態模式推薦自動決定_2: '  [1] 動態模式（推薦）- AI 自動決定思考量'
+  msg.包含: '[dim]   包含 {summary['
+  msg.匯出報告失敗: '[dim magenta]✗ 匯出報告失敗：{e}[/red]'
+  msg.匯出性能報告: '  [9] 匯出性能報告'
+  msg.匯出性能報告_2: '  [9] 匯出性能報告'
+  msg.匯出性能報告_3: '
+
+    [#DA70D6]📁 匯出性能報告[/#DA70D6]
+
+    '
+  msg.匯出性能報告_4: '
+
+    [#DA70D6]📁 匯出性能報告[/#DA70D6]
+
+    '
+  msg.即時控制: 即時控制：
+  msg.卸載: '  [3] 卸載'
+  msg.卸載_2: '  [3] 卸載'
+  msg.卸載失敗: '[dim magenta]✗ 卸載失敗[/red]'
+  msg.卸載失敗_2: '[dim magenta]✗ 卸載失敗[/red]'
+  msg.卸載成功: '[#DA70D6]✓ 卸載成功[/#DA70D6]'
+  msg.卸載成功_2: '[#DA70D6]✓ 卸載成功[/#DA70D6]'
+  msg.取消: '  [0] 取消
+
+    '
+  msg.取消_2: '  [0] 取消
+
+    '
+  msg.可用引擎: '
+
+    【可用引擎】'
+  msg.可用語言: '[dim]   可用語言: zh-TW, en, ja, ko[/dim]
+
+    '
+  msg.可用語言_2: '[dim]   可用語言: zh-TW, en, ja, ko[/dim]
+
+    '
+  msg.可能的解決方案: '
+
+    [#DA70D6]💡 可能的解決方案：[/#DA70D6]'
+  msg.可能的解決方案_2: '
+
+    [#DA70D6]💡 可能的解決方案：[/#DA70D6]'
+  msg.右上角: '  [2] 右上角'
+  msg.右上角_2: '  [2] 右上角'
+  msg.右下角預設: '  [4] 右下角（預設）'
+  msg.右下角預設_2: '  [4] 右下角（預設）'
+  msg.合併模式: '
+
+    [#DA70D6]合併模式：[/#DA70D6]'
+  msg.合併模式_2: '
+
+    [#DA70D6]合併模式：[/#DA70D6]'
+  msg.合併音訊: '
+
+    [#DA70D6]🎵 合併音訊[/#DA70D6]
+
+    '
+  msg.合併音訊_2: '
+
+    [#DA70D6]🎵 合併音訊[/#DA70D6]
+
+    '
+  msg.向量資料庫統計資訊: '[bold bright_magenta]📊 向量資料庫統計資訊[/bold bright_magenta]'
+  msg.向量資料庫統計資訊_2: '[bold bright_magenta]📊 向量資料庫統計資訊[/bold bright_magenta]'
+  msg.品質設定: '
+
+    [#DA70D6]品質設定：[/#DA70D6]'
+  msg.品質設定_2: '
+
+    [#DA70D6]品質設定：[/#DA70D6]'
+  msg.品質設定_3: '
+
+    [#DA70D6]品質設定：[/#DA70D6]'
+  msg.品質設定_4: '
+
+    [#DA70D6]品質設定：[/#DA70D6]'
+  msg.問題: '[#DDA0DD]問題：[/#DDA0DD] {r.get('
+  msg.啟動: 啟動：
+  msg.啟動_2: '  [2] 啟動 Gemini CLI session'
+  msg.啟動_3: '  [2] 啟動 Gemini CLI session'
+  msg.啟動_4: '
+
+    [#DA70D6]啟動 Gemini CLI...[/#DA70D6]'
+  msg.啟動_5: '
+
+    [#DA70D6]啟動 Gemini CLI...[/#DA70D6]'
+  msg.啟動失敗: '[dim magenta]啟動失敗：{e}[/red]'
+  msg.啟動失敗_2: '[dim magenta]啟動失敗：{e}[/red]'
+  msg.啟動帶上下文: '  • 啟動 Gemini CLI session（帶上下文）'
+  msg.啟動時配置: 啟動時配置：
+  msg.啟用失敗: '[#DDA0DD]⚠️  Codebase Embedding 啟用失敗: {e}[/#DDA0DD]'
+  msg.單次費用: '  單次費用：NT$ {cost_twd:.4f} (${cost_usd:.6f})'
+  msg.回溯失敗或已取消: '
+
+    [#DDA0DD]回溯失敗或已取消[/#DDA0DD]'
+  msg.回溯失敗或已取消_2: '
+
+    [#DDA0DD]回溯失敗或已取消[/#DDA0DD]'
+  msg.回溯成功: '
+
+    [green]✓[/green] 回溯成功！'
+  msg.回溯成功_2: '
+
+    [green]✓[/green] 回溯成功！'
+  msg.回溯錯誤: '[red]✗[/red] 回溯錯誤: {e}'
+  msg.回答: '[#DA70D6]回答：[/#DA70D6] {answer_preview}'
+  msg.固定思考: '  [#DDA0DD][think:2000][/#DDA0DD] - 固定 2000 tokens 思考'
+  msg.固定思考_2: '  [#DDA0DD][think:2000][/#DDA0DD] - 固定 2000 tokens 思考'
+  msg.圖像分析: '  - Gemini Vision 圖像分析'
+  msg.圖像分析_2: '  - Gemini Vision 圖像分析'
+  msg.圖像分析工具: '
+
+    [#DA70D6]🖼️ 圖像分析工具[/#DA70D6]
+
+    '
+  msg.圖像分析工具_2: '
+
+    [#DA70D6]🖼️ 圖像分析工具[/#DA70D6]
+
+    '
+  msg.圖像放大: '  [14] Imagen 圖像放大（Upscaling）'
+  msg.圖像放大_2: '  [14] Imagen 圖像放大（Upscaling）'
+  msg.圖像生成: '  [12] Imagen 圖像生成（Text-to-Image）'
+  msg.圖像生成_2: '  [12] Imagen 圖像生成（Text-to-Image）'
+  msg.圖像編輯編輯: '  [13] Imagen 圖像編輯（AI 編輯）'
+  msg.圖像編輯編輯_2: '  [13] Imagen 圖像編輯（AI 編輯）'
+  msg.圖片: '  圖片：20 MB'
+  msg.圖片固定: '  圖片：258 tokens（固定）'
+  msg.圖片已放大: '
+
+    [#DA70D6]✅ 圖片已放大：{output_path}[/#DA70D6]'
+  msg.圖片已生成張: '
+
+    [#DA70D6]✅ 圖片已生成：{len(output_paths)} 張[/#DA70D6]'
+  msg.圖片已編輯: '
+
+    [#DA70D6]✅ 圖片已編輯：{output_path}[/#DA70D6]'
+  msg.圖片放大: '
+
+    [#DA70D6]🔍 Imagen 圖片放大[/#DA70D6]
+
+    '
+  msg.圖片放大_2: '
+
+    [#DA70D6]🔍 Imagen 圖片放大[/#DA70D6]
+
+    '
+  msg.圖片生成: '
+
+    [#DA70D6]🎨 Imagen 圖片生成[/#DA70D6]
+
+    '
+  msg.圖片生成_2: '
+
+    [#DA70D6]🎨 Imagen 圖片生成[/#DA70D6]
+
+    '
+  msg.圖片編輯: '
+
+    [#DA70D6]✏️ Imagen 圖片編輯[/#DA70D6]
+
+    '
+  msg.圖片編輯_2: '
+
+    [#DA70D6]✏️ Imagen 圖片編輯[/#DA70D6]
+
+    '
+  msg.圖片路徑: '  python gemini_image_analyzer.py <圖片路徑>
+
+    '
+  msg.圖片路徑_2: '  python gemini_image_analyzer.py <圖片路徑>
+
+    '
+  msg.在對話中附加檔案讓分: '在對話中附加檔案，讓 AI 分析內容
+
+    '
+  msg.執行: '   執行: pip install prompt-toolkit'
+  msg.執行_2: '     執行：[#DDA0DD]{sol.command}[/#DDA0DD]'
+  msg.執行_3: '
+
+    [#DA70D6]執行 {description}...[/#DA70D6]
+
+    '
+  msg.執行錯誤: '[dim magenta]執行錯誤：{e}[/red]'
+  msg.基本使用: 基本使用：
+  msg.基本影片生成: '
+
+    [#DA70D6]🎬 Veo 基本影片生成[/#DA70D6]
+
+    '
+  msg.基本影片生成_2: '
+
+    [#DA70D6]🎬 Veo 基本影片生成[/#DA70D6]
+
+    '
+  msg.基本指令: '
+
+    [#DDA0DD]基本指令：[/#DDA0DD]'
+  msg.基本指令_2: '
+
+    [#DDA0DD]基本指令：[/#DDA0DD]'
+  msg.基本指令_3: 基本指令：
+  msg.基礎影片新片段時間點: '  python gemini_video_compositor.py replace <基礎影片> <新片段> <時間點>'
+  msg.基礎影片新片段時間點_2: '  python gemini_video_compositor.py replace <基礎影片> <新片段> <時間點>'
+  msg.增亮: '  [6] 增亮 (brighten)'
+  msg.增亮_2: '  [6] 增亮 (brighten)'
+  msg.增強對比: '  [7] 增強對比 (contrast)'
+  msg.增強對比_2: '  [7] 增強對比 (contrast)'
+  msg.多媒體創作中心: '[bold bright_magenta]🎬 多媒體創作中心[/bold bright_magenta]'
+  msg.多媒體創作中心_2: '[bold bright_magenta]🎬 多媒體創作中心[/bold bright_magenta]'
+  msg.多輪對話重要: 多輪對話（重要！）：
+  msg.媒體分析器圖片影片分: '  [0] 媒體分析器（圖片/影片 AI 分析）'
+  msg.媒體分析器圖片影片分_2: '  [0] 媒體分析器（圖片/影片 AI 分析）'
+  msg.媒體查看器已啟用附加: ✅ 媒體查看器已啟用（附加檔案時自動顯示資訊）
+  msg.媒體檔上傳到: '  媒體檔 → 上傳到 Gemini API'
+  msg.媒體檔案查看器: '
+
+    [#DA70D6]🎬 媒體檔案查看器[/#DA70D6]
+
+    '
+  msg.媒體檔案查看器_2: '
+
+    [#DA70D6]🎬 媒體檔案查看器[/#DA70D6]
+
+    '
+  msg.字幕已燒錄: '
+
+    [#DA70D6]✅ 字幕已燒錄：{output_path}[/#DA70D6]'
+  msg.字幕已生成: '
+
+    [#DA70D6]✅ 字幕已生成：{subtitle_path}[/#DA70D6]'
+  msg.字幕格式: '
+
+    [#DA70D6]字幕格式：[/#DA70D6]'
+  msg.字幕格式_2: '
+
+    [#DA70D6]字幕格式：[/#DA70D6]'
+  msg.字幕檔案不存在: '[#DDA0DD]字幕檔案不存在[/#DDA0DD]'
+  msg.字幕檔案不存在_2: '[#DDA0DD]字幕檔案不存在[/#DDA0DD]'
+  msg.存在: '[#DDA0DD]  2. CodeGemini/config_manager.py 存在[/#DDA0DD]'
+  msg.存在_2: '[#DDA0DD]  2. CodeGemini/config_manager.py 存在[/#DDA0DD]'
+  msg.存檔位置: '
+
+    [dim]存檔位置: {stats['
+  msg.安裝: '  [1] 安裝'
+  msg.安裝_2: '  [1] 安裝'
+  msg.安裝失敗: '[dim magenta]✗ 安裝失敗[/red]'
+  msg.安裝失敗_2: '[dim magenta]✗ 安裝失敗[/red]'
+  msg.安裝成功: '[#DA70D6]✓ 安裝成功[/#DA70D6]'
+  msg.安裝成功_2: '[#DA70D6]✓ 安裝成功[/#DA70D6]'
+  msg.安裝更新: '  [4] 安裝/更新 Gemini CLI'
+  msg.安裝更新_2: '  [4] 安裝/更新 Gemini CLI'
+  msg.安裝更新_3: '
+
+    [#DA70D6]安裝/更新 Gemini CLI[/#DA70D6]'
+  msg.安裝更新_4: '
+
+    [#DA70D6]安裝/更新 Gemini CLI[/#DA70D6]'
+  msg.安裝更新卸載: '  • 安裝/更新/卸載 Gemini CLI'
+  msg.完整指令列表: '  [#DA70D6]help[/#DA70D6] - 完整指令列表'
+  msg.完整指令列表_2: '  [#DA70D6]help[/#DA70D6] - 完整指令列表'
+  msg.對話工具新版本: '[bold bright_magenta]Gemini 對話工具（新 SDK 版本）[/bold bright_magenta]
+
+    '
+  msg.對話工具新版本_2: '[bold bright_magenta]Gemini 對話工具（新 SDK 版本）[/bold bright_magenta]
+
+    '
+  msg.對話成本: '   ├─ 對話成本: NT${(cost - hidden_cost) * USD_TO_TWD:.2f}'
+  msg.對話模型: Gemini 對話（模型：{model_name}）
+  msg.對話狀態: '
+
+    [#DA70D6]📊 對話狀態[/#DA70D6]'
+  msg.尚未產生思考過程: '
+
+    [#DDA0DD]💭 尚未產生思考過程[/#DDA0DD]
+
+    '
+  msg.尚未產生思考過程_2: '
+
+    [#DDA0DD]💭 尚未產生思考過程[/#DDA0DD]
+
+    '
+  msg.尚無對話內容可建立快: ⚠️  尚無對話內容可建立快取
+  msg.尚無性能數據: '[#DDA0DD]⚠️  尚無性能數據[/#DDA0DD]'
+  msg.尚無性能數據_2: '[#DDA0DD]⚠️  尚無性能數據[/#DDA0DD]'
+  msg.尚無性能數據_3: '[#DDA0DD]⚠️  尚無性能數據[/#DDA0DD]'
+  msg.尚無性能數據_4: '[#DDA0DD]⚠️  尚無性能數據[/#DDA0DD]'
+  msg.尚無性能數據可匯出: '[#DDA0DD]⚠️  尚無性能數據可匯出[/#DDA0DD]'
+  msg.尚無性能數據可匯出_2: '[#DDA0DD]⚠️  尚無性能數據可匯出[/#DDA0DD]'
+  msg.工具管理: '
+
+    [#DA70D6]工具管理：[/#DA70D6]'
+  msg.工具管理_2: '
+
+    [#DA70D6]工具管理：[/#DA70D6]'
+  msg.工具調用統計: '  [10] 工具調用統計'
+  msg.工具調用統計_2: '  [10] 工具調用統計'
+  msg.工具調用詳細報告: '  [11] 工具調用詳細報告'
+  msg.工具調用詳細報告_2: '  [11] 工具調用詳細報告'
+  msg.左上角: '  [1] 左上角'
+  msg.左上角_2: '  [1] 左上角'
+  msg.左下角: '  [3] 左下角'
+  msg.左下角_2: '  [3] 左下角'
+  msg.已取消: '
+
+    [dim]已取消[/dim]'
+  msg.已取消_2: '
+
+    [dim]已取消[/dim]'
+  msg.已取消_3: '[#DDA0DD]已取消[/#DDA0DD]'
+  msg.已取消_4: '[#DDA0DD]已取消[/#DDA0DD]'
+  msg.已取消_5: '[dim]已取消[/dim]
+
+    '
+  msg.已取消_6: '[dim]已取消[/dim]
+
+    '
+  msg.已取消生成: '
+
+    [#DDA0DD]已取消生成[/#DDA0DD]'
+  msg.已取消生成_2: '
+
+    [#DDA0DD]已取消生成[/#DDA0DD]'
+  msg.已啟用: '[#DA70D6]✓ Codebase Embedding 已啟用[/#DA70D6]'
+  msg.已啟用_2: '[#DA70D6]✓ Codebase Embedding 已啟用[/#DA70D6]'
+  msg.已啟用配置來源: '✅ Codebase Embedding 已啟用（配置來源: {config_source}）'
+  msg.已清理條訊息: '
+
+    [green]✓ 已清理 {cleared_count} 條訊息[/green]'
+  msg.已產生思考摘要顯示思: '[dim magenta]💭 已產生思考摘要 (Ctrl+T 顯示思路)[/dim magenta]'
+  msg.已產生思考摘要顯示思_2: '[dim magenta]💭 已產生思考摘要 (Ctrl+T 顯示思路)[/dim magenta]'
+  msg.已產生思考摘要顯示翻: '[dim magenta]💭 已產生思考摘要 (Ctrl+T 顯示翻譯思路)[/dim magenta]'
+  msg.已產生思考摘要顯示翻_2: '[dim magenta]💭 已產生思考摘要 (Ctrl+T 顯示翻譯思路)[/dim magenta]'
+  msg.已翻譯字元: '  已翻譯字元: {trans_status['
+  msg.已設定思考預算: '
+
+    ✓ 已設定思考預算：{budget:,} tokens'
+  msg.已設定思考預算_2: '
+
+    ✓ 已設定思考預算：{budget:,} tokens'
+  msg.已設定思考預算_3: '
+
+    ✓ 已設定思考預算：{budget:,} tokens'
+  msg.已設定為動態模式: '
+
+    ✓ 已設定為動態模式'
+  msg.已設定為動態模式_2: '
+
+    ✓ 已設定為動態模式'
+  msg.已載入統一配置管理器: ✅ 已載入統一配置管理器（三層架構）
+  msg.已達快取門檻自動建立: '
+
+    🔔 已達快取門檻（{auto_cache_mgr.total_input_tokens:,} tokens），自動建立快取...'
+  msg.幫助系統: 📖 ChatGemini 幫助系統
+  msg.建立失敗: '[dim magenta]建立失敗：{e}[/red]'
+  msg.建立快取最低需求: '
+
+    [#DA70D6]建立快取（最低 token 需求：gemini-2.5-flash=1024, gemini-2.5-pro=4096）[/#DA70D6]'
+  msg.建立快取最低需求_2: '
+
+    [#DA70D6]建立快取（最低 token 需求：gemini-2.5-flash=1024, gemini-2.5-pro=4096）[/#DA70D6]'
+  msg.建立新快取: '  2. 建立新快取'
+  msg.建立新快取_2: '  2. 建立新快取'
+  msg.建立檢查點: '
+
+    [#87CEEB]建立檢查點...[/#87CEEB]'
+  msg.建立檢查點失敗: '[red]✗[/red] 建立檢查點失敗: {e}'
+  msg.建議安裝以獲得更好的: ⚠️  建議安裝 prompt-toolkit 以獲得更好的輸入體驗
+  msg.引擎智能影片生成預設: '
+
+    [#DA70D6]🎬 Flow 引擎 - 智能影片生成（預設 1080p）[/#DA70D6]
+
+    '
+  msg.引擎智能影片生成預設_2: '
+
+    [#DA70D6]🎬 Flow 引擎 - 智能影片生成（預設 1080p）[/#DA70D6]
+
+    '
+  msg.影片: '  影片：2 GB'
+  msg.影片內容分析圖像內容: '  [5] 影片內容分析  [6] 圖像內容分析'
+  msg.影片內容分析圖像內容_2: '  [5] 影片內容分析  [6] 圖像內容分析'
+  msg.影片分析工具: '
+
+    [#DA70D6]🎥 影片分析工具[/#DA70D6]
+
+    '
+  msg.影片分析工具_2: '
+
+    [#DA70D6]🎥 影片分析工具[/#DA70D6]
+
+    '
+  msg.影片合併工具: '
+
+    [#DA70D6]🎞️ 影片合併工具[/#DA70D6]
+
+    '
+  msg.影片合併工具_2: '
+
+    [#DA70D6]🎞️ 影片合併工具[/#DA70D6]
+
+    '
+  msg.影片合併無損拼接: '  [4] 影片合併（無損拼接）'
+  msg.影片合併無損拼接_2: '  [4] 影片合併（無損拼接）'
+  msg.影片已裁切: '
+
+    [#DA70D6]✅ 影片已裁切：{output_path}[/#DA70D6]'
+  msg.影片影片: '  python gemini_video_compositor.py concat <影片1> <影片2> ...'
+  msg.影片影片_2: '  python gemini_video_compositor.py concat <影片1> <影片2> ...'
+  msg.影片檔案不存在: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_2: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_3: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_4: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_5: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_6: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_7: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片檔案不存在_8: '[#DDA0DD]影片檔案不存在[/#DDA0DD]'
+  msg.影片生成完成: '
+
+    [#DA70D6]✅ 影片生成完成！[/#DA70D6]'
+  msg.影片生成秒快速生成: '  [2] Veo 影片生成（8秒快速生成）'
+  msg.影片生成秒快速生成_2: '  [2] Veo 影片生成（8秒快速生成）'
+  msg.影片生成長影片自然語: '  [1] Flow 影片生成（1080p 長影片，自然語言）'
+  msg.影片生成長影片自然語_2: '  [1] Flow 影片生成（1080p 長影片，自然語言）'
+  msg.影片秒分鐘: '  影片：258 tokens/秒（1 分鐘 ≈ 15,480 tokens）'
+  msg.影片處理: '
+
+    [bold magenta]>>> 影片處理[/bold magenta]'
+  msg.影片處理_2: '
+
+    [bold magenta]>>> 影片處理[/bold magenta]'
+  msg.影片路徑: '  python gemini_video_analyzer.py <影片路徑>
+
+    '
+  msg.影片路徑_2: '  python gemini_video_analyzer.py <影片路徑>
+
+    '
+  msg.影片路徑指令: '  python gemini_video_preprocessor.py <影片路徑> <指令>'
+  msg.影片路徑指令_2: '  python gemini_video_preprocessor.py <影片路徑> <指令>'
+  msg.影片音訊自動等待轉碼: '  3. 影片/音訊自動等待轉碼完成
+
+    '
+  msg.影片預處理分割關鍵幀: '  [3] 影片預處理（分割/關鍵幀/資訊）'
+  msg.影片預處理分割關鍵幀_2: '  [3] 影片預處理（分割/關鍵幀/資訊）'
+  msg.影片預處理工具: '
+
+    [#DA70D6]✂️ 影片預處理工具[/#DA70D6]
+
+    '
+  msg.影片預處理工具_2: '
+
+    [#DA70D6]✂️ 影片預處理工具[/#DA70D6]
+
+    '
+  msg.影音功能選單分析: '  [#DA70D6]media[/#DA70D6] - 影音功能選單（Flow/Veo/分析）'
+  msg.影音功能選單分析_2: '  [#DA70D6]media[/#DA70D6] - 影音功能選單（Flow/Veo/分析）'
+  msg.影音功能選單分析處理: '  media       - 影音功能選單（Flow/Veo/分析/處理）'
+  msg.影音檔案處理: '  [5] 影音檔案處理'
+  msg.影音檔案處理_2: 🎬 影音檔案處理
+  msg.復古: '  [2] 復古 (sepia)'
+  msg.復古_2: '  [2] 復古 (sepia)'
+  msg.快取功能已在中停用: ℹ️  快取功能已在 config.py 中停用
+  msg.快取功能已關閉: '✓ 快取功能已關閉
+
+    '
+  msg.快取功能未啟用未找到: '[#DDA0DD]快取功能未啟用（gemini_cache_manager.py 未找到）[/#DDA0DD]'
+  msg.快取功能未啟用未找到_2: '[#DDA0DD]快取功能未啟用（gemini_cache_manager.py 未找到）[/#DDA0DD]'
+  msg.快取控制: 快取控制：
+  msg.快取狀態個有效快取可: '
+
+    [#DA70D6]💾 快取狀態：{len(valid_caches)} 個有效快取（可節省 75-90% 成本）[/#DA70D6]'
+  msg.快取狀態無快取提示輸: '
+
+    [#DDA0DD]💾 快取狀態：無快取（提示：輸入 '
+  msg.快取管理: '  [快取管理]'
+  msg.快取管理_2: '  [快取管理]'
+  msg.快取管理節省成本: '  [#DA70D6]cache[/#DA70D6] - 快取管理（節省成本 75-90%）'
+  msg.快取管理節省成本_2: '  [#DA70D6]cache[/#DA70D6] - 快取管理（節省成本 75-90%）'
+  msg.快取管理選單: '  cache       - 快取管理選單'
+  msg.快取與思考管理: '
+
+    [#DA70D6]💾 快取與思考管理[/#DA70D6]
+
+    '
+  msg.快取與思考管理_2: '
+
+    [#DA70D6]💾 快取與思考管理[/#DA70D6]
+
+    '
+  msg.快取項目: '  快取項目: {trans_status['
+  msg.快轉兩倍速度: '  2.0 = 快轉（兩倍速度）'
+  msg.快轉兩倍速度_2: '  2.0 = 快轉（兩倍速度）'
+  msg.快速入門: '  [1] 快速入門'
+  msg.快速入門_2: 🚀 快速入門
+  msg.快速模式自動建立: '  [y] 快速模式 - 5000 tokens 自動建立'
+  msg.思考: '  思考 Tokens：{tokens:,}'
+  msg.思考按輸入價格計費: '  思考 tokens 按輸入價格計費'
+  msg.思考模式: 思考模式：
+  msg.思考模式在輸入前加上: '
+
+    [#BA55D3]💡 思考模式（在輸入前加上）：[/#BA55D3]'
+  msg.思考模式在輸入前加上_2: '
+
+    [#BA55D3]💡 思考模式（在輸入前加上）：[/#BA55D3]'
+  msg.思考模式控制: '  [2] 思考模式控制'
+  msg.思考模式控制_2: 🧠 思考模式控制
+  msg.思考模式讓深入思考後: '  • 思考模式：讓 AI 深入思考後回答'
+  msg.思考模式配置: "\n  [思考模式配置]"
+  msg.思考模式配置_2: "\n  [思考模式配置]"
+  msg.思考模式配置_3: '
+
+    [#DA70D6]🧠 思考模式配置[/#DA70D6]
+
+    '
+  msg.思考模式配置_4: '
+
+    [#DA70D6]🧠 思考模式配置[/#DA70D6]
+
+    '
+  msg.思考範圍: '思考範圍：{MIN_TOKENS:,} - {MAX_TOKENS:,} tokens
+
+    '
+  msg.思考範圍停用或: '思考範圍：0 (停用) 或 {MIN_TOKENS:,} - {MAX_TOKENS:,} tokens
+
+    '
+  msg.思考範圍停用或_2: '思考範圍：0 (停用) 或 1 - {MAX_TOKENS:,} tokens
+
+    '
+  msg.思考範圍無法停用: '思考範圍：{MIN_TOKENS:,} - {MAX_TOKENS:,} tokens（無法停用）
+
+    '
+  msg.思考簽名: 🧠 [思考簽名] {thinking_budget:,} tokens ✓
+  msg.思考簽名_2: 🧠 [思考簽名] {thinking_budget:,} tokens ✓
+  msg.思考簽名動態思考模式: 🧠 [思考簽名] 動態思考模式 ✓
+  msg.思考簽名已停用: 🧠 [思考簽名] 已停用 ✗
+  msg.思考簽名預估: '🧠 [思考簽名] {thinking_budget:,} tokens ✓ (預估: NT$ {estimated_cost_twd:.4f}
+    / ${estimated_cost_usd:.6f})'
+  msg.思考費用試算器: '
+
+    [#DA70D6]💰 思考費用試算器[/#DA70D6]
+
+    '
+  msg.思考費用試算器_2: '
+
+    [#DA70D6]💰 思考費用試算器[/#DA70D6]
+
+    '
+  msg.思考過程即時串流: '
+
+    [dim bright_magenta]━━━ 🧠 思考過程（即時串流） ━━━[/dim bright_magenta]'
+  msg.思考過程即時串流_2: '
+
+    [dim bright_magenta]━━━ 🧠 思考過程（即時串流） ━━━[/dim bright_magenta]'
+  msg.思考過程將自動翻譯為: 💡 思考過程將自動翻譯為繁體中文
+  msg.思考過程將自動翻譯為_2: 💡 思考過程將自動翻譯為繁體中文
+  msg.思考過程將顯示英文原: 💡 思考過程將顯示英文原文
+  msg.思考過程將顯示英文原_2: 💡 思考過程將顯示英文原文
+  msg.思考過程已隱藏: '
+
+    [#DDA0DD]💭 思考過程已隱藏[/#DDA0DD]
+
+    '
+  msg.思考過程已隱藏_2: '
+
+    [#DDA0DD]💭 思考過程已隱藏[/#DDA0DD]
+
+    '
+  msg.思考過程翻譯: '
+
+    [#DA70D6]━━━ 🧠 思考過程（翻譯） ━━━[/#DA70D6]'
+  msg.思考過程翻譯_2: '
+
+    [#DA70D6]━━━ 🧠 思考過程（翻譯） ━━━[/#DA70D6]'
+  msg.思考過程翻譯_3: '
+
+    [dim bright_magenta]━━━ 🌐 思考過程翻譯 ━━━[/dim bright_magenta]'
+  msg.思考過程翻譯_4: '
+
+    [dim bright_magenta]━━━ 🌐 思考過程翻譯 ━━━[/dim bright_magenta]'
+  msg.思考過程翻譯_5: '
+
+    {status_text} 思考過程翻譯'
+  msg.思考過程翻譯設定: '
+
+    [#DA70D6]🌐 思考過程翻譯設定[/#DA70D6]
+
+    '
+  msg.思考過程翻譯設定_2: '
+
+    [#DA70D6]🌐 思考過程翻譯設定[/#DA70D6]
+
+    '
+  msg.思考過程雙語對照: '
+
+    [#DA70D6]━━━ 🧠 思考過程（雙語對照） ━━━[/#DA70D6]'
+  msg.思考過程雙語對照_2: '
+
+    [#DA70D6]━━━ 🧠 思考過程（雙語對照） ━━━[/#DA70D6]'
+  msg.性能報告已匯出至: '
+
+    [#DA70D6]✓ 性能報告已匯出至：[/#DA70D6]{report_path}'
+  msg.性能監控: '
+
+    [#DA70D6]性能監控：[/#DA70D6]'
+  msg.性能監控_2: '
+
+    [#DA70D6]性能監控：[/#DA70D6]'
+  msg.性能監控摘要: '[bold bright_magenta]⚡ 性能監控摘要[/bold bright_magenta]'
+  msg.性能監控摘要_2: '[bold bright_magenta]⚡ 性能監控摘要[/bold bright_magenta]'
+  msg.恢復自動: '  [cache:on]   - 恢復自動'
+  msg.恢復自動快取: '  [cache:on]   - 恢復自動快取'
+  msg.慢動作一半速度: '  0.5 = 慢動作（一半速度）'
+  msg.慢動作一半速度_2: '  0.5 = 慢動作（一半速度）'
+  msg.懷舊: '  [3] 懷舊 (vintage)'
+  msg.懷舊_2: '  [3] 懷舊 (vintage)'
+  msg.成本: 成本：
+  msg.成本範例: 成本範例：
+  msg.或停用思考僅: '  [no-think] 或 [think:0] - 停用思考（僅 Flash/Flash-8b）'
+  msg.或動態思考所有模型推: '  [think:-1] 或 [think:auto] - 動態思考（所有模型，推薦）'
+  msg.找到條相關對話: '
+
+    [#DA70D6]✓ 找到 {len(results)} 條相關對話[/#DA70D6]
+
+    '
+  msg.指令: 指令：
+  msg.指令_2: 指令：
+  msg.指令列表: '  [7] 指令列表'
+  msg.指令列表_2: '  [6] 指令列表'
+  msg.指令列表_3: 📋 指令列表
+  msg.指定思考與回應: '  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens'
+  msg.指定思考與回應_2: '  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens'
+  msg.按任意鍵開始對話: '
+
+    [dim]按任意鍵開始對話...[/dim]'
+  msg.按任意鍵開始對話_2: '
+
+    [dim]按任意鍵開始對話...[/dim]'
+  msg.排除本次: '  [no-cache]   - 排除本次'
+  msg.推薦: '  [1] 1080p (推薦)'
+  msg.推薦_2: '  [1] 1080p (推薦)'
+  msg.描述: '[dim]描述: {description}[/dim]
+
+    '
+  msg.提供程式碼輔助功能: '  • Gemini CLI 提供程式碼輔助功能'
+  msg.提取關鍵幀等距提取: '  3. 提取關鍵幀（等距提取）'
+  msg.提取關鍵幀等距提取_2: '  3. 提取關鍵幀（等距提取）'
+  msg.提取音訊: '
+
+    [#DA70D6]🎵 提取音訊[/#DA70D6]
+
+    '
+  msg.提取音訊_2: '
+
+    [#DA70D6]🎵 提取音訊[/#DA70D6]
+
+    '
+  msg.提取音訊合併音訊音量: '  [7] 提取音訊  [8] 合併音訊  [9] 音量調整'
+  msg.提取音訊合併音訊音量_2: '  [7] 提取音訊  [8] 合併音訊  [9] 音量調整'
+  msg.提示不存在引擎功能已: 提示：gemini_flow_engine.py 不存在，Flow 引擎功能已停用
+  msg.提示不存在快取功能已: 提示：gemini_cache_manager.py 不存在，快取功能已停用
+  msg.提示不存在檔案上傳功: 提示：gemini_file_manager.py 不存在，檔案上傳功能已停用
+  msg.提示不存在翻譯功能已: 提示：gemini_translator.py 不存在，翻譯功能已停用
+  msg.提示不存在計價功能已: 提示：gemini_pricing.py 不存在，計價功能已停用
+  msg.提示不存在錯誤修復建: 提示：error_fix_suggestions.py 不存在，錯誤修復建議已停用
+  msg.提示使用無損裁切保持: '[dim]提示：使用 -c copy 無損裁切，保持原始品質[/dim]'
+  msg.提示使用無損裁切保持_2: '[dim]提示：使用 -c copy 無損裁切，保持原始品質[/dim]'
+  msg.提示初始化失敗: '提示：Codebase Embedding 初始化失敗: {e}'
+  msg.提示在中啟用以自動儲: '[dim]   提示：在 config.py 中啟用 EMBEDDING_AUTO_SAVE_CONVERSATIONS 以自動儲存對話[/dim]'
+  msg.提示在中啟用以自動儲_2: '[dim]   提示：在 config.py 中啟用 EMBEDDING_AUTO_SAVE_CONVERSATIONS
+    以自動儲存對話[/dim]'
+  msg.提示對話會在時自動儲: '[dim]   提示：對話會在 EMBEDDING_AUTO_SAVE_CONVERSATIONS = True 時自動儲存[/dim]'
+  msg.提示對話會在時自動儲_2: '[dim]   提示：對話會在 EMBEDDING_AUTO_SAVE_CONVERSATIONS = True 時自動儲存[/dim]'
+  msg.提示性能監控會自動追: '[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'
+  msg.提示性能監控會自動追_2: '[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'
+  msg.提示性能監控會自動追_3: '[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'
+  msg.提示性能監控會自動追_4: '[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'
+  msg.提示性能監控會自動追_5: '[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'
+  msg.提示性能監控會自動追_6: '[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'
+  msg.提示每次對話可用覆蓋: 💡 提示：每次對話可用 [think:auto] 覆蓋
+  msg.提示每次對話可用覆蓋_2: 💡 提示：每次對話可用 [think:auto] 覆蓋
+  msg.提示每次對話可用覆蓋_3: 💡 提示：每次對話可用 [think:{budget}] 覆蓋
+  msg.提示翻譯功能可能未啟: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示翻譯功能可能未啟_2: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示翻譯功能可能未啟_3: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示翻譯功能可能未啟_4: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示配置管理器載入失: '提示：CodeGemini 配置管理器載入失敗: {e}'
+  msg.提示需要模組: 提示：Codebase Embedding 需要 CodeGemini 模組
+  msg.插入新行多行輸入: '  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'
+  msg.插入新行多行輸入_2: '  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'
+  msg.搜尋對話記錄: '  [5] 搜尋對話記錄'
+  msg.搜尋對話記錄_2: '  [5] 搜尋對話記錄'
+  msg.搜尋對話記錄_3: '
+
+    [#DA70D6]🔍 搜尋對話記錄[/#DA70D6]'
+  msg.搜尋對話記錄_4: '
+
+    [#DA70D6]🔍 搜尋對話記錄[/#DA70D6]'
+  msg.搜尋錯誤: '
+
+    [dim magenta]✗ 搜尋錯誤：{e}[/red]'
+  msg.支援參考圖片: '  - 支援參考圖片'
+  msg.支援參考圖片_2: '  - 支援參考圖片'
+  msg.支援多檔案編輯程式碼: '  • 支援多檔案編輯、程式碼生成'
+  msg.支援多種圖片格式: '  - 支援多種圖片格式'
+  msg.支援多種圖片格式_2: '  - 支援多種圖片格式'
+  msg.數字指定思考預算依模: '  [think:數字] - 指定思考預算（依模型而異）'
+  msg.文字檔格式直接讀取嵌: '  文字檔（30+ 格式）→ 直接讀取嵌入 prompt'
+  msg.文字生成影片秒: '  - 文字生成影片（8 秒，Veo 3.1）'
+  msg.文字生成影片秒_2: '  - 文字生成影片（8 秒，Veo 3.1）'
+  msg.文檔問答: '  2. 文檔問答：'
+  msg.新台幣計價即時顯示花: '  • 新台幣計價：即時顯示花費
+
+    '
+  msg.日文: '  [3] 日文 (ja)'
+  msg.日文_2: '  [3] 日文 (ja)'
+  msg.是一個強大的對話工具: 'ChatGemini 是一個強大的 Gemini API 對話工具
+
+    '
+  msg.時間: '[dim]時間：{timestamp} | Session：{session_id}[/dim]
+
+    '
+  msg.時間裁切無損: '
+
+    [#DA70D6]✂️ 時間裁切（無損）[/#DA70D6]
+
+    '
+  msg.時間裁切無損_2: '
+
+    [#DA70D6]✂️ 時間裁切（無損）[/#DA70D6]
+
+    '
+  msg.時間裁切無損剪輯: '  [15] 時間裁切（無損剪輯）'
+  msg.時間裁切無損剪輯_2: '  [15] 時間裁切（無損剪輯）'
+  msg.智慧判斷: 智慧判斷：
+  msg.智能增強成本任務規劃: '   └─ 智能增強成本: NT${hidden_cost * USD_TO_TWD:.2f} (任務規劃, {hidden_model})'
+  msg.智能觸發器已啟用自動: ✅ 智能觸發器已啟用（自動檢測意圖）
+  msg.智能錯誤診斷系統已啟: ✅ 智能錯誤診斷系統已啟用
+  msg.暫停自動: '  [cache:off]  - 暫停自動'
+  msg.暫停自動快取: '  [cache:off]  - 暫停自動快取'
+  msg.更新: '  [2] 更新'
+  msg.更新_2: '  [2] 更新'
+  msg.更新失敗: '[dim magenta]✗ 更新失敗[/red]'
+  msg.更新失敗_2: '[dim magenta]✗ 更新失敗[/red]'
+  msg.更新成功: '[#DA70D6]✓ 更新成功[/#DA70D6]'
+  msg.更新成功_2: '[#DA70D6]✓ 更新成功[/#DA70D6]'
+  msg.替換取代原音訊預設: '  [1] 替換（取代原音訊，預設）'
+  msg.替換取代原音訊預設_2: '  [1] 替換（取代原音訊，預設）'
+  msg.替換影片片段功能: '  - 替換影片片段（Insert 功能）
+
+    '
+  msg.替換影片片段功能_2: '  - 替換影片片段（Insert 功能）
+
+    '
+  msg.最低需要: '
+
+    ⚠️  {model_name} 最低需要 {min_required} tokens'
+  msg.最簡短: '  @file.txt       - 最簡短'
+  msg.未啟用: '[#DDA0DD]⚠️  Codebase Embedding 未啟用[/#DDA0DD]'
+  msg.未啟用_2: '[#DDA0DD]⚠️  Codebase Embedding 未啟用[/#DDA0DD]'
+  msg.未啟用_3: '[#DDA0DD]⚠️  Codebase Embedding 未啟用[/#DDA0DD]'
+  msg.未啟用_4: '[#DDA0DD]⚠️  Codebase Embedding 未啟用[/#DDA0DD]'
+  msg.未找到相關對話: '
+
+    [#DDA0DD]⚠️  未找到相關對話[/#DDA0DD]'
+  msg.未找到相關對話_2: '
+
+    [#DDA0DD]⚠️  未找到相關對話[/#DDA0DD]'
+  msg.未輸入描述: '[#DDA0DD]未輸入描述[/#DDA0DD]'
+  msg.未輸入描述_2: '[#DDA0DD]未輸入描述[/#DDA0DD]'
+  msg.未輸入描述取消操作: '[#DDA0DD]未輸入描述，取消操作[/#DDA0DD]'
+  msg.未輸入描述取消操作_2: '[#DDA0DD]未輸入描述，取消操作[/#DDA0DD]'
+  msg.未輸入編輯描述: '[#DDA0DD]未輸入編輯描述[/#DDA0DD]'
+  msg.未輸入編輯描述_2: '[#DDA0DD]未輸入編輯描述[/#DDA0DD]'
+  msg.本次對話不列入快取: '  [no-cache]   - 本次對話不列入快取
+
+    '
+  msg.查看向量資料庫統計: '  [6] 查看向量資料庫統計'
+  msg.查看向量資料庫統計_2: '  [6] 查看向量資料庫統計'
+  msg.查看思考費用試算: '  5. 查看思考費用試算'
+  msg.查看思考費用試算_2: '  5. 查看思考費用試算'
+  msg.查看性能摘要: '  [7] 查看性能摘要'
+  msg.查看性能摘要_2: '  [7] 查看性能摘要'
+  msg.查看瓶頸分析報告: '  [8] 查看瓶頸分析報告'
+  msg.查看瓶頸分析報告_2: '  [8] 查看瓶頸分析報告'
+  msg.查詢影片資訊解析度時: '  1. 查詢影片資訊（解析度/時長/編碼/大小）'
+  msg.查詢影片資訊解析度時_2: '  1. 查詢影片資訊（解析度/時長/編碼/大小）'
+  msg.極限思考: '  [5] 極限思考 ({MAX_TOKENS:,} tokens)'
+  msg.模糊: '  [5] 模糊 (blur)'
+  msg.模糊_2: '  [5] 模糊 (blur)'
+  msg.模組已安裝: '[#DDA0DD]  1. CodeGemini 模組已安裝[/#DDA0DD]'
+  msg.模組已安裝_2: '[#DDA0DD]  1. CodeGemini 模組已安裝[/#DDA0DD]'
+  msg.橫向: '  2. 16:9 (橫向)'
+  msg.橫向_2: '  2. 16:9 (橫向)'
+  msg.橫向預設: '  [1] 16:9 (橫向，預設)'
+  msg.橫向預設_2: '  [1] 16:9 (橫向，預設)'
+  msg.檔案不存在: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_10: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_11: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_12: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_13: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_14: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_15: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_16: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_17: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_18: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_19: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_2: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_20: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_3: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_4: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_5: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_6: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_7: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_8: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_9: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案管理功能已在中停: ℹ️  檔案管理功能已在 config.py 中停用
+  msg.檔案路徑附加檔案: '  @檔案路徑    - 附加檔案'
+  msg.檔案附加: 檔案附加：
+  msg.檔案附加分析程式碼圖: '  • 檔案附加：分析程式碼、圖片、影片'
+  msg.檔案附加功能: '  [3] 檔案附加功能'
+  msg.檔案附加功能_2: 📎 檔案附加功能
+  msg.檔案限制: 檔案限制：
+  msg.檢查安裝狀態: '  • 檢查 Gemini CLI 安裝狀態'
+  msg.檢查檔案大小限制: '  4. 檢查檔案大小（API 限制 < 2GB）
+
+    '
+  msg.檢查檔案大小限制_2: '  4. 檢查檔案大小（API 限制 < 2GB）
+
+    '
+  msg.檢查點已建立: '[green]✓[/green] 檢查點已建立: [#87CEEB]{checkpoint.id[:8]}[/#87CEEB]'
+  msg.檢查點系統已啟用: ✅ 檢查點系統已啟用
+  msg.檢查點系統未啟用: '[#DDA0DD]⚠️  檢查點系統未啟用[/#DDA0DD]'
+  msg.檢查點系統未啟用_2: '[#DDA0DD]⚠️  檢查點系統未啟用[/#DDA0DD]'
+  msg.檢查點系統未啟用_3: '[#DDA0DD]⚠️  檢查點系統未啟用[/#DDA0DD]'
+  msg.檢查點系統未啟用_4: '[#DDA0DD]⚠️  檢查點系統未啟用[/#DDA0DD]'
+  msg.檢查點系統未啟用_5: '[#DDA0DD]⚠️  檢查點系統未啟用[/#DDA0DD]'
+  msg.檢查點系統未啟用_6: '[#DDA0DD]⚠️  檢查點系統未啟用[/#DDA0DD]'
+  msg.檢查點系統未找到: ⚠️  檢查點系統未找到（gemini_checkpoint.py）
+  msg.檢查點系統錯誤: '[red]✗[/red] 檢查點系統錯誤: {e}'
+  msg.次費用: '  10 次費用：NT$ {cost_twd*10:.4f}'
+  msg.次費用_2: '  100 次費用：NT$ {cost_twd*100:.2f}'
+  msg.正在卸載統計模式: '
+
+    [#DDA0DD]⚠️  正在卸載統計模式...[/#DDA0DD]'
+  msg.正在卸載統計模式_2: '
+
+    [#DDA0DD]⚠️  正在卸載統計模式...[/#DDA0DD]'
+  msg.正在建立快取: '
+
+    ⏳ 正在建立快取...'
+  msg.正常速度: '  1.0 = 正常速度'
+  msg.正常速度_2: '  1.0 = 正常速度'
+  msg.正方形預設: '  1. 1:1 (正方形，預設)'
+  msg.正方形預設_2: '  1. 1:1 (正方形，預設)'
+  msg.正確: '  ✅ 正確：'
+  msg.比例: '
+
+    [#DA70D6]比例：[/#DA70D6]'
+  msg.比例_2: '
+
+    [#DA70D6]比例：[/#DA70D6]'
+  msg.注意同時調整影片和音: '[dim]注意：同時調整影片和音訊速度，已使用高品質設定[/dim]'
+  msg.注意同時調整影片和音_2: '[dim]注意：同時調整影片和音訊速度，已使用高品質設定[/dim]'
+  msg.注意添加浮水印需要重: '[dim]注意：添加浮水印需要重新編碼，已使用高品質設定[/dim]'
+  msg.注意添加浮水印需要重_2: '[dim]注意：添加浮水印需要重新編碼，已使用高品質設定[/dim]'
+  msg.注意濾鏡需要重新編碼: '[dim]注意：濾鏡需要重新編碼，已使用高品質設定[/dim]'
+  msg.注意濾鏡需要重新編碼_2: '[dim]注意：濾鏡需要重新編碼，已使用高品質設定[/dim]'
+  msg.浮水印位置: '
+
+    [#DA70D6]浮水印位置：[/#DA70D6]'
+  msg.浮水印位置_2: '
+
+    [#DA70D6]浮水印位置：[/#DA70D6]'
+  msg.浮水印已添加: '
+
+    [#DA70D6]✅ 浮水印已添加：{output_path}[/#DA70D6]'
+  msg.浮水印檔案不存在: '[#DDA0DD]浮水印檔案不存在[/#DDA0DD]'
+  msg.浮水印檔案不存在_2: '[#DDA0DD]浮水印檔案不存在[/#DDA0DD]'
+  msg.消耗: Token 消耗：
+  msg.淡入淡出已完成: '
+
+    [#DA70D6]✅ 淡入淡出已完成：{output_path}[/#DA70D6]'
+  msg.深度思考: '  [4] 深度思考 (10,000 tokens)'
+  msg.深度思考_2: '  [4] 深度思考 (10,000 tokens)'
+  msg.混合與原音訊混合: '  [2] 混合（與原音訊混合）'
+  msg.混合與原音訊混合_2: '  [2] 混合（與原音訊混合）'
+  msg.添加浮水印: '  [18] 添加浮水印'
+  msg.添加浮水印_2: '  [18] 添加浮水印'
+  msg.添加浮水印_3: '
+
+    [#DA70D6]💧 添加浮水印[/#DA70D6]
+
+    '
+  msg.添加浮水印_4: '
+
+    [#DA70D6]💧 添加浮水印[/#DA70D6]
+
+    '
+  msg.添加背景音樂: '
+
+    [#DA70D6]🎵 添加背景音樂[/#DA70D6]
+
+    '
+  msg.添加背景音樂_2: '
+
+    [#DA70D6]🎵 添加背景音樂[/#DA70D6]
+
+    '
+  msg.清理失敗: '[red]✗ 清理失敗：{e}[/red]
+
+    '
+  msg.清理記憶體將: '
+
+    [#DDA0DD]⚠️  清理記憶體將：[/#DDA0DD]'
+  msg.清理記憶體將_2: '
+
+    [#DDA0DD]⚠️  清理記憶體將：[/#DDA0DD]'
+  msg.清除對話: '  [#DA70D6]clear[/#DA70D6] - 清除對話'
+  msg.清除對話_2: '  [#DA70D6]clear[/#DA70D6] - 清除對話'
+  msg.清除對話歷史: '  clear       - 清除對話歷史'
+  msg.清除翻譯快取: '  [2] 清除翻譯快取'
+  msg.清除翻譯快取_2: '  [2] 清除翻譯快取'
+  msg.測試: '  [3] Flow Engine 測試'
+  msg.測試_2: '  [3] Flow Engine 測試'
+  msg.測試完成部分項目未通: '[#DDA0DD]測試完成（部分項目未通過）[/#DDA0DD]'
+  msg.測試模組: '
+
+    [#DA70D6]測試模組：[/#DA70D6]'
+  msg.測試模組_2: '
+
+    [#DA70D6]測試模組：[/#DA70D6]'
+  msg.準備生成秒影片: '
+
+    [dim bright_magenta]⏳ 準備生成 {target_duration}秒 影片（{resolution}, {aspect_ratio}）...[/dim
+    bright_magenta]'
+  msg.濾鏡已套用: '
+
+    [#DA70D6]✅ 濾鏡已套用：{output_path}[/#DA70D6]'
+  msg.濾鏡效果: '
+
+    [#DA70D6]🎨 濾鏡效果[/#DA70D6]
+
+    '
+  msg.濾鏡效果_2: '
+
+    [#DA70D6]🎨 濾鏡效果[/#DA70D6]
+
+    '
+  msg.濾鏡特效種風格: '  [16] 濾鏡特效（7種風格）'
+  msg.濾鏡特效種風格_2: '  [16] 濾鏡特效（7種風格）'
+  msg.瀏覽歷史記錄: '  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'
+  msg.瀏覽歷史記錄_2: '  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'
+  msg.無損合併多段影片: '  - 無損合併多段影片（ffmpeg concat demuxer）'
+  msg.無損合併多段影片_2: '  - 無損合併多段影片（ffmpeg concat demuxer）'
+  msg.無效的數值: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_10: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_2: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_3: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_4: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_5: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_6: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_7: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_8: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的數值_9: '[#DDA0DD]無效的數值[/#DDA0DD]'
+  msg.無效的選擇: '[#DDA0DD]無效的選擇[/#DDA0DD]'
+  msg.無效的選擇_2: '[#DDA0DD]無效的選擇[/#DDA0DD]'
+  msg.無效輸入: '[#DDA0DD]無效輸入[/#DDA0DD]'
+  msg.無效輸入_2: '[#DDA0DD]無效輸入[/#DDA0DD]'
+  msg.無效輸入使用預設: '[#DDA0DD]無效輸入，使用預設 5000[/#DDA0DD]'
+  msg.無效輸入使用預設_2: '[#DDA0DD]無效輸入，使用預設 5000[/#DDA0DD]'
+  msg.無效選項: '
+
+    [#DDA0DD]無效選項[/#DDA0DD]'
+  msg.無效選項_2: '
+
+    [#DDA0DD]無效選項[/#DDA0DD]'
+  msg.無效選項或功能未啟用: '
+
+    [#DDA0DD]無效選項或功能未啟用[/#DDA0DD]'
+  msg.無效選項或功能未啟用_2: '
+
+    [#DDA0DD]無效選項或功能未啟用[/#DDA0DD]'
+  msg.無法停用思考使用最小: '[#DDA0DD]{model_name} 無法停用思考，使用最小值 {MIN_TOKENS}[/#DDA0DD]'
+  msg.燒錄字幕: '
+
+    [#DA70D6]🔥 燒錄字幕[/#DA70D6]
+
+    '
+  msg.燒錄字幕_2: '
+
+    [#DA70D6]🔥 燒錄字幕[/#DA70D6]
+
+    '
+  msg.燒錄字幕嵌入影片: '  [20] 燒錄字幕（嵌入影片）'
+  msg.燒錄字幕嵌入影片_2: '  [20] 燒錄字幕（嵌入影片）'
+  msg.燒錄完成: '
+
+    [#DA70D6]✅ 燒錄完成：{video_with_subs}[/#DA70D6]'
+  msg.特色功能: 特色功能：
+  msg.獲取工具統計失敗: '[dim magenta]✗ 獲取工具統計失敗：{e}[/red]'
+  msg.獲取工具詳細報告失敗: '[dim magenta]✗ 獲取工具詳細報告失敗：{e}[/red]'
+  msg.獲取性能摘要失敗: '[dim magenta]✗ 獲取性能摘要失敗：{e}[/red]'
+  msg.獲取瓶頸分析失敗: '[dim magenta]✗ 獲取瓶頸分析失敗：{e}[/red]'
+  msg.獲取統計失敗: '
+
+    [dim magenta]✗ 獲取統計失敗：{e}[/red]'
+  msg.環境檢查: '  [1] 環境檢查'
+  msg.環境檢查_2: '  [1] 環境檢查'
+  msg.瓶頸分析報告: '[bold magenta]🔍 瓶頸分析報告[/bold magenta]'
+  msg.瓶頸分析報告_2: '[bold magenta]🔍 瓶頸分析報告[/bold magenta]'
+  msg.生成字幕: '
+
+    [#DA70D6]📝 生成字幕[/#DA70D6]
+
+    '
+  msg.生成字幕_2: '
+
+    [#DA70D6]📝 生成字幕[/#DA70D6]
+
+    '
+  msg.生成字幕語音辨識翻譯: '  [19] 生成字幕（語音辨識+翻譯）'
+  msg.生成字幕語音辨識翻譯_2: '  [19] 生成字幕（語音辨識+翻譯）'
+  msg.生成詳細描述: '  - 生成詳細描述'
+  msg.生成詳細描述_2: '  - 生成詳細描述'
+  msg.用途: 用途：
+  msg.當前模型: 當前模型：{model_name}
+  msg.當前模型_2: 當前模型：{model_name}
+  msg.當前活躍訊息數條: '
+
+    [plum]當前活躍訊息數: {active} 條[/plum]'
+  msg.當前狀態: '當前狀態: {'
+  msg.發生錯誤請重試: 發生錯誤，請重試
+  msg.目標語言: '
+
+    [#DA70D6]目標語言：[/#DA70D6]'
+  msg.目標語言_2: '
+
+    [#DA70D6]目標語言：[/#DA70D6]'
+  msg.直向: '  [2] 9:16 (直向)'
+  msg.直向_2: '  [2] 9:16 (直向)'
+  msg.直向_3: '  3. 9:16 (直向)'
+  msg.直向_4: '  3. 9:16 (直向)'
+  msg.直接輸入問題即可對話: '  直接輸入問題即可對話'
+  msg.硬碟對話記錄保留: '[dim]  硬碟對話記錄：{archive_file} 保留[/dim]'
+  msg.硬碟對話記錄保留_2: '[dim]  硬碟對話記錄：{archive_file} 保留[/dim]'
+  msg.硬碟已存檔: '   [dim]硬碟已存檔：{stats['
+  msg.示例請分析這段程式碼: "\n  [dim]示例：[think:5000] 請分析這段程式碼的效能問題...[/dim]"
+  msg.示例請分析這段程式碼_2: "\n  [dim]示例：[think:5000] 請分析這段程式碼的效能問題...[/dim]"
+  msg.程式碼分析: '  1. 程式碼分析：'
+  msg.立即建立: '  [cache:now]  - 立即建立'
+  msg.立即建立快取: '  [cache:now]  - 立即建立快取'
+  msg.管理: '  [6] Gemini CLI 管理'
+  msg.管理_2: 🛠️  Gemini CLI 管理
+  msg.管理_3: '  [3] 管理 checkpoints'
+  msg.管理_4: '  [3] 管理 checkpoints'
+  msg.管理_5: '
+
+    [#DA70D6]Checkpoint 管理...[/#DA70D6]'
+  msg.管理_6: '
+
+    [#DA70D6]Checkpoint 管理...[/#DA70D6]'
+  msg.管理儲存載入對話狀態: '  • 管理 checkpoints（儲存/載入對話狀態）'
+  msg.管理工具: '管理 Google Gemini Code Assist CLI 工具
+
+    '
+  msg.管理工具_2: '  cli         - Gemini CLI 管理工具'
+  msg.管理工具_3: '[bold bright_magenta]🛠️  Gemini CLI 管理工具[/bold bright_magenta]'
+  msg.管理工具_4: '[bold bright_magenta]🛠️  Gemini CLI 管理工具[/bold bright_magenta]'
+  msg.範例: 範例：
+  msg.範例_2: 範例：
+  msg.範例_3: '
+
+    範例：'
+  msg.範例_4: '
+
+    範例：'
+  msg.範例_5: '
+
+    範例：'
+  msg.範例_6: '
+
+    範例：'
+  msg.範例_7: '[dim]範例: /rewind a1b2c3d4[/dim]
+
+    '
+  msg.範例_8: '[dim]範例: /rewind a1b2c3d4[/dim]
+
+    '
+  msg.範例思考: '  範例：2000 tokens 思考 ≈ NT$ 0.06'
+  msg.終端輸入測試: '  [4] 終端輸入測試'
+  msg.終端輸入測試_2: '  [4] 終端輸入測試'
+  msg.組合使用: 組合使用：
+  msg.結果相似度: '[bold bright_magenta]═══ 結果 {i} (相似度: {similarity:.2%}) ═══[/bold bright_magenta]'
+  msg.統計模式已卸載: '[#DA70D6]✓ 統計模式已卸載[/#DA70D6]'
+  msg.統計模式已卸載_2: '[#DA70D6]✓ 統計模式已卸載[/#DA70D6]'
+  msg.總分塊數: '[#DA70D6]總分塊數：[/#DA70D6] {total_chunks:,}'
+  msg.總檔案數: '[#DA70D6]總檔案數：[/#DA70D6] {total_files:,}'
+  msg.繁體中文: '[bold bright_magenta]🇹🇼 繁體中文：[/bold bright_magenta]'
+  msg.繁體中文_2: '[bold bright_magenta]🇹🇼 繁體中文：[/bold bright_magenta]'
+  msg.繁體中文_3: '[dim bright_magenta]【繁體中文】[/dim bright_magenta]'
+  msg.繁體中文_4: '[dim bright_magenta]【繁體中文】[/dim bright_magenta]'
+  msg.繁體中文預設: '  [1] 繁體中文 (zh-TW, 預設)'
+  msg.繁體中文預設_2: '  [1] 繁體中文 (zh-TW, 預設)'
+  msg.翻譯功能已在中停用: ℹ️  翻譯功能已在 config.py 中停用
+  msg.翻譯引擎: '翻譯引擎: {trans_status['
+  msg.翻譯快取已清除: '
+
+    ✓ 翻譯快取已清除'
+  msg.翻譯快取已清除_2: '
+
+    ✓ 翻譯快取已清除'
+  msg.背景音樂已添加: '
+
+    [#DA70D6]✅ 背景音樂已添加：{output_path}[/#DA70D6]'
+  msg.背景音樂淡入淡出: '  [10] 背景音樂  [11] 淡入淡出'
+  msg.背景音樂淡入淡出_2: '  [10] 背景音樂  [11] 淡入淡出'
+  msg.腳本不存在: '[dim magenta]腳本不存在：{script_path}[/red]'
+  msg.腳本不存在_2: '[dim magenta]腳本不存在：{script_path}[/red]'
+  msg.自動建立快取節省成本: '自動建立快取，節省 75-90% API 成本
+
+    '
+  msg.自動快取已啟用模式門: '
+
+    ✓ 自動快取：已啟用（{auto_cache_mgr.mode} 模式，門檻 {auto_cache_mgr.threshold:,} tokens）'
+  msg.自動快取管理: '  [4] 自動快取管理'
+  msg.自動快取管理_2: 💾 自動快取管理
+  msg.自動快取管理可節省成: 💾 自動快取管理（可節省 75-90% 成本）
+  msg.自動快取節省成本: '  • 自動快取：節省 75-90% API 成本'
+  msg.自動提取關鍵幀: '  - 自動提取關鍵幀'
+  msg.自動提取關鍵幀_2: '  - 自動提取關鍵幀'
+  msg.自動檢查已上傳檔案避: '  2. 自動檢查已上傳檔案（避免重複）'
+  msg.自動補全指令與語法: '  • [bold]Tab[/bold] - 自動補全指令與語法'
+  msg.自動補全指令與語法_2: '  • [bold]Tab[/bold] - 自動補全指令與語法'
+  msg.自動調整為: '   自動調整為 {min_required}'
+  msg.自動達到後建立快取: '     [自動達到 5000 tokens 後建立快取]'
+  msg.自動重試機制已啟用: ✅ API 自動重試機制已啟用
+  msg.自訂: '  [6] 自訂 tokens'
+  msg.自訂_2: '  [6] 自訂 tokens'
+  msg.自訂_3: '  [5] 自訂'
+  msg.自訂_4: '  [5] 自訂'
+  msg.自訂長寬比: '  - 自訂長寬比'
+  msg.自訂長寬比_2: '  - 自訂長寬比'
+  msg.與互補使用: '  • 與 ChatGemini 互補使用
+
+    '
+  msg.英文: '  [2] 英文 (en)'
+  msg.英文_2: '  [2] 英文 (en)'
+  msg.英文原文: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.英文原文_2: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.英文原文_3: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.英文原文_4: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.解析度: '
+
+    [#DA70D6]解析度：[/#DA70D6]'
+  msg.解析度_2: '
+
+    [#DA70D6]解析度：[/#DA70D6]'
+  msg.計價功能已在中停用: ℹ️  計價功能已在 config.py 中停用
+  msg.計價功能未啟用: '[#DDA0DD]計價功能未啟用[/#DDA0DD]'
+  msg.計價功能未啟用_2: '[#DDA0DD]計價功能未啟用[/#DDA0DD]'
+  msg.計算失敗: '[dim magenta]計算失敗：{e}[/red]'
+  msg.記憶體已是空的無需清: '[dim]記憶體已是空的，無需清理[/dim]
+
+    '
+  msg.記憶體已是空的無需清_2: '[dim]記憶體已是空的，無需清理[/dim]
+
+    '
+  msg.記憶體已清空: '
+
+    [#DA70D6]✓ 記憶體已清空[/#DA70D6]'
+  msg.記憶體已清空_2: '
+
+    [#DA70D6]✓ 記憶體已清空[/#DA70D6]'
+  msg.記憶體已釋放對話已保: '[dim]記憶體已釋放，對話已保存到磁碟[/dim]
+
+    '
+  msg.記憶體已釋放對話已保_2: '[dim]記憶體已釋放，對話已保存到磁碟[/dim]
+
+    '
+  msg.記憶體快取: '   記憶體快取：{stats['
+  msg.記憶體清理完成繼續對: '[green]✓ 記憶體清理完成，繼續對話[/green]
+
+    '
+  msg.記憶體清理完成繼續對_2: '[green]✓ 記憶體清理完成，繼續對話[/green]
+
+    '
+  msg.設定失敗: '[dim magenta]✗ API Key 設定失敗[/red]'
+  msg.設定失敗_2: '[dim magenta]✗ API Key 設定失敗[/red]'
+  msg.設定完成: '[#DA70D6]✓ API Key 設定完成[/#DA70D6]'
+  msg.設定完成_2: '[#DA70D6]✓ API Key 設定完成[/#DA70D6]'
+  msg.設定完成模式門檻: '
+
+    ✓ 設定完成：{mode} 模式，門檻 {threshold:,} tokens，TTL {ttl}h
+
+    '
+  msg.設定預設思考模式: '  4. 設定預設思考模式'
+  msg.設定預設思考模式_2: '  4. 設定預設思考模式'
+  msg.詳細內容描述: '  - 詳細內容描述'
+  msg.詳細內容描述_2: '  - 詳細內容描述'
+  msg.語法: 語法：
+  msg.語法種: 語法（4 種）：
+  msg.語言切換失敗: '[red]❌ 語言切換失敗: {e}[/red]'
+  msg.語言設定已更新新訊息: '[dim]💡 語言設定已更新，新訊息將使用選擇的語言[/dim]
+
+    '
+  msg.語言設定已更新新訊息_2: '[dim]💡 語言設定已更新，新訊息將使用選擇的語言[/dim]
+
+    '
+  msg.請使用語言代碼: '[#87CEEB]💡 請使用: python3 gemini_lang.py --set <語言代碼>[/#87CEEB]'
+  msg.請使用語言代碼_2: '[#87CEEB]💡 請使用: python3 gemini_lang.py --set <語言代碼>[/#87CEEB]'
+  msg.請再次執行開始對話: '[dim]請再次執行 python gemini_chat.py 開始對話[/dim]
+
+    '
+  msg.請再次執行開始對話_2: '[dim]請再次執行 python gemini_chat.py 開始對話[/dim]
+
+    '
+  msg.請在中設置並重啟: '[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]'
+  msg.請在中設置並重啟_2: '[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]'
+  msg.請在中設置並重啟_3: '[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]'
+  msg.請在中設置並重啟_4: '[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]'
+  msg.請在文件中添加你的金: 請在 .env 文件中添加：GEMINI_API_KEY=你的API金鑰
+  msg.請指定檢查點: '[#DDA0DD]請指定檢查點 ID[/#DDA0DD]'
+  msg.請指定檢查點_2: '[#DDA0DD]請指定檢查點 ID[/#DDA0DD]'
+  msg.請確認: '[#DDA0DD]請確認：[/#DDA0DD]'
+  msg.請確認_2: '[#DDA0DD]請確認：[/#DDA0DD]'
+  msg.請輸入搜尋關鍵字: '[#DDA0DD]請輸入搜尋關鍵字[/#DDA0DD]'
+  msg.請輸入搜尋關鍵字_2: '[#DDA0DD]請輸入搜尋關鍵字[/#DDA0DD]'
+  msg.讀取中文語法: '  讀取 code.py    - 中文語法'
+  msg.讀取檔案讀取檔案: '  讀取 檔案    - 讀取檔案'
+  msg.讓模型先思考再回答提: '讓 Gemini 2.5 模型先思考再回答，提升回答品質
+
+    '
+  msg.費率: "\n  費率：NT$ {input_price * USD_TO_TWD:.4f} / 1K tokens"
+  msg.費用試算結果: '
+
+    [#DA70D6]費用試算結果：[/#DA70D6]'
+  msg.費用試算結果_2: '
+
+    [#DA70D6]費用試算結果：[/#DA70D6]'
+  msg.資料庫大小: '[#DA70D6]資料庫大小：[/#DA70D6] {db_size_mb:.2f} MB'
+  msg.資料庫為空: '
+
+    [#DDA0DD]ℹ️  資料庫為空[/#DDA0DD]'
+  msg.資料庫為空_2: '
+
+    [#DDA0DD]ℹ️  資料庫為空[/#DDA0DD]'
+  msg.資料庫路徑: '
+
+    [#DA70D6]資料庫路徑：[/#DA70D6] {db_path}'
+  msg.資料庫運作正常: '
+
+    [#DA70D6]✓ 資料庫運作正常[/#DA70D6]'
+  msg.載入搜尋模式: '
+
+    [#DA70D6]🔄 載入搜尋模式...[/#DA70D6]'
+  msg.載入搜尋模式_2: '
+
+    [#DA70D6]🔄 載入搜尋模式...[/#DA70D6]'
+  msg.輕度思考: '  [2] 輕度思考 (2,000 tokens)'
+  msg.輕度思考_2: '  [2] 輕度思考 (2,000 tokens)'
+  msg.輸入: '  輸入 '
+  msg.輸入_2: '  輸入 '
+  msg.輸入提示: '
+
+    [#DA70D6]💡 輸入提示：[/#DA70D6]'
+  msg.輸入提示_2: '
+
+    [#DA70D6]💡 輸入提示：[/#DA70D6]'
+  msg.輸出限制: 📝 [輸出限制] {max_output_tokens:,} tokens
+  msg.返回: '  [0] 返回'
+  msg.返回_2: "\n  0. 返回\n"
+  msg.返回_3: "\n  0. 返回\n"
+  msg.返回_4: '  [0] 返回
+
+    '
+  msg.返回_5: '  [0] 返回
+
+    '
+  msg.返回_6: "\n  [0] 返回\n"
+  msg.返回_7: "\n  [0] 返回\n"
+  msg.返回_8: '  [0] 返回
+
+    '
+  msg.返回_9: '  [0] 返回
+
+    '
+  msg.返回主選單: "\n  [99] 返回主選單\n"
+  msg.返回主選單_2: "\n  [99] 返回主選單\n"
+  msg.返回主選單_3: "\n  [0] 返回主選單\n"
+  msg.返回主選單_4: "\n  [0] 返回主選單\n"
+  msg.退出: '  [#DA70D6]exit, quit[/#DA70D6] - 退出'
+  msg.退出_2: '  [#DA70D6]exit, quit[/#DA70D6] - 退出'
+  msg.退出程式: '  exit/quit   - 退出程式'
+  msg.速度倍數: '
+
+    [#DA70D6]速度倍數：[/#DA70D6]'
+  msg.速度倍數_2: '
+
+    [#DA70D6]速度倍數：[/#DA70D6]'
+  msg.速度已調整: '
+
+    [#DA70D6]✅ 速度已調整：{output_path}[/#DA70D6]'
+  msg.速度必須大於: '[#DDA0DD]速度必須大於0[/#DDA0DD]'
+  msg.速度必須大於_2: '[#DDA0DD]速度必須大於0[/#DDA0DD]'
+  msg.速度調整: '
+
+    [#DA70D6]⚡ 速度調整[/#DA70D6]
+
+    '
+  msg.速度調整_2: '
+
+    [#DA70D6]⚡ 速度調整[/#DA70D6]
+
+    '
+  msg.速度調整快轉慢動作: '  [17] 速度調整（快轉/慢動作）'
+  msg.速度調整快轉慢動作_2: '  [17] 速度調整（快轉/慢動作）'
+  msg.進階模式自訂門檻模式: '  [c] 進階模式 - 自訂門檻、模式、TTL'
+  msg.進階設定: '
+
+    🔧 進階設定'
+  msg.運作方式: 運作方式：
+  msg.適用模型: 適用模型：
+  msg.選擇主題: 選擇主題：
+  msg.選擇啟動: '  選擇 [2] 啟動 CLI session'
+  msg.選擇濾鏡: '
+
+    [#DA70D6]選擇濾鏡：[/#DA70D6]'
+  msg.選擇濾鏡_2: '
+
+    [#DA70D6]選擇濾鏡：[/#DA70D6]'
+  msg.選擇長寬比: '
+
+    選擇長寬比：'
+  msg.選擇長寬比_2: '
+
+    選擇長寬比：'
+  msg.選擇預設思考模式: 選擇預設思考模式：
+  msg.選擇預設思考模式_2: 選擇預設思考模式：
+  msg.選擇顯示狀態: '  選擇 [1] 顯示狀態'
+  msg.選項: '
+
+    選項：'
+  msg.選項_2: '
+
+    選項：'
+  msg.配置: '  • 配置 API Key
+
+    '
+  msg.配置_2: '  [5] 配置 API Key'
+  msg.配置_3: '  [5] 配置 API Key'
+  msg.配置完成: '
+
+    [bold green]✅ 配置完成！[/bold green]'
+  msg.配置完成_2: '
+
+    [bold green]✅ 配置完成！[/bold green]'
+  msg.配置已取消: '
+
+    [#DDA0DD]配置已取消[/#DDA0DD]
+
+    '
+  msg.配置已取消_2: '
+
+    [#DDA0DD]配置已取消[/#DDA0DD]
+
+    '
+  msg.配置已更新重啟程式後: '
+
+    [#DA70D6]✓ 配置已更新（重啟程式後生效）[/#DA70D6]'
+  msg.配置已更新重啟程式後_2: '
+
+    [#DA70D6]✓ 配置已更新（重啟程式後生效）[/#DA70D6]'
+  msg.配置管理器已載入: ✅ CodeGemini 配置管理器已載入
+  msg.配置管理器未載入: '[dim magenta]✗ CodeGemini 配置管理器未載入[/red]'
+  msg.配置管理器未載入_2: '[dim magenta]✗ CodeGemini 配置管理器未載入[/red]'
+  msg.配置管理資料庫設定: '  [#DA70D6]config[/#DA70D6] - 配置管理（資料庫設定）'
+  msg.配置管理資料庫設定_2: '  [#DA70D6]config[/#DA70D6] - 配置管理（資料庫設定）'
+  msg.配置管理錯誤: '[dim magenta]✗ 配置管理錯誤: {e}[/red]'
+  msg.釋放記憶體中的歷史記: '  • 釋放記憶體中的歷史記錄'
+  msg.釋放記憶體中的歷史記_2: '  • 釋放記憶體中的歷史記錄'
+  msg.銳化: '  [4] 銳化 (sharpen)'
+  msg.銳化_2: '  [4] 銳化 (sharpen)'
+  msg.錯誤: '  ❌ 錯誤：'
+  msg.錯誤_10: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_11: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_12: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_13: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_14: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_15: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_16: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_17: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_18: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_19: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_2: '[dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_20: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_21: '
+
+    錯誤：{e}'
+  msg.錯誤_3: '[dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_4: '[dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_5: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_6: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_7: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_8: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_9: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤修復建議系統已啟: ✅ 錯誤修復建議系統已啟用
+  msg.錯誤找不到: '[dim magenta]錯誤：找不到 testTool/{script_name}[/red]'
+  msg.錯誤請設置環境變數: 錯誤：請設置 GEMINI_API_KEY 環境變數
+  msg.長影片建議使用最佳參: '[dim magenta]💡 長影片建議使用最佳參數：1080p, 16:9[/dim magenta]'
+  msg.長影片建議使用最佳參_2: '[dim magenta]💡 長影片建議使用最佳參數：1080p, 16:9[/dim magenta]'
+  msg.關閉思考: '  [#DDA0DD][no-think][/#DDA0DD] - 關閉思考'
+  msg.關閉思考_2: '  [#DDA0DD][no-think][/#DDA0DD] - 關閉思考'
+  msg.關閉自動快取: '  [n] 關閉自動快取
+
+    '
+  msg.附加檔案附加檔案: '  附加 檔案    - 附加檔案'
+  msg.附加附加媒體: '  附加 image.jpg  - 附加媒體'
+  msg.除錯與測試工具: '  [#DA70D6]debug[/#DA70D6] - 除錯與測試工具'
+  msg.除錯與測試工具_2: '  [#DA70D6]debug[/#DA70D6] - 除錯與測試工具'
+  msg.除錯與測試工具_3: '[bold bright_magenta]🔧 除錯與測試工具[/bold bright_magenta]'
+  msg.除錯與測試工具_4: '[bold bright_magenta]🔧 除錯與測試工具[/bold bright_magenta]'
+  msg.韓文: '  [4] 韓文 (ko)'
+  msg.韓文_2: '  [4] 韓文 (ko)'
+  msg.音樂檔案不存在: '[#DDA0DD]音樂檔案不存在[/#DDA0DD]'
+  msg.音樂檔案不存在_2: '[#DDA0DD]音樂檔案不存在[/#DDA0DD]'
+  msg.音訊: '  音訊：2 GB
+
+    '
+  msg.音訊已合併: '
+
+    [#DA70D6]✅ 音訊已合併：{output_path}[/#DA70D6]'
+  msg.音訊已提取: '
+
+    [#DA70D6]✅ 音訊已提取：{output_path}[/#DA70D6]'
+  msg.音訊格式: '
+
+    [#DA70D6]音訊格式：[/#DA70D6]'
+  msg.音訊格式_2: '
+
+    [#DA70D6]音訊格式：[/#DA70D6]'
+  msg.音訊檔案不存在: '[#DDA0DD]音訊檔案不存在[/#DDA0DD]'
+  msg.音訊檔案不存在_2: '[#DDA0DD]音訊檔案不存在[/#DDA0DD]'
+  msg.音訊淡入淡出: '
+
+    [#DA70D6]🎵 音訊淡入淡出[/#DA70D6]
+
+    '
+  msg.音訊淡入淡出_2: '
+
+    [#DA70D6]🎵 音訊淡入淡出[/#DA70D6]
+
+    '
+  msg.音訊秒分鐘: '  音訊：32 tokens/秒（1 分鐘 ≈ 1,920 tokens）
+
+    '
+  msg.音訊處理: '
+
+    [bold magenta]>>> 音訊處理[/bold magenta]'
+  msg.音訊處理_2: '
+
+    [bold magenta]>>> 音訊處理[/bold magenta]'
+  msg.音量已調整: '
+
+    [#DA70D6]✅ 音量已調整：{output_path}[/#DA70D6]'
+  msg.音量必須大於: '[#DDA0DD]音量必須大於0[/#DDA0DD]'
+  msg.音量必須大於_2: '[#DDA0DD]音量必須大於0[/#DDA0DD]'
+  msg.音量調整: '
+
+    [#DA70D6]🎵 音量調整[/#DA70D6]
+
+    '
+  msg.音量調整_2: '
+
+    [#DA70D6]🎵 音量調整[/#DA70D6]
+
+    '
+  msg.預估每次思考費用: 💰 預估每次思考費用：NT$ {cost_twd:.4f} (${cost_usd:.6f})
+  msg.預設: '  [1] AAC (預設)'
+  msg.預設_2: '  [1] AAC (預設)'
+  msg.預設_3: '  [1] SRT (預設)'
+  msg.預設_4: '  [1] SRT (預設)'
+  msg.顯示幫助系統: '  help        - 顯示幫助系統'
+  msg.顯示狀態: "\n  [1] 顯示 Gemini CLI 狀態"
+  msg.顯示狀態_2: "\n  [1] 顯示 Gemini CLI 狀態"
+  msg.高品質: '  [1] 高品質 (CRF 18, slow)'
+  msg.高品質_2: '  [1] 高品質 (CRF 18, slow)'
+  msg.高品質_3: '  [1] 高品質 (CRF 18, slow)'
+  msg.高品質_4: '  [1] 高品質 (CRF 18, slow)'
+  msg.黑白: '  [1] 黑白 (grayscale)'
+  msg.黑白_2: '  [1] 黑白 (grayscale)'
 pricing:
   cost: 비용
   price: 가격
@@ -411,52 +2115,61 @@ pricing:
   total_transactions_line: '總交易次數: {count}'
   session_total_cost: '會話總成本: ${cost:.6f}'
   twd_equivalent: '約合台幣: {currency}{amount}'
-  gemini_planning: "Gemini 계획 생성"
-  veo_segments: "{num}개 세그먼트 x {sec}초"
-
-  # 장면 감지 비용
-  scene_detection_cost: "[dim]💰 장면 감지 비용: NT${twd} (${usd} USD)[/dim]"
-  tokens_detail: "[dim]   입력: {input:,} tokens, 출력: {output:,} tokens, 씽킹: {thinking:,} tokens[/dim]"
-  accumulated_cost: "[dim]   누적 비용: NT${twd} (${usd} USD)[/dim]"
-
-  # 예산 관리 경고 메시지
-  budget_exceeded_daily: "일일 예산 초과：${projected} > ${limit}"
-  budget_exceeded_monthly: "월간 예산 초과：${projected} > ${limit}"
-  budget_usage_daily: "일일 예산의 {percent}% 사용"
-  budget_insufficient: "예산 부족：{warning}"
-  budget_warning_prefix: "경고：{warning}"
-
-  # 예산 관리 상태
-  today_usage: "오늘 사용량：{percent}%"
-
+  gemini_planning: Gemini 계획 생성
+  veo_segments: '{num}개 세그먼트 x {sec}초'
+  scene_detection_cost: '[dim]💰 장면 감지 비용: NT${twd} (${usd} USD)[/dim]'
+  tokens_detail: '[dim]   입력: {input:,} tokens, 출력: {output:,} tokens, 씽킹: {thinking:,}
+    tokens[/dim]'
+  accumulated_cost: '[dim]   누적 비용: NT${twd} (${usd} USD)[/dim]'
+  budget_exceeded_daily: 일일 예산 초과：${projected} > ${limit}
+  budget_exceeded_monthly: 월간 예산 초과：${projected} > ${limit}
+  budget_usage_daily: 일일 예산의 {percent}% 사용
+  budget_insufficient: 예산 부족：{warning}
+  budget_warning_prefix: 경고：{warning}
+  today_usage: 오늘 사용량：{percent}%
 translator:
-  engine_ready: "✅ deep-translator 준비 완료 (메인 엔진, 완전 무료)"
-  engine_loaded: "✓ 번역 엔진 로드됨: deep-translator"
-  toggle_status: "번역 기능 {status}"
-  cache_cleared: "✓ 번역 캐시 지워짐"
-  translating: "🌐 번역 중..."
-  translation_complete: "✓ 번역 완료"
-  translation_failed: "❌ 번역 실패: {error}"
-  test_original: "원문"
-  test_translated: "번역문"
-  bilingual_display: "이중 언어 표시"
+  engine_ready: ✅ deep-translator 준비 완료 (메인 엔진, 완전 무료)
+  engine_loaded: '✓ 번역 엔진 로드됨: deep-translator'
+  toggle_status: 번역 기능 {status}
+  cache_cleared: ✓ 번역 캐시 지워짐
+  translating: 🌐 번역 중...
+  translation_complete: ✓ 번역 완료
+  translation_failed: '❌ 번역 실패: {error}'
+  test_original: 원문
+  test_translated: 번역문
+  bilingual_display: 이중 언어 표시
+  engine_missing: ⚠️  翻譯引擎未安裝
+  load_failed: '❌ 翻譯引擎載入失敗: {error}'
+  original: 原文
+  test_num: '測試 {num}:'
+  msg.再次切換: '
 
+    [#DDA0DD]再次切換:[/#DDA0DD] {'
+  msg.切換後: '[#DDA0DD]切換後:[/#DDA0DD] {'
+  msg.原文: '
+
+    [dim]原文：[/dim] {test_text}'
+  msg.引擎: '[dim]引擎：{translator.current_engine}[/dim]'
+  msg.當前狀態: '[#DDA0DD]當前狀態:[/#DDA0DD] {'
+  msg.結果應顯示原文: '[#DDA0DD]結果：[/#DDA0DD] {result} [dim](應顯示原文)[/dim]'
+  msg.結果應顯示翻譯: '[#DDA0DD]結果：[/#DDA0DD] {result} [dim](應顯示翻譯)[/dim]'
+  msg.翻譯: '[#DA70D6]翻譯：[/green] {result}'
 thinking:
-  signature_loaded: "씽킹 시그니처 상태 로드됨 (함수 호출 활성화)"
-  signature_disabled: "씽킹 시그니처 상태: 함수 호출 비활성화"
-  signature_saved: "씽킹 시그니처 저장됨 (parts 포함)"
-  signature_cleared: "씽킹 시그니처 지워짐"
-  state_saved: "씽킹 시그니처 상태 저장됨"
-  load_failed: "씽킹 시그니처 상태 로드 실패: {error}"
-  save_failed: "씽킹 시그니처 저장 실패: {error}"
-  state_save_failed: "씽킹 시그니처 상태 저장 실패: {error}"
-  no_disable_warning: "⚠️  {model}은(는) 씽킹 비활성화를 지원하지 않습니다, 동적 모드를 사용합니다"
-  no_disable_adjusted: "⚠️  {model}은(는) 씽킹 비활성화를 지원하지 않습니다 (0 토큰), 최소값 {min_tokens} 토큰으로 조정됨"
-  budget_below_min: "⚠️  씽킹 예산이 최소값 {min_tokens} 토큰 미만입니다, 조정됨"
-  budget_above_max: "⚠️  씽킹 예산이 최대값 {max_tokens:,} 토큰을 초과합니다, 최대값으로 조정됨"
-  response_min_warning: "⚠️  응답 토큰은 최소 1이어야 합니다, 조정됨"
-  response_max_warning: "⚠️  응답 토큰이 최대값 8192를 초과합니다, 최대값으로 조정됨"
-
+  signature_loaded: 씽킹 시그니처 상태 로드됨 (함수 호출 활성화)
+  signature_disabled: '씽킹 시그니처 상태: 함수 호출 비활성화'
+  signature_saved: 씽킹 시그니처 저장됨 (parts 포함)
+  signature_cleared: 씽킹 시그니처 지워짐
+  state_saved: 씽킹 시그니처 상태 저장됨
+  load_failed: '씽킹 시그니처 상태 로드 실패: {error}'
+  save_failed: '씽킹 시그니처 저장 실패: {error}'
+  state_save_failed: '씽킹 시그니처 상태 저장 실패: {error}'
+  no_disable_warning: ⚠️  {model}은(는) 씽킹 비활성화를 지원하지 않습니다, 동적 모드를 사용합니다
+  no_disable_adjusted: ⚠️  {model}은(는) 씽킹 비활성화를 지원하지 않습니다 (0 토큰), 최소값 {min_tokens}
+    토큰으로 조정됨
+  budget_below_min: ⚠️  씽킹 예산이 최소값 {min_tokens} 토큰 미만입니다, 조정됨
+  budget_above_max: ⚠️  씽킹 예산이 최대값 {max_tokens:,} 토큰을 초과합니다, 최대값으로 조정됨
+  response_min_warning: ⚠️  응답 토큰은 최소 1이어야 합니다, 조정됨
+  response_max_warning: ⚠️  응답 토큰이 최대값 8192를 초과합니다, 최대값으로 조정됨
 cache:
   create: 캐시 생성
   create_cache: 캐시 생성
@@ -495,6 +2208,72 @@ cache:
   auto_cache_threshold: '자동 캐시 임계값: {threshold} 토큰'
   cache_trigger_suggestion: 비용 절감을 위해 캐시 생성을 권장합니다
   cache_recommended: 캐시 활성화를 권장합니다(약 {percent}% 비용 절감)
+  cache_info: 快取資訊
+  cache_name_info: 快取名稱資訊
+  cache_not_found: 找不到快取
+  cached_tokens_detail: 快取 tokens 詳情
+  create_failed: 建立快取失敗
+  create_title: 📦 建立 Context Cache
+  created_success: ✓ 快取已建立
+  creating: ⏳ 建立中...
+  cumulative_cost_info: 累計成本資訊
+  discount_info: 折扣資訊
+  display_name_info: 顯示名稱資訊
+  example_savings: 範例節省金額
+  expire_time_info: 過期時間資訊
+  hint_content_too_short: 內容太短，無法使用 Context Caching
+  hint_increase_content: 請增加內容長度以使用 Context Caching
+  hint_model_not_support: 此模型不支援 Context Caching
+  list_failed: 列出快取失敗
+  list_title: 📦 已建立的 Context Caches：
+  min_tokens_info: 最小 tokens 資訊
+  model_info: 模型資訊
+  no_caches_found: 沒有找到快取
+  query_cost: 查詢成本
+  query_failed: 查詢失敗
+  query_title: 🔍 使用快取查詢
+  question_info: 問題資訊
+  savings_detail: 節省詳情
+  savings_info_title: 💰 成本節省資訊
+  status_expired: 已過期
+  status_valid: 有效
+  table_col_created: 建立時間
+  table_col_expire: 過期時間
+  table_col_model: 模型
+  table_col_name: 名稱
+  table_col_status: 狀態
+  tokens_detail: tokens 詳情
+  total_caches: 快取總數
+  trying_api: 在本地找不到快取，嘗試從 API 獲取...
+  ttl_info: TTL 資訊
+  using_cache_label: Gemini (使用快取)：
+  warning_model_not_support: 警告：此模型不支援 Context Caching
+  msg.不使用快取: '    不使用快取：NT$ {no_cache_cost * USD_TO_TWD:.2f}'
+  msg.你: '  - 你: {user_preview}'
+  msg.使用快取: '    使用快取：  NT$ {with_cache_cost * USD_TO_TWD:.2f}'
+  msg.共輪對話: '  ... (共 {len(self.conversation_pairs)} 輪對話)'
+  msg.對話輪次次: '  對話輪次：{len(self.conversation_pairs)} 次'
+  msg.建立快取中: '
+
+    ⏳ 建立快取中...'
+  msg.後續每次查詢輸入: '  後續每次查詢（{future_input:,} tokens 輸入）：'
+  msg.快取內容預覽: 📦 快取內容預覽：
+  msg.快取功能未啟用未找到: ⚠️  快取功能未啟用（gemini_cache_manager.py 未找到）
+  msg.快取建立失敗: ⚠️  快取建立失敗：{e}
+  msg.快取建立成功後續對話: '✅ 快取建立成功！後續對話將自動使用快取節省成本。
+
+    '
+  msg.快取建立成本一次性: '  快取建立成本：NT$ {cache_create_cost * USD_TO_TWD:.2f} (一次性)'
+  msg.快取有效期小時: '     (快取有效期 {self.ttl_hours} 小時)'
+  msg.快取觸發提醒: 快取觸發提醒
+  msg.成本分析: 💰 成本分析：
+  msg.損益平衡次查詢後開始: '  💡 損益平衡：{breakeven} 次查詢後開始省錢'
+  msg.本次對話不列入快取: ⚠️  本次對話不列入快取
+  msg.每次節省省: '    每次節省：  NT$ {per_query_savings * USD_TO_TWD:.2f} (省 {((per_query_savings/no_cache_cost)*100):.0f}%)'
+  msg.目前狀態: 📊 目前狀態：
+  msg.累積輸入: '  累積輸入：{self.total_input_tokens:,} tokens'
+  msg.自動快取已恢復: ✓ 自動快取已恢復
+  msg.自動快取已暫停: ⚠️  自動快取已暫停
 checkpoint:
   create: 체크포인트 생성
   create_checkpoint: 체크포인트 생성
@@ -528,6 +2307,66 @@ checkpoint:
   size: 크기
   checkpoint_size: '크기: {size}'
   description: 설명
+  msg.儲存檢查點失敗: '[red]✗[/red] 儲存檢查點失敗: {e}'
+  msg.初始化完成: '[dim]✓ CheckpointManager 初始化完成: {self.checkpoints_dir}[/dim]'
+  msg.刪除: '  [green]✓[/green] 刪除: {file_change.file_path}'
+  msg.刪除失敗: '[red]✗[/red] 刪除失敗: {e}'
+  msg.及其他個: '  ... 及其他 {len(to_delete) - 10} 個'
+  msg.回溯完成: '
+
+    [green]✓[/green] 回溯完成:'
+  msg.壓縮率: '  └─ 壓縮率: {compressed_size / total_size * 100:.1f}%'
+  msg.失敗: '  [red]✗[/red] 失敗: {file_change.file_path} - {e}'
+  msg.失敗個檔案: '  └─ 失敗: {fail_count} 個檔案'
+  msg.將刪除個舊檢查點: '
+
+    [#DDA0DD]將刪除 {len(to_delete)} 個舊檢查點:[/#DDA0DD]'
+  msg.已刪除檢查點: '[green]✓[/green] 已刪除檢查點: {checkpoint.id[:8]}'
+  msg.已取消回溯: '[#DDA0DD]已取消回溯[/#DDA0DD]'
+  msg.已取消回溯_2: '[#DDA0DD]已取消回溯[/#DDA0DD]'
+  msg.已取消清理: '[#DDA0DD]已取消清理[/#DDA0DD]'
+  msg.已取消清理_2: '[#DDA0DD]已取消清理[/#DDA0DD]'
+  msg.已清理個舊檢查點: '
+
+    [green]✓[/green] 已清理 {deleted_count} 個舊檢查點'
+  msg.快照檔案不存在: '  [#DDA0DD]⚠[/#DDA0DD] 快照檔案不存在: {file_change.file_path}'
+  msg.恢復: '  [green]✓[/green] 恢復: {file_change.file_path}'
+  msg.恢復_2: '  [green]✓[/green] 恢復: {file_change.file_path}'
+  msg.成功個檔案: '  └─ 成功: {success_count} 個檔案'
+  msg.找不到檢查點: '[red]✗[/red] 找不到檢查點: {checkpoint_id}'
+  msg.找不到檢查點_2: '[red]✗[/red] 找不到檢查點: {checkpoint_id}'
+  msg.檔案變更個: '  └─ 檔案變更: {len(file_changes)} 個'
+  msg.檢查點已建立: '[green]✓[/green] 檢查點已建立: [#87CEEB]{checkpoint_id[:8]}[/#87CEEB]'
+  msg.沒有檢查點: '[#DDA0DD]沒有檢查點[/#DDA0DD]'
+  msg.沒有檢查點_2: '[#DDA0DD]沒有檢查點[/#DDA0DD]'
+  msg.測試完成: '
+
+    [green]✓[/green] 測試完成'
+  msg.測試完成_2: '
+
+    [green]✓[/green] 測試完成'
+  msg.測試模式建立範例檢查: '[#87CEEB]測試模式 - 建立範例檢查點[/#87CEEB]
+
+    '
+  msg.測試模式建立範例檢查_2: '[#87CEEB]測試模式 - 建立範例檢查點[/#87CEEB]
+
+    '
+  msg.無需清理共個檢查點保: '[green]無需清理（共 {len(checkpoints)} 個檢查點，保留 {keep_count} 個）[/green]'
+  msg.試運行模式未實際刪除: '
+
+    [#87CEEB]（試運行模式，未實際刪除）[/#87CEEB]'
+  msg.試運行模式未實際刪除_2: '
+
+    [#87CEEB]（試運行模式，未實際刪除）[/#87CEEB]'
+  msg.開始回溯至檢查點: '
+
+    [#87CEEB]開始回溯至檢查點 {checkpoint.id[:8]}...[/#87CEEB]'
+  msg.需要指定: '[red]需要指定 --files[/red]'
+  msg.需要指定_2: '[red]需要指定 --files[/red]'
+  msg.需要指定_3: '[red]需要指定 --id[/red]'
+  msg.需要指定_4: '[red]需要指定 --id[/red]'
+  msg.需要指定_5: '[red]需要指定 --id[/red]'
+  msg.需要指定_6: '[red]需要指定 --id[/red]'
 errors:
   api_error: API 호출에 실패했습니다
   api_error_detail: 'API 호출에 실패했습니다: {detail}'
@@ -589,11 +2428,6 @@ help:
   need_help: 도움이 필요하십니까? /help로 사용 가능한 명령 표시
   type_help: /help [주제]로 자세한 정보 표시
   no_help_available: 이 주제에 대한 도움말이 없습니다
-
-# ============================================================================
-# Media Common Terms (通用媒體詞彙)
-# Renamed from media_menu to avoid conflict with menu items (line 78)
-# ============================================================================
 media_common:
   image: 이미지
   image_analysis: 이미지 분석
@@ -652,6 +2486,100 @@ file:
   file_not_found: 파일을 찾을 수 없습니다
   file_exists: 파일이 존재합니다
   invalid_file: 잘못된 파일
+  selector:
+    pricing:
+      estimate: '💰 預估費用
+
+        選擇檔案數: {selected_count}
+
+        單檔成本: NT$ {single_cost:.4f}
+
+        總計: NT$ {total_cost_twd:.2f} (≈ ${total_cost_usd:.4f} USD)
+
+        '
+    table:
+      title: 檔案選擇清單
+      filename: 檔案名稱
+      confidence: 信心度
+      size: 大小
+      modified: 修改時間
+    unknown: 未知
+    prompt:
+      select: 請選擇要處理的檔案
+      help_multi: '提示: 可輸入多個編號（以空格或逗號分隔，例如: 1 2 3 或 1,2,3）'
+      help_all_cancel: 輸入 'all' 選擇全部 | 輸入 'cancel' 取消
+    choice: 您的選擇
+    error:
+      no_valid: ⚠️ 未選擇有效的檔案編號，請重新輸入
+      invalid_format: ⚠️ 輸入格式錯誤，請輸入有效的編號
+    cancelled: ✗ 已取消選擇
+    selected: 已選擇 {count} 個檔案：
+    confirm: 確認選擇這些檔案？
+    reselect: 重新選擇...
+    best_match: '🎯 最佳匹配檔案（信心度: {confidence}%）
+
+
+      檔案名稱: {name}
+
+      路徑: {path}
+
+      '
+    use_default: 使用此檔案作為預設選擇？
+    manual_mode: 📋 進入手動選擇模式
+    sorted_confidence: 信心度最高的 {top_n} 個檔案
+    options:
+      high_confidence: '
+
+        [dim]選項:[/dim]
+
+        [dim]• 輸入編號選擇檔案 (1-{max_num})，支援多選（例如: 1 2 3）[/dim]
+
+        [dim]• 輸入 ''0'' 或 ''all'' 顯示全部檔案（按時間排序）[/dim]
+
+        [dim]• 輸入 ''cancel'' 取消[/dim]
+
+        '
+      low_confidence: '
+
+        [dim]選項:[/dim]
+
+        [dim]• 輸入編號選擇檔案 (1-{max_num})，支援多選（例如: 1 2 4）[/dim]
+
+        [dim]• 輸入 ''7'' 或 ''all'' 顯示全部檔案（按時間排序）[/dim]
+
+        [dim]• 輸入 ''cancel'' 取消[/dim]
+
+        '
+    please_select: 請選擇
+    low_confidence_warning: '⚠️ 低信心度情境
+
+
+      系統無法以高信心度識別最佳檔案。
+
+      以下同時顯示「信心度最高」與「時間最近」的檔案供您選擇。
+
+      '
+    top_confidence: 📊 信心度最高的 3 個檔案：
+    top_time: ⏱️ 時間最近的檔案：
+    all_files_time: 顯示全部檔案（按時間排序）
+    sorted_time: 時間排序
+    select_from_list: 從清單中選擇檔案
+    no_files: ⚠️ 沒有可選擇的檔案
+    header: '
+
+      ╔══════════════════════════════════════════════════════════════╗
+
+      ║  🤖 智能檔案選擇系統                                          ║
+
+      ╠══════════════════════════════════════════════════════════════╣
+
+      ║  找到 {count} 個相似檔案                                      ║
+
+      ║  最高信心度: {confidence}%                                    ║
+
+      ╚══════════════════════════════════════════════════════════════╝
+
+      '
 codegemini:
   code_analysis: 코드 분석
   task_planning: 작업 계획
@@ -672,6 +2600,199 @@ codegemini:
   analysis_complete: 분석 완료
   plan_ready: 계획 완료
   index_ready: 인덱스 생성 완료
+  api_key.set_failed: '✗ 設定失敗: {error}'
+  api_key.set_success: ✓ API Key 已設定至 {target}
+  api_key.setup_failed: '✗ 設定失敗: {error}'
+  api_key.setup_script_not_found: '設定腳本不存在: {path}'
+  approval.add_rejection_reason: 是否要新增拒絕原因？
+  approval.all_approved: '
+
+    所有步驟已批准'
+  approval.approved: '
+
+    ✅ 已批准執行計畫'
+  approval.cancelled: '
+
+    ⏸️  已取消操作'
+  approval.change_preview: "\n 變更預覽\n"
+  approval.continue_review: '
+
+    是否繼續檢視剩餘步驟？'
+  approval.enter_reason: 請輸入拒絕原因
+  approval.execute_approved: '
+
+    是否執行已批准的步驟？'
+  approval.executing: "\n 開始執行計畫...\n"
+  approval.execution_error: '
+
+    [bold red]錯誤：執行過程中發生異常 - {error}[/bold red]'
+  approval.execution_failed: '
+
+    ❌ 計畫執行失敗'
+  approval.execution_success: '
+
+    ✅ 計畫執行成功！'
+  approval.no_steps_approved: '
+
+    沒有任何步驟被批准'
+  approval.not_approved: 錯誤：計畫尚未被批准
+  approval.partial_approval: '
+
+    部分步驟被批准'
+  approval.rejected: '
+
+    ❌ 已拒絕執行計畫'
+  approval.requires_integration: 注意：實際執行需要整合 MultiFileEditor 模組
+  approval.simulation_complete: '
+
+    ✅ 所有步驟已執行（模擬模式）'
+  approval.step_approved: '  [#DA70D6]✓ 步驟 {num} 已批准[/green]'
+  approval.step_by_step_mode: "\n 分步確認模式\n"
+  approval.step_skipped: '  [dim magenta]✗ 步驟 {num} 已跳過[/red]'
+  auto_model.disable_hint: 使用 disable_auto_model_selector() 可卸載
+  auto_model.disabled: ✓ Auto Model Selection 已卸載
+  auto_model.enabled: ✓ Auto Model Selection 已啟用
+  background_shell.initialized: BackgroundShellManager 已初始化
+  checkpoint.disable_hint: 使用 disable_checkpointing() 可卸載
+  checkpoint.disabled: ✓ Checkpointing System 已卸載
+  checkpoint.enabled: ✓ Checkpointing System 已啟用
+  cli.install_failed: '✗ 安裝失敗: {error}'
+  cli.install_script_not_found: '安裝腳本不存在: {path}'
+  cli.install_starting: 開始安裝 Gemini CLI...
+  cli.install_success: ✓ Gemini CLI 安裝成功
+  cli.uninstall_failed: '✗ 卸載失敗: {error}'
+  cli.uninstall_starting: 開始卸載 Gemini CLI...
+  cli.uninstall_success: ✓ Gemini CLI 卸載成功
+  cli.update_failed: '✗ 更新失敗: {error}'
+  cli.update_starting: 開始更新 Gemini CLI...
+  cli.update_success: ✓ Gemini CLI 更新成功
+  config.collection_allowed_chars: '· 允許: 英文字母 (a-zA-Z)、數字 (0-9)、底線 (_)'
+  config.collection_format_invalid: '
+
+    ❌ 名稱格式不符合規則'
+  config.collection_format_valid: '
+
+    [plum]✓ 格式驗證通過: {name}[/plum]'
+  config.collection_invalid_reason: '· 原因: 包含不允許的字元'
+  config.collection_refer_examples: '· 請參考上方有效範例重新輸入
+
+    '
+  config.confirm_reset: 確定要重置所有配置為預設值嗎？
+  config.confirm_use_path: 確定要使用此路徑？
+  config.create_parent_dir: 是否創建父目錄？
+  config.file_exists: '[#DDA0DD]檔案存在：[/#DDA0DD] {exists}'
+  config.file_path: '
+
+    [#DDA0DD]配置檔案路徑：[/#DDA0DD] {path}'
+  config.full_path: '
+
+    [dim]完整路徑: {path}[/dim]'
+  config.initialized: '✓ ConfigManager 已初始化: {path}'
+  config.invalid_threshold: '✗ 無效的相似度閾值: {threshold}（應在 0.0-1.0 之間）'
+  config.invalid_value: ✗ 無效的數值
+  config.keep_original_path: 已取消，保留原路徑
+  config.load_failed: '✗ 載入配置失敗: {error}'
+  config.loaded: ✓ 配置檔案已載入
+  config.no_write_permission: '[red]✗ 無寫入權限: {error}[/red]'
+  config.not_found: 配置檔案不存在，使用預設配置
+  config.parent_dir_create_failed: '[red]✗ 創建父目錄失敗: {error}[/red]'
+  config.parent_dir_created: ✓ 已創建父目錄
+  config.parent_dir_missing: '[#DDA0DD]⚠ 父目錄不存在: {dir}[/#DDA0DD]'
+  config.path_cancelled: 已取消，路徑可能無法使用
+  config.path_empty: ⚠ 路徑不能為空
+  config.path_is_file: '[#DDA0DD]⚠ 此路徑指向檔案，而非目錄: {path}[/#DDA0DD]'
+  config.path_should_be_dir: '建議: 向量資料庫路徑應為目錄'
+  config.path_valid: ✓ 路徑有效（目錄已存在）
+  config.path_validation_failed: '
+
+    路徑驗證失敗，請重新輸入'
+  config.path_will_create: 路徑尚未建立，將在首次使用時自動創建
+  config.path_writable: ✓ 目錄可寫入
+  config.reset: ✓ 配置已重置為預設值
+  config.reset_done: ✓ 配置已重置為預設值
+  config.retry_input: 是否重新輸入？
+  config.save_failed: '✗ 儲存配置失敗: {error}'
+  config.saved: '✓ 配置已儲存: {path}'
+  config.suggest_writable_dir: '建議: 選擇有寫入權限的目錄'
+  config.threshold_update_failed: ✗ 更新失敗（向量相關係數閾值應在 0.0-1.0 之間）
+  config.updated_collection: ✓ 已更新向量資料庫集合名稱
+  config.updated_enabled: ✓ 已更新啟用狀態
+  config.updated_orthogonal: ✓ 已更新正交模式
+  config.updated_path: '
+
+    ✓ 已更新向量資料庫路徑'
+  config.updated_threshold: ✓ 已更新向量相關係數閾值
+  config.use_defaults: 使用預設配置
+  editor.backup_created: '[#DA70D6]✓ 已建立備份：{id}[/green]'
+  editor.backup_failed: '[#DDA0DD]警告：備份失敗 - {error}[/#DDA0DD]'
+  editor.backup_not_found: '[dim magenta]錯誤：找不到備份：{path}[/red]'
+  editor.batch_edit_complete: '
+
+    ✅ 批次編輯完成'
+  editor.batch_edit_start: '
+
+    [#DDA0DD]✏️  開始批次編輯（ID: {id}）[/#DDA0DD]
+
+    '
+  editor.change_preview: "\n 變更預覽\n"
+  editor.error_occurred: '
+
+    [dim magenta]✗ 錯誤：{file} - {error}[/red]'
+  editor.git_commit_created: ✓ 已建立 Git commit
+  editor.git_commit_failed: '[#DDA0DD]警告：Git commit 失敗 - {error}[/#DDA0DD]'
+  editor.no_backup_id: 錯誤：沒有備份 ID，無法回滾
+  editor.rollback_failed: '[dim magenta]錯誤：回滾失敗 - {error}[/red]'
+  editor.rollback_start: '
+
+    [#DDA0DD]🔄 回滾變更（編輯 ID: {id}）[/#DDA0DD]'
+  editor.rollback_success: ✓ 已從備份還原
+  editor.rolling_back: 回滾所有變更...
+  editor.success_count: '  成功：{count}/{total} 個檔案'
+  editor.validation_failed: ✗ 驗證失敗：
+  editor.warnings: ⚠️  警告：
+  env_check.api_key_not_configured: GEMINI_API_KEY 未配置
+  env_check.nodejs_not_installed: Node.js 未安裝或版本不符
+  env_check.nodejs_outdated: Node.js 版本過舊 ({version})，建議升級至 v{required}+
+  env_check.npm_not_installed: npm 未安裝
+  env_check.starting: 開始環境檢查...
+  interactive_qa.initialized: InteractiveQA 已初始化
+  main.enable_hint: 提示：v1.2.0 新功能需手動啟用，請使用 enable_*() 方法
+  main.initialized: CodeGemini 已初始化
+  mcp.config_format_error: '✗ MCP 配置格式錯誤: {error}'
+  mcp.config_not_found: 'MCP 配置檔不存在: {path}'
+  mcp.config_saved: ✓ MCP 配置已儲存至 {path}
+  mcp.save_failed: '✗ 儲存失敗: {error}'
+  planner.analysis_complete: ✓ 分析完成
+  planner.analysis_failed: '[#DDA0DD]警告：Gemini 分析失敗，使用備用分析 - {error}[/#DDA0DD]'
+  planner.analyzing_request: "\n 分析使用者請求..."
+  planner.api_key_required: 請設置 GEMINI_API_KEY 環境變數
+  planner.complexity: '  複雜度：{complexity}'
+  planner.example_cmd: python task_planner.py "新增使用者登入功能" .
+  planner.example_title: '
+
+    範例：'
+  planner.file_count: '  檔案數量：{count}'
+  planner.framework: '  框架：{framework}'
+  planner.generating_plan: "\n 生成執行計畫..."
+  planner.intent: '  意圖：{intent}'
+  planner.path_not_exists: 專案路徑不存在：{path}
+  planner.plan_failed: '[#DDA0DD]警告：Gemini 計畫生成失敗，使用備用計畫 - {error}[/#DDA0DD]'
+  planner.plan_generated: ✓ 計畫生成完成
+  planner.project_type: '  專案類型：{type}'
+  planner.risk_level: '  風險等級：{level}'
+  planner.scan_complete: ✓ 掃描完成
+  planner.scanning_codebase: "\n 掃描程式碼庫..."
+  planner.step_count: '  步驟數量：{count}'
+  planner.success: '
+
+    ✅ 計畫生成成功！'
+  planner.type: '  類型：{type}'
+  planner.usage: 用法：
+  planner.usage_cmd: python task_planner.py "任務描述"
+  slash_commands.disable_hint: 使用 disable_slash_commands() 可卸載
+  slash_commands.disabled: ✓ Custom Slash Commands 已卸載
+  slash_commands.enabled: ✓ Custom Slash Commands 已啟用
+  todo_tracker.initialized: TodoTracker 已初始化
 config:
   load: 구성 로드
   load_config: 구성 로드
@@ -738,8 +2859,6 @@ model:
   model_version: 모델 버전
   model_info: 모델 정보
   supported_models: 지원되는 모델
-
-  # Model selector
   selector_title: 🤖 Gemini 모델 선택
   col_option: 옵션
   col_name: 모델 이름
@@ -754,6 +2873,15 @@ model:
   not_in_list: ⚠️  모델 '{model}'이(가) 사용 가능한 목록에 없습니다. 다시 선택하세요
   invalid_option: 잘못된 옵션입니다. 다시 시도하세요
   custom_model: 사용자 정의 모델 이름
+  updating_list: 🔄 API에서 모델 목록 업데이트 중...
+  list_updated: ✅ 모델 목록이 업데이트되었습니다! 총 {count}개 모델
+  update_failed: ❌ 업데이트 실패, 네트워크 연결 및 API 키를 확인하세요
+  switch_cancelled: 모델 전환이 취소되었습니다
+  cannot_load_selector: '⚠️ 모델 선택기를 로드할 수 없습니다: {error}'
+  selection_error: '⚠️ 모델 선택 중 오류 발생: {error}'
+  update_error: '⚠️ 모델 목록 업데이트 중 오류 발생: {error}'
+  using_saved: '使用上次選擇的模型: {model}'
+  cli_override: '使用 CLI 指定的模型: {model}'
 validation:
   validating: 검증 중
   valid: 유효
@@ -765,101 +2893,2984 @@ validation:
   required: 필수
   optional: 선택
   format_error: 형식 오류
-
-# ============================================================================
-# 형식 (format) - 2025-10-29 추가
-# ============================================================================
 format:
-  # 통화 기호
   currency_symbol:
-    twd: "NT$"
-    usd: "US$"
-  
-  # 구분자
-  separator: ": "
-  separator_currency: ": NT$"
-  
-  # 단위
+    twd: NT$
+    usd: US$
+  separator: ': '
+  separator_currency: ': NT$'
   unit:
-    segment: "세그먼트"
-    second: "초"
-
-# CodeGemini MCP Detector
+    segment: 세그먼트
+    second: 초
 mcp:
   detector:
-    postgresql_desc: "PostgreSQL 데이터베이스 작업"
-    puppeteer_desc: "웹 자동화 및 스크래핑"
-    slack_desc: "Slack 팀 협업"
-    drive_desc: "Google Drive 파일 관리"
-    contains_keywords: "키워드 포함: {keywords}"
-    match_patterns: "{count}개 패턴 일치"
-    match_rule: "규칙 일치"
-    rule_added: "사용자 정의 규칙 추가됨: {name}"
-    rule_removed: "규칙 제거됨: {name}"
-    rules_list: "MCP Server 감지 규칙 목록"
-    description: "설명"
-    keywords_count: "키워드 수"
-    patterns_count: "패턴 수"
-    confidence_weight: "신뢰도 가중치"
-    demo_title: "MCP Server 스마트 감지기 데모"
-    test: "테스트"
-    detected_servers: "{count}개의 관련 Server 감지됨"
-    confidence: "신뢰도"
-    no_servers_detected: "MCP Server가 감지되지 않았습니다"
-
-# CodeGemini Templates
+    postgresql_desc: PostgreSQL 데이터베이스 작업
+    puppeteer_desc: 웹 자동화 및 스크래핑
+    slack_desc: Slack 팀 협업
+    drive_desc: Google Drive 파일 관리
+    contains_keywords: '키워드 포함: {keywords}'
+    match_patterns: '{count}개 패턴 일치'
+    match_rule: 규칙 일치
+    rule_added: '사용자 정의 규칙 추가됨: {name}'
+    rule_removed: '규칙 제거됨: {name}'
+    rules_list: MCP Server 감지 규칙 목록
+    description: 설명
+    keywords_count: 키워드 수
+    patterns_count: 패턴 수
+    confidence_weight: 신뢰도 가중치
+    demo_title: MCP Server 스마트 감지기 데모
+    test: 테스트
+    detected_servers: '{count}개의 관련 Server 감지됨'
+    confidence: 신뢰도
+    no_servers_detected: MCP Server가 감지되지 않았습니다
 templates:
-  not_list_warning: "경고: '{name}'은(는) 리스트가 아닙니다. 루프를 건너뜁니다"
-  missing_variables: "경고: 변수 누락: {vars}"
-  test_title: "CodeGemini 템플릿 엔진 테스트"
-  test1: "테스트 1: 간단한 변수 보간"
-  test2: "테스트 2: 기본값"
-  test3: "테스트 3: 조건 로직"
-  test4: "테스트 4: 루프"
-  test5: "테스트 5: 템플릿 라이브러리"
-  result: "결과"
-  premium_member: "프리미엄 회원"
-  normal_member: "일반 회원"
-  all_tests_complete: "모든 테스트 완료"
-
-# CodeGemini Test Generator
+  not_list_warning: '경고: ''{name}''은(는) 리스트가 아닙니다. 루프를 건너뜁니다'
+  missing_variables: '경고: 변수 누락: {vars}'
+  test_title: CodeGemini 템플릿 엔진 테스트
+  test1: '테스트 1: 간단한 변수 보간'
+  test2: '테스트 2: 기본값'
+  test3: '테스트 3: 조건 로직'
+  test4: '테스트 4: 루프'
+  test5: '테스트 5: 템플릿 라이브러리'
+  result: 결과
+  premium_member: 프리미엄 회원
+  normal_member: 일반 회원
+  all_tests_complete: 모든 테스트 완료
 test_gen:
-  analyzing_file: "파일 분석 중: {path}"
-  analysis_complete: "분석 완료"
-  functions: "함수"
-  classes: "클래스"
-  analysis_failed: "분석 실패: {error}"
-  generating_tests: "테스트 코드 생성 중..."
-  unsupported_framework: "지원하지 않는 테스트 프레임워크: {framework}"
-  test_file_saved: "테스트 파일 저장됨: {path}"
-  title: "CodeGemini 테스트 생성기"
-  usage: "사용법"
-  examples: "예제"
-  generated_code: "생성된 테스트 코드"
-
-# CodeGemini Doc Generator
+  analyzing_file: '파일 분석 중: {path}'
+  analysis_complete: 분석 완료
+  functions: 함수
+  classes: 클래스
+  analysis_failed: '분석 실패: {error}'
+  generating_tests: 테스트 코드 생성 중...
+  unsupported_framework: '지원하지 않는 테스트 프레임워크: {framework}'
+  test_file_saved: '테스트 파일 저장됨: {path}'
+  title: CodeGemini 테스트 생성기
+  usage: 사용법
+  examples: 예제
+  generated_code: 생성된 테스트 코드
 doc_gen:
-  scanning_project: "프로젝트 스캔 중: {path}"
-  found_files: "{count}개의 Python 파일 발견"
-  analysis_complete: "분석 완료: {count}개 모듈"
-  analysis_warning: "경고: {path}를 분석할 수 없음 - {error}"
-  generating_readme: "README.md 생성 중..."
-  readme_saved: "README 저장됨: {path}"
-  generating_api: "API 문서 생성 중..."
-  api_saved: "API 문서 저장됨: {path}"
-  title: "CodeGemini 문서 생성기"
-  usage: "사용법"
-  examples: "예제"
-  readme_title: "README.md"
-
-# CodeGemini Codebase Embedding
+  scanning_project: '프로젝트 스캔 중: {path}'
+  found_files: '{count}개의 Python 파일 발견'
+  analysis_complete: '분석 완료: {count}개 모듈'
+  analysis_warning: '경고: {path}를 분석할 수 없음 - {error}'
+  generating_readme: README.md 생성 중...
+  readme_saved: 'README 저장됨: {path}'
+  generating_api: API 문서 생성 중...
+  api_saved: 'API 문서 저장됨: {path}'
+  title: CodeGemini 문서 생성기
+  usage: 사용법
+  examples: 예제
+  readme_title: README.md
 embedding:
-  faiss_initialized: "✓ FAISS 인덱스 초기화됨 (차원: {dim})"
-  cache_enabled: "✓ EmbeddingCache 활성화됨 (maxsize={size})"
-  cache_unloaded: "✓ EmbeddingCache 언로드됨 (해제된 메모리: ~{mem}MB)"
-  cache_reloaded: "✓ EmbeddingCache 재활성화됨"
-  db_initialized: "✓ VectorDatabase 초기화됨: {path} (FAISS 활성화)"
+  faiss_initialized: '✓ FAISS 인덱스 초기화됨 (차원: {dim})'
+  cache_enabled: ✓ EmbeddingCache 활성화됨 (maxsize={size})
+  cache_unloaded: '✓ EmbeddingCache 언로드됨 (해제된 메모리: ~{mem}MB)'
+  cache_reloaded: ✓ EmbeddingCache 재활성화됨
+  db_initialized: '✓ VectorDatabase 초기화됨: {path} (FAISS 활성화)'
+async_batch:
+  async_mode:
+    value: '[dim]使用異步處理模式（asyncio）[/dim]
 
-# Common
-common:
-  unit: "개"
+      '
+  cleared:
+    value: '[#B565D8]✓ 已清理 {count} 個已完成的任務[/#B565D8]'
+  completed:
+    value: '
+
+      [bold green]✅ 批次處理完成！[/bold green]'
+  example:
+    completed: 完成：{prompt}
+    processing: '[dim]處理中：{prompt_short}...[/dim]'
+    stats: '
+
+      統計：{stats}'
+    task: 任務 {number}
+    test_start: 開始異步批次處理測試
+  handler:
+    async: 異步
+    not_found: 未找到任務處理器：{task_type}
+    registered: '[#B565D8]✓ 註冊任務處理器：{task_type} ({handler_type})[/#B565D8]'
+    sync: 同步
+  load:
+    failed: '[#E8C4F0]載入任務失敗：{e}[/#E8C4F0]'
+    success: '[#E8C4F0]📂 載入了 {tasks_count} 個任務[/#E8C4F0]'
+  no_matching_tasks:
+    value: '[#E8C4F0]沒有符合條件的任務[/#E8C4F0]'
+  no_tasks:
+    value: '[#E8C4F0]沒有待處理的任務[/#E8C4F0]'
+  performance_stats:
+    value: ''
+  processing:
+    value: 處理 {total_tasks} 個任務
+  save:
+    failed: '[dim #E8C4F0]保存任務失敗：{e}[/#E8C4F0]'
+  start:
+    value: '
+
+      [bold #E8C4F0]🚀 開始批次處理（最大並行：{max_concurrent}）[/bold #E8C4F0]'
+  stats_summary:
+    value: '[dim]總耗時：{overall_time:.2f}s | 平均：{avg_task_time:.2f}s/任務[/dim]'
+  summary:
+    value: ''
+  table:
+    created_at: 建立時間
+    priority: 優先級
+    retry_count: 重試次數
+    status: 狀態
+    task_id: 任務 ID
+    title: 批次任務列表（共 {count} 個）
+    type: 類型
+  task:
+    added: '[#B565D8]✓ 已添加任務：{task_id}[/#B565D8]'
+    batch_added: '[#B565D8]✓ 已批次添加 {count} 個任務[/#B565D8]'
+    cancelled: '[#B565D8]✓ 已取消任務：{task_id}[/#B565D8]'
+    cannot_cancel: '[#E8C4F0]無法取消正在執行的任務：{task_id}[/#E8C4F0]'
+    completed: '[#B565D8]✅ 任務完成：{task_id}[/#B565D8]'
+    executing: '
+
+      [#E8C4F0]▶️  開始執行任務：{task_id}[/#E8C4F0]'
+    failed: '[#E8C4F0]❌ 任務失敗：{task_id} - {error}[/#E8C4F0]'
+    not_found: '[#E8C4F0]未找到任務：{task_id}[/#E8C4F0]'
+    retrying: '[#E8C4F0]🔄 重試任務 ({retry_count}/{max_retries})：{task_id}[/#E8C4F0]'
+batch:
+  processor:
+    column:
+      created_at: 생성 시간
+      priority: 우선순위
+      retry_count: 재시도 횟수
+      status: 상태
+      task_id: 작업 ID
+      type: 유형
+    handler_not_found: '작업 핸들러를 찾을 수 없습니다: {task_type}'
+    processing_tasks: '{total}개의 작업 처리 중'
+    status:
+      cancelled: 취소됨
+      completed: 완료
+      failed: 실패
+      pending: 대기 중
+      running: 실행 중
+    task_list_title: 배치 작업 목록(총 {count}개)
+error:
+  cannot_process: '[dim #E8C4F0]❌ 사전 점검에 실패했습니다, 실행을 계속할 수 없습니다:[/red]'
+  example:
+    api_unavailable: API를 일시적으로 사용할 수 없습니다
+    cannot_process_video: 동영상 파일을 처리할 수 없습니다
+    check_video_format: 동영상 형식이 지원되는지 확인하세요
+    confirm_ffmpeg: ffmpeg가 설치되어 있는지 확인하세요
+    convert_format: 동영상 형식 변환을 시도하세요
+    invalid_param: 잘못된 매개변수입니다
+    success: 성공
+  failed: '  - API 재시도: ✅ 활성화'
+  formatter:
+    context: 컨텍스트 정보
+    severity: 심각도
+    suggestions: 권장 해결 방법
+    time: 시간
+    traceback: 스택 트레이스
+  panel:
+    details: 오류 세부정보
+  recovery:
+    col_progress: 진행 상황
+    col_status: 상태
+    col_task_id: 작업 ID
+    col_time: 시간
+    col_type: 유형
+    no_checkpoints: '[#E8C4F0]복원 가능한 체크포인트가 없습니다[/#E8C4F0]'
+    status_failed: ❌ 실패
+    status_paused: ⏸️  일시 중지
+    table_title: 복원 가능한 체크포인트
+  stats:
+    by_severity: '
+
+      [#E8C4F0]심각도별 분포:[/#E8C4F0]'
+    by_type: '
+
+      [#E8C4F0]오류 유형별 분포:[/#E8C4F0]'
+  suggestion:
+    check_api_docs: API 문서를 확인하세요
+    check_api_key: API 키가 올바른지 확인하세요
+    check_api_status: API 서비스 상태를 확인하세요
+    check_ffmpeg_version: ffmpeg 버전이 요구사항을 충족하는지 확인하세요
+    check_file_path: 파일 경로가 올바른지 확인하세요
+    check_file_permission: 파일 접근 권한을 확인하세요
+    check_firewall: 방화벽 설정을 확인하세요
+    check_network: 네트워크 연결을 확인하세요
+    check_permission_settings: 파일 접근 권한 설정을 확인하세요
+    check_video_corruption: 동영상 파일이 손상되지 않았는지 확인하세요
+    confirm_api_quota: API 할당량이 충분한지 확인하세요
+    confirm_api_service: API 서비스가 정상적으로 작동하는지 확인하세요
+    confirm_file_exists: 파일이 존재하는지 확인하세요
+    confirm_video_format: 동영상 형식이 지원되는지 확인하세요
+    confirm_write_permission: 쓰기 권한이 있는지 확인하세요
+    install_ffmpeg: 'ffmpeg를 설치하세요: brew install ffmpeg'
+    try_admin_mode: 관리자 권한으로 실행해 보세요
+    try_later: 잠시 후 다시 시도하세요
+  video_info_failed: '[dim #E8C4F0]오류: 동영상 정보를 가져올 수 없습니다[/red]'
+  suggested_solutions: 💡 제안된 해결 방법：
+  solution_execute: 실행：
+  solution_manual: 수동 단계：
+  details: 錯誤詳情
+  retry_attempt: ⚠️  嘗試 {attempt}/{max_retries} 失敗，{delay:.1f} 秒後重試...
+  message: '[dim]錯誤：{error}[/dim]'
+  max_retries_reached: ❌ 已達到最大重試次數 ({max_retries})，操作失敗
+  timestamp: '[dim]時間：{time}[/dim]'
+  context_info: '
+
+    上下文資訊：'
+  suggestions: '
+
+    建議的解決方案：'
+  stack_trace: '
+
+    堆疊追蹤：'
+  stats_title: '
+
+    [bold magenta]📊 錯誤統計（最近 {days} 天）[/bold magenta]
+
+    '
+  total_count: 總錯誤數：{count}
+  type_distribution: '
+
+    錯誤類型分佈：'
+  severity_distribution: '
+
+    嚴重程度分佈：'
+  video_not_found: '[dim magenta]錯誤：找不到影片檔案：{path}[/red]'
+  unsupported_format: '[dim magenta]不支援的格式：{format}[/red]'
+  generic: '
+
+    [dim magenta]錯誤：{error}[/red]'
+  not_found: 錯誤：未找到 ffmpeg 或 ffprobe
+flow:
+  engine:
+    api_call_failed: 'Gemini API 호출에 실패했습니다: {error}'
+    cleanup_failed: 임시 파일 정리에 실패했습니다
+    confirm_prompt: '생성을 계속하시겠습니까? (y/n): '
+    fallback_segment: '{description}, 세그먼트 {num}'
+    generating_segments: '[#E8C4F0]{count}개의 세그먼트를 생성 중...[/#E8C4F0]'
+    generation_cancelled: '[#E8C4F0]생성이 취소되었습니다[/#E8C4F0]'
+    output_filename: flow_video_{segments_count}segments.mp4
+    preflight_failed: 사전 점검에 실패했습니다, 위 문제를 수정한 후 다시 시도하세요
+    segment_generation_failed: 세그먼트 {current}/{total} 생성에 실패했습니다
+    suggestion:
+      check_api_key: API 키가 유효한지 확인하세요
+      check_api_status: Gemini API 상태 페이지를 확인하세요
+      check_content_policy: 프롬프트가 Veo 콘텐츠 정책을 준수하는지 확인하세요
+      check_dependencies: 모든 종속성 모듈이 정상적으로 작동하는지 확인하세요
+      check_disk_space: 디스크 공간이 충분한지 확인하세요
+      check_duration: '동영상 길이 설정을 확인하세요(현재: {duration}초, 권장: ≤8초)'
+      check_logs: 오류 로그에서 세부 정보를 확인하세요
+      check_network: 네트워크 연결이 안정적인지 확인하세요
+      check_permissions: 파일 접근 권한이 올바른지 확인하세요
+      check_quota: API 할당량이 충분한지 확인하세요
+      check_segments: '생성된 세그먼트가 저장된 위치를 확인하세요: {temp_dir}'
+      check_veo_quota: Veo API 할당량을 확인하세요(https://console.cloud.google.com/)
+      manual_delete: '임시 디렉토리를 수동으로 삭제: rm -rf {temp_dir}'
+      resume_task: '명령으로 작업 복원: python gemini_chat.py recovery resume {task_id}'
+      simplify_prompt: 프롬프트를 단순화한 후 다시 생성하세요
+      simplify_veo_prompt: '프롬프트 단순화를 시도하세요: {prompt_preview}...'
+      use_fallback: 대체 세그먼테이션 전략을 사용하여 실행 계속
+      wait_retry: 2~5분 후 다시 시도하세요(API가 일시적으로 과부하 상태일 수 있습니다)
+    suggestions: '     권장 사항:
+
+      '
+    unexpected_error: 동영상 생성 중 예기치 않은 오류가 발생했습니다
+    validation_failed: '매개변수 검증에 실패했습니다:
+
+      '
+    veo_generation_failed: Veo API 동영상 생성에 실패했습니다
+media:
+  clip:
+    analysis_title: '\n[bold #E8C4F0]🎬 AI 剪輯建議分析[/bold #E8C4F0]\n'
+    analyzing_features: \n[#E8C4F0]🔍 分析影片內容特徵...[/#E8C4F0]
+    detailed_suggestions: '\n[bold #E8C4F0]💡 詳細建議：[/bold #E8C4F0]\n'
+    generating_suggestions: \n[#E8C4F0]💡 生成剪輯建議...[/#E8C4F0]
+    no_suggestions: '[#E8C4F0]沒有生成剪輯建議[/#E8C4F0]'
+    scene_detection: \n[#E8C4F0]📦 執行場景檢測...[/#E8C4F0]
+  vision_imagen:
+    title: 🎨 Gemini Vision + Imagen 지능형 이미지 생성
+    step1_title: '📊 단계 1/2: Gemini Vision 원본 이미지 분석'
+    step2_title: '📊 단계 2/2: Imagen 새 이미지 생성'
+    uploading_image: 📤 이미지 업로드 중...
+    uploaded: '✅ 업로드 완료: {name}'
+    analyzing: 🔍 분석 중...
+    analysis_complete: ✅ 분석 완료
+    analysis_failed: '❌ 분석 실패: {error}'
+    generating: 🎨 생성 중...
+    generation_complete: ✅ 생성 완료
+    generation_failed: '❌ 생성 실패: {error}'
+    creation_complete: ✅ 생성 완료!
+    estimated_cost: '💰 예상 비용: ${cost_usd} USD (NT$ {cost_twd})'
+    actual_cost: '💰 실제 비용: ${cost_usd} USD (NT$ {cost_twd})'
+    estimated_total_cost: '💰 총 예상 비용: ${cost_usd} USD (NT$ {cost_twd})'
+    cost_summary: 💰 비용 요약
+    image_tokens: '   - 이미지 토큰: {tokens} ({width}x{height})'
+    input_tokens: '   - 입력 토큰: {tokens}'
+    output_tokens: '   - 출력 토큰: {tokens}'
+    unit_price: '   - 단가: ${price} / 장'
+    vision_analysis_cost: 'Gemini Vision 분석: ${cost_usd} USD (NT$ {cost_twd})'
+    imagen_generation_cost: 'Imagen 이미지 생성:  ${cost_usd} USD (NT$ {cost_twd})'
+    total_cost: '합계:           ${cost_usd} USD (NT$ {cost_twd})'
+    source_image: '원본:'
+    instruction: '지시:'
+    model: '모델:'
+    output: '출력:'
+    generated_description: '📝 생성된 설명:'
+    generated_count: 총 {count}장의 이미지 생성
+    cannot_read_dimensions: '⚠️  이미지 크기를 읽을 수 없음: {error}'
+    source_not_found: '원본 이미지를 찾을 수 없음: {path}'
+    budget_insufficient: '예산 부족: {warning}'
+    analysis_prompt:
+      intro: '이 이미지를 주의 깊게 분석하고 다음 단계를 따르십시오:'
+      step1_title: '1. **원본 이미지 설명**:'
+      step1_item1: '   - 주요 객체 및 내용'
+      step1_item2: '   - 색상, 조명, 구도'
+      step1_item3: '   - 스타일과 분위기'
+      step2_title: '2. **수정 지시 적용**:'
+      step2_instruction: '   편집 지시: {instruction}'
+      step3_title: '3. **새로운 이미지 설명 생성**:'
+      step3_line1: '   위의 수정 지시를 기반으로 Imagen 이미지 생성에 적합한 완전한 이미지 설명을 생성하십시오.'
+      step3_line2: '   설명은 다음과 같아야 합니다:'
+      step3_item1: '   - 구체적이고 상세함'
+      step3_item2: '   - 스타일, 색상, 구도 등 세부 사항 포함'
+      step3_item3: '   - AI 이미지 생성에 적합'
+      outro: 최종 이미지 설명을 직접 출력하십시오(다른 설명 불필요).
+    cli:
+      usage: '사용법: python3 gemini_vision_imagen.py <이미지_경로> <편집_지시>'
+      example: '예제:'
+      example_cmd: '  python3 gemini_vision_imagen.py photo.jpg ''배경을 파란 하늘로 변경'''
+      success: '✅ 성공! 출력: {output}'
+      error: '❌ 오류: {error}'
+    unexpected_error: 影片生成過程發生未預期錯誤
+    validation_failed: 參數驗證失敗：\n
+    veo_generation_failed: Veo API 影片生成失敗
+  function_error: '✗ 멀티미디어 기능 오류: {error}'
+  image: 圖片
+  image_analysis: 圖片分析
+  image_generation: 圖片生成
+  image_upload: 圖片上傳
+  image_processing: 圖片處理中
+  image_resize: 調整圖片大小
+  image_format: 圖片格式
+  video_analysis: 影片分析
+  video_generation: 影片生成
+  video_upload: 影片上傳
+  video_processing: 影片處理中
+  video_editing: 影片編輯
+  scene_detection: 場景檢測
+  video_format: 影片格式
+  video_duration: 影片長度
+  audio: 音訊
+  audio_analysis: 音訊分析
+  audio_processing: 音訊處理
+  audio_transcription: 音訊轉錄
+  audio_format: 音訊格式
+  subtitle: 字幕
+  subtitle_generation: 字幕生成
+  subtitle_translation: 字幕翻譯
+  subtitle_format: 字幕格式
+  upload_progress: '上傳進度: {percent}%'
+  processing_progress: '處理進度: {percent}%'
+  upload_complete: 上傳完成
+  processing_complete: 處理完成
+  analyzing: 分析中
+  media_file: 媒體檔案
+  file_size: 檔案大小
+  file_format: 檔案格式
+  resolution: 解析度
+  bitrate: 位元率
+  frame_rate: 幀率
+  clip.analysis_title: "\n AI 剪輯建議分析\n"
+  clip.analyzing_features: "\n 分析影片內容特徵..."
+  clip.detailed_suggestions: "\n 詳細建議：\n"
+  clip.generating_suggestions: "\n 生成剪輯建議..."
+  clip.no_suggestions: 沒有生成剪輯建議
+  clip.preview_frame_warning: '[#DDA0DD]警告：提取預覽幀失敗 ({time}s): {error}[/#DDA0DD]'
+  clip.scene_detection: "\n 執行場景檢測..."
+  clip.scenes_found: ✓ 檢測到 {count} 個場景
+  clip.suggestions_generated: '
+
+    [#DA70D6]✓ 已生成 {count} 個剪輯建議[/green]'
+  clip.suggestions_list: '
+
+    [bold magenta]📋 剪輯建議列表（{count} 個）[/bold magenta]
+
+    '
+  clip.suggestions_saved: '[#DA70D6]✓ 剪輯建議已保存：{file}[/green]'
+  clip.target_duration: 🎯 目標長度：{time}
+  clip.total_duration: ⏱️  總長度：{time}
+  clip.video_file: 📁 影片：{name}
+  video.analyzing: 分析中
+  video.analyzing_file: '
+
+    [#DDA0DD]📹 分析影片：{name}[/#DDA0DD]'
+  video.analyzing_frames: '使用 Gemini Vision 分析關鍵幀...
+
+    '
+  video.cannot_analyze: 無法分析
+  video.detecting_scenes: "\n 檢測場景變化..."
+  video.duration: '[dim]  時長：{duration:.2f} 秒[/dim]'
+  video.extracting_frames: '[dim]  將提取 {count} 個關鍵幀[/dim]
+
+    '
+  video.frame_analyze_warning: '[#DDA0DD]警告：分析幀失敗：{error}[/#DDA0DD]'
+  video.frame_extract_warning: '[#DDA0DD]警告：提取幀 {num} 失敗[/#DDA0DD]'
+  video.frames_extracted: '[#DA70D6]✓ 已提取 {count} 個關鍵幀[/green]
+
+    '
+  video.scene_index_saved: '[#DA70D6]✓ 場景索引已保存：{file}[/green]'
+  video.scene_list_title: 場景列表
+  video.scenes_detected: '[#DA70D6]✓ 檢測到 {count} 個場景[/green]
+
+    '
+  video.unknown_scene: 未知場景
+error_handler:
+  error_diagnostics:
+    msg_0001: 清理臨時檔案
+    msg_0002: 清理專案臨時檔案
+    msg_0003: 清理本專案的臨時音訊/影片檔案
+    msg_0004: 更改輸出目錄
+    msg_0005: 將輸出目錄改為空間較大的磁碟
+    msg_0006: 1. 使用 df -h 查看可用磁碟空間
+    msg_0007: 2. 修改輸出路徑參數至空間充足的目錄
+    msg_0008: 3. 重新執行操作
+    msg_0009: 讀取
+    msg_0010: 寫入
+    msg_0011: 修復輸出目錄權限
+    msg_0012: 確保對輸出目錄有寫入權限
+    msg_0013: 驗證檔案完整性
+    msg_0014: 使用 ffprobe 檢查檔案是否真的損壞
+    msg_0015: 嘗試修復檔案
+    msg_0016: 使用 ffmpeg 重新封裝檔案（可能修復輕微損壞）
+    msg_0017: 重新下載或獲取檔案
+    msg_0018: 如果檔案確實損壞，建議重新獲取原始檔案
+    msg_0019: 1. 確認檔案來源
+    msg_0020: 2. 重新下載或複製檔案
+    msg_0021: 3. 驗證檔案完整性（檢查檔案大小、MD5 等）
+    msg_0022: 4. 重新執行操作
+    msg_0023: 檢查檔案串流資訊
+    msg_0024: 確認檔案是否包含音訊軌
+    msg_0025: 使用其他檔案
+    msg_0026: 如果檔案確實沒有音訊，請使用包含音訊的檔案
+    msg_0027: 1. 確認影片檔案是否包含音軌
+    msg_0028: 2. 如果是無聲影片，請先添加音軌
+    msg_0029: 3. 或使用其他包含音訊的影片
+    msg_0030: 轉換為常見格式
+    msg_0031: 將檔案轉換為 H.264/AAC 格式（最廣泛支援）
+    msg_0032: 檢查 ffmpeg 編碼器
+    msg_0033: 查看 ffmpeg 支援的編碼器
+    msg_0034: 可能的相似檔案
+    msg_0035: 1. 確認檔案路徑是否正確
+    msg_0036: 2. 檢查上述相似檔案是否為目標檔案
+    msg_0037: 3. 更正檔案路徑後重試
+    msg_0038: 檢查檔案路徑
+    msg_0039: 確認檔案是否存在於指定位置
+    msg_0040: 安裝中文字型
+    msg_0041: 字幕燒錄需要中文字型支援
+    msg_0042: 指定字型檔案
+    msg_0043: 在字幕樣式中明確指定字型檔案路徑
+    msg_0044: 1. 找到系統中的字型檔案（.ttf 或 .otf）
+    msg_0045: 2. 在字幕參數中指定字型路徑
+    msg_0046: 3. 重新執行燒錄
+    msg_0047: 降低處理品質
+    msg_0048: 使用較低的解析度或位元率
+    msg_0049: 1. 調整輸出解析度（如 1080p → 720p）
+    msg_0050: 2. 降低位元率參數
+    msg_0051: 3. 重新執行操作
+    msg_0052: 分段處理
+    msg_0053: 將大檔案分段處理後再合併
+    msg_0054: 1. 使用 ffmpeg 將影片分段
+    msg_0055: 2. 逐段處理
+    msg_0056: 3. 合併處理後的片段
+    msg_0057: 釋放系統記憶體
+    msg_0058: 關閉其他應用程式以釋放記憶體
+    msg_0059: 1. 關閉不必要的應用程式
+    msg_0060: 2. 清理系統快取
+    msg_0061: 3. 重新執行操作
+    msg_0062: 函數
+    msg_0063: 3. 或升級相關套件到支援該參數的版本
+    msg_0064: Rich Console 不支援 flush 參數
+    msg_0065: 1. 移除 console.print() 中的 flush=True 參數
+    msg_0066: 2. 如需立即輸出，Rich 會自動處理
+    msg_0067: '# 自動搜尋並修復所有 console.print(flush=True)'
+    msg_0068: CodeGemini 配置管理器路徑問題
+    msg_0069: 1. 檢查 CodeGemini/ 目錄是否存在
+    msg_0070: 2. 檢查 CodeGemini/config_manager.py 是否存在
+    msg_0071: 3. 系統將自動嘗試重新載入配置管理器
+    msg_0072: 導入路徑錯誤
+    msg_0073: 這可能是因為版本不相容或 API 變更
+    msg_0074: 1. 檢查相關套件的版本
+    msg_0075: 2. 查看最新的 API 文檔
+    msg_0076: 3. 確認屬性名稱是否正確
+    msg_0077: 4. 考慮更新或降級相關套件
+    msg_0078: API 金鑰無效
+    msg_0079: 請檢查 API 金鑰是否正確設定
+    msg_0080: 1. 確認環境變數 GEMINI_API_KEY 已設定
+    msg_0081: 2. 檢查 API 金鑰是否正確
+    msg_0082: 3. 確認 API 金鑰尚未過期
+    msg_0083: 4. 到 https://makersuite.google.com/app/apikey 重新生成金鑰
+    msg_0084: API 速率限制
+    msg_0085: 請求過於頻繁，需要降低請求頻率
+    msg_0086: 1. 等待一段時間後重試
+    msg_0087: 2. 在請求間加入延遲
+    msg_0088: 3. 考慮升級 API 配額
+    msg_0089: API 配額已用盡
+    msg_0090: 已達到 API 使用限制
+    msg_0091: 1. 檢查配額使用情況
+    msg_0092: 2. 等待配額重置（通常為每分鐘或每日）
+    msg_0093: 3. 考慮升級到付費方案
+    msg_0094: API 伺服器錯誤
+    msg_0095: Gemini API 伺服器暫時無法使用
+    msg_0096: 1. 等待幾分鐘後重試
+    msg_0097: 2. 檢查 Google Cloud 服務狀態
+    msg_0098: 3. 如持續發生，請回報問題
+    msg_0099: '是否要自動修復此問題？(y/n): '
+    msg_0100: 音訊提取
+  error_fix_suggestions:
+    msg_0001: 剛才
+    msg_0002: 剛才
+    msg_0003: 修復檔案
+    msg_0004: 重新編碼
+    msg_0005: JSON 內容
+    msg_0006: 手動修復
+    msg_0007: 剛才
+    msg_0008: 快速複製
+    msg_0009: 標準編碼
+    msg_0010: 快速編碼
+    msg_0011: 未知
+    msg_0012: 斷點續傳下載
+    msg_0013: 可靠傳輸
+    msg_0014: ⚠️  危險操作
+    msg_0015: 修正副檔名
+    msg_0016: 使用 ImageMagick 修復
+    msg_0017: 壓縮圖片（縮小為原尺寸的 1/2）
+    msg_0018: 音訊
+    msg_0019: 批次驗證
+    msg_0020: 高品質轉換
+    msg_0021: 添加讀取權限
+    msg_0022: 添加封面圖片
+    msg_0023: 檢查檔案類型
+    msg_0024: 添加讀取權限
+    msg_0025: 詳細錯誤診斷
+    msg_0026: 重新封裝
+    msg_0027: 檢查影片資訊
+    msg_0028: 壓縮影片
+async_batch_phase5:
+  performance_stats: ''
+error_phase5:
+  retry:
+    attempting: '[#E8C4F0]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗,{{delay:.1f}} 秒後重試...[/#E8C4F0]'
+error_handler_phase5:
+  error_diagnostics:
+    msg_0001: 清理臨時檔案
+    msg_0002: 清理專案臨時檔案
+    msg_0003: 清理本專案的臨時音訊/影片檔案
+    msg_0004: 更改輸出目錄
+    msg_0005: 將輸出目錄改為空間較大的磁碟
+    msg_0006: 1. 使用 df -h 查看可用磁碟空間
+    msg_0007: 2. 修改輸出路徑參數至空間充足的目錄
+    msg_0008: 3. 重新執行操作
+    msg_0009: 讀取
+    msg_0010: 寫入
+    msg_0011: 修復輸出目錄權限
+    msg_0012: 確保對輸出目錄有寫入權限
+    msg_0013: 驗證檔案完整性
+    msg_0014: 使用 ffprobe 檢查檔案是否真的損壞
+    msg_0015: 嘗試修復檔案
+    msg_0016: 使用 ffmpeg 重新封裝檔案（可能修復輕微損壞）
+    msg_0017: 重新下載或獲取檔案
+    msg_0018: 如果檔案確實損壞，建議重新獲取原始檔案
+    msg_0019: 1. 確認檔案來源
+    msg_0020: 2. 重新下載或複製檔案
+    msg_0021: 3. 驗證檔案完整性（檢查檔案大小、MD5 等）
+    msg_0022: 4. 重新執行操作
+    msg_0023: 檢查檔案串流資訊
+    msg_0024: 確認檔案是否包含音訊軌
+    msg_0025: 使用其他檔案
+    msg_0026: 如果檔案確實沒有音訊，請使用包含音訊的檔案
+    msg_0027: 1. 確認影片檔案是否包含音軌
+    msg_0028: 2. 如果是無聲影片，請先添加音軌
+    msg_0029: 3. 或使用其他包含音訊的影片
+    msg_0030: 轉換為常見格式
+    msg_0031: 將檔案轉換為 H.264/AAC 格式（最廣泛支援）
+    msg_0032: 檢查 ffmpeg 編碼器
+    msg_0033: 查看 ffmpeg 支援的編碼器
+    msg_0034: 可能的相似檔案
+    msg_0035: 1. 確認檔案路徑是否正確
+    msg_0036: 2. 檢查上述相似檔案是否為目標檔案
+    msg_0037: 3. 更正檔案路徑後重試
+    msg_0038: 檢查檔案路徑
+    msg_0039: 確認檔案是否存在於指定位置
+    msg_0040: 安裝中文字型
+    msg_0041: 字幕燒錄需要中文字型支援
+    msg_0042: 指定字型檔案
+    msg_0043: 在字幕樣式中明確指定字型檔案路徑
+    msg_0044: 1. 找到系統中的字型檔案（.ttf 或 .otf）
+    msg_0045: 2. 在字幕參數中指定字型路徑
+    msg_0046: 3. 重新執行燒錄
+    msg_0047: 降低處理品質
+    msg_0048: 使用較低的解析度或位元率
+    msg_0049: 1. 調整輸出解析度（如 1080p → 720p）
+    msg_0050: 2. 降低位元率參數
+    msg_0051: 3. 重新執行操作
+    msg_0052: 分段處理
+    msg_0053: 將大檔案分段處理後再合併
+    msg_0054: 1. 使用 ffmpeg 將影片分段
+    msg_0055: 2. 逐段處理
+    msg_0056: 3. 合併處理後的片段
+    msg_0057: 釋放系統記憶體
+    msg_0058: 關閉其他應用程式以釋放記憶體
+    msg_0059: 1. 關閉不必要的應用程式
+    msg_0060: 2. 清理系統快取
+    msg_0061: 3. 重新執行操作
+    msg_0062: 函數
+    msg_0063: 3. 或升級相關套件到支援該參數的版本
+    msg_0064: Rich Console 不支援 flush 參數
+    msg_0065: 1. 移除 console.print() 中的 flush=True 參數
+    msg_0066: 2. 如需立即輸出，Rich 會自動處理
+    msg_0067: '# 自動搜尋並修復所有 console.print(flush=True)'
+    msg_0068: CodeGemini 配置管理器路徑問題
+    msg_0069: 1. 檢查 CodeGemini/ 目錄是否存在
+    msg_0070: 2. 檢查 CodeGemini/config_manager.py 是否存在
+    msg_0071: 3. 系統將自動嘗試重新載入配置管理器
+    msg_0072: 導入路徑錯誤
+    msg_0073: 這可能是因為版本不相容或 API 變更
+    msg_0074: 1. 檢查相關套件的版本
+    msg_0075: 2. 查看最新的 API 文檔
+    msg_0076: 3. 確認屬性名稱是否正確
+    msg_0077: 4. 考慮更新或降級相關套件
+    msg_0078: API 金鑰無效
+    msg_0079: 請檢查 API 金鑰是否正確設定
+    msg_0080: 1. 確認環境變數 GEMINI_API_KEY 已設定
+    msg_0081: 2. 檢查 API 金鑰是否正確
+    msg_0082: 3. 確認 API 金鑰尚未過期
+    msg_0083: 4. 到 https://makersuite.google.com/app/apikey 重新生成金鑰
+    msg_0084: API 速率限制
+    msg_0085: 請求過於頻繁，需要降低請求頻率
+    msg_0086: 1. 等待一段時間後重試
+    msg_0087: 2. 在請求間加入延遲
+    msg_0088: 3. 考慮升級 API 配額
+    msg_0089: API 配額已用盡
+    msg_0090: 已達到 API 使用限制
+    msg_0091: 1. 檢查配額使用情況
+    msg_0092: 2. 等待配額重置（通常為每分鐘或每日）
+    msg_0093: 3. 考慮升級到付費方案
+    msg_0094: API 伺服器錯誤
+    msg_0095: Gemini API 伺服器暫時無法使用
+    msg_0096: 1. 等待幾分鐘後重試
+    msg_0097: 2. 檢查 Google Cloud 服務狀態
+    msg_0098: 3. 如持續發生，請回報問題
+    msg_0099: '是否要自動修復此問題？(y/n): '
+    msg_0100: 音訊提取
+  error_fix_suggestions:
+    msg_0001: 剛才
+    msg_0002: 剛才
+    msg_0003: 修復檔案
+    msg_0004: 重新編碼
+    msg_0005: JSON 內容
+    msg_0006: 手動修復
+    msg_0007: 剛才
+    msg_0008: 快速複製
+    msg_0009: 標準編碼
+    msg_0010: 快速編碼
+    msg_0011: 未知
+    msg_0012: 斷點續傳下載
+    msg_0013: 可靠傳輸
+    msg_0014: ⚠️  危險操作
+    msg_0015: 修正副檔名
+    msg_0016: 使用 ImageMagick 修復
+    msg_0017: 壓縮圖片（縮小為原尺寸的 1/2）
+    msg_0018: 音訊
+    msg_0019: 批次驗證
+    msg_0020: 高品質轉換
+    msg_0021: 添加讀取權限
+    msg_0022: 添加封面圖片
+    msg_0023: 檢查檔案類型
+    msg_0024: 添加讀取權限
+    msg_0025: 詳細錯誤診斷
+    msg_0026: 重新封裝
+    msg_0027: 檢查影片資訊
+    msg_0028: 壓縮影片
+flow_phase5:
+  engine:
+    segment_prompt_template: ''
+command:
+  unknown: '❌ 알 수 없는 명령어: /{slash_cmd}'
+  did_you_mean: 💡 다음 명령어 중 하나를 의미하셨나요?
+  help_hint: 💡 사용 가능한 명령어를 보려면 [bold]/[/bold] 또는 [bold]/help[/bold]를 입력하세요
+debug:
+  system_diagnostic: 🏥 ChatGemini 시스템 진단
+  core_dependencies: 핵심 종속성 확인：
+  module_status: 모듈 상태：
+  pricing_system: 가격 시스템
+  cache_management: 캐시 관리
+  conversation_history: 대화 기록
+  file_management: 파일 관리
+  translation_engine: 번역 엔진
+  video_preprocessor: 비디오 전처리
+  video_compositor: 비디오 합성
+  environment_config: 환경 구성：
+  api_key_configured: 구성됨
+  api_key_not_configured: 구성되지 않음
+  system_resources: 시스템 리소스：
+  diagnostic_complete: 💡 진단 완료. 오류가 발생한 경우 관련 설정을 확인하세요.
+  python_version: 'Python 버전: {version}'
+  virtual_environment: '가상 환경: {path}'
+  not_installed: 설치되지 않음
+  available_disk_space: '사용 가능한 디스크 공간: {space} GB'
+  cannot_check_disk_space: '디스크 공간을 확인할 수 없습니다: {error}'
+cli:
+  management_error: '✗ CLI 관리 오류: {error}'
+language_menu:
+  title: 🌍 언어 선택 / Language Selection
+  current: 현재
+  current_subtitle: '현재: {flag} {native} ({code})'
+  prompt: 언어 선택 / Select language
+  cancel: 취소
+  cancelled: ✖ 취소됨 / Cancelled
+  already_using: ℹ️  이미 {native} 사용 중 / Already using {native}
+  switched: '✅ 언어가 전환되었습니다: {flag} {native}'
+  settings_saved: 💾 설정이 .env에 저장되었습니다 / Settings saved to .env
+  switch_failed: ❌ 전환 실패 / Switch failed
+  invalid_choice: ❌ 잘못된 선택입니다. 0-{max}를 입력하세요 / Invalid choice, please enter 0-{max}
+  enter_number: ❌ 숫자를 입력하세요 / Please enter a number
+  column_option: 옵션
+  column_flag: 깃발
+  column_language: 언어
+  column_native_name: 원어 이름
+  column_status: 상태
+  tips_title: '💡 팁 / Tips:'
+  tip_quick_switch: '• 빠른 전환: 채팅에서 ''lang'' 또는 ''language'' 입력'
+  tip_cli_switch: • gemini_lang.py --set <code>로 직접 전환
+imagen:
+  menu_title: '
+
+    [#DDA0DD]功能選擇：[/#DDA0DD]'
+  menu_generate: '  [1] 生成圖片（Text-to-Image）'
+  menu_batch: '  [2] 批次生成圖片（Batch Generation - 並行處理）'
+  menu_edit: '  [3] 編輯圖片（Image Editing）'
+  menu_upscale: '  [4] 放大圖片（Upscaling）'
+  menu_exit: '  [0] 退出
+
+    '
+recovery:
+  checkpoint_saved: '[#DDA0DD]💾 已保存恢復檢查點：{name}[/#DDA0DD]'
+  checkpoint_loaded: '[#DDA0DD]📂 已載入恢復檢查點：{name}[/#DDA0DD]'
+  checkpoint_load_failed: '[dim magenta]載入檢查點失敗：{error}[/red]'
+  checkpoint_deleted: '[#DA70D6]🗑️  已刪除恢復檢查點：{name}[/green]'
+  checkpoint_read_warning: '[#DDA0DD]警告：無法讀取檢查點 {name}: {error}[/#DDA0DD]'
+  no_checkpoints: 沒有可恢復的檢查點
+  checkpoints_title: 可恢復的檢查點
+  checkpoints_cleaned: '[#DA70D6]已清理 {count} 個舊的恢復檢查點[/green]'
+test:
+  key: 測試文本
+video:
+  compositor.base_video_not_found: 找不到影片檔案：{path}
+  compositor.commands: '
+
+    命令：'
+  compositor.concat_command: concat <video1> <video2>  - 合併影片
+  compositor.concat_done: '
+
+    [#DA70D6]✓ 合併完成：{output}[/green]'
+  compositor.empty_video_list: 影片路徑列表為空
+  compositor.ffmpeg_not_found: 錯誤：未找到 ffmpeg
+  compositor.ffmpeg_not_installed: ffmpeg 未安裝
+  compositor.file_not_found: 找不到影片檔案：{path}
+  compositor.install_ffmpeg: 請安裝 ffmpeg：brew install ffmpeg (macOS)
+  compositor.merge_complete: ✓ 合併完成
+  compositor.merge_failed: ffmpeg 合併失敗：{error}
+  compositor.merged_with_transition: '[#DA70D6]✓ 影片已合併（含過渡效果）：{path}[/green]'
+  compositor.merging: 合併中...
+  compositor.merging_videos: "\n 合併影片..."
+  compositor.new_segment: '  新片段：{name}'
+  compositor.new_segment_not_found: 找不到新片段檔案：{path}
+  compositor.no_lossy_encoding: 系統禁止有損編碼以保持影片品質
+  compositor.no_lossy_policy: 系統禁止有損編碼以保持影片原始品質
+  compositor.original_video: '  原始影片：{name}'
+  compositor.processing_complete: ✓ 處理完成
+  compositor.processing_failed: ffmpeg 處理失敗：{error}
+  compositor.processing_transition: 處理過渡效果...
+  compositor.replace_command: replace <base> <new_segment> <start_time> - 替換片段
+  compositor.replace_done: '
+
+    [#DA70D6]✓ 替換完成：{output}[/green]'
+  compositor.replace_needs_args: 錯誤：replace 需要 3 個參數
+  compositor.replace_position: '  替換位置：{time}s'
+  compositor.replacing_segment: '
+
+    ✂️  替換影片片段...'
+  compositor.segment_count: '  片段數量：{count}'
+  compositor.segment_duration: '  新片段時長：{duration:.2f}s'
+  compositor.transition_disabled: '
+
+    ✗ 錯誤：過渡效果已禁用'
+  compositor.transition_effect: '  過渡效果：{transition}'
+  compositor.transition_not_allowed: 禁止使用過渡效果（{transition}）。系統僅支援無損合併（transition=""）
+  compositor.transition_quality_loss: 過渡效果需要重新編碼影片，會造成品質損失
+  compositor.transition_warning: 注意：過渡效果需要重新編碼，耗時較長
+  compositor.transitions_disabled: '
+
+    ✗ 錯誤：過渡效果功能已禁用'
+  compositor.transitions_function_disabled: add_transitions() 功能已禁用。此功能需要有損編碼（libx264），與系統「禁止有損壓縮」政策衝突。
+  compositor.transitions_need_encoding: 過渡效果需要重新編碼影片（libx264），會造成品質損失
+  compositor.unknown_command: '[dim magenta]未知命令：{command}[/red]'
+  compositor.usage: 用法：
+  compositor.usage_command: python gemini_video_compositor.py <command> <args>
+  compositor.video_merged: '[#DA70D6]✓ 影片已合併：{path}[/green]'
+async_batch_processor:
+  msg.任務失敗: '[dim magenta]❌ 任務失敗：{task.task_id} - {e}[/red]'
+  msg.任務完成: '[#DA70D6]✅ 任務完成：{task.task_id}[/green]'
+  msg.使用異步批次處理器優: '[dim]✓ 使用異步批次處理器（優化版）[/dim]'
+  msg.使用異步批次處理器優_2: '[dim]✓ 使用異步批次處理器（優化版）[/dim]'
+  msg.使用異步處理模式: '[dim]使用異步處理模式（asyncio）[/dim]
+
+    '
+  msg.使用異步處理模式_2: '[dim]使用異步處理模式（asyncio）[/dim]
+
+    '
+  msg.保存任務失敗: '[dim magenta]保存任務失敗：{e}[/red]'
+  msg.已取消任務: '[#DA70D6]✓ 已取消任務：{task_id}[/green]'
+  msg.已批次添加個任務: '[#DA70D6]✓ 已批次添加 {len(task_ids)} 個任務[/green]'
+  msg.已添加任務: '[#DA70D6]✓ 已添加任務：{task_id}[/green]'
+  msg.已清理個已完成的任務: '[#DA70D6]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]'
+  msg.批次處理完成: '
+
+    [bold green]✅ 批次處理完成！[/bold green]'
+  msg.未找到任務: '[dim magenta]未找到任務：{task_id}[/red]'
+  msg.沒有待處理的任務: '[#DDA0DD]沒有待處理的任務[/#DDA0DD]'
+  msg.沒有待處理的任務_2: '[#DDA0DD]沒有待處理的任務[/#DDA0DD]'
+  msg.沒有符合條件的任務: '[#DDA0DD]沒有符合條件的任務[/#DDA0DD]'
+  msg.沒有符合條件的任務_2: '[#DDA0DD]沒有符合條件的任務[/#DDA0DD]'
+  msg.無法取消正在執行的任: '[#DDA0DD]無法取消正在執行的任務：{task_id}[/#DDA0DD]'
+  msg.統計: '
+
+    統計：{stats}'
+  msg.總耗時平均: '[dim]總耗時：{overall_time:.2f}s | 平均：{self.stats['
+  msg.處理中: '[dim]處理中：{prompt[:30]}...[/dim]'
+  msg.處理中_2: '[dim]處理中：{prompt[:30]}...[/dim]'
+  msg.註冊任務處理器: '[#DA70D6]✓ 註冊任務處理器：{task_type} ({handler_type})[/green]'
+  msg.載入了個任務: '[#DDA0DD]📂 載入了 {len(self.tasks)} 個任務[/#DDA0DD]'
+  msg.載入任務失敗: '[#DDA0DD]載入任務失敗：{e}[/#DDA0DD]'
+  msg.重試任務: '[#DDA0DD]🔄 重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/#DDA0DD]'
+  msg.開始執行任務: '
+
+    [#DDA0DD]▶️  開始執行任務：{task.task_id}[/#DDA0DD]'
+  msg.開始批次處理最大並行: '
+
+    [bold magenta]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold magenta]'
+  msg.開始異步批次處理測試: 開始異步批次處理測試
+audio_processor:
+  msg.並行數: '  並行數：{max_workers}
+
+    '
+  msg.並行數_2: '  並行數：{max_workers}
+
+    '
+  msg.分塊完成個塊: '[#DA70D6]✓ 分塊完成：{len(chunk_files)} 個塊[/green]'
+  msg.分塊數塊: '  分塊數：{num_chunks} 塊
+
+    '
+  msg.分塊處理大檔案: '
+
+    [#DDA0DD]🔧 分塊處理大檔案...[/#DDA0DD]'
+  msg.合併中: '
+
+    [#DDA0DD]合併中...[/#DDA0DD]'
+  msg.合併中_2: '
+
+    [#DDA0DD]合併中...[/#DDA0DD]'
+  msg.合併完成: '[#DA70D6]✓ 合併完成：{output_path}[/green]'
+  msg.合併音訊: '
+
+    [#DDA0DD]🎵 合併音訊...[/#DDA0DD]'
+  msg.命令: '
+
+    [#DDA0DD]命令：[/#DDA0DD]'
+  msg.命令_2: '
+
+    [#DDA0DD]命令：[/#DDA0DD]'
+  msg.命令參數: '  python gemini_audio_processor.py <命令> <參數>'
+  msg.命令參數_2: '  python gemini_audio_processor.py <命令> <參數>'
+  msg.塊大小秒: '  塊大小：{chunk_duration} 秒
+
+    '
+  msg.失敗個檔案: '[dim magenta]✗ 失敗：{len(failed)} 個檔案[/red]'
+  msg.失敗個檔案_2: '[dim magenta]✗ 失敗：{len(failed)} 個檔案[/red]'
+  msg.完成: '
+
+    [#DA70D6]✓ 完成：{output}[/green]'
+  msg.完成_2: '
+
+    [#DA70D6]✓ 完成：{output}[/green]'
+  msg.完成_3: '
+
+    [#DA70D6]✓ 完成：{output}[/green]'
+  msg.完成_4: '
+
+    [#DA70D6]✓ 完成：{output}[/green]'
+  msg.完成_5: '
+
+    [#DA70D6]✓ 完成：{output}[/green]'
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{alternative}[/green]
+
+    '
+  msg.影片: '  影片：{os.path.basename(video_path)}'
+  msg.影片_2: '  影片：{os.path.basename(video_path)}'
+  msg.影片_3: '  影片：{os.path.basename(video_path)}'
+  msg.影片已合併: '[#DA70D6]✓ 影片已合併：{output_path}[/green]'
+  msg.影片路徑提取音訊: '  extract <影片路徑>                     - 提取音訊'
+  msg.影片路徑提取音訊_2: '  extract <影片路徑>                     - 提取音訊'
+  msg.影片路徑音樂路徑音量: '  bgm <影片路徑> <音樂路徑> [音量]        - 添加背景音樂'
+  msg.影片路徑音樂路徑音量_2: '  bgm <影片路徑> <音樂路徑> [音量]        - 添加背景音樂'
+  msg.影片路徑音訊路徑合併: '  merge <影片路徑> <音訊路徑>             - 合併音訊（替換）'
+  msg.影片路徑音訊路徑合併_2: '  merge <影片路徑> <音訊路徑>             - 合併音訊（替換）'
+  msg.成功個檔案: '
+
+    [#DA70D6]✓ 成功：{len(results)} 個檔案[/green]'
+  msg.成功個檔案_2: '
+
+    [#DA70D6]✓ 成功：{len(results)} 個檔案[/green]'
+  msg.批次提取音訊個檔案: '
+
+    [#DDA0DD]🎵 批次提取音訊（{len(video_paths)} 個檔案）[/#DDA0DD]'
+  msg.批次調整音量個檔案: '
+
+    [#DDA0DD]🔊 批次調整音量（{len(file_paths)} 個檔案）[/#DDA0DD]'
+  msg.提取音訊: '
+
+    [#DDA0DD]🎵 提取音訊...[/#DDA0DD]'
+  msg.未知命令: '[dim magenta]未知命令：{command}[/red]'
+  msg.格式: '  格式：{format.upper()}'
+  msg.模式: '  模式：{'
+  msg.檔案: '  檔案：{os.path.basename(audio_or_video_path)}'
+  msg.檔案_2: '  檔案：{os.path.basename(audio_or_video_path)}'
+  msg.檔案_3: '  檔案：{os.path.basename(audio_path)}'
+  msg.檔案路徑淡入秒數淡出: '  fade <檔案路徑> [淡入秒數] [淡出秒數]   - 淡入淡出'
+  msg.檔案路徑淡入秒數淡出_2: '  fade <檔案路徑> [淡入秒數] [淡出秒數]   - 淡入淡出'
+  msg.檔案路徑音量倍數調整: '  volume <檔案路徑> <音量倍數>            - 調整音量'
+  msg.檔案路徑音量倍數調整_2: '  volume <檔案路徑> <音量倍數>            - 調整音量'
+  msg.淡入淡出已添加: '[#DA70D6]✓ 淡入淡出已添加：{output_path}[/green]'
+  msg.淡入淡出秒: '  淡入淡出：{fade_duration} 秒'
+  msg.淡入秒: '  淡入：{fade_in} 秒'
+  msg.淡出秒: '  淡出：{fade_out} 秒'
+  msg.添加淡入淡出: '
+
+    [#DDA0DD]🎵 添加淡入淡出...[/#DDA0DD]'
+  msg.添加背景音樂: '
+
+    [#DDA0DD]🎵 添加背景音樂...[/#DDA0DD]'
+  msg.用法: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.用法_2: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.總時長秒: '  總時長：{total_duration:.1f} 秒'
+  msg.背景音樂已添加: '[#DA70D6]✓ 背景音樂已添加：{output_path}[/green]'
+  msg.處理完成: '[#DA70D6]✓ 處理完成[/green]'
+  msg.調整音量: '
+
+    [#DDA0DD]🔊 調整音量...[/#DDA0DD]'
+  msg.請安裝: '[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'
+  msg.請安裝_2: '[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'
+  msg.警告無法獲取檔案時長: '[#DDA0DD]警告：無法獲取檔案時長 - {e}[/#DDA0DD]'
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤未找到: '[dim magenta]錯誤：未找到 ffmpeg[/red]'
+  msg.錯誤未找到_2: '[dim magenta]錯誤：未找到 ffmpeg[/red]'
+  msg.錯誤需要提供影片路徑: '[dim magenta]錯誤：需要提供影片路徑[/red]'
+  msg.錯誤需要提供影片路徑_2: '[dim magenta]錯誤：需要提供影片路徑[/red]'
+  msg.錯誤需要提供影片路徑_3: '[dim magenta]錯誤：需要提供影片路徑和音訊路徑[/red]'
+  msg.錯誤需要提供影片路徑_4: '[dim magenta]錯誤：需要提供影片路徑和音訊路徑[/red]'
+  msg.錯誤需要提供影片路徑_5: '[dim magenta]錯誤：需要提供影片路徑和音樂路徑[/red]'
+  msg.錯誤需要提供影片路徑_6: '[dim magenta]錯誤：需要提供影片路徑和音樂路徑[/red]'
+  msg.錯誤需要提供檔案路徑: '[dim magenta]錯誤：需要提供檔案路徑和音量倍數[/red]'
+  msg.錯誤需要提供檔案路徑_2: '[dim magenta]錯誤：需要提供檔案路徑和音量倍數[/red]'
+  msg.錯誤需要提供檔案路徑_3: '[dim magenta]錯誤：需要提供檔案路徑[/red]'
+  msg.錯誤需要提供檔案路徑_4: '[dim magenta]錯誤：需要提供檔案路徑[/red]'
+  msg.音樂: '  音樂：{os.path.basename(music_path)}'
+  msg.音樂音量: '  音樂音量：{music_volume * 100:.0f}%'
+  msg.音訊: '  音訊：{os.path.basename(audio_path)}'
+  msg.音訊已提取: '[#DA70D6]✓ 音訊已提取：{output_path}[/green]'
+  msg.音量: '  音量：{volume * 100:.0f}%'
+  msg.音量_2: '  音量：{volume * 100:.0f}%'
+  msg.音量已調整: '[#DA70D6]✓ 音量已調整：{output_path}[/green]'
+batch_processor:
+  msg.任務失敗: '[dim magenta]❌ 任務失敗：{task.task_id} - {e}[/red]'
+  msg.任務完成: '[#DA70D6]✅ 任務完成：{task.task_id}[/green]'
+  msg.保存任務失敗: '[dim magenta]保存任務失敗：{e}[/red]'
+  msg.已取消任務: '[#DA70D6]✓ 已取消任務：{task_id}[/green]'
+  msg.已批次添加個任務: '[#DA70D6]✓ 已批次添加 {len(task_ids)} 個任務[/green]'
+  msg.已添加任務: '[#DA70D6]✓ 已添加任務：{task_id}[/green]'
+  msg.已清理個已完成的任務: '[#DA70D6]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]'
+  msg.批次處理完成: '
+
+    [bold green]✅ 批次處理完成！[/bold green]'
+  msg.未找到任務: '[dim magenta]未找到任務：{task_id}[/red]'
+  msg.沒有待處理的任務: '[#DDA0DD]沒有待處理的任務[/#DDA0DD]'
+  msg.沒有待處理的任務_2: '[#DDA0DD]沒有待處理的任務[/#DDA0DD]'
+  msg.沒有符合條件的任務: '[#DDA0DD]沒有符合條件的任務[/#DDA0DD]'
+  msg.沒有符合條件的任務_2: '[#DDA0DD]沒有符合條件的任務[/#DDA0DD]'
+  msg.無法取消正在執行的任: '[#DDA0DD]無法取消正在執行的任務：{task_id}[/#DDA0DD]'
+  msg.生成影片秒: 生成影片：{prompt[:30]}... ({duration}秒)
+  msg.註冊任務處理器: '[#DA70D6]✓ 註冊任務處理器：{task_type}[/green]'
+  msg.載入了個任務: '[#DDA0DD]📂 載入了 {len(self.tasks)} 個任務[/#DDA0DD]'
+  msg.載入任務失敗: '[#DDA0DD]載入任務失敗：{e}[/#DDA0DD]'
+  msg.重試任務: '[#DDA0DD]🔄 重試任務 ({task.retry_count}/{task.max_retries})：{task.task_id}[/#DDA0DD]'
+  msg.開始執行任務: '
+
+    [#DDA0DD]▶️  開始執行任務：{task.task_id}[/#DDA0DD]'
+  msg.開始批次處理最大並行: '
+
+    [bold magenta]🚀 開始批次處理（最大並行：{self.max_concurrent}）[/bold magenta]
+
+    '
+cache_manager:
+  msg.使用快取可節省最高的: '💰 [bold]使用快取可節省最高 90% 的成本！[/bold]
+
+    '
+  msg.使用快取可節省最高的_2: '💰 [bold]使用快取可節省最高 90% 的成本！[/bold]
+
+    '
+  msg.使用快取查詢: '  使用快取查詢：'
+  msg.使用快取查詢_2: '  使用快取查詢：'
+  msg.使用方式: 使用方式：
+  msg.使用方式_2: 使用方式：
+  msg.列出快取: '  列出快取：'
+  msg.列出快取_2: '  列出快取：'
+  msg.列出快取失敗: '[dim magenta]列出快取失敗：{e}[/red]'
+  msg.刪除快取: '  刪除快取：'
+  msg.刪除快取_2: '  刪除快取：'
+  msg.刪除快取失敗: '[dim magenta]✗ 刪除快取失敗：{e}[/red]'
+  msg.已刪除快取: '[#DA70D6]✓ 已刪除快取：{cache_name_or_key}[/green]'
+  msg.建立快取: '  建立快取：'
+  msg.建立快取_2: '  建立快取：'
+  msg.管理器: '
+
+    [bold magenta]Gemini Context Caching 管理器[/bold magenta]
+
+    '
+  msg.管理器_2: '
+
+    [bold magenta]Gemini Context Caching 管理器[/bold magenta]
+
+    '
+  msg.計算節省: '  計算節省：'
+  msg.計算節省_2: '  計算節省：'
+  msg.錯誤請提供: '[dim magenta]錯誤：請提供 --content[/red]'
+  msg.錯誤請提供_2: '[dim magenta]錯誤：請提供 --content[/red]'
+  msg.錯誤請提供_3: '[dim magenta]錯誤：請提供 --cache[/red]'
+  msg.錯誤請提供_4: '[dim magenta]錯誤：請提供 --cache[/red]'
+  msg.錯誤請提供_5: '[dim magenta]錯誤：請提供 --tokens[/red]'
+  msg.錯誤請提供_6: '[dim magenta]錯誤：請提供 --tokens[/red]'
+  msg.錯誤請提供和: '[dim magenta]錯誤：請提供 --cache 和 --question[/red]'
+  msg.錯誤請提供和_2: '[dim magenta]錯誤：請提供 --cache 和 --question[/red]'
+config_ui:
+  msg.一般使用者可直接按使: '[dim]一般使用者可直接按 Enter 使用預設值[/dim]
+
+    '
+  msg.一般使用者可直接按使_2: '[dim]一般使用者可直接按 Enter 使用預設值[/dim]
+
+    '
+  msg.上傳失敗: '⚠️  上傳失敗 {file_path}: {e}'
+  msg.不支援停用思考將使用: ⚠️  {model_name} 不支援停用思考，將使用動態模式
+  msg.不支援停用思考已調整: ⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens
+  msg.不支援停用思考已調整_2: ⚠️  {model_name} 不支援停用思考（0 tokens），已調整為最小值 {MIN_TOKENS} tokens
+  msg.使用最佳預設值: '[#DA70D6]✓ 使用最佳預設值[/green]
+
+    '
+  msg.使用最佳預設值_2: '[#DA70D6]✓ 使用最佳預設值[/green]
+
+    '
+  msg.切換思考過程顯示: '  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'
+  msg.切換思考過程顯示_2: '  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'
+  msg.包含模組啟用停用匯率: '[dim]包含：模組啟用/停用、匯率、快取門檻等參數[/dim]
+
+    '
+  msg.包含模組啟用停用匯率_2: '[dim]包含：模組啟用/停用、匯率、快取門檻等參數[/dim]
+
+    '
+  msg.回應至少為已調整: ⚠️  回應 tokens 至少為 1，已調整
+  msg.回應超過上限已調整為: ⚠️  回應 tokens 超過上限 8192，已調整為最大值
+  msg.將使用預設配置繼續執: '[#DDA0DD]⚠️  將使用預設配置繼續執行[/#DDA0DD]
+
+    '
+  msg.將使用預設配置繼續執_2: '[#DDA0DD]⚠️  將使用預設配置繼續執行[/#DDA0DD]
+
+    '
+  msg.尚未產生思考過程: '
+
+    [#DDA0DD]💭 尚未產生思考過程[/#DDA0DD]
+
+    '
+  msg.尚未產生思考過程_2: '
+
+    [#DDA0DD]💭 尚未產生思考過程[/#DDA0DD]
+
+    '
+  msg.已上傳媒體檔: '✅ 已上傳媒體檔: {file_path}'
+  msg.已讀取文字檔: '✅ 已讀取文字檔: {file_path}'
+  msg.已讀取文字檔_2: '✅ 已讀取文字檔: {file_path} (latin-1)'
+  msg.已讀取檔案: '✅ 已讀取檔案: {file_path}'
+  msg.已選擇: '[#DA70D6]✓ 已選擇: {model_name}[/green]'
+  msg.建立配置檔案失敗: '
+
+    [bold red]❌ 建立配置檔案失敗：{e}[/bold red]'
+  msg.思考過程已隱藏: '
+
+    [#DDA0DD]💭 思考過程已隱藏[/#DDA0DD]
+
+    '
+  msg.思考過程已隱藏_2: '
+
+    [#DDA0DD]💭 思考過程已隱藏[/#DDA0DD]
+
+    '
+  msg.思考過程翻譯: '
+
+    [#DA70D6]━━━ 🧠 思考過程（翻譯） ━━━[/#DA70D6]'
+  msg.思考過程翻譯_2: '
+
+    [#DA70D6]━━━ 🧠 思考過程（翻譯） ━━━[/#DA70D6]'
+  msg.思考過程雙語對照: '
+
+    [#DA70D6]━━━ 🧠 思考過程（雙語對照） ━━━[/#DA70D6]'
+  msg.思考過程雙語對照_2: '
+
+    [#DA70D6]━━━ 🧠 思考過程（雙語對照） ━━━[/#DA70D6]'
+  msg.思考預算低於最小值已: ⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整
+  msg.思考預算低於最小值已_2: ⚠️  思考預算低於最小值 {MIN_TOKENS} tokens，已調整
+  msg.思考預算超過上限已調: ⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值
+  msg.思考預算超過上限已調_2: ⚠️  思考預算超過上限 {MAX_TOKENS:,} tokens，已調整為最大值
+  msg.您可以隨時編輯此檔案: '[dim]您可以隨時編輯此檔案來調整配置[/dim]
+
+    '
+  msg.您可以隨時編輯此檔案_2: '[dim]您可以隨時編輯此檔案來調整配置[/dim]
+
+    '
+  msg.找不到檔案: '⚠️  找不到檔案: {file_path}'
+  msg.指定思考與回應: '  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens'
+  msg.指定思考與回應_2: '  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens'
+  msg.按接受預設值輸入來啟: '[dim]按 Enter 接受預設值，輸入 y/n 來啟用/停用[/dim]
+
+    '
+  msg.按接受預設值輸入來啟_2: '[dim]按 Enter 接受預設值，輸入 y/n 來啟用/停用[/dim]
+
+    '
+  msg.提示翻譯功能可能未啟: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示翻譯功能可能未啟_2: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示翻譯功能可能未啟_3: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.提示翻譯功能可能未啟_4: '[dim magenta]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim magenta]'
+  msg.插入新行多行輸入: '  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'
+  msg.插入新行多行輸入_2: '  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'
+  msg.未知檔案類型嘗試當文: ⚠️  未知檔案類型 {ext}，嘗試當文字檔讀取...
+  msg.模組配置: '
+
+    [bold magenta]模組配置[/bold magenta]'
+  msg.模組配置_2: '
+
+    [bold magenta]模組配置[/bold magenta]'
+  msg.檔案管理器未啟用無法: ⚠️  檔案管理器未啟用，無法上傳 {file_path}
+  msg.步驟選擇預設模型涉及: '
+
+    [bold magenta]步驟 1: 選擇預設模型（涉及費用，請確認）[/bold magenta]'
+  msg.步驟選擇預設模型涉及_2: '
+
+    [bold magenta]步驟 1: 選擇預設模型（涉及費用，請確認）[/bold magenta]'
+  msg.瀏覽歷史記錄: '  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'
+  msg.瀏覽歷史記錄_2: '  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'
+  msg.無效的選項請輸入: '[dim magenta]❌ 無效的選項，請輸入 1-4[/red]'
+  msg.無效的選項請輸入_2: '[dim magenta]❌ 無效的選項，請輸入 1-4[/red]'
+  msg.無效輸入使用預設值: '    [#DDA0DD]⚠️  無效輸入，使用預設值: {'
+  msg.無法處理檔案: '⚠️  無法處理檔案 {file_path}: {e}'
+  msg.無法讀取檔案: '⚠️  無法讀取檔案 {file_path}: {e}'
+  msg.無法讀取檔案_2: '⚠️  無法讀取檔案 {file_path}: {e}'
+  msg.繁體中文: '[bold bright_magenta]🇹🇼 繁體中文：[/bold bright_magenta]'
+  msg.繁體中文_2: '[bold bright_magenta]🇹🇼 繁體中文：[/bold bright_magenta]'
+  msg.自動補全指令與語法: '  • [bold]Tab[/bold] - 自動補全指令與語法'
+  msg.自動補全指令與語法_2: '  • [bold]Tab[/bold] - 自動補全指令與語法'
+  msg.英文原文: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.英文原文_2: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.英文原文_3: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.英文原文_4: '[bold bright_magenta]🇬🇧 英文原文：[/bold bright_magenta]'
+  msg.輸入提示: '
+
+    [#DA70D6]💡 輸入提示：[/#DA70D6]'
+  msg.輸入提示_2: '
+
+    [#DA70D6]💡 輸入提示：[/#DA70D6]'
+  msg.進階參數: '
+
+    [bold magenta]進階參數[/bold magenta]'
+  msg.進階參數_2: '
+
+    [bold magenta]進階參數[/bold magenta]'
+  msg.進階設定可選: '[bold magenta]進階設定（可選）[/bold magenta]'
+  msg.進階設定可選_2: '[bold magenta]進階設定（可選）[/bold magenta]'
+  msg.進階設定完成: '
+
+    [#DA70D6]✓ 進階設定完成[/green]'
+  msg.進階設定完成_2: '
+
+    [#DA70D6]✓ 進階設定完成[/green]'
+  msg.配置檔案已成功建立: '
+
+    [bold green]✅ 配置檔案已成功建立：{self.config_path}[/bold green]'
+  msg.配置預覽: '
+
+    [bold magenta]配置預覽[/bold magenta]'
+  msg.配置預覽_2: '
+
+    [bold magenta]配置預覽[/bold magenta]'
+file_manager:
+  msg.上傳失敗: '⚠️  上傳失敗 {file_path}: {e}'
+  msg.已上傳媒體檔: '✅ 已上傳媒體檔: {file_path}'
+  msg.已讀取文字檔: '✅ 已讀取文字檔: {file_path}'
+  msg.已讀取文字檔_2: '✅ 已讀取文字檔: {file_path} (latin-1)'
+  msg.已讀取檔案: '✅ 已讀取檔案: {file_path}'
+  msg.找不到檔案: '⚠️  找不到檔案: {file_path}'
+  msg.找不到檔案_2: '⚠️  找不到檔案: {file_path}'
+  msg.未知檔案類型嘗試當文: ⚠️  未知檔案類型 {ext}，嘗試當文字檔讀取...
+  msg.檔案管理器未啟用無法: ⚠️  檔案管理器未啟用，無法上傳 {file_path}
+  msg.無法處理檔案: '⚠️  無法處理檔案 {file_path}: {e}'
+  msg.無法讀取檔案: '⚠️  無法讀取檔案 {file_path}: {e}'
+  msg.無法讀取檔案_2: '⚠️  無法讀取檔案 {file_path}: {e}'
+flow_engine:
+  msg.使用備案分段策略: '[#DDA0DD]使用備案分段策略...[/#DDA0DD]'
+  msg.使用備案分段策略_2: '[#DDA0DD]使用備案分段策略...[/#DDA0DD]'
+  msg.使用備案分段策略繼續: '[#DDA0DD]使用備案分段策略繼續執行...[/#DDA0DD]'
+  msg.使用備案分段策略繼續_2: '[#DDA0DD]使用備案分段策略繼續執行...[/#DDA0DD]'
+  msg.儲存路徑: '  儲存路徑：{final_video}'
+  msg.分析使用者描述: '
+
+    [#DDA0DD]🤖 分析使用者描述...[/#DDA0DD]'
+  msg.分段計畫: '  Gemini 分段計畫：{estimate['
+  msg.分段計畫生成成本: '[dim]💰 分段計畫生成成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]'
+  msg.合併個片段: '
+
+    [#DDA0DD]🎞️  合併 {len(segment_paths)} 個片段...[/#DDA0DD]'
+  msg.執行飛行前檢查: '
+
+    [#DDA0DD]🔍 執行飛行前檢查...[/#DDA0DD]'
+  msg.執行飛行前檢查_2: '
+
+    [#DDA0DD]🔍 執行飛行前檢查...[/#DDA0DD]'
+  msg.實際時長: '  實際時長：{estimate['
+  msg.已取消生成: '[#DDA0DD]已取消生成[/#DDA0DD]'
+  msg.已取消生成_2: '[#DDA0DD]已取消生成[/#DDA0DD]'
+  msg.已清理臨時檔案: '[dim]已清理臨時檔案：{temp_dir}[/dim]'
+  msg.已生成個片段計畫: '[#DA70D6]✓ 已生成 {len(segments)} 個片段計畫[/green]'
+  msg.建議: '     [#DDA0DD]建議：[/#DDA0DD]'
+  msg.建議_2: '     [#DDA0DD]建議：[/#DDA0DD]'
+  msg.影片生成: '  Veo 影片生成：{estimate['
+  msg.影片生成完成: '
+
+    [#DA70D6]✅ 影片生成完成！[/green]'
+  msg.影片配置: '[#DDA0DD]影片配置：{self.resolution} @ {self.aspect_ratio} (24fps)[/#DDA0DD]'
+  msg.成功影片已生成: '
+
+    [bold green]✅ 成功！影片已生成：[/bold green]'
+  msg.描述: '  描述：{user_description}'
+  msg.提示詞: '  提示詞：{segment.prompt[:60]}...'
+  msg.模型: '  Veo 模型：{veo_model}'
+  msg.片段: '
+
+    [#DDA0DD]片段 {i} ({seg.scene_id})：[/#DDA0DD]'
+  msg.片段數量: '  片段數量：{len(segments)}'
+  msg.生成完成: '  [#DA70D6]✓ 生成完成[/green]'
+  msg.生成片段: '
+
+    [#DDA0DD]生成片段 {i+1}/{len(segments)}：{segment.scene_id}[/#DDA0DD]'
+  msg.用法: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.用法_2: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.發現警告可繼續執行: '[#DDA0DD]⚠️  發現警告（可繼續執行）：[/#DDA0DD]'
+  msg.發現警告可繼續執行_2: '[#DDA0DD]⚠️  發現警告（可繼續執行）：[/#DDA0DD]'
+  msg.目標時長: '  目標時長：{estimate['
+  msg.目標時長秒: '  目標時長：{target_duration}秒'
+  msg.範例: '
+
+    [#DDA0DD]範例：[/#DDA0DD]'
+  msg.範例_2: '
+
+    [#DDA0DD]範例：[/#DDA0DD]'
+  msg.累計成本: '[dim]   累計成本: NT${self.pricing.total_cost * USD_TO_TWD:.2f} (${self.pricing.total_cost:.6f}
+    USD)[/dim]'
+  msg.總時長秒: '  總時長：{len(segments) * segments[0].duration} 秒'
+  msg.自然語言影片生成: '[bold magenta]Gemini Flow Engine - 自然語言影片生成[/bold magenta]'
+  msg.自然語言影片生成_2: '[bold magenta]Gemini Flow Engine - 自然語言影片生成[/bold magenta]'
+  msg.警告無法清理臨時檔案: '[#DDA0DD]警告：無法清理臨時檔案 {temp_dir}，請手動刪除[/#DDA0DD]'
+  msg.費用預估: '
+
+    [#DDA0DD]💰 費用預估：[/#DDA0DD]'
+  msg.輸入輸出思考: '[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens,
+    思考: {thinking_tokens:,} tokens[/dim]'
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.開始生成影片: '
+
+    [#DDA0DD]🎬 開始生成影片...[/#DDA0DD]'
+  msg.預估總成本: '  [bold]預估總成本：{estimate['
+  msg.飛行前檢查失敗無法繼: '[dim magenta]❌ 飛行前檢查失敗，無法繼續執行：[/red]'
+  msg.飛行前檢查失敗無法繼_2: '[dim magenta]❌ 飛行前檢查失敗，無法繼續執行：[/red]'
+  msg.飛行前檢查通過: '[#DA70D6]✅ 飛行前檢查通過[/green]
+
+    '
+  msg.飛行前檢查通過_2: '[#DA70D6]✅ 飛行前檢查通過[/green]
+
+    '
+image_analyzer:
+  msg.任務: '
+
+    [#DDA0DD]💭 任務：{task}[/#DDA0DD]'
+  msg.任務_2: '
+
+    [#DDA0DD]💭 任務：{task}[/#DDA0DD]'
+  msg.分析中: '
+
+    [#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]
+
+    '
+  msg.分析中_2: '
+
+    [#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]
+
+    '
+  msg.分析失敗: '[dim magenta]✗ 分析失敗：{e}[/red]'
+  msg.分析失敗_2: '[dim magenta]✗ 分析失敗：{e}[/red]'
+  msg.分析失敗_3: '[dim magenta]✗ 分析失敗：{e}[/red]'
+  msg.圖片: '
+
+    [#DDA0DD]━━━ 圖片 {i}/{len(image_paths)} ━━━[/#DDA0DD]'
+  msg.圖片資訊: '
+
+    [#DDA0DD]📷 圖片資訊：[/#DDA0DD]'
+  msg.執行失敗: '[dim magenta]✗ 執行失敗：{e}[/red]'
+  msg.大小: '   大小：{img.size[0]} × {img.size[1]}'
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{image_path}[/green]
+
+    '
+  msg.已載入模型: '[#DA70D6]✓ 已載入模型：{model_name}[/green]'
+  msg.批次分析完成成功: '
+
+    [#DA70D6]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/green]'
+  msg.批次分析張圖片: '
+
+    [bold magenta]📦 批次分析 {len(image_paths)} 張圖片[/bold magenta]'
+  msg.提示: '[#DDA0DD]📝 提示：{prompt[:50]}...[/#DDA0DD]'
+  msg.本次成本圖片提示回應: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,}
+    tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]'
+  msg.本次成本圖片提示思考: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,}
+    tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]'
+  msg.格式: '   格式：{img.format}'
+  msg.檔案: '   檔案：{os.path.basename(image_path)}'
+  msg.記憶體優化失敗使用標: '[#DDA0DD]⚠️  記憶體優化失敗，使用標準載入: {e}[/#DDA0DD]'
+  msg.警告可能不受支援: '[#DDA0DD]警告：{ext} 可能不受支援[/#DDA0DD]'
+  msg.載入失敗: '   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]'
+  msg.載入張圖片: '
+
+    [#DDA0DD]📷 載入 {len(image_paths)} 張圖片：[/#DDA0DD]'
+  msg.錯誤請提供圖片路徑: '[dim magenta]錯誤：請提供圖片路徑[/red]'
+  msg.錯誤請提供圖片路徑_2: '[dim magenta]錯誤：請提供圖片路徑[/red]'
+image_analyzer_async:
+  msg.任務: '
+
+    [#DDA0DD]💭 任務：{task}[/#DDA0DD]'
+  msg.任務異步模式: '
+
+    [#DDA0DD]💭 任務：{task} (異步模式)[/#DDA0DD]'
+  msg.使用異步模式: '[dim]使用異步模式（event loop detected）[/dim]'
+  msg.使用異步模式_2: '[dim]使用異步模式（event loop detected）[/dim]'
+  msg.使用範例: '
+
+    使用範例：'
+  msg.分析中: '[#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]
+
+    '
+  msg.分析中_2: '
+
+    [#DDA0DD]🤖 Gemini 分析中...[/#DDA0DD]
+
+    '
+  msg.安裝方式: 安裝方式：pip install httpx
+  msg.批次載入張圖片異步模: '
+
+    [#DDA0DD]📷 批次載入 {len(image_paths)} 張圖片（異步模式）：[/#DDA0DD]'
+  msg.本次成本圖片提示回應: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,}
+    tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]'
+  msg.本次成本圖片提示思考: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (圖片+提示: {input_tokens:,}
+    tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]'
+  msg.此模組為添加異步支援: '
+
+    此模組為 ImageAnalyzer 添加異步支援'
+  msg.異步批次處理完成: 異步批次處理完成
+  msg.異步擴展模組: Gemini Image Analyzer - 異步擴展模組
+  msg.示範異步批次圖片分析: 示範：異步批次圖片分析
+  msg.詳見文檔性能優化技術: 詳見文檔：F-7_性能優化技術實作方案.md
+  msg.警告未安裝異步功能將: '[警告] httpx 未安裝，異步功能將降級到同步模式'
+  msg.載入失敗: '   [dim magenta]✗ {os.path.basename(path)} - 載入失敗：{e}[/red]'
+imagen_generator:
+  msg.上傳圖片: '
+
+    [#DDA0DD]📤 上傳圖片...[/#DDA0DD]'
+  msg.上傳圖片_2: '
+
+    [#DDA0DD]📤 上傳圖片...[/#DDA0DD]'
+  msg.並行數量: '[#DDA0DD]並行數量：[/#DDA0DD] {max_workers}'
+  msg.互動式圖片生成: '
+
+    [bold magenta]🎨 Imagen 互動式圖片生成[/bold magenta]
+
+    '
+  msg.互動式圖片生成_2: '
+
+    [bold magenta]🎨 Imagen 互動式圖片生成[/bold magenta]
+
+    '
+  msg.保存圖片中: '
+
+    [#DDA0DD]💾 保存圖片中...[/#DDA0DD]'
+  msg.儲存目錄: '  儲存目錄：{OUTPUT_DIR}'
+  msg.再見: '
+
+    [#DA70D6]再見！[/green]'
+  msg.再見_2: '
+
+    [#DA70D6]再見！[/green]'
+  msg.功能選擇: '
+
+    [#DDA0DD]功能選擇：[/#DDA0DD]'
+  msg.功能選擇_2: '
+
+    [#DDA0DD]功能選擇：[/#DDA0DD]'
+  msg.原始圖片: '[#DDA0DD]原始圖片：[/#DDA0DD] {image_path}'
+  msg.原始圖片_2: '[#DDA0DD]原始圖片：[/#DDA0DD] {image_path}'
+  msg.單價: '  單價：NT${details['
+  msg.單價_2: '  單價：NT${details['
+  msg.圖片已儲存: '
+
+    [#DA70D6]✓ 圖片已儲存：{output_path}[/green]'
+  msg.圖片已儲存_2: '
+
+    [#DA70D6]✓ 圖片已儲存：{output_path}[/green]'
+  msg.圖片放大: '[bold magenta]🔍 Imagen 圖片放大[/bold magenta]'
+  msg.圖片生成: '[bold magenta]🎨 Imagen 圖片生成[/bold magenta]'
+  msg.圖片生成工具: '[bold magenta]Gemini Imagen 3 圖片生成工具[/bold magenta]
+
+    '
+  msg.圖片生成工具_2: '[bold magenta]Gemini Imagen 3 圖片生成工具[/bold magenta]
+
+    '
+  msg.圖片編輯: '[bold magenta]✏️ Imagen 圖片編輯[/bold magenta]'
+  msg.圖片資訊: '
+
+    [#DDA0DD]📊 圖片資訊：[/#DDA0DD]'
+  msg.圖片資訊_2: '
+
+    [#DDA0DD]📊 圖片資訊：[/#DDA0DD]'
+  msg.圖片資訊_3: '
+
+    [#DDA0DD]📊 圖片資訊：[/#DDA0DD]'
+  msg.失敗: '  [{i}] {prompt[:50]}... → [dim magenta]失敗[/red]'
+  msg.失敗數量: '  失敗數量：{len(prompts) - len([p for p in results.values() if p])}'
+  msg.實際費用: '
+
+    [#DDA0DD]💰 實際費用：[/#DDA0DD]'
+  msg.實際費用_2: '
+
+    [#DDA0DD]💰 實際費用：[/#DDA0DD]'
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{image_path}[/green]
+
+    '
+  msg.已切換至_2: '[#DA70D6]✅ 已切換至：{image_path}[/green]
+
+    '
+  msg.張圖片: '  [{i}] {prompt[:50]}... → {len(paths)} 張圖片'
+  msg.成功生成張圖片: '  成功生成：{total_images} 張圖片'
+  msg.批次圖片生成並行處理: '[bold magenta]🎨 Imagen 批次圖片生成（並行處理）[/bold magenta]'
+  msg.批次圖片生成模式輸入: '
+
+    [#DDA0DD]批次圖片生成模式（輸入多個 prompt，並行處理）[/#DDA0DD]'
+  msg.批次圖片生成模式輸入_2: '
+
+    [#DDA0DD]批次圖片生成模式（輸入多個 prompt，並行處理）[/#DDA0DD]'
+  msg.批次生成圖片並行處理: '  [2] 批次生成圖片（Batch Generation - 並行處理）'
+  msg.批次生成圖片並行處理_2: '  [2] 批次生成圖片（Batch Generation - 並行處理）'
+  msg.批次生成完成: '[bold green]✓ 批次生成完成[/bold green]'
+  msg.提示: '[#DDA0DD]提示：[/#DDA0DD] {prompt}'
+  msg.放大圖片: '  [4] 放大圖片（Upscaling）'
+  msg.放大圖片_2: '  [4] 放大圖片（Upscaling）'
+  msg.放大失敗: '
+
+    [dim magenta]❌ 放大失敗：{e}[/red]'
+  msg.數量: '[#DDA0DD]數量：[/#DDA0DD] {number_of_images}'
+  msg.數量_2: '[#DDA0DD]Prompt 數量：[/#DDA0DD] {len(prompts)}'
+  msg.未輸入任何: '[#DDA0DD]未輸入任何 prompt[/#DDA0DD]'
+  msg.未輸入任何_2: '[#DDA0DD]未輸入任何 prompt[/#DDA0DD]'
+  msg.未輸入編輯描述: '[#DDA0DD]未輸入編輯描述[/#DDA0DD]'
+  msg.未輸入編輯描述_2: '[#DDA0DD]未輸入編輯描述[/#DDA0DD]'
+  msg.模型: '[#DDA0DD]模型：[/#DDA0DD] {model}'
+  msg.模型_2: '[#DDA0DD]模型：[/#DDA0DD] {model}'
+  msg.橫向: '  2. 16:9 (橫向)'
+  msg.橫向_2: '  2. 16:9 (橫向)'
+  msg.橫向_3: '  2. 16:9 (橫向)'
+  msg.橫向_4: '  2. 16:9 (橫向)'
+  msg.檔案不存在: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_2: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_3: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案不存在_4: '[#DDA0DD]檔案不存在[/#DDA0DD]'
+  msg.檔案大小: '  檔案大小：{file_size:.2f} MB'
+  msg.檔案大小_2: '  檔案大小：{file_size:.2f} MB'
+  msg.正方形預設: '  1. 1:1 (正方形，預設)'
+  msg.正方形預設_2: '  1. 1:1 (正方形，預設)'
+  msg.正方形預設_3: '  1. 1:1 (正方形，預設)'
+  msg.正方形預設_4: '  1. 1:1 (正方形，預設)'
+  msg.每行一個輸入空行結束: '[#DDA0DD]每行一個 prompt，輸入空行結束：[/#DDA0DD]
+
+    '
+  msg.每行一個輸入空行結束_2: '[#DDA0DD]每行一個 prompt，輸入空行結束：[/#DDA0DD]
+
+    '
+  msg.無效選擇使用預設模型: '[#DDA0DD]無效選擇，使用預設模型[/#DDA0DD]'
+  msg.無效選擇使用預設模型_2: '[#DDA0DD]無效選擇，使用預設模型[/#DDA0DD]'
+  msg.無效選項: '
+
+    [#DDA0DD]無效選項[/#DDA0DD]'
+  msg.無效選項_2: '
+
+    [#DDA0DD]無效選項[/#DDA0DD]'
+  msg.生成圖片: '  [1] 生成圖片（Text-to-Image）'
+  msg.生成圖片_2: '  [1] 生成圖片（Text-to-Image）'
+  msg.生成失敗: '
+
+    [dim magenta]❌ 生成失敗：{e}[/red]'
+  msg.生成數量: '  生成數量：{len(output_paths)}'
+  msg.生成結果摘要: '
+
+    [#DDA0DD]📋 生成結果摘要：[/#DDA0DD]'
+  msg.生成結果摘要_2: '
+
+    [#DDA0DD]📋 生成結果摘要：[/#DDA0DD]'
+  msg.直向: '  3. 9:16 (直向)'
+  msg.直向_2: '  3. 9:16 (直向)'
+  msg.直向_3: '  3. 9:16 (直向)'
+  msg.直向_4: '  3. 9:16 (直向)'
+  msg.編輯圖片: '  [3] 編輯圖片（Image Editing）'
+  msg.編輯圖片_2: '  [3] 編輯圖片（Image Editing）'
+  msg.編輯失敗: '
+
+    [dim magenta]❌ 編輯失敗：{e}[/red]'
+  msg.編輯提示: '[#DDA0DD]編輯提示：[/#DDA0DD] {prompt}'
+  msg.總大小: '  總大小：{total_size:.2f} MB'
+  msg.總結: '[#DDA0DD]📊 總結：[/#DDA0DD]'
+  msg.總費用預估: '
+
+    [#DDA0DD]💰 總費用預估：[/#DDA0DD]'
+  msg.請選擇模型: '
+
+    [#DDA0DD]請選擇 Imagen 模型：[/#DDA0DD]'
+  msg.請選擇模型_2: '
+
+    [#DDA0DD]請選擇 Imagen 模型：[/#DDA0DD]'
+  msg.負面提示: '[#DDA0DD]負面提示：[/#DDA0DD] {negative_prompt}'
+  msg.費用預估: '
+
+    [#DDA0DD]💰 費用預估：[/#DDA0DD]'
+  msg.費用預估_2: '
+
+    [#DDA0DD]💰 費用預估：[/#DDA0DD]'
+  msg.費用預估_3: '
+
+    [#DDA0DD]💰 費用預估：[/#DDA0DD]'
+  msg.退出: '  [0] 退出
+
+    '
+  msg.退出_2: '  [0] 退出
+
+    '
+  msg.選擇長寬比: '
+
+    [#DDA0DD]選擇長寬比：[/#DDA0DD]'
+  msg.選擇長寬比_2: '
+
+    [#DDA0DD]選擇長寬比：[/#DDA0DD]'
+  msg.選擇長寬比套用至所有: '
+
+    [#DDA0DD]選擇長寬比（套用至所有圖片）：[/#DDA0DD]'
+  msg.選擇長寬比套用至所有_2: '
+
+    [#DDA0DD]選擇長寬比（套用至所有圖片）：[/#DDA0DD]'
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_2: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_3: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_4: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_5: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.長寬比: '[#DDA0DD]長寬比：[/#DDA0DD] {aspect_ratio}'
+  msg.開啟圖片中: '
+
+    [#DDA0DD]🖼️ 開啟圖片中...[/#DDA0DD]'
+  msg.開啟圖片中_2: '
+
+    [#DDA0DD]🖼️ 開啟圖片中...[/#DDA0DD]'
+  msg.開始並行生成組圖片: '[#DDA0DD]⏳ 開始並行生成 {len(prompts)} 組圖片...[/#DDA0DD]
+
+    '
+  msg.開始生成圖片: '
+
+    [#DDA0DD]⏳ 開始生成圖片...[/#DDA0DD]
+
+    '
+  msg.開始生成圖片_2: '
+
+    [#DDA0DD]⏳ 開始生成圖片...[/#DDA0DD]
+
+    '
+lang:
+  msg.不支援的語言: '❌ 不支援的語言 / Unsupported language: {lang}'
+  msg.代碼: '代碼 / Code:       {current}'
+  msg.切換語言失敗: '❌ 切換語言失敗 / Failed to switch language: {lang}'
+  msg.可用語言: '   可用語言 / Available: {'
+  msg.可用語言_2: 可用語言 / Available Languages
+  msg.名稱: '名稱 / Name:       {name}'
+  msg.已取消: '
+
+
+    已取消 / Cancelled'
+  msg.提示重新啟動程式以套: '
+
+    💡 提示：重新啟動程式以套用新語言'
+  msg.支援的語言: '   支援的語言 / Supported: {'
+  msg.本地名: '本地名 / Native:   {native_name}'
+  msg.無效的輸入: ❌ 無效的輸入 / Invalid input
+  msg.無效的選項: '❌ 無效的選項 / Invalid option: {choice}'
+  msg.無法更新: '⚠️  無法更新 .env: {e}'
+  msg.用法: '   用法 / Usage: python3 gemini_lang.py --set <lang>'
+  msg.當前語言: 當前語言 / Current Language
+  msg.範例: '   範例 / Example: python3 gemini_lang.py --set en'
+  msg.設定已保存至: '   設定已保存至 .env'
+  msg.語言包不存在: '⚠️  語言包不存在 / Language pack not found: {lang}'
+  msg.語言已切換但下次啟動: '   語言已切換，但下次啟動可能需要重新設定'
+  msg.語言已切換至: '
+
+    ✅ 語言已切換至：{name} ({lang})'
+  msg.語言選擇言語選択: 語言選擇 / Language Selection / 言語選択 / 언어 선택
+  msg.請指定語言代碼: ❌ 請指定語言代碼 / Please specify language code
+media_viewer:
+  msg.不支援的檔案類型: '[#DDA0DD]不支援的檔案類型：{file_type}[/#DDA0DD]'
+  msg.不支援的檔案類型_2: '[#DDA0DD]不支援的檔案類型[/#DDA0DD]'
+  msg.再見: '
+
+    [#DA70D6]再見！[/green]'
+  msg.再見_2: '
+
+    [#DA70D6]再見！[/green]'
+  msg.分析中: '
+
+    [#DDA0DD]🤖 AI 分析中...[/#DDA0DD]
+
+    '
+  msg.分析功能未啟用需要: '[#DDA0DD]AI 分析功能未啟用（需要 GEMINI_API_KEY）[/#DDA0DD]'
+  msg.分析功能未啟用需要_2: '[#DDA0DD]AI 分析功能未啟用（需要 GEMINI_API_KEY）[/#DDA0DD]'
+  msg.分析失敗: '[dim magenta]AI 分析失敗：{e}[/red]'
+  msg.分析成本: '[dim]💰 分析成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]'
+  msg.圖片資訊: '
+
+    [#DDA0DD]📸 圖片資訊：{os.path.basename(image_path)}[/#DDA0DD]
+
+    '
+  msg.媒體檔案查看器: '
+
+    [bold magenta]🎬 Gemini 媒體檔案查看器[/bold magenta]
+
+    '
+  msg.媒體檔案查看器_2: '
+
+    [bold magenta]🎬 Gemini 媒體檔案查看器[/bold magenta]
+
+    '
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{image_path}[/green]
+
+    '
+  msg.已切換至_2: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.影片資訊: '
+
+    [#DDA0DD]🎬 影片資訊：{os.path.basename(video_path)}[/#DDA0DD]
+
+    '
+  msg.提示檔案大小接近限制: '
+
+    [#DDA0DD]⚠ 提示：檔案大小接近 API 限制，建議壓縮[/#DDA0DD]'
+  msg.檔案不存在: '[dim magenta]檔案不存在：{file_path}[/red]'
+  msg.檔案不存在_2: '[dim magenta]檔案不存在[/red]'
+  msg.檔案不存在_3: '[dim magenta]檔案不存在[/red]'
+  msg.累計成本: '[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f}
+    (${global_pricing_calculator.total_cost:.6f} USD)[/dim]'
+  msg.警告: '
+
+    [#DDA0DD]⚠ 警告：{info['
+  msg.警告_2: '
+
+    [#DDA0DD]⚠ 警告：{info['
+  msg.警告檔案大小超過限制: '
+
+    [dim magenta]⚠ 警告：檔案大小超過 Gemini API 限制（2GB）[/red]'
+  msg.輸入輸出思考: '[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens,
+    思考: {thinking_tokens:,} tokens[/dim]'
+  msg.錯誤: '[dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_2: '[dim magenta]錯誤：{e}[/red]'
+  msg.音訊檔案資訊查看功能: '[#DDA0DD]音訊檔案資訊查看功能開發中[/#DDA0DD]'
+  msg.音訊檔案資訊查看功能_2: '[#DDA0DD]音訊檔案資訊查看功能開發中[/#DDA0DD]'
+memory_manager:
+  msg.上傳失敗: '[dim magenta]❌ Chunk {chunk_idx} 上傳失敗[/red]'
+  msg.上傳失敗_2: '[dim magenta]❌ 上傳失敗: {e}[/red]'
+  msg.合併影片片段: '[#DDA0DD]🔗 合併影片片段...[/#DDA0DD]'
+  msg.合併影片片段_2: '[#DDA0DD]🔗 合併影片片段...[/#DDA0DD]'
+  msg.圖片處理記憶體減少: '[dim]🖼️  圖片處理: {original_size} → {new_size}, 記憶體減少 {reduction}%[/dim]'
+  msg.圖片載入失敗: '[dim magenta]❌ 圖片載入失敗: {e}[/red]'
+  msg.已存檔則對話到: '[dim]📁 已存檔 {len(to_archive)} 則對話到 {archive_file.name}[/dim]'
+  msg.影片處理失敗: '[dim magenta]❌ 影片處理失敗: {e}[/red]'
+  msg.影片處理完成: '[#DA70D6]✅ 影片處理完成: {output_path}[/green]'
+  msg.成功失敗: '
+
+    [#DA70D6]✅ 成功: {success_count}[/green] | [dim magenta]❌ 失敗: {error_count}[/red]'
+  msg.檔案上傳完成: '[#DA70D6]✅ 檔案上傳完成: {file_path}[/green]'
+  msg.檔案已上傳完成使用快: '[#DA70D6]✅ 檔案已上傳完成（使用快取）[/green]'
+  msg.檔案已上傳完成使用快_2: '[#DA70D6]✅ 檔案已上傳完成（使用快取）[/green]'
+  msg.清理臨時檔案: '[dim]🧹 清理臨時檔案...[/dim]'
+  msg.清理臨時檔案_2: '[dim]🧹 清理臨時檔案...[/dim]'
+  msg.無法取得影片時長: '[dim magenta]❌ 無法取得影片時長: {e}[/red]'
+module_loader:
+  msg.動態模組載入器測試: '=== 動態模組載入器測試 ===
+
+    '
+  msg.已載入模組: '   已載入模組: {stats['
+  msg.已載入模組_2: '   已載入模組: {loader.get_stats()['
+  msg.已載入模組數: '   已載入模組數: {stats['
+  msg.測試卸載模組: '
+
+    3. 測試卸載模組:'
+  msg.測試完成: '
+
+    ✓ 測試完成'
+  msg.測試載入模組: '1. 測試載入模組:'
+  msg.載入失敗模組可能未啟: '   ✗ 載入失敗（模組可能未啟用或不存在）'
+  msg.載入成功: '   ✓ 載入成功: smart_triggers'
+  msg.載入統計: '
+
+    2. 載入統計:'
+scene_detector:
+  msg.場景檢測成本: '[dim]💰 場景檢測成本: NT${cost * USD_TO_TWD:.2f} (${cost:.6f} USD)[/dim]'
+  msg.本次成本: '[dim]💰 本次成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f}
+    (${global_pricing_calculator.total_cost:.6f})[/dim]
+
+    '
+  msg.累計成本: '[dim]   累計成本: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f}
+    (${global_pricing_calculator.total_cost:.6f} USD)[/dim]'
+  msg.輸入輸出思考: '[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens,
+    思考: {thinking_tokens:,} tokens[/dim]'
+subtitle_generator:
+  msg.使用修復後的成功解析: '[#DA70D6]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/green]'
+  msg.修復後的仍無法解析: '[dim magenta]✗ 修復後的 JSON 仍無法解析：{parse_error}[/red]'
+  msg.共識別個片段: '[#DA70D6]✓ 共識別 {len(segments)} 個片段[/green]'
+  msg.原始回應: '[#DDA0DD]原始回應：{result_text}[/#DDA0DD]'
+  msg.啟用翻譯: '  --translate       啟用翻譯'
+  msg.啟用翻譯_2: '  --translate       啟用翻譯'
+  msg.字幕: '  字幕：{os.path.basename(subtitle_path)}'
+  msg.字幕已燒錄: '[#DA70D6]✓ 字幕已燒錄：{output_path}[/green]'
+  msg.字幕已生成: '[#DA70D6]✓ 字幕已生成：{output_path}[/green]'
+  msg.字幕檔案: '
+
+    [#DA70D6]✓ 字幕檔案：{subtitle_path}[/green]'
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已切換至_2: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已切換至_3: '[#DA70D6]✅ 已切換至：{subtitle_path}[/green]
+
+    '
+  msg.影片: '  影片：{os.path.basename(video_path)}'
+  msg.影片_2: '  影片：{os.path.basename(video_path)}'
+  msg.影片路徑選項: '  python gemini_subtitle_generator.py <影片路徑> [選項]'
+  msg.影片路徑選項_2: '  python gemini_subtitle_generator.py <影片路徑> [選項]'
+  msg.格式: '  格式：{format.upper()}'
+  msg.格式字幕格式預設: '  --format <格式>   字幕格式 srt/vtt（預設 srt）'
+  msg.格式字幕格式預設_2: '  --format <格式>   字幕格式 srt/vtt（預設 srt）'
+  msg.檔案已上傳: '[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]'
+  msg.檔案已生成: '[#DA70D6]✓ 檔案已生成[/green]'
+  msg.步驟提取音訊: '
+
+    [#DDA0DD]🎵 步驟 1/4: 提取音訊...[/#DDA0DD]'
+  msg.步驟提取音訊_2: '
+
+    [#DDA0DD]🎵 步驟 1/4: 提取音訊...[/#DDA0DD]'
+  msg.步驟生成檔案: '
+
+    [#DDA0DD]💾 步驟 4/4: 生成 {format.upper()} 檔案...[/#DDA0DD]'
+  msg.步驟翻譯字幕目標: '
+
+    [#DDA0DD]🌐 步驟 3/4: 翻譯字幕（目標：{target_language}）...[/#DDA0DD]'
+  msg.步驟語音辨識: '
+
+    [#DDA0DD]🎤 步驟 2/4: 語音辨識...[/#DDA0DD]'
+  msg.步驟語音辨識_2: '
+
+    [#DDA0DD]🎤 步驟 2/4: 語音辨識...[/#DDA0DD]'
+  msg.注意使用此檔案進行分: '[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'
+  msg.燒錄字幕: '
+
+    [#DDA0DD]🔥 燒錄字幕...[/#DDA0DD]'
+  msg.燒錄字幕到影片: '  --burn            燒錄字幕到影片'
+  msg.燒錄字幕到影片_2: '  --burn            燒錄字幕到影片'
+  msg.燒錄影片: '
+
+    [#DA70D6]✓ 燒錄影片：{video_with_subs}[/green]'
+  msg.生成字幕: '
+
+    [#DDA0DD]📝 生成字幕...[/#DDA0DD]'
+  msg.用法: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.用法_2: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.範例: '
+
+    [#DDA0DD]範例：[/#DDA0DD]'
+  msg.範例_2: '
+
+    [#DDA0DD]範例：[/#DDA0DD]'
+  msg.翻譯: '  翻譯：{'
+  msg.翻譯完成: '[#DA70D6]✓ 翻譯完成[/green]'
+  msg.解析錯誤: '[dim magenta]JSON 解析錯誤：{e}[/red]'
+  msg.語言目標語言預設: '  --lang <語言>     目標語言（預設 zh-TW）'
+  msg.語言目標語言預設_2: '  --lang <語言>     目標語言（預設 zh-TW）'
+  msg.語音辨識成本音訊提示: '[dim]💰 語音辨識成本: NT${cost * USD_TO_TWD:.2f} (音訊+提示: {input_tokens:,}
+    tokens, 回應: {output_tokens:,} tokens) | 累計: NT${self.pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${self.pricing_calculator.total_cost:.6f})[/dim]'
+  msg.警告不可用翻譯功能已: '[#DDA0DD]警告：gemini_translator 不可用，翻譯功能已停用[/#DDA0DD]'
+  msg.警告不可用翻譯功能已_2: '[#DDA0DD]警告：gemini_translator 不可用，翻譯功能已停用[/#DDA0DD]'
+  msg.警告不可用音訊提取功: '[#DDA0DD]警告：gemini_audio_processor 不可用，音訊提取功能受限[/#DDA0DD]'
+  msg.警告不可用音訊提取功_2: '[#DDA0DD]警告：gemini_audio_processor 不可用，音訊提取功能受限[/#DDA0DD]'
+  msg.警告未找到部分功能可: '[#DDA0DD]警告：未找到 ffmpeg，部分功能可能受限[/#DDA0DD]'
+  msg.警告未找到部分功能可_2: '[#DDA0DD]警告：未找到 ffmpeg，部分功能可能受限[/#DDA0DD]'
+  msg.警告翻譯功能不可用跳: '[#DDA0DD]警告：翻譯功能不可用，跳過翻譯步驟[/#DDA0DD]'
+  msg.警告翻譯功能不可用跳_2: '[#DDA0DD]警告：翻譯功能不可用，跳過翻譯步驟[/#DDA0DD]'
+  msg.選項: '
+
+    [#DDA0DD]選項：[/#DDA0DD]'
+  msg.選項_2: '
+
+    [#DDA0DD]選項：[/#DDA0DD]'
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.音訊已提取: '[#DA70D6]✓ 音訊已提取[/green]'
+tools:
+  msg.使用: '[dim bright_magenta]✓ 使用 {tool_name}[/green][/dim]'
+  msg.各工具詳細資訊: '
+
+    [bold bright_magenta]各工具詳細資訊：[/bold bright_magenta]
+
+    '
+  msg.各工具詳細資訊_2: '
+
+    [bold bright_magenta]各工具詳細資訊：[/bold bright_magenta]
+
+    '
+  msg.工具調用統計: '
+
+    [bold bright_magenta]🔧 工具調用統計[/bold bright_magenta]
+
+    '
+  msg.工具調用統計_2: '
+
+    [bold bright_magenta]🔧 工具調用統計[/bold bright_magenta]
+
+    '
+  msg.已載入: '[dim]✓ {tool_name} 已載入[/dim]'
+  msg.已載入工具數: '[#DA70D6]已載入工具數：[/#DA70D6]{stats['
+  msg.整體成功率: '[#DA70D6]整體成功率：[/#DA70D6]{overall_success_rate:.1f}%'
+  msg.未知工具: '[dim]⚠️ 未知工具：{tool_name}[/dim]'
+  msg.測試命令執行偵測: '[bold]測試 3: 命令執行偵測[/bold]'
+  msg.測試命令執行偵測_2: '[bold]測試 3: 命令執行偵測[/bold]'
+  msg.測試完成: '
+
+    [#DA70D6]✓ 測試完成[/green]
+
+    '
+  msg.測試完成_2: '
+
+    [#DA70D6]✓ 測試完成[/green]
+
+    '
+  msg.測試搜尋偵測: '[bold]測試 1: 搜尋偵測[/bold]'
+  msg.測試搜尋偵測_2: '[bold]測試 1: 搜尋偵測[/bold]'
+  msg.測試網頁抓取偵測: '[bold]測試 2: 網頁抓取偵測[/bold]'
+  msg.測試網頁抓取偵測_2: '[bold]測試 2: 網頁抓取偵測[/bold]'
+  msg.準備工具: '準備工具: {prepared}
+
+    '
+  msg.準備工具_2: '準備工具: {prepared}
+
+    '
+  msg.準備工具_3: '準備工具: {prepared}
+
+    '
+  msg.目前沒有已載入的工具: '[dim]目前沒有已載入的工具[/dim]
+
+    '
+  msg.目前沒有已載入的工具_2: '[dim]目前沒有已載入的工具[/dim]
+
+    '
+  msg.統計資訊: '[bold]統計資訊:[/bold]'
+  msg.統計資訊_2: '[bold]統計資訊:[/bold]'
+  msg.總調用次數: '[#DA70D6]總調用次數：[/#DA70D6]{stats['
+  msg.總錯誤次數: '[#DA70D6]總錯誤次數：[/#DA70D6]{stats['
+  msg.自動化工具管理系統測: '
+
+    [bold bright_magenta]自動化工具管理系統測試[/bold bright_magenta]
+
+    '
+  msg.自動化工具管理系統測_2: '
+
+    [bold bright_magenta]自動化工具管理系統測試[/bold bright_magenta]
+
+    '
+  msg.詳細錯誤資訊: '
+
+    [bold bright_magenta]詳細錯誤資訊：[/bold bright_magenta]
+
+    '
+  msg.詳細錯誤資訊_2: '
+
+    [bold bright_magenta]詳細錯誤資訊：[/bold bright_magenta]
+
+    '
+  msg.載入失敗: '[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]'
+  msg.載入失敗_2: '[dim red]⚠️ {tool_name} 載入失敗：{error_msg}[/dim red]'
+  msg.輸入: '輸入: {user_input_1}'
+  msg.輸入_2: '輸入: {user_input_2}'
+  msg.輸入_3: '輸入: {user_input_3}'
+upload_helper:
+  msg.上傳失敗: '
+
+    [dim magenta]✗ 上傳失敗：{e}[/red]'
+  msg.上傳失敗_2: '
+
+    [dim magenta]✗ 上傳失敗：{e}[/red]
+
+    '
+  msg.上傳完成: '[#DA70D6]✓ 上傳完成[/green]'
+  msg.上傳已中斷進度已保存: '
+
+    [#DDA0DD]⏸️  上傳已中斷，進度已保存[/#DDA0DD]'
+  msg.下次執行時將自動從斷: "\n   下次執行時將自動從斷點繼續上傳\n"
+  msg.使用推薦配置分塊增加: '   [#DDA0DD]1. 使用推薦配置（2MB 分塊 + 增加重試）[/#DDA0DD]'
+  msg.使用推薦配置分塊增加_2: '   [#DDA0DD]1. 使用推薦配置（2MB 分塊 + 增加重試）[/#DDA0DD]'
+  msg.使用推薦配置重試中: '[#DA70D6]✓ 使用推薦配置重試中...[/#DA70D6]
+
+    '
+  msg.使用推薦配置重試中_2: '[#DA70D6]✓ 使用推薦配置重試中...[/#DA70D6]
+
+    '
+  msg.使用範例: '
+
+    使用範例：'
+  msg.使用範例_2: '
+
+    使用範例：'
+  msg.儲存進度檔案失敗: '[#DDA0DD]⚠️ 儲存進度檔案失敗：{e}[/#DDA0DD]'
+  msg.分塊上傳: '
+
+    [#DDA0DD]📦 分塊上傳：{os.path.basename(file_path)}[/#DDA0DD]'
+  msg.分塊上傳完成: '
+
+    [#DA70D6]✓ 分塊上傳完成！[/green]'
+  msg.分塊大小: '   分塊大小：{self.CHUNK_SIZE / (1024 ** 2):.2f} MB'
+  msg.刪除進度檔案失敗: '[#DDA0DD]⚠️ 刪除進度檔案失敗：{e}[/#DDA0DD]'
+  msg.功能檢查: 功能檢查：
+  msg.功能檢查_2: 功能檢查：
+  msg.取消上傳: '   [#DDA0DD]2. 取消上傳[/#DDA0DD]
+
+    '
+  msg.取消上傳_2: '   [#DDA0DD]2. 取消上傳[/#DDA0DD]
+
+    '
+  msg.大小: '   大小：{file_size_mb:.2f} MB'
+  msg.大小_2: '   大小：{file_size_mb:.2f} MB'
+  msg.已上傳: '   已上傳：{len(progress['
+  msg.已取消上傳: '[#DDA0DD]已取消上傳[/#DDA0DD]'
+  msg.已取消上傳_2: '[#DDA0DD]已取消上傳[/#DDA0DD]'
+  msg.建議調整配置: '[#DDA0DD]💡 建議調整配置：[/#DDA0DD]
+
+    '
+  msg.建議調整配置_2: '[#DDA0DD]💡 建議調整配置：[/#DDA0DD]
+
+    '
+  msg.所有分塊已上傳驗證中: '[#DA70D6]✓ 所有分塊已上傳，驗證中...[/green]'
+  msg.所有分塊已上傳驗證中_2: '[#DA70D6]✓ 所有分塊已上傳，驗證中...[/green]'
+  msg.未找到將不使用智能錯: ⚠️  error_fix_suggestions 未找到，將不使用智能錯誤診斷
+  msg.未找到將不使用自動重: ⚠️  api_retry_wrapper 未找到，將不使用自動重試機制
+  msg.檔案大小: '   [dim]檔案大小：{file_size_mb:.2f} MB[/dim]'
+  msg.檔案已上傳: '[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]'
+  msg.檔案已上傳_2: '[dim]📁 檔案已上傳: {uploaded_file_retry.name}[/dim]'
+  msg.檔案已被修改無法續傳: '[#DDA0DD]⚠️ 檔案已被修改，無法續傳[/#DDA0DD]'
+  msg.檔案已被修改無法續傳_2: '[#DDA0DD]⚠️ 檔案已被修改，無法續傳[/#DDA0DD]'
+  msg.注意使用此檔案進行分: '[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'
+  msg.注意使用此檔案進行分_2: '[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'
+  msg.測試模式: '[#DDA0DD]Gemini Upload Helper - 測試模式[/#DDA0DD]
+
+    '
+  msg.測試模式_2: '[#DDA0DD]Gemini Upload Helper - 測試模式[/#DDA0DD]
+
+    '
+  msg.準備上傳: '
+
+    [#DDA0DD]📤 準備上傳：{os.path.basename(file_path)}[/#DDA0DD]'
+  msg.當前分塊: '   [dim]當前分塊：5 MB[/dim]
+
+    '
+  msg.發現未完成的上傳分塊: '[#DA70D6]✓ 發現未完成的上傳：{uploaded_count}/{total_count} 分塊已上傳[/green]'
+  msg.策略優化上傳: '   策略：[#DDA0DD]優化上傳（{'
+  msg.策略快速上傳小檔案: '   策略：[#DA70D6]快速上傳（小檔案）[/green]
+
+    '
+  msg.總分塊數: '   總分塊數：{(file_size + self.CHUNK_SIZE - 1) // self.CHUNK_SIZE}'
+  msg.繼續從斷點上傳: '   繼續從斷點上傳...
+
+    '
+  msg.耗時秒: '   耗時：{actual_time:.1f} 秒'
+  msg.讀取進度檔案失敗: '[#DDA0DD]⚠️ 讀取進度檔案失敗：{e}[/#DDA0DD]'
+  msg.超時秒: '   超時：{timeout} 秒'
+  msg.速度: '   速度：{actual_speed:.2f} MB/s
+
+    '
+  msg.進度已保存可稍後重試: '   進度已保存，可稍後重試
+
+    '
+  msg.進度檔案: '   進度檔案：{self._get_progress_file_path(file_path)}'
+  msg.開始新的上傳: '   開始新的上傳...
+
+    '
+  msg.類別: '   類別：{file_category}'
+validator:
+  msg.不存在: '
+
+    [dim magenta]❌ gemini_flow_demo.py 不存在[/red]'
+  msg.不存在_2: '
+
+    [dim magenta]❌ gemini_flow_demo.py 不存在[/red]'
+  msg.僅顯示設定指令: '  3. 僅顯示設定指令'
+  msg.僅顯示設定指令_2: '  3. 僅顯示設定指令'
+  msg.儲存位置: '
+
+    [#DA70D6]儲存位置：[/#DA70D6]'
+  msg.儲存位置_2: '
+
+    [#DA70D6]儲存位置：[/#DA70D6]'
+  msg.原始提示詞: '[#DDA0DD]原始提示詞：[/#DDA0DD] {args.check_prompt}'
+  msg.啟動: '[#DDA0DD]啟動 Flow Engine...[/#DDA0DD]
+
+    '
+  msg.啟動_2: '[#DDA0DD]啟動 Flow Engine...[/#DDA0DD]
+
+    '
+  msg.執行: '
+
+    [#DDA0DD]執行：[/#DDA0DD] pip install '
+  msg.執行_2: '
+
+    [#DDA0DD]執行：[/#DDA0DD] pip install '
+  msg.執行基本測試: '[#DDA0DD]執行基本測試...[/#DDA0DD]
+
+    '
+  msg.執行基本測試_2: '[#DDA0DD]執行基本測試...[/#DDA0DD]
+
+    '
+  msg.執行失敗: '
+
+    [dim magenta]❌ 執行失敗：{e}[/red]'
+  msg.執行完成: '
+
+    [#DA70D6]✅ Flow Engine 執行完成！[/green]'
+  msg.執行完成_2: '
+
+    [#DA70D6]✅ Flow Engine 執行完成！[/green]'
+  msg.執行完整系統檢查: '[#DDA0DD]執行完整系統檢查...[/#DDA0DD]
+
+    '
+  msg.執行完整系統檢查_2: '[#DDA0DD]執行完整系統檢查...[/#DDA0DD]
+
+    '
+  msg.執行指令: '[#DDA0DD]執行指令：[/#DDA0DD]'
+  msg.套件安裝成功: '[#DA70D6]✅ 套件安裝成功！[/green]
+
+    '
+  msg.套件安裝成功_2: '[#DA70D6]✅ 套件安裝成功！[/green]
+
+    '
+  msg.好的請調整參數後重試: '
+
+    [#DDA0DD]好的，請調整參數後重試[/#DDA0DD]'
+  msg.好的請調整參數後重試_2: '
+
+    [#DDA0DD]好的，請調整參數後重試[/#DDA0DD]'
+  msg.安裝失敗: '[dim magenta]❌ 安裝失敗：{e}[/red]
+
+    '
+  msg.安裝指令依平台選擇: '
+
+    [#DDA0DD]安裝指令（依平台選擇）：[/#DDA0DD]'
+  msg.安裝指令依平台選擇_2: '
+
+    [#DDA0DD]安裝指令（依平台選擇）：[/#DDA0DD]'
+  msg.已儲存到: '
+
+    [#DA70D6]✅ 已儲存到 {env_path}[/#DA70D6]'
+  msg.已從環境變數載入: '
+
+    [#DA70D6]✅ 已從環境變數 {env_var_name} 載入[/#DA70D6]'
+  msg.已從載入: '
+
+    [#DA70D6]✅ 已從 {env_file_path} 載入[/#DA70D6]'
+  msg.已設定本次會話有效: '
+
+    [#DA70D6]✅ 已設定（本次會話有效）[/#DA70D6]'
+  msg.已設定本次會話有效_2: '
+
+    [#DA70D6]✅ 已設定（本次會話有效）[/#DA70D6]'
+  msg.已選擇: '
+
+    [#DA70D6]✅ 已選擇：[/green] {selected}'
+  msg.建議: '   [dim]建議：[/dim]'
+  msg.建議_2: '   建議：'
+  msg.建議_3: '   建議：'
+  msg.建議_4: '   建議：'
+  msg.建議_5: '   建議：'
+  msg.建議_6: '   建議：'
+  msg.建議_7: '   建議：'
+  msg.建議的擴展版本: '
+
+    [#DDA0DD]建議的擴展版本：[/#DDA0DD]'
+  msg.建議的擴展版本_2: '
+
+    [#DDA0DD]建議的擴展版本：[/#DDA0DD]'
+  msg.您想要生成秒的影片但: '[#DDA0DD]您想要生成 {args.duration} 秒的影片，但 Veo 3.1 限制為 8 秒。[/#DDA0DD]'
+  msg.您的提示詞太短我可以: '[#DDA0DD]您的提示詞太短，我可以幫您擴展！[/#DDA0DD]
+
+    '
+  msg.您的提示詞太短我可以_2: '[#DDA0DD]您的提示詞太短，我可以幫您擴展！[/#DDA0DD]
+
+    '
+  msg.我可以幫您使用自動分: '[#DDA0DD]我可以幫您使用 Flow Engine 自動分段生成！[/#DDA0DD]
+
+    '
+  msg.所有檢查通過可以安全: '[bold green]✅ 所有檢查通過，可以安全執行！[/bold green]
+
+    '
+  msg.所有檢查通過可以安全_2: '[bold green]✅ 所有檢查通過，可以安全執行！[/bold green]
+
+    '
+  msg.提示使用查看所有選項: '[dim]提示：使用 --help 查看所有選項[/dim]
+
+    '
+  msg.提示使用查看所有選項_2: '[dim]提示：使用 --help 查看所有選項[/dim]
+
+    '
+  msg.提示詞: '  提示詞: {args.check_veo}'
+  msg.提示請重新啟動程式以: '[#DDA0DD]提示：請重新啟動程式以載入設定[/#DDA0DD]'
+  msg.提示請重新啟動程式以_2: '[#DDA0DD]提示：請重新啟動程式以載入設定[/#DDA0DD]'
+  msg.時長秒: '  時長: {args.duration} 秒'
+  msg.智能修復建議: '
+
+    [bold yellow]💡 智能修復建議[/bold yellow]
+
+    '
+  msg.智能修復建議_2: '
+
+    [bold yellow]💡 智能修復建議[/bold yellow]
+
+    '
+  msg.智能建議: '
+
+    [bold yellow]💡 智能建議[/bold yellow]'
+  msg.智能建議_2: '
+
+    [bold yellow]💡 智能建議[/bold yellow]'
+  msg.智能建議_3: '
+
+    [bold yellow]💡 智能建議[/bold yellow]'
+  msg.智能建議_4: '
+
+    [bold yellow]💡 智能建議[/bold yellow]'
+  msg.未安裝: '[#DDA0DD]ffmpeg 未安裝[/#DDA0DD]'
+  msg.未安裝_2: '[#DDA0DD]ffmpeg 未安裝[/#DDA0DD]'
+  msg.檔案不存在: '[red]❌ 檔案不存在：{env_file_path}[/red]'
+  msg.檔案中未找到: '[#DDA0DD]⚠ 檔案中未找到 GEMINI_API_KEY[/#DDA0DD]'
+  msg.檔案推薦: '  1. .env 檔案（推薦）'
+  msg.檔案推薦_2: '  1. .env 檔案（推薦）'
+  msg.檢查依賴工具: '[#DDA0DD]🔍 檢查依賴工具...[/#DDA0DD]'
+  msg.檢查依賴工具_2: '[#DDA0DD]🔍 檢查依賴工具...[/#DDA0DD]'
+  msg.檢查內容政策: '[#DDA0DD]🔍 檢查內容政策...[/#DDA0DD]'
+  msg.檢查內容政策_2: '[#DDA0DD]🔍 檢查內容政策...[/#DDA0DD]'
+  msg.檢查參考圖片: '[#DDA0DD]🔍 檢查參考圖片...[/#DDA0DD]'
+  msg.檢查參考圖片_2: '[#DDA0DD]🔍 檢查參考圖片...[/#DDA0DD]'
+  msg.檢查失敗請修正錯誤後: '[bold red]❌ 檢查失敗，請修正錯誤後再執行[/bold red]
+
+    '
+  msg.檢查失敗請修正錯誤後_2: '[bold red]❌ 檢查失敗，請修正錯誤後再執行[/bold red]
+
+    '
+  msg.檢查延伸影片: '[#DDA0DD]🔍 檢查延伸影片...[/#DDA0DD]'
+  msg.檢查延伸影片_2: '[#DDA0DD]🔍 檢查延伸影片...[/#DDA0DD]'
+  msg.檢查影片生成參數: '[#DDA0DD]檢查 Veo 影片生成參數...[/#DDA0DD]
+
+    '
+  msg.檢查提示詞內容政策: '[#DDA0DD]檢查提示詞內容政策...[/#DDA0DD]
+
+    '
+  msg.檢查檔案: '[#DDA0DD]檢查檔案...[/#DDA0DD]
+
+    '
+  msg.檢查狀態: '[#DDA0DD]🔍 檢查 API 狀態...[/#DDA0DD]'
+  msg.檢查狀態_2: '[#DDA0DD]🔍 檢查 API 狀態...[/#DDA0DD]'
+  msg.檢查連接狀態: '[#DDA0DD]檢查 API 連接狀態...[/#DDA0DD]
+
+    '
+  msg.檢查連接狀態_2: '[#DDA0DD]檢查 API 連接狀態...[/#DDA0DD]
+
+    '
+  msg.正在啟動: '
+
+    [#DA70D6]✅ 正在啟動 Flow Engine...[/green]
+
+    '
+  msg.正在啟動_2: '
+
+    [#DA70D6]✅ 正在啟動 Flow Engine...[/green]
+
+    '
+  msg.環境變數未設定: '[#DDA0DD]⚠ 環境變數 {env_var_name} 未設定[/#DDA0DD]'
+  msg.環境變數本次會話: '  2. 環境變數（本次會話）'
+  msg.環境變數本次會話_2: '  2. 環境變數（本次會話）'
+  msg.申請金鑰: '
+
+    [dim]💡 申請 API 金鑰：https://aistudio.google.com/app/apikey[/dim]
+
+    '
+  msg.申請金鑰_2: '
+
+    [dim]💡 申請 API 金鑰：https://aistudio.google.com/app/apikey[/dim]
+
+    '
+  msg.發現缺少的套件: '[#DDA0DD]發現缺少的套件：[/#DDA0DD] {'
+  msg.總檢查項目: '[#DDA0DD]總檢查項目：[/#DDA0DD] {len(self.checks)}'
+  msg.解析度: '  解析度: {args.resolution}'
+  msg.請先執行: '
+
+    [#DA70D6]請先執行：[/#DA70D6]'
+  msg.請執行: '
+
+    [#DA70D6]請執行：[/#DA70D6]'
+  msg.請手動執行上述指令: '[#DDA0DD]請手動執行上述指令[/#DDA0DD]'
+  msg.請手動執行上述指令_2: '[#DDA0DD]請手動執行上述指令[/#DDA0DD]'
+  msg.警告: '[#DDA0DD]警告：[/#DDA0DD] {self.warnings}'
+  msg.讀取失敗: '[red]❌ 讀取失敗：{e}[/red]'
+  msg.重新執行系統檢查: '
+
+    [#DDA0DD]重新執行系統檢查...[/#DDA0DD]
+
+    '
+  msg.重新執行系統檢查_2: '
+
+    [#DDA0DD]重新執行系統檢查...[/#DDA0DD]
+
+    '
+  msg.重新執行驗證: '
+
+    [#DDA0DD]重新執行驗證...[/#DDA0DD]
+
+    '
+  msg.重新執行驗證_2: '
+
+    [#DDA0DD]重新執行驗證...[/#DDA0DD]
+
+    '
+  msg.重新執行驗證_3: '
+
+    [#DDA0DD]重新執行驗證...[/#DDA0DD]
+
+    '
+  msg.重新執行驗證_4: '
+
+    [#DDA0DD]重新執行驗證...[/#DDA0DD]
+
+    '
+  msg.金鑰未設定: '[#DDA0DD]API 金鑰未設定[/#DDA0DD]'
+  msg.金鑰未設定_2: '[#DDA0DD]API 金鑰未設定[/#DDA0DD]'
+  msg.金鑰配置方式: '[bold bright_magenta]API 金鑰配置方式[/bold bright_magenta]'
+  msg.金鑰配置方式_2: '[bold bright_magenta]API 金鑰配置方式[/bold bright_magenta]'
+  msg.錯誤: '[dim magenta]錯誤：[/red] {self.errors}'
+  msg.長寬比: '  長寬比: {args.aspect_ratio}
+
+    '
+  msg.預防性驗證系統: '
+
+    [bold magenta]🔍 Gemini 預防性驗證系統[/bold magenta]
+
+    '
+  msg.預防性驗證系統_2: '
+
+    [bold magenta]🔍 Gemini 預防性驗證系統[/bold magenta]
+
+    '
+  msg.飛行前檢查報告: '
+
+    [bold magenta]🔍 飛行前檢查報告 {status_icon} {status_text}[/bold magenta]
+
+    '
+  msg.驗證參數: '[#DDA0DD]🔍 驗證參數...[/#DDA0DD]'
+  msg.驗證參數_2: '[#DDA0DD]🔍 驗證參數...[/#DDA0DD]'
+veo_generator:
+  msg.下載影片中: '
+
+    [#DDA0DD]💾 下載影片中...[/#DDA0DD]'
+  msg.互動式影片生成: '
+
+    [bold magenta]🎬 Veo 互動式影片生成[/bold magenta]
+
+    '
+  msg.互動式影片生成_2: '
+
+    [bold magenta]🎬 Veo 互動式影片生成[/bold magenta]
+
+    '
+  msg.使用自動規劃分段: '[#DDA0DD]🤖 使用 AI 自動規劃分段...[/#DDA0DD]
+
+    '
+  msg.使用自動規劃分段_2: '[#DDA0DD]🤖 使用 AI 自動規劃分段...[/#DDA0DD]
+
+    '
+  msg.儲存路徑: '  儲存路徑：{output_path}'
+  msg.再見: '
+
+    [#DA70D6]再見！[/green]'
+  msg.再見_2: '
+
+    [#DA70D6]再見！[/green]'
+  msg.參數驗證失敗: '
+
+    [dim magenta]❌ 參數驗證失敗：[/red]'
+  msg.參數驗證失敗_2: '
+
+    [dim magenta]❌ 參數驗證失敗：[/red]'
+  msg.參數驗證通過: '[#DA70D6]✅ 參數驗證通過[/green]
+
+    '
+  msg.參數驗證通過_2: '[#DA70D6]✅ 參數驗證通過[/green]
+
+    '
+  msg.參考圖片張: '[#DDA0DD]參考圖片：[/#DDA0DD] {len(reference_images)} 張'
+  msg.單價: '  單價：NT${details['
+  msg.執行參數驗證: '[#DDA0DD]🔍 執行參數驗證...[/#DDA0DD]'
+  msg.執行參數驗證_2: '[#DDA0DD]🔍 執行參數驗證...[/#DDA0DD]'
+  msg.延伸影片: '[#DDA0DD]延伸影片：[/#DDA0DD] {video_to_extend}'
+  msg.建議: '     [#DDA0DD]建議：[/#DDA0DD]'
+  msg.建議_2: '     [#DDA0DD]建議：[/#DDA0DD]'
+  msg.影片大小: '
+
+    [#DDA0DD]⚠ 影片大小 {video_info['
+  msg.影片已儲存: '[#DA70D6]✓ 影片已儲存：{output_path}[/green]'
+  msg.影片生成: '[bold magenta]🎬 Veo 影片生成[/bold magenta]'
+  msg.影片生成工具: '[bold magenta]Gemini Veo 3.1 影片生成工具[/bold magenta]
+
+    '
+  msg.影片生成工具_2: '[bold magenta]Gemini Veo 3.1 影片生成工具[/bold magenta]
+
+    '
+  msg.影片資訊: '
+
+    [#DDA0DD]📊 影片資訊：[/#DDA0DD]'
+  msg.影片路徑: '[#DDA0DD]影片路徑：[/#DDA0DD] {final_video}'
+  msg.影片預處理功能已啟用: '[#DA70D6]✓ 影片預處理功能已啟用[/green]'
+  msg.影片預處理功能已啟用_2: '[#DA70D6]✓ 影片預處理功能已啟用[/green]'
+  msg.您想生成秒的影片但限: '[#DDA0DD]您想生成 {duration} 秒的影片，但 Veo 3.1 限制為 8 秒。[/#DDA0DD]'
+  msg.我可以自動使用分段生: '[#DDA0DD]我可以自動使用 Flow Engine 分段生成並合併！[/#DDA0DD]
+
+    '
+  msg.提示: '[#DDA0DD]提示：[/#DDA0DD] {prompt}'
+  msg.提示不存在進階錯誤處: '[#DDA0DD]提示：gemini_error_handler.py 不存在，進階錯誤處理已停用[/#DDA0DD]'
+  msg.方形: '  3. 1:1 (方形)'
+  msg.方形_2: '  3. 1:1 (方形)'
+  msg.智能解決方案: '
+
+    [bold yellow]💡 智能解決方案[/bold yellow]'
+  msg.智能解決方案_2: '
+
+    [bold yellow]💡 智能解決方案[/bold yellow]'
+  msg.模型: '[#DDA0DD]模型：[/#DDA0DD] {model}'
+  msg.模組不存在: '[dim magenta]❌ Flow Engine 模組不存在[/red]'
+  msg.模組不存在_2: '[dim magenta]❌ Flow Engine 模組不存在[/red]'
+  msg.橫向: '  1. 16:9 (橫向)'
+  msg.橫向_2: '  1. 16:9 (橫向)'
+  msg.檔案大小: '  檔案大小：{file_size:.2f} MB'
+  msg.正在切換到: '
+
+    [#DA70D6]✅ 正在切換到 Flow Engine...[/green]
+
+    '
+  msg.正在切換到_2: '
+
+    [#DA70D6]✅ 正在切換到 Flow Engine...[/green]
+
+    '
+  msg.無效選擇使用預設模型: '[#DDA0DD]無效選擇，使用預設模型[/#DDA0DD]'
+  msg.無效選擇使用預設模型_2: '[#DDA0DD]無效選擇，使用預設模型[/#DDA0DD]'
+  msg.無法檢查影片: '[#DDA0DD]⚠ 無法檢查影片：{e}[/#DDA0DD]'
+  msg.生成失敗: '
+
+    [dim magenta]❌ 生成失敗：{e}[/red]'
+  msg.生成完成: '
+
+    [bold green]✅ Flow Engine 生成完成！[/bold green]'
+  msg.發現警告: '
+
+    [#DDA0DD]⚠️  發現警告：[/#DDA0DD]'
+  msg.發現警告_2: '
+
+    [#DDA0DD]⚠️  發現警告：[/#DDA0DD]'
+  msg.直向: '  2. 9:16 (直向)'
+  msg.直向_2: '  2. 9:16 (直向)'
+  msg.請確認存在: '[#DDA0DD]請確認 gemini_flow_engine.py 存在[/#DDA0DD]'
+  msg.請確認存在_2: '[#DDA0DD]請確認 gemini_flow_engine.py 存在[/#DDA0DD]'
+  msg.請調整時長至秒或更短: '
+
+    [#DDA0DD]請調整時長至 8 秒或更短後重試[/#DDA0DD]'
+  msg.請調整時長至秒或更短_2: '
+
+    [#DDA0DD]請調整時長至 8 秒或更短後重試[/#DDA0DD]'
+  msg.請選擇模型: '
+
+    [#DDA0DD]請選擇 Veo 模型：[/#DDA0DD]'
+  msg.請選擇模型_2: '
+
+    [#DDA0DD]請選擇 Veo 模型：[/#DDA0DD]'
+  msg.負面提示: '[#DDA0DD]負面提示：[/#DDA0DD] {negative_prompt}'
+  msg.費用預估: '
+
+    [#DDA0DD]💰 費用預估：[/#DDA0DD]'
+  msg.選擇長寬比: '
+
+    [#DDA0DD]選擇長寬比：[/#DDA0DD]'
+  msg.選擇長寬比_2: '
+
+    [#DDA0DD]選擇長寬比：[/#DDA0DD]'
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤_2: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.長寬比: '[#DDA0DD]長寬比：[/#DDA0DD] {aspect_ratio}'
+  msg.長度秒: '[#DDA0DD]長度：[/#DDA0DD] {duration} 秒'
+  msg.開啟影片中: '
+
+    [#DDA0DD]🎥 開啟影片中...[/#DDA0DD]'
+  msg.開啟影片中_2: '
+
+    [#DDA0DD]🎥 開啟影片中...[/#DDA0DD]'
+  msg.開始生成影片: '
+
+    [#DDA0DD]⏳ 開始生成影片...[/#DDA0DD]
+
+    '
+  msg.開始生成影片_2: '
+
+    [#DDA0DD]⏳ 開始生成影片...[/#DDA0DD]
+
+    '
+  msg.預處理功能初始化失敗: '[#DDA0DD]⚠ 預處理功能初始化失敗：{e}[/#DDA0DD]'
+video_analyzer:
+  msg.使用模型: '
+
+    [#DDA0DD]🤖 使用模型：{self.model_name}[/#DDA0DD]'
+  msg.再見: '
+
+    [#DA70D6]再見！[/green]'
+  msg.再見_2: '
+
+    [#DA70D6]再見！[/green]'
+  msg.再見_3: '
+
+
+    [#DA70D6]再見！[/green]'
+  msg.再見_4: '
+
+
+    [#DA70D6]再見！[/green]'
+  msg.分析失敗: '[dim magenta]✗ 分析失敗：{e}[/red]'
+  msg.列出檔案失敗: '[dim magenta]✗ 列出檔案失敗：{e}[/red]'
+  msg.名稱: '  名稱：{video_file.display_name}'
+  msg.名稱_2: '   名稱: {f.name}'
+  msg.已上傳的檔案: '
+
+    [#DDA0DD]📁 已上傳的檔案：[/#DDA0DD]
+
+    '
+  msg.已上傳的檔案_2: '
+
+    [#DDA0DD]📁 已上傳的檔案：[/#DDA0DD]
+
+    '
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已載入模型: '[#DA70D6]✓ 已載入模型：{model_name}[/green]'
+  msg.建立時間: '  建立時間：{video_file.create_time}'
+  msg.建立時間_2: '   建立時間: {f.create_time}'
+  msg.影片互動式對話模型: '[bold magenta]影片互動式對話（模型：{self.model_name}）[/bold magenta]'
+  msg.影片已就緒可以開始分: '[#DA70D6]✓ 影片已就緒，可以開始分析[/green]'
+  msg.影片已就緒可以開始分_2: '[#DA70D6]✓ 影片已就緒，可以開始分析[/green]'
+  msg.影片已就緒可以開始分_3: '[#DA70D6]✓ 影片已就緒，可以開始分析[/green]'
+  msg.影片資訊: '
+
+    [#DDA0DD]📹 影片資訊：[/#DDA0DD]'
+  msg.影片資訊_2: '
+
+    [#DDA0DD]影片資訊：[/#DDA0DD]'
+  msg.提示: '[#DDA0DD]💭 提示：{prompt}[/#DDA0DD]
+
+    '
+  msg.提示_2: '
+
+    [#DDA0DD]提示：[/#DDA0DD]'
+  msg.提示_3: '
+
+    [#DDA0DD]提示：[/#DDA0DD]'
+  msg.支援的格式: '支援的格式: {'
+  msg.本次成本影片提示回應: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (影片+提示: {input_tokens:,}
+    tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]'
+  msg.本次成本影片提示回應_2: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (影片+提示: {input_tokens:,},
+    回應: {output_tokens:,}) | 累計: NT${global_pricing_calculator.total_cost * USD_TO_TWD:.2f}[/dim]
+
+    '
+  msg.本次成本影片提示思考: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (影片+提示: {input_tokens:,}
+    tokens, 思考: {thinking_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f} (${global_pricing_calculator.total_cost:.6f})[/dim]'
+  msg.本次成本影片提示思考_2: '[dim]💰 本次成本: NT${cost * USD_TO_TWD:.2f} (影片+提示: {input_tokens:,},
+    思考: {thinking_tokens:,}, 回應: {output_tokens:,}) | 累計: NT${global_pricing_calculator.total_cost
+    * USD_TO_TWD:.2f}[/dim]
+
+    '
+  msg.格式: '   格式：{file_ext}'
+  msg.檔案名稱: '   檔案名稱：{os.path.basename(video_path)}'
+  msg.檔案名稱_2: '[#DA70D6]✓ 檔案名稱：{video_file.name}[/green]'
+  msg.檔案名稱_3: '  檔案名稱：{video_file.name}'
+  msg.檔案大小: '   檔案大小：{file_size_mb:.2f} MB'
+  msg.檔案已存在: '[#DA70D6]✓ 檔案已存在：{existing_file.name}[/green]'
+  msg.檔案正在處理中等待完: '[#DDA0DD]⏳ 檔案正在處理中，等待完成...[/#DDA0DD]'
+  msg.檔案正在處理中等待完_2: '[#DDA0DD]⏳ 檔案正在處理中，等待完成...[/#DDA0DD]'
+  msg.檢查已上傳檔案時發生: '[#DDA0DD]檢查已上傳檔案時發生錯誤：{e}[/#DDA0DD]'
+  msg.檢查是否已上傳: '
+
+    [#DDA0DD]🔍 檢查是否已上傳...[/#DDA0DD]'
+  msg.檢查是否已上傳_2: '
+
+    [#DDA0DD]🔍 檢查是否已上傳...[/#DDA0DD]'
+  msg.沒有找到已上傳的影片: '[#DDA0DD]沒有找到已上傳的影片檔案[/#DDA0DD]'
+  msg.沒有找到已上傳的影片_2: '[#DDA0DD]沒有找到已上傳的影片檔案[/#DDA0DD]'
+  msg.注意使用此檔案進行分: '[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'
+  msg.狀態: '  狀態：{video_file.state.name}'
+  msg.狀態_2: '   狀態: {f.state.name}'
+  msg.直接輸入問題開始分析: '  - 直接輸入問題開始分析'
+  msg.直接輸入問題開始分析_2: '  - 直接輸入問題開始分析'
+  msg.等待影片處理: '
+
+    [#DDA0DD]⏳ 等待影片處理...[/#DDA0DD]'
+  msg.等待影片處理_2: '
+
+    [#DDA0DD]⏳ 等待影片處理...[/#DDA0DD]'
+  msg.警告可能不受支援: '[#DDA0DD]警告：{file_ext} 可能不受支援[/#DDA0DD]'
+  msg.輸入: '  - 輸入 '
+  msg.輸入_2: '  - 輸入 '
+  msg.輸入_3: '  - 輸入 '
+  msg.輸入_4: '  - 輸入 '
+  msg.過期時間: '  過期時間：{video_file.expiration_time}
+
+    '
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]
+
+    '
+  msg.錯誤_2: '
+
+    [dim magenta]錯誤：{e}[/red]'
+video_effects:
+  msg.不透明度: '不透明度: {opacity}'
+  msg.位置: '位置: {position}'
+  msg.倍數品質調整速度慢動: '  speed <倍數> [品質]                  - 調整速度（0.5=慢動作, 2.0=2倍速）'
+  msg.倍數品質調整速度慢動_2: '  speed <倍數> [品質]                  - 調整速度（0.5=慢動作, 2.0=2倍速）'
+  msg.優化單次編碼應用所有: '
+
+    [#DA70D6]✨ 優化：單次編碼應用所有濾鏡（{len(filter_names)}x 提升）[/green]
+
+    '
+  msg.可用指令: '
+
+    [#DDA0DD]可用指令：[/#DDA0DD]'
+  msg.可用指令_2: '
+
+    [#DDA0DD]可用指令：[/#DDA0DD]'
+  msg.品質: '品質: {quality}'
+  msg.品質_2: '品質: {quality}'
+  msg.品質_3: '品質: {quality}'
+  msg.圖片路徑位置透明度添: '  watermark <圖片路徑> [位置] [透明度] - 添加浮水印'
+  msg.圖片路徑位置透明度添_2: '  watermark <圖片路徑> [位置] [透明度] - 添加浮水印'
+  msg.已切換至: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已切換至_2: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已切換至_3: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已切換至_4: '[#DA70D6]✅ 已切換至：{video_path}[/green]
+
+    '
+  msg.已切換至_5: '[#DA70D6]✅ 已切換至：{watermark_path}[/green]
+
+    '
+  msg.影片已裁切: '
+
+    [#DA70D6]✅ 影片已裁切：{output_path}[/green]'
+  msg.影片特效處理工具: '[bold magenta]Gemini 影片特效處理工具[/bold magenta]
+
+    '
+  msg.影片特效處理工具_2: '[bold magenta]Gemini 影片特效處理工具[/bold magenta]
+
+    '
+  msg.影片路徑指令參數: '  python gemini_video_effects.py <影片路徑> <指令> [參數...]'
+  msg.影片路徑指令參數_2: '  python gemini_video_effects.py <影片路徑> <指令> [參數...]'
+  msg.應用濾鏡效果: '
+
+    [#DDA0DD]🎨 應用濾鏡效果[/#DDA0DD]'
+  msg.所有濾鏡已應用: '
+
+    [#DA70D6]✅ 所有濾鏡已應用：{output_path}[/green]'
+  msg.批次應用濾鏡效果: '
+
+    [#DDA0DD]🎨 批次應用濾鏡效果[/#DDA0DD]'
+  msg.提示單次編碼避免了次: '[dim]提示：單次編碼避免了 {len(filter_names)-1} 次額外的品質損失[/dim]'
+  msg.未知指令: '[dim magenta]未知指令：{command}[/red]'
+  msg.檔案大小: 檔案大小：{file_size:.2f} MB
+  msg.檔案大小_2: 檔案大小：{file_size:.2f} MB
+  msg.檔案大小_3: 檔案大小：{file_size:.2f} MB
+  msg.檔案大小_4: 檔案大小：{file_size:.2f} MB
+  msg.檔案大小_5: 檔案大小：{file_size:.2f} MB
+  msg.此操作需要重新編碼影: '
+
+    [#DDA0DD]⚠️  此操作需要重新編碼影片（使用高品質設置）[/#DDA0DD]
+
+    '
+  msg.此操作需要重新編碼影_2: '
+
+    [#DDA0DD]⚠️  此操作需要重新編碼影片（使用高品質設置）[/#DDA0DD]
+
+    '
+  msg.此操作需要重新編碼影_3: '
+
+    [#DDA0DD]⚠️  此操作需要重新編碼影片（使用高品質設置）[/#DDA0DD]
+
+    '
+  msg.浮水印: '浮水印: {os.path.basename(watermark_path)}'
+  msg.浮水印已添加: '
+
+    [#DA70D6]✅ 浮水印已添加：{output_path}[/green]'
+  msg.添加浮水印: '
+
+    [#DDA0DD]💧 添加浮水印[/#DDA0DD]'
+  msg.濾鏡: '濾鏡: {filter_name}'
+  msg.濾鏡名稱品質應用濾鏡: '  filter <濾鏡名稱> [品質]             - 應用濾鏡（grayscale, sepia, vintage,
+    sharpen, blur）'
+  msg.濾鏡名稱品質應用濾鏡_2: '  filter <濾鏡名稱> [品質]             - 應用濾鏡（grayscale, sepia, vintage,
+    sharpen, blur）'
+  msg.濾鏡已應用: '
+
+    [#DA70D6]✅ 濾鏡已應用：{output_path}[/green]'
+  msg.濾鏡鏈: '濾鏡鏈: {'
+  msg.片段長度: '片段長度: {trim_duration:.2f}s
+
+    '
+  msg.用法: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.用法_2: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.範例: '
+
+    [#DDA0DD]範例：[/#DDA0DD]'
+  msg.範例_2: '
+
+    [#DDA0DD]範例：[/#DDA0DD]'
+  msg.結束時間: '結束時間: {end_time}s'
+  msg.處理失敗: '
+
+    [dim magenta]❌ 處理失敗：{error_msg}[/red]'
+  msg.處理失敗_2: '
+
+    [dim magenta]❌ 處理失敗：{error_msg}[/red]'
+  msg.處理失敗_3: '
+
+    [dim magenta]❌ 處理失敗：{error_msg}[/red]'
+  msg.處理失敗_4: '
+
+    [dim magenta]❌ 處理失敗：{error_msg}[/red]'
+  msg.處理失敗_5: '
+
+    [dim magenta]❌ 處理失敗：{error_msg}[/red]'
+  msg.處理完成: '
+
+    [#DA70D6]✅ 處理完成：{output}[/green]'
+  msg.裁切影片時間段無損: '
+
+    [#DDA0DD]✂️ 裁切影片時間段（無損）[/#DDA0DD]'
+  msg.調整影片速度: '
+
+    [#DDA0DD]⚡ 調整影片速度[/#DDA0DD]'
+  msg.請安裝: '[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'
+  msg.請安裝_2: '[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'
+  msg.速度倍數: '速度倍數: {speed_factor}x'
+  msg.速度已調整: '
+
+    [#DA70D6]✅ 速度已調整：{output_path}[/green]'
+  msg.錯誤: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤未找到: '[dim magenta]錯誤：未找到 ffmpeg[/red]'
+  msg.錯誤未找到_2: '[dim magenta]錯誤：未找到 ffmpeg[/red]'
+  msg.錯誤無法獲取影片時長: '[dim magenta]錯誤：無法獲取影片時長[/red]'
+  msg.錯誤詳情: '[dim]錯誤詳情：{e}[/dim]'
+  msg.錯誤需要圖片路徑: '[dim magenta]錯誤：watermark 需要圖片路徑[/red]'
+  msg.錯誤需要圖片路徑_2: '[dim magenta]錯誤：watermark 需要圖片路徑[/red]'
+  msg.錯誤需要濾鏡名稱: '[dim magenta]錯誤：filter 需要濾鏡名稱[/red]'
+  msg.錯誤需要濾鏡名稱_2: '[dim magenta]錯誤：filter 需要濾鏡名稱[/red]'
+  msg.錯誤需要速度倍數: '[dim magenta]錯誤：speed 需要速度倍數[/red]'
+  msg.錯誤需要速度倍數_2: '[dim magenta]錯誤：speed 需要速度倍數[/red]'
+  msg.錯誤需要開始和結束時: '[dim magenta]錯誤：trim 需要開始和結束時間[/red]'
+  msg.錯誤需要開始和結束時_2: '[dim magenta]錯誤：trim 需要開始和結束時間[/red]'
+  msg.開始時間: '開始時間: {start_time}s'
+  msg.開始秒數結束秒數裁切: '  trim <開始秒數> <結束秒數>           - 裁切時間段（無損）'
+  msg.開始秒數結束秒數裁切_2: '  trim <開始秒數> <結束秒數>           - 裁切時間段（無損）'
+video_preprocessor:
+  msg.使用分割影片為多個小: '  1. 使用 split_by_duration() 分割影片為多個小片段'
+  msg.使用較短的影片片段: '  3. 使用較短的影片片段'
+  msg.分割影片: '
+
+    [#DDA0DD]✂️  分割影片...[/#DDA0DD]'
+  msg.分割影片_2: '  split        - 分割影片'
+  msg.分割影片_3: '  split        - 分割影片'
+  msg.分割片段失敗: '[dim magenta]✗ 分割片段 {i+1} 失敗[/red]'
+  msg.命令: '
+
+    [#DDA0DD]命令：[/#DDA0DD]'
+  msg.命令_2: '
+
+    [#DDA0DD]命令：[/#DDA0DD]'
+  msg.在影片編輯軟體中預先: '  2. 在影片編輯軟體中預先分割影片'
+  msg.壓縮完成: '
+
+    [#DA70D6]✓ 壓縮完成：{output}[/green]'
+  msg.壓縮影片: '  compress     - 壓縮影片'
+  msg.壓縮影片_2: '  compress     - 壓縮影片'
+  msg.已分割為個片段: '
+
+    [#DA70D6]✓ 已分割為 {len(segment_paths)} 個片段[/green]'
+  msg.已分割為個片段_2: '
+
+    [#DA70D6]✓ 已分割為 {len(segments)} 個片段[/green]'
+  msg.已提取幀: '
+
+    [#DA70D6]✓ 已提取 {len(frame_paths)} 幀[/green]'
+  msg.已提取幀_2: '
+
+    [#DA70D6]✓ 已提取 {len(frames)} 幀[/green]'
+  msg.建議解決方案: '
+
+    [#DDA0DD]建議解決方案：[/#DDA0DD]'
+  msg.影片時長秒: '  影片時長：{duration:.2f} 秒'
+  msg.影片時長秒_2: '  影片時長：{duration:.2f} 秒'
+  msg.影片資訊: '
+
+    [#DDA0DD]📊 影片資訊：[/#DDA0DD]'
+  msg.影片資訊_2: '
+
+    [#DDA0DD]📊 影片資訊：[/#DDA0DD]'
+  msg.影片資訊_3: '
+
+    [#DDA0DD]📊 影片資訊：[/#DDA0DD]'
+  msg.提取幀: '  ✓ 提取幀 {i+1}：{timestamp:.2f}s'
+  msg.提取幀失敗: '  ✗ 提取幀 {i+1} 失敗：{e}'
+  msg.提取數量幀: '  提取數量：{num_frames} 幀'
+  msg.提取關鍵幀: '
+
+    [#DDA0DD]🖼️  提取關鍵幀...[/#DDA0DD]'
+  msg.提取關鍵幀_2: '  keyframes    - 提取關鍵幀'
+  msg.提取關鍵幀_3: '  keyframes    - 提取關鍵幀'
+  msg.時長: '  時長：{info['
+  msg.未知命令: '[dim magenta]未知命令：{command}[/red]'
+  msg.檔案大小: '  檔案大小：{current_size_mb:.2f} MB'
+  msg.檔案大小符合要求: '[#DA70D6]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/green]'
+  msg.片段數量: '  片段數量：{num_segments}'
+  msg.片段時長秒: '  片段時長：{segment_duration} 秒'
+  msg.用法: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.用法_2: '[#DDA0DD]用法：[/#DDA0DD]'
+  msg.當前大小: '  當前大小：{current_size_mb:.2f} MB'
+  msg.編碼: '  編碼：{info['
+  msg.解析度: '  解析度：{info['
+  msg.請安裝: '[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'
+  msg.請安裝_2: '[#DDA0DD]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#DDA0DD]'
+  msg.警告最多支援張參考圖: '[#DDA0DD]警告：Veo 最多支援 3 張參考圖片，將限制為 3 張[/#DDA0DD]'
+  msg.警告最多支援張參考圖_2: '[#DDA0DD]警告：Veo 最多支援 3 張參考圖片，將限制為 3 張[/#DDA0DD]'
+  msg.錯誤: '[dim magenta]錯誤：{stderr[:200]}[/red]'
+  msg.錯誤_2: '
+
+    [dim magenta]錯誤：{e}[/red]'
+  msg.錯誤影片檔案過大: '
+
+    [dim magenta]✗ 錯誤：影片檔案過大[/red]'
+  msg.錯誤未找到或: '[dim magenta]錯誤：未找到 ffmpeg 或 ffprobe[/red]'
+  msg.錯誤未找到或_2: '[dim magenta]錯誤：未找到 ffmpeg 或 ffprobe[/red]'
+  msg.限制大小: '  限制大小：{target_size_mb} MB'
+  msg.顯示影片資訊預設: '  info         - 顯示影片資訊（預設）'
+  msg.顯示影片資訊預設_2: '  info         - 顯示影片資訊（預設）'
+video_summarizer:
+  msg.主要話題: '
+
+    [bold magenta]🏷️  主要話題：[/bold magenta] {'
+  msg.分析影片內容: '
+
+    [#DDA0DD]🔍 分析影片內容...[/#DDA0DD]'
+  msg.分析影片內容_2: '
+
+    [#DDA0DD]🔍 分析影片內容...[/#DDA0DD]'
+  msg.執行場景檢測: '
+
+    [#DDA0DD]📦 執行場景檢測...[/#DDA0DD]'
+  msg.執行場景檢測_2: '
+
+    [#DDA0DD]📦 執行場景檢測...[/#DDA0DD]'
+  msg.已保存: '[#DA70D6]✓ JSON 已保存：{output_file}[/green]'
+  msg.已保存_2: '[#DA70D6]✓ TXT 已保存：{output_file}[/green]'
+  msg.已保存_3: '[#DA70D6]✓ Markdown 已保存：{output_file}[/green]'
+  msg.已生成個章節: ✓ 已生成 {len(chapters)} 個章節
+  msg.建議標題: '
+
+    [bold yellow]💡 建議標題：[/bold yellow] {summary.title}
+
+    '
+  msg.影片: 📁 影片：{os.path.basename(video_path)}
+  msg.影片摘要: '[bold magenta]📝 影片摘要：{summary.video_name}[/bold magenta]'
+  msg.描述已保存: '[#DA70D6]✓ YouTube 描述已保存：{output_file}[/green]'
+  msg.提取主題和標籤: '
+
+    [#DDA0DD]🏷️  提取主題和標籤...[/#DDA0DD]'
+  msg.提取主題和標籤_2: '
+
+    [#DDA0DD]🏷️  提取主題和標籤...[/#DDA0DD]'
+  msg.摘要內容: '[bold magenta]📄 摘要內容：[/bold magenta]
+
+    '
+  msg.摘要內容_2: '[bold magenta]📄 摘要內容：[/bold magenta]
+
+    '
+  msg.摘要生成完成: '
+
+    [#DA70D6]✓ 摘要生成完成！[/green]'
+  msg.摘要生成完成_2: '
+
+    [#DA70D6]✓ 摘要生成完成！[/green]'
+  msg.智能影片摘要分析: '
+
+    [bold magenta]📝 智能影片摘要分析[/bold magenta]
+
+    '
+  msg.智能影片摘要分析_2: '
+
+    [bold magenta]📝 智能影片摘要分析[/bold magenta]
+
+    '
+  msg.標籤: '[bold magenta]🔖 標籤：[/bold magenta] {'
+  msg.檢測到個場景: ✓ 檢測到 {len(scenes)} 個場景
+  msg.沒有可顯示的摘要: '[#DDA0DD]沒有可顯示的摘要[/#DDA0DD]'
+  msg.沒有可顯示的摘要_2: '[#DDA0DD]沒有可顯示的摘要[/#DDA0DD]'
+  msg.生成多層次摘要: '
+
+    [#DDA0DD]✍️  生成多層次摘要...[/#DDA0DD]'
+  msg.生成多層次摘要_2: '
+
+    [#DDA0DD]✍️  生成多層次摘要...[/#DDA0DD]'
+  msg.生成章節標記: '
+
+    [#DDA0DD]📑 生成章節標記...[/#DDA0DD]'
+  msg.生成章節標記_2: '
+
+    [#DDA0DD]📑 生成章節標記...[/#DDA0DD]'
+  msg.章節標記: '[bold magenta]📑 章節標記：[/bold magenta]
+
+    '
+  msg.章節標記_2: '[bold magenta]📑 章節標記：[/bold magenta]
+
+    '
+  msg.總長度: ⏱️  總長度：{self._format_time(duration)}
+  msg.警告生成摘要時出錯使: '[#DDA0DD]警告：生成摘要時出錯，使用預設摘要: {e}[/#DDA0DD]'
+  msg.錯誤找不到影片檔案: '[dim magenta]錯誤：找不到影片檔案：{args.video}[/red]'
+  msg.錯誤無法獲取影片資訊: '[dim magenta]錯誤：無法獲取影片資訊[/red]'
+  msg.錯誤無法獲取影片資訊_2: '[dim magenta]錯誤：無法獲取影片資訊[/red]'
+  msg.風格: 📊 風格：{summary_style}
+history:
+  search_title: 搜尋結果
+  search_no_results: 未找到相關對話
+  search_keyword: 搜尋關鍵字
+  search_placeholder: 輸入關鍵字搜尋歷史對話...
+  list_title: 對話列表
+  list_empty: 目前沒有對話記錄
+  list_loading: 載入對話列表中...
+  conversation_count: '{count} 個對話'
+  message_count: '{count} 則訊息'
+  export_success: 已匯出至 {path}
+  export_failed: '匯出失敗: {error}'
+  export_format: 匯出格式
+  export_format_json: JSON 格式
+  export_format_markdown: Markdown 格式
+  export_progress: 匯出中... {current}/{total}
+  delete_confirm: 確定刪除對話記錄？（無法復原）
+  delete_success: '已刪除對話記錄: {file}'
+  delete_failed: '刪除失敗: {error}'
+  delete_warning: ⚠️  刪除後無法復原，請謹慎操作
+  statistics: 統計資訊
+  total_conversations: 對話總數
+  total_messages: 訊息總數
+  total_size: 總大小
+  date_range: 日期範圍
+  role_distribution: 角色分布
+  preview: 內容預覽
+  full_content: 完整內容
+  timestamp: 時間戳
+  file_name: 檔案名稱
+  command_search: /search <關鍵字> - 搜尋對話記錄
+  command_history: /history - 列出最近對話
+  command_export: /export <路徑> [格式] - 匯出對話記錄
+  command_stats: /stats - 顯示統計資訊

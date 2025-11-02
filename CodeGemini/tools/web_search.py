@@ -110,14 +110,14 @@ class WebSearch:
         # 驗證設定
         if engine == SearchEngine.GOOGLE_CUSTOM:
             if not self.api_key or not self.cx_id:
-                console.print(f"[#DDA0DD]⚠️  {safe_t('web_search.google_needs_api', 'Google Custom Search 需要 API Key 和 CSE ID')}[/#DDA0DD]")
-                console.print(f"[#DDA0DD]   {safe_t('web_search.fallback_to_duckduckgo', '回退到 DuckDuckGo')}[/#DDA0DD]")
+                console.print(f"[#B565D8]⚠️  {safe_t('web_search.google_needs_api', 'Google Custom Search 需要 API Key 和 CSE ID')}[/#B565D8]")
+                console.print(f"[#B565D8]   {safe_t('web_search.fallback_to_duckduckgo', '回退到 DuckDuckGo')}[/#B565D8]")
                 self.engine = SearchEngine.DUCKDUCKGO
 
         elif engine == SearchEngine.BRAVE:
             if not self.api_key:
-                console.print(f"[#DDA0DD]⚠️  {safe_t('web_search.brave_needs_api', 'Brave Search 需要 API Key')}[/#DDA0DD]")
-                console.print(f"[#DDA0DD]   {safe_t('web_search.fallback_to_duckduckgo', '回退到 DuckDuckGo')}[/#DDA0DD]")
+                console.print(f"[#B565D8]⚠️  {safe_t('web_search.brave_needs_api', 'Brave Search 需要 API Key')}[/#B565D8]")
+                console.print(f"[#B565D8]   {safe_t('web_search.fallback_to_duckduckgo', '回退到 DuckDuckGo')}[/#B565D8]")
                 self.engine = SearchEngine.DUCKDUCKGO
 
     def search(
@@ -141,7 +141,7 @@ class WebSearch:
         Returns:
             List[SearchResult]: 搜尋結果列表
         """
-        console.print(f"\n[#DDA0DD]🔍 {safe_t('web_search.searching', '搜尋')}：{query}[/#DDA0DD]")
+        console.print(f"\n[#B565D8]🔍 {safe_t('web_search.searching', '搜尋')}：{query}[/#B565D8]")
         console.print(f"[dim]{safe_t('web_search.search_engine', '搜尋引擎')}：{self.engine.value}[/dim]")
 
         try:
@@ -177,12 +177,12 @@ class WebSearch:
 
                 self.pricing_tracker.track_search_usage(engine_key, query_count=1)
 
-            console.print(f"[#DA70D6]✓ {safe_t('web_search.found_results', '找到')} {len(results)} {safe_t('common.count_unit', '個')}{safe_t('web_search.results', '結果')}[/green]")
+            console.print(f"[#B565D8]✓ {safe_t('web_search.found_results', '找到')} {len(results)} {safe_t('common.count_unit', '個')}{safe_t('web_search.results', '結果')}[/#B565D8]")
 
             return results
 
         except Exception as e:
-            console.print(f"[dim #DDA0DD]✗ {safe_t('web_search.search_failed', '搜尋失敗')}：{e}[/red]")
+            console.print(f"[dim #B565D8]✗ {safe_t('web_search.search_failed', '搜尋失敗')}：{e}[/red]")
             return []
 
     def _search_duckduckgo(
@@ -217,7 +217,7 @@ class WebSearch:
             return results[:max_results]
 
         except Exception as e:
-            console.print(f"[#DDA0DD]⚠️  {safe_t('web_search.duckduckgo_error', 'DuckDuckGo 搜尋錯誤')}：{e}[/#DDA0DD]")
+            console.print(f"[#B565D8]⚠️  {safe_t('web_search.duckduckgo_error', 'DuckDuckGo 搜尋錯誤')}：{e}[/#B565D8]")
             return []
 
     def _parse_duckduckgo_html(self, html: str) -> List[SearchResult]:
@@ -306,7 +306,7 @@ class WebSearch:
             return results
 
         except Exception as e:
-            console.print(f"[#DDA0DD]⚠️  {safe_t('web_search.google_error', 'Google Custom Search 錯誤')}：{e}[/#DDA0DD]")
+            console.print(f"[#B565D8]⚠️  {safe_t('web_search.google_error', 'Google Custom Search 錯誤')}：{e}[/#B565D8]")
             return []
 
     def _search_brave(
@@ -354,20 +354,20 @@ class WebSearch:
             return results
 
         except Exception as e:
-            console.print(f"[#DDA0DD]⚠️  {safe_t('web_search.brave_error', 'Brave Search 錯誤')}：{e}[/#DDA0DD]")
+            console.print(f"[#B565D8]⚠️  {safe_t('web_search.brave_error', 'Brave Search 錯誤')}：{e}[/#B565D8]")
             return []
 
     def display_results(self, results: List[SearchResult]) -> None:
         """展示搜尋結果"""
         if not results:
-            console.print(f"[#DDA0DD]⚠️  {safe_t('web_search.no_results', '無搜尋結果')}[/#DDA0DD]")
+            console.print(f"[#B565D8]⚠️  {safe_t('web_search.no_results', '無搜尋結果')}[/#B565D8]")
             return
 
         console.print(f"\n[bold]🔍 {safe_t('web_search.search_results', '搜尋結果')}（{len(results)} {safe_t('common.count_unit', '個')}）[/bold]\n")
 
         for result in results:
-            console.print(f"[bold #DDA0DD]{result.rank}. {result.title}[/bold #DDA0DD]")
-            console.print(f"   [#DDA0DD]{result.url}[/#DDA0DD]")
+            console.print(f"[bold #B565D8]{result.rank}. {result.title}[/bold #B565D8]")
+            console.print(f"   [#B565D8]{result.url}[/#B565D8]")
             if result.snippet:
                 # 限制摘要長度
                 snippet = result.snippet[:200] + "..." if len(result.snippet) > 200 else result.snippet
@@ -381,7 +381,7 @@ def main():
     """Web Search 命令列工具"""
     import sys
 
-    console.print("\n[bold #DDA0DD]CodeGemini Web Search Tool[/bold #DDA0DD]\n")
+    console.print("\n[bold #B565D8]CodeGemini Web Search Tool[/bold #B565D8]\n")
 
     if len(sys.argv) < 2:
         console.print(f"{safe_t('common.usage', '用法')}：")

@@ -119,7 +119,7 @@ class ContextBuilder:
         Returns:
             Context: 建立的上下文
         """
-        console.print(safe_t("context.build.starting", fallback="\n[#DDA0DD]🔨 建立任務上下文...[/#DDA0DD]"))
+        console.print(safe_t("context.build.starting", fallback="\n[#B565D8]🔨 建立任務上下文...[/#B565D8]"))
         console.print(safe_t("context.build.task", fallback="  任務：{task}...").format(task=task_description[:60]))
 
         # 步驟 1：掃描專案（如果還沒掃描）
@@ -171,7 +171,7 @@ class ContextBuilder:
             }
         )
 
-        console.print(safe_t("context.build.completed", fallback="[#DA70D6]✓ 上下文已建立[/green]"))
+        console.print(safe_t("context.build.completed", fallback="[#B565D8]✓ 上下文已建立[/#B565D8]"))
         console.print(safe_t("context.build.files", fallback="  包含檔案：{count}").format(count=context.included_files))
         console.print(safe_t("context.build.tokens", fallback="  預估 tokens：{tokens:,}").format(tokens=context.total_tokens))
         console.print(safe_t("context.build.usage", fallback="  預算使用率：{usage:.1f}%").format(usage=context.total_tokens / context.token_budget * 100))
@@ -195,7 +195,7 @@ class ContextBuilder:
         Returns:
             List[str]: 排序後的檔案列表（由高到低）
         """
-        console.print(safe_t("context.relevance.calculating", fallback="\n[#DDA0DD]📊 計算檔案相關性...[/#DDA0DD]"))
+        console.print(safe_t("context.relevance.calculating", fallback="\n[#B565D8]📊 計算檔案相關性...[/#B565D8]"))
 
         file_scores: List[Tuple[str, float]] = []
 
@@ -220,8 +220,8 @@ class ContextBuilder:
         file_scores.sort(key=lambda x: x[1], reverse=True)
 
         # 顯示前 10 個最相關的檔案
-        console.print(safe_t("context.relevance.completed", fallback="[#DA70D6]✓ 相關性評分完成[/green]"))
-        console.print(safe_t("context.relevance.top10", fallback="\n[#DDA0DD]前 10 個最相關檔案：[/#DDA0DD]"))
+        console.print(safe_t("context.relevance.completed", fallback="[#B565D8]✓ 相關性評分完成[/#B565D8]"))
+        console.print(safe_t("context.relevance.top10", fallback="\n[#B565D8]前 10 個最相關檔案：[/#B565D8]"))
         for i, (file, score) in enumerate(file_scores[:10], 1):
             level = self._get_relevance_level(score)
             console.print(f"  {i}. [{level.value}] {os.path.basename(file)} ({score:.2f})")
@@ -287,7 +287,7 @@ class ContextBuilder:
             return snippets[:max_snippets]
 
         except Exception as e:
-            console.print(safe_t("context.file.read_error", fallback="[#DDA0DD]警告：無法讀取 {path} - {error}[/#DDA0DD]").format(path=file_path, error=e))
+            console.print(safe_t("context.file.read_error", fallback="[#B565D8]警告：無法讀取 {path} - {error}[/#B565D8]").format(path=file_path, error=e))
             return []
 
     def estimate_token_usage(self, context: Context) -> int:
@@ -320,7 +320,7 @@ class ContextBuilder:
         Returns:
             Context: 壓縮後的上下文
         """
-        console.print(safe_t("context.compress.starting", fallback="\n[#DDA0DD]🗜️  壓縮上下文...[/#DDA0DD]"))
+        console.print(safe_t("context.compress.starting", fallback="\n[#B565D8]🗜️  壓縮上下文...[/#B565D8]"))
         console.print(safe_t("context.compress.original", fallback="  原始 tokens：{tokens:,}").format(tokens=context.total_tokens))
         console.print(safe_t("context.compress.target", fallback="  目標減少：{percent:.0f}%").format(percent=target_reduction * 100))
 
@@ -348,7 +348,7 @@ class ContextBuilder:
         compressed_context.total_tokens = self.estimate_token_usage(compressed_context)
         compressed_context.included_files = len(filtered_files)
 
-        console.print(safe_t("context.compress.completed", fallback="[#DA70D6]✓ 壓縮完成[/green]"))
+        console.print(safe_t("context.compress.completed", fallback="[#B565D8]✓ 壓縮完成[/#B565D8]"))
         console.print(safe_t("context.compress.after", fallback="  壓縮後 tokens：{tokens:,}").format(tokens=compressed_context.total_tokens))
         console.print(safe_t("context.compress.actual", fallback="  實際減少：{percent:.0f}%").format(percent=(1 - compressed_context.total_tokens / context.total_tokens) * 100))
 
@@ -462,7 +462,7 @@ class ContextBuilder:
         for file_path in files:
             # 檢查預算
             if used_tokens >= token_budget:
-                console.print(safe_t("context.load.budget_reached", fallback="[#DDA0DD]已達 token 預算上限，停止載入[/#DDA0DD]"))
+                console.print(safe_t("context.load.budget_reached", fallback="[#B565D8]已達 token 預算上限，停止載入[/#B565D8]"))
                 break
 
             # 提取相關片段
@@ -487,7 +487,7 @@ class ContextBuilder:
                             )
                             snippets = [snippet]
                     except Exception as e:
-                        console.print(safe_t("context.file.read_error", fallback="[#DDA0DD]警告：無法讀取 {path} - {error}[/#DDA0DD]").format(path=file_path, error=e))
+                        console.print(safe_t("context.file.read_error", fallback="[#B565D8]警告：無法讀取 {path} - {error}[/#B565D8]").format(path=file_path, error=e))
                         continue
                 else:
                     continue
@@ -572,9 +572,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print(safe_t("context.usage.title", fallback="[#DDA0DD]用法：[/#DDA0DD]"))
+        console.print(safe_t("context.usage.title", fallback="[#B565D8]用法：[/#B565D8]"))
         console.print(safe_t("context.usage.syntax", fallback='  python builder.py <專案路徑> "<任務描述>"'))
-        console.print(safe_t("context.usage.example_title", fallback="\n[#DDA0DD]範例：[/#DDA0DD]"))
+        console.print(safe_t("context.usage.example_title", fallback="\n[#B565D8]範例：[/#B565D8]"))
         console.print(safe_t("context.usage.example", fallback='  python builder.py . "新增使用者登入功能"'))
         sys.exit(1)
 
@@ -586,18 +586,18 @@ def main():
         context = builder.build_for_task(task_description, max_files=10)
 
         console.print(safe_t("context.main.success", fallback="\n[bold green]✅ 上下文建立成功[/bold green]"))
-        console.print(safe_t("context.main.summary", fallback="\n[#DDA0DD]上下文摘要：[/#DDA0DD]"))
+        console.print(safe_t("context.main.summary", fallback="\n[#B565D8]上下文摘要：[/#B565D8]"))
         console.print(safe_t("context.main.task", fallback="  任務：{task}").format(task=context.task_description))
         console.print(safe_t("context.main.files", fallback="  檔案數：{count}").format(count=context.included_files))
         console.print(safe_t("context.build.tokens", fallback="  預估 tokens：{tokens:,}").format(tokens=context.total_tokens))
 
         # 顯示檔案列表
-        console.print(safe_t("context.main.files_list", fallback="\n[#DDA0DD]包含的檔案：[/#DDA0DD]"))
+        console.print(safe_t("context.main.files_list", fallback="\n[#B565D8]包含的檔案：[/#B565D8]"))
         for fc in context.file_contexts[:5]:
             console.print(safe_t("context.main.file_snippet", fallback="  - {path} (分數: {score:.2f}, 片段: {count})").format(path=fc.file_path, score=fc.relevance_score, count=len(fc.snippets)))
 
     except Exception as e:
-        console.print(safe_t("context.main.error", fallback="\n[dim #DDA0DD]錯誤：{error}[/red]").format(error=e))
+        console.print(safe_t("context.main.error", fallback="\n[dim #B565D8]錯誤：{error}[/red]").format(error=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

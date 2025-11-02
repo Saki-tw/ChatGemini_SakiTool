@@ -61,20 +61,20 @@ class InteractiveQA:
         Returns:
             List[str]: 選中的選項標籤列表
         """
-        console.print(safe_t('codegemini.qa.separator', fallback=f"\n[bold #DDA0DD]{'=' * 70}[/bold #DDA0DD]"))
+        console.print(safe_t('codegemini.qa.separator', fallback=f"\n[bold #B565D8]{'=' * 70}[/bold #B565D8]"))
 
         # 顯示標題
         if header:
             console.print(safe_t('codegemini.qa.header', fallback="[bold]📌 {header}[/bold]", header=header))
 
         # 顯示問題
-        console.print(safe_t('codegemini.qa.question', fallback="[bold #DDA0DD]❓ {question}[/bold #DDA0DD]", question=question))
+        console.print(safe_t('codegemini.qa.question', fallback="[bold #B565D8]❓ {question}[/bold #B565D8]", question=question))
         console.print(safe_t('codegemini.qa.divider', fallback=f"[dim]{'-' * 70}[/dim]\n"))
 
         # 顯示選項表格
         table = Table(show_header=False, box=None, padding=(0, 1))
         console_width = console.width or 120
-        table.add_column(safe_t('codegemini.qa.number', fallback="編號"), style="#DA70D6", width=max(6, int(console_width * 0.05)))
+        table.add_column(safe_t('codegemini.qa.number', fallback="編號"), style="#B565D8", width=max(6, int(console_width * 0.05)))
         table.add_column(safe_t('codegemini.qa.option', fallback="選項"), style="white")
         table.add_column(safe_t('codegemini.qa.description', fallback="說明"), style="dim")
 
@@ -94,7 +94,7 @@ class InteractiveQA:
         else:
             console.print(safe_t('codegemini.qa.single_select_hint', fallback="\n[dim]💡 輸入選項編號，或輸入 0 自訂[/dim]"))
 
-        console.print(safe_t('codegemini.qa.separator_end', fallback="[bold #DDA0DD]{'=' * 70}[/bold #DDA0DD]\n"))
+        console.print(safe_t('codegemini.qa.separator_end', fallback="[bold #B565D8]{'=' * 70}[/bold #B565D8]\n"))
 
         # 取得使用者輸入
         while True:
@@ -102,7 +102,7 @@ class InteractiveQA:
                 user_input = Prompt.ask(safe_t('codegemini.qa.prompt_select', fallback="請選擇")).strip()
 
                 if not user_input:
-                    console.print(safe_t('codegemini.qa.empty_input', fallback="[#DDA0DD]⚠️  請輸入選項編號[/#DDA0DD]"))
+                    console.print(safe_t('codegemini.qa.empty_input', fallback="[#B565D8]⚠️  請輸入選項編號[/#B565D8]"))
                     continue
 
                 # 處理自訂輸入
@@ -117,10 +117,10 @@ class InteractiveQA:
                     return self._parse_single_select(user_input, options)
 
             except ValueError as e:
-                console.print(safe_t('codegemini.qa.error', fallback="[dim #DDA0DD]✗ {error}[/red]", error=str(e)))
+                console.print(safe_t('codegemini.qa.error', fallback="[dim #B565D8]✗ {error}[/red]", error=str(e)))
                 continue
             except KeyboardInterrupt:
-                console.print(safe_t('codegemini.qa.cancelled', fallback="\n\n[#DDA0DD]⚠️  已取消[/#DDA0DD]"))
+                console.print(safe_t('codegemini.qa.cancelled', fallback="\n\n[#B565D8]⚠️  已取消[/#B565D8]"))
                 return []
 
     def _parse_single_select(
@@ -178,7 +178,7 @@ class InteractiveQA:
         Returns:
             bool: 使用者確認結果
         """
-        return Confirm.ask(safe_t('codegemini.qa.confirm_format', fallback="[#DDA0DD]{message}[/#DDA0DD]", message=message), default=default)
+        return Confirm.ask(safe_t('codegemini.qa.confirm_format', fallback="[#B565D8]{message}[/#B565D8]", message=message), default=default)
 
     def ask_text(self, prompt: str, default: str = "") -> str:
         """
@@ -191,14 +191,14 @@ class InteractiveQA:
         Returns:
             str: 使用者輸入
         """
-        return Prompt.ask(safe_t('codegemini.qa.text_format', fallback="[#DDA0DD]{prompt}[/#DDA0DD]", prompt=prompt), default=default)
+        return Prompt.ask(safe_t('codegemini.qa.text_format', fallback="[#B565D8]{prompt}[/#B565D8]", prompt=prompt), default=default)
 
 
 # ==================== 命令列介面 ====================
 
 def main():
     """Interactive Q&A 命令列工具"""
-    console.print(safe_t('codegemini.qa.demo_title', fallback="\n[bold #DDA0DD]CodeGemini Interactive Q&A Demo[/bold #DDA0DD]\n"))
+    console.print(safe_t('codegemini.qa.demo_title', fallback="\n[bold #B565D8]CodeGemini Interactive Q&A Demo[/bold #B565D8]\n"))
 
     qa = InteractiveQA()
 
@@ -214,7 +214,7 @@ def main():
         ],
         multi_select=False
     )
-    console.print(safe_t('codegemini.qa.demo_selected', fallback="\n[#DA70D6]✓ 您選擇了：{answers}[/green]\n", answers=str(answers)))
+    console.print(safe_t('codegemini.qa.demo_selected', fallback="\n[#B565D8]✓ 您選擇了：{answers}[/#B565D8]\n", answers=str(answers)))
 
     # 示例 2：多選
     console.print(safe_t('codegemini.qa.demo_example2', fallback="[bold]示例 2：選擇要實作的功能（多選）[/bold]"))
@@ -229,13 +229,13 @@ def main():
         ],
         multi_select=True
     )
-    console.print(safe_t('codegemini.qa.demo_selected_multi', fallback="\n[#DA70D6]✓ 您選擇了：{answers}[/green]\n", answers=', '.join(answers)))
+    console.print(safe_t('codegemini.qa.demo_selected_multi', fallback="\n[#B565D8]✓ 您選擇了：{answers}[/#B565D8]\n", answers=', '.join(answers)))
 
     # 示例 3：確認
     if qa.confirm(safe_t('codegemini.qa.demo_confirm', fallback="是否繼續執行？")):
-        console.print(safe_t('codegemini.qa.demo_continue', fallback="[#DA70D6]✓ 繼續執行[/green]"))
+        console.print(safe_t('codegemini.qa.demo_continue', fallback="[#B565D8]✓ 繼續執行[/#B565D8]"))
     else:
-        console.print(safe_t('codegemini.qa.demo_cancelled', fallback="[#DDA0DD]⚠️  已取消[/#DDA0DD]"))
+        console.print(safe_t('codegemini.qa.demo_cancelled', fallback="[#B565D8]⚠️  已取消[/#B565D8]"))
 
 
 if __name__ == "__main__":

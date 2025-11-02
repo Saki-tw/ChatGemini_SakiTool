@@ -196,19 +196,19 @@ class ErrorFormatter:
         # 只有繼承自 GeminiVideoError 的異常才有這些屬性
         if isinstance(error, GeminiVideoError):
             # 顯示嚴重程度(LOW/MEDIUM/HIGH/CRITICAL)
-            lines.append(f"\n[#E8C4F0]嚴重程度:{error.severity.value}[/#E8C4F0]")
+            lines.append(f"\n[#E8C4F0]{safe_t('error.formatter.severity', fallback='Severity')}:{error.severity.value}[/#E8C4F0]")
             # 顯示錯誤發生時間
-            lines.append(f"[dim]時間:{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
+            lines.append(f"[dim]{safe_t('error.formatter.time', fallback='Time')}:{error.timestamp.strftime('%Y-%m-%d %H:%M:%S')}[/dim]")
 
             # 上下文資訊(檔案路徑、API 名稱、命令等)
             if error.context:
-                lines.append("\n[#87CEEB]上下文資訊:[/#87CEEB]")
+                lines.append(f"\n[#87CEEB]{safe_t('error.formatter.context', fallback='Context')}:[/#87CEEB]")
                 for key, value in error.context.items():
                     lines.append(f"  • {key}: {value}")
 
             # 修復建議列表
             if show_suggestions and error.suggestions:
-                lines.append("\n[green]建議的解決方案:[/green]")
+                lines.append(f"\n[green]{safe_t('error.formatter.suggestions', fallback='Suggestions')}:[/green]")
                 for i, suggestion in enumerate(error.suggestions, 1):
                     lines.append(f"  {i}. {suggestion}")
 
@@ -218,7 +218,7 @@ class ErrorFormatter:
             tb = traceback.format_exc()
             # 過濾掉空的或無意義的追蹤
             if tb and tb != "NoneType: None\n":
-                lines.append("\n[dim]堆疊追蹤:[/dim]")
+                lines.append(f"\n[dim]{safe_t('error.formatter.traceback', fallback='Traceback')}:[/dim]")
                 lines.append(f"[dim]{tb}[/dim]")
 
         # 將所有行合併為單一字串,用換行分隔
@@ -228,7 +228,7 @@ class ErrorFormatter:
     def display_error(error: Exception, **kwargs):
         """顯示格式化的錯誤訊息"""
         formatted = ErrorFormatter.format_error(error, **kwargs)
-        console.print(Panel(formatted, title=safe_t('error.panel.details', fallback='錯誤詳情'), border_style="red"))
+        console.print(Panel(formatted, title=safe_t('error.panel.details', fallback='Error Details'), border_style="red"))
 
 
 # ============================================================================
@@ -302,12 +302,12 @@ def retry_on_error(
                         else:
                             console.print(
                                 safe_t('error.retry.attempting',
-                                       fallback=f"[#E8C4F0]⚠️  嘗試 {{attempt}}/{{max_retries}} 失敗,{{delay:.1f}} 秒後重試...[/#E8C4F0]",
+                                       fallback="[#E8C4F0]⚠️  Attempt {attempt}/{max_retries} failed, retrying in {delay:.1f}s...[/#E8C4F0]",
                                        attempt=attempt + 1,
                                        max_retries=max_retries,
                                        delay=current_delay)
                             )
-                            console.print(safe_t('error.message', fallback=f"[dim]錯誤:{{error}}[/dim]", error=str(e)))
+                            console.print(safe_t('error.message', fallback="[dim]Error: {error}[/dim]", error=str(e)))
 
                         time.sleep(current_delay)
                         # 指數退避:下次延遲時間 = 當前延遲 * backoff
@@ -315,7 +315,9 @@ def retry_on_error(
                     else:
                         # 最後一次嘗試失敗
                         console.print(
-                            f"[red]❌ 已達到最大重試次數 ({max_retries}),操作失敗[/red]"
+                            safe_t('error.retry.max_retries_reached',
+                                   fallback="[red]❌ Max retries ({max_retries}) reached, operation failed[/red]",
+                                   max_retries=max_retries)
                         )
                         raise
 
@@ -417,8 +419,8 @@ class RecoveryManager:
         with open(checkpoint_path, 'w', encoding='utf-8') as f:
             json.dump(asdict(checkpoint), f, ensure_ascii=False, indent=2)
 
-        console.print(safe_t('recovery.checkpoint.saved',
-                             fallback=f"[#87CEEB]💾 已保存恢復檢查點:{{name}}[/#87CEEB]",
+        console.print(safe_t('error.recovery.saved',
+                             fallback="[#87CEEB]💾 Recovery checkpoint saved: {name}[/#87CEEB]",
                              name=checkpoint_path.name))
         return str(checkpoint_path)
 
@@ -445,14 +447,14 @@ class RecoveryManager:
 
             # 將字典還原為 RecoveryCheckpoint 物件
             checkpoint = RecoveryCheckpoint(**data)
-            console.print(safe_t('recovery.checkpoint.loaded',
-                                 fallback=f"[#87CEEB]📂 已載入恢復檢查點:{{name}}[/#87CEEB]",
+            console.print(safe_t('error.recovery.loaded',
+                                 fallback="[#87CEEB]📂 Recovery checkpoint loaded: {name}[/#87CEEB]",
                                  name=checkpoint_path.name))
             return checkpoint
 
         except Exception as e:
-            console.print(safe_t('recovery.checkpoint.load_failed',
-                                 fallback=f"[red]載入檢查點失敗:{{error}}[/red]",
+            console.print(safe_t('error.recovery.load_failed',
+                                 fallback="[red]Failed to load checkpoint: {error}[/red]",
                                  error=str(e)))
             return None
 
@@ -470,8 +472,8 @@ class RecoveryManager:
 
         if checkpoint_path.exists():
             checkpoint_path.unlink()
-            console.print(safe_t('recovery.checkpoint.deleted',
-                                 fallback=f"[green]🗑️  已刪除恢復檢查點:{{name}}[/green]",
+            console.print(safe_t('error.recovery.deleted',
+                                 fallback="[green]🗑️  Recovery checkpoint deleted: {name}[/green]",
                                  name=checkpoint_path.name))
             return True
         return False
@@ -486,8 +488,8 @@ class RecoveryManager:
                     data = json.load(f)
                 checkpoints.append(RecoveryCheckpoint(**data))
             except Exception as e:
-                console.print(safe_t('recovery.checkpoint.read_warning',
-                                     fallback=f"[#E8C4F0]警告:無法讀取檢查點 {{name}}: {{error}}[/#E8C4F0]",
+                console.print(safe_t('error.recovery.read_warning',
+                                     fallback="[#E8C4F0]Warning: Cannot read checkpoint {name}: {error}[/#E8C4F0]",
                                      name=checkpoint_file.name,
                                      error=str(e)))
 
@@ -498,19 +500,19 @@ class RecoveryManager:
         checkpoints = self.list_checkpoints()
 
         if not checkpoints:
-            console.print(safe_t('recovery.checkpoint.none', fallback='[#E8C4F0]沒有可恢復的檢查點[/#E8C4F0]'))
+            console.print(safe_t('error.recovery.no_checkpoints', fallback='[#E8C4F0]No recovery checkpoints available[/#E8C4F0]'))
             return
 
-        table = Table(title=safe_t('recovery.checkpoint.table_title', fallback='可恢復的檢查點'))
-        table.add_column(safe_t('recovery.checkpoint.col_task_id', fallback='任務 ID'), style="#87CEEB")
-        table.add_column(safe_t('recovery.checkpoint.col_type', fallback='類型'), style="green")
-        table.add_column(safe_t('recovery.checkpoint.col_progress', fallback='進度'), style="#E8C4F0")
-        table.add_column(safe_t('recovery.checkpoint.col_time', fallback='時間'), style="dim")
-        table.add_column(safe_t('recovery.checkpoint.col_status', fallback='狀態'), style="#E8C4F0")
+        table = Table(title=safe_t('error.recovery.table_title', fallback='Recovery Checkpoints'))
+        table.add_column(safe_t('error.recovery.col_task_id', fallback='Task ID'), style="#87CEEB")
+        table.add_column(safe_t('error.recovery.col_type', fallback='Type'), style="green")
+        table.add_column(safe_t('error.recovery.col_progress', fallback='Progress'), style="#E8C4F0")
+        table.add_column(safe_t('error.recovery.col_time', fallback='Time'), style="dim")
+        table.add_column(safe_t('error.recovery.col_status', fallback='Status'), style="#E8C4F0")
 
         for cp in checkpoints:
             progress = f"{len(cp.completed_steps)}/{cp.total_steps}"
-            status = safe_t('recovery.checkpoint.status_failed', fallback='❌ 失敗') if cp.error else safe_t('recovery.checkpoint.status_paused', fallback='⏸️ 暫停')
+            status = safe_t('error.recovery.status_failed', fallback='❌ Failed') if cp.error else safe_t('error.recovery.status_paused', fallback='⏸️ Paused')
             table.add_row(
                 cp.task_id,
                 cp.task_type,
@@ -537,8 +539,8 @@ class RecoveryManager:
                 deleted += 1
 
         if deleted > 0:
-            console.print(safe_t('recovery.checkpoint.cleaned',
-                                 fallback=f"[green]已清理 {{count}} 個舊的恢復檢查點[/green]",
+            console.print(safe_t('error.recovery.cleaned',
+                                 fallback="[green]Cleaned up {count} old recovery checkpoints[/green]",
                                  count=deleted))
 
 
@@ -576,7 +578,7 @@ class ErrorLogger:
         self.log_dir = Path(log_dir)
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
-        error_log_path=self.log_dir / "errors.jsonl"
+        self.error_log_path = self.log_dir / "errors.jsonl"
 
     def log_error(
         self,
@@ -663,19 +665,19 @@ class ErrorLogger:
         stats = self.get_error_stats(days)
 
         console.print(safe_t('error.stats.title',
-                             fallback=f"\n[bold #87CEEB]📊 錯誤統計(最近 {{days}} 天)[/bold #87CEEB]\n",
+                             fallback="\n[bold #87CEEB]📊 Error Statistics (Last {days} days)[/bold #87CEEB]\n",
                              days=days))
         console.print(safe_t('error.stats.total',
-                             fallback=f"總錯誤數:{{total}}",
+                             fallback="Total Errors: {total}",
                              total=stats['total']))
 
         if stats['by_type']:
-            console.print(safe_t('error.stats.by_type', fallback="\n[#E8C4F0]錯誤類型分佈:[/#E8C4F0]"))
+            console.print(safe_t('error.stats.by_type', fallback="\n[#E8C4F0]Distribution by Type:[/#E8C4F0]"))
             for error_type, count in sorted(stats['by_type'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {error_type}: {count}")
 
         if stats['by_severity']:
-            console.print(safe_t('error.stats.by_severity', fallback="\n[#E8C4F0]嚴重程度分佈:[/#E8C4F0]"))
+            console.print(safe_t('error.stats.by_severity', fallback="\n[#E8C4F0]Distribution by Severity:[/#E8C4F0]"))
             for severity, count in sorted(stats['by_severity'].items(), key=lambda x: x[1], reverse=True):
                 console.print(f"  • {severity}: {count}")
 
@@ -696,36 +698,36 @@ def suggest_solutions(error: Exception) -> List[str]:
 
     if isinstance(error, FileNotFoundError):
         suggestions.extend([
-            "檢查檔案路徑是否正確",
-            "確認檔案是否存在",
-            "檢查檔案權限"
+            safe_t('error.suggestion.check_file_path', fallback='Check if the file path is correct'),
+            safe_t('error.suggestion.confirm_file_exists', fallback='Confirm the file exists'),
+            safe_t('error.suggestion.check_file_permission', fallback='Check file permissions')
         ])
     elif isinstance(error, PermissionError):
         suggestions.extend([
-            "檢查檔案權限設定",
-            "確認是否有寫入權限",
-            "嘗試使用管理員權限執行"
+            safe_t('error.suggestion.check_permission_settings', fallback='Check file permission settings'),
+            safe_t('error.suggestion.confirm_write_permission', fallback='Confirm you have write permissions'),
+            safe_t('error.suggestion.try_admin_mode', fallback='Try running with administrator privileges')
         ])
     elif isinstance(error, ConnectionError) or isinstance(error, NetworkError):
         suggestions.extend([
-            "檢查網路連線",
-            "確認 API 服務是否正常",
-            "檢查防火牆設定",
-            "稍後再試"
+            safe_t('error.suggestion.check_network', fallback='Check network connection'),
+            safe_t('error.suggestion.confirm_api_service', fallback='Confirm API service is available'),
+            safe_t('error.suggestion.check_firewall', fallback='Check firewall settings'),
+            safe_t('error.suggestion.try_later', fallback='Try again later')
         ])
     elif isinstance(error, APIError):
         suggestions.extend([
-            "檢查 API 金鑰是否正確",
-            "確認 API 配額是否足夠",
-            "檢查 API 服務狀態",
-            "查看 API 文檔"
+            safe_t('error.suggestion.check_api_key', fallback='Check if the API key is correct'),
+            safe_t('error.suggestion.confirm_api_quota', fallback='Confirm API quota is sufficient'),
+            safe_t('error.suggestion.check_api_status', fallback='Check API service status'),
+            safe_t('error.suggestion.check_api_docs', fallback='Review API documentation')
         ])
     elif isinstance(error, FFmpegError):
         suggestions.extend([
-            "確認 ffmpeg 已安裝:brew install ffmpeg",
-            "檢查 ffmpeg 版本是否符合要求",
-            "確認影片格式是否支援",
-            "檢查影片檔案是否損壞"
+            safe_t('error.suggestion.install_ffmpeg', fallback='Ensure ffmpeg is installed: brew install ffmpeg'),
+            safe_t('error.suggestion.check_ffmpeg_version', fallback='Check if ffmpeg version meets requirements'),
+            safe_t('error.suggestion.confirm_video_format', fallback='Confirm video format is supported'),
+            safe_t('error.suggestion.check_video_corruption', fallback='Check if video file is corrupted')
         ])
 
     return suggestions
@@ -740,18 +742,18 @@ if __name__ == "__main__":
         """可能失敗的 API 呼叫"""
         import random
         if random.random() < 0.7:
-            raise APIError("API 暫時無法使用", api_name="Gemini")
-        return "成功"
+            raise APIError(safe_t('error.example.api_unavailable', fallback='API temporarily unavailable'), api_name="Gemini")
+        return safe_t('error.example.success', fallback='Success')
 
     # 範例 2:使用自訂錯誤與建議
     try:
         raise FileProcessingError(
-            "無法處理影片檔案",
+            safe_t('error.example.cannot_process_video', fallback='Cannot process video file'),
             file_path="/path/to/video.mp4",
             suggestions=[
-                "檢查影片格式是否支援",
-                "確認 ffmpeg 已安裝",
-                "嘗試轉換影片格式"
+                safe_t('error.example.check_video_format', fallback='Check if video format is supported'),
+                safe_t('error.example.confirm_ffmpeg', fallback='Confirm ffmpeg is installed'),
+                safe_t('error.example.convert_format', fallback='Try converting video format')
             ]
         )
     except GeminiVideoError as e:
@@ -776,7 +778,7 @@ if __name__ == "__main__":
     error_logger = ErrorLogger()
 
     try:
-        raise ValidationError("無效的參數", field="resolution")
+        raise ValidationError(safe_t('error.example.invalid_param', fallback='Invalid parameter'), field="resolution")
     except Exception as e:
         error_logger.log_error(e, context={"user": "test", "operation": "generate_video"})
 

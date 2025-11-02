@@ -125,18 +125,18 @@ class WebFetcher:
         Returns:
             Optional[FetchedPage]: 抓取的網頁，失敗返回 None
         """
-        console.print(f"\n[#DDA0DD]🌐 {safe_t('web_fetch.fetching', '抓取網頁')}：{url}[/#DDA0DD]")
+        console.print(f"\n[#B565D8]🌐 {safe_t('web_fetch.fetching', '抓取網頁')}：{url}[/#B565D8]")
 
         # 檢查快取
         if use_cache:
             cached_page = self._get_from_cache(url)
             if cached_page:
-                console.print(f"[#DA70D6]✓ {safe_t('web_fetch.from_cache', '從快取讀取')}[/green]")
+                console.print(f"[#B565D8]✓ {safe_t('web_fetch.from_cache', '從快取讀取')}[/#B565D8]")
                 return cached_page
 
         # 驗證 URL
         if not self._is_valid_url(url):
-            console.print(f"[dim #DDA0DD]✗ {safe_t('web_fetch.invalid_url', '無效的 URL')}：{url}[/red]")
+            console.print(f"[dim #B565D8]✗ {safe_t('web_fetch.invalid_url', '無效的 URL')}：{url}[/red]")
             return None
 
         # 執行抓取
@@ -148,13 +148,13 @@ class WebFetcher:
 
             # 檢查狀態碼
             if response.status_code != 200:
-                console.print(f"[#DDA0DD]⚠️  HTTP {response.status_code}[/#DDA0DD]")
+                console.print(f"[#B565D8]⚠️  HTTP {response.status_code}[/#B565D8]")
 
             # 提取重定向資訊
             redirected_from = None
             if response.history:
                 redirected_from = response.history[0].url
-                console.print(f"[#DDA0DD]↪️  {safe_t('web_fetch.redirected_from', '重定向自')}：{redirected_from}[/#DDA0DD]")
+                console.print(f"[#B565D8]↪️  {safe_t('web_fetch.redirected_from', '重定向自')}：{redirected_from}[/#B565D8]")
 
             # 轉換 HTML 為 Markdown
             html_content = response.text
@@ -182,14 +182,14 @@ class WebFetcher:
             if use_cache:
                 self._save_to_cache(url, page)
 
-            console.print(f"[#DA70D6]✓ {safe_t('web_fetch.fetch_success', '抓取成功')}[/green]")
+            console.print(f"[#B565D8]✓ {safe_t('web_fetch.fetch_success', '抓取成功')}[/#B565D8]")
             console.print(f"  {safe_t('web_fetch.title', '標題')}：{title}")
             console.print(f"  {safe_t('web_fetch.word_count', '字數')}：{page.word_count}")
 
             return page
 
         except Exception as e:
-            console.print(f"[dim #DDA0DD]✗ {safe_t('web_fetch.fetch_failed', '抓取失敗')}：{e}[/red]")
+            console.print(f"[dim #B565D8]✗ {safe_t('web_fetch.fetch_failed', '抓取失敗')}：{e}[/red]")
             return None
 
     def _make_request(
@@ -218,7 +218,7 @@ class WebFetcher:
                 return response
 
             except requests.exceptions.Timeout:
-                console.print(f"[#DDA0DD]⚠️  {safe_t('web_fetch.request_timeout', '請求超時')}（{safe_t('web_fetch.attempt', '嘗試')} {attempt + 1}/{self.max_retries}）[/#DDA0DD]")
+                console.print(f"[#B565D8]⚠️  {safe_t('web_fetch.request_timeout', '請求超時')}（{safe_t('web_fetch.attempt', '嘗試')} {attempt + 1}/{self.max_retries}）[/#B565D8]")
                 if attempt < self.max_retries - 1:
                     time.sleep(2 ** attempt)  # 指數退避
                     continue
@@ -226,7 +226,7 @@ class WebFetcher:
                     return None
 
             except requests.exceptions.RequestException as e:
-                console.print(f"[dim #DDA0DD]✗ {safe_t('web_fetch.request_error', '請求錯誤')}：{e}[/red]")
+                console.print(f"[dim #B565D8]✗ {safe_t('web_fetch.request_error', '請求錯誤')}：{e}[/red]")
                 return None
 
         return None
@@ -246,7 +246,7 @@ class WebFetcher:
             return markdown
 
         except Exception as e:
-            console.print(f"[#DDA0DD]⚠️  {safe_t('web_fetch.markdown_error', 'Markdown 轉換錯誤')}：{e}[/#DDA0DD]")
+            console.print(f"[#B565D8]⚠️  {safe_t('web_fetch.markdown_error', 'Markdown 轉換錯誤')}：{e}[/#B565D8]")
             # 回退到純文字
             from bs4 import BeautifulSoup
             soup = BeautifulSoup(html, 'html.parser')
@@ -330,7 +330,7 @@ class WebFetcher:
     def clear_cache(self) -> None:
         """清空快取"""
         self.cache.clear()
-        console.print(f"[#DA70D6]✓ {safe_t('web_fetch.cache_cleared', '快取已清空')}[/green]")
+        console.print(f"[#B565D8]✓ {safe_t('web_fetch.cache_cleared', '快取已清空')}[/#B565D8]")
 
     def get_cache_stats(self) -> Dict[str, Any]:
         """取得快取統計"""
@@ -348,7 +348,7 @@ def main():
     """Web Fetch 命令列工具"""
     import sys
 
-    console.print("\n[bold #DDA0DD]CodeGemini Web Fetch Tool[/bold #DDA0DD]\n")
+    console.print("\n[bold #B565D8]CodeGemini Web Fetch Tool[/bold #B565D8]\n")
 
     if len(sys.argv) < 2:
         console.print(f"{safe_t('common.usage', '用法')}：")
@@ -379,13 +379,13 @@ def main():
     if page:
         # 顯示結果
         console.print(f"\n[bold]📄 {safe_t('web_fetch.page_content', '網頁內容')}：[/bold]\n")
-        console.print(f"[bold #DDA0DD]{safe_t('web_fetch.title', '標題')}：[/bold #DDA0DD]{page.title}")
-        console.print(f"[bold #DDA0DD]URL：[/bold #DDA0DD]{page.url}")
-        console.print(f"[bold #DDA0DD]{safe_t('web_fetch.word_count', '字數')}：[/bold #DDA0DD]{page.word_count}")
-        console.print(f"[bold #DDA0DD]{safe_t('web_fetch.status_code', '狀態碼')}：[/bold #DDA0DD]{page.status_code}")
+        console.print(f"[bold #B565D8]{safe_t('web_fetch.title', '標題')}：[/bold #B565D8]{page.title}")
+        console.print(f"[bold #B565D8]URL：[/bold #B565D8]{page.url}")
+        console.print(f"[bold #B565D8]{safe_t('web_fetch.word_count', '字數')}：[/bold #B565D8]{page.word_count}")
+        console.print(f"[bold #B565D8]{safe_t('web_fetch.status_code', '狀態碼')}：[/bold #B565D8]{page.status_code}")
 
         if page.is_redirect:
-            console.print(f"[bold #DDA0DD]{safe_t('web_fetch.redirected_from', '重定向自')}：[/bold #DDA0DD]{page.redirected_from}")
+            console.print(f"[bold #B565D8]{safe_t('web_fetch.redirected_from', '重定向自')}：[/bold #B565D8]{page.redirected_from}")
 
         console.print(f"\n[dim]--- {safe_t('web_fetch.markdown_content', 'Markdown 內容')}（{safe_t('web_fetch.first_chars', '前')} 500 {safe_t('common.characters', '字')}） ---[/dim]")
         console.print(page.content[:500] + "..." if len(page.content) > 500 else page.content)
@@ -399,9 +399,9 @@ def main():
                 f.write("---\n\n")
                 f.write(page.content)
 
-            console.print(f"\n[#DA70D6]✓ {safe_t('web_fetch.saved_to', '已儲存到')}：{output_file}[/green]")
+            console.print(f"\n[#B565D8]✓ {safe_t('web_fetch.saved_to', '已儲存到')}：{output_file}[/#B565D8]")
     else:
-        console.print(f"[dim #DDA0DD]✗ {safe_t('web_fetch.fetch_failed', '抓取失敗')}[/red]")
+        console.print(f"[dim #B565D8]✗ {safe_t('web_fetch.fetch_failed', '抓取失敗')}[/red]")
 
 
 if __name__ == "__main__":

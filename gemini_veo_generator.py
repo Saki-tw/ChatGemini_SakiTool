@@ -118,6 +118,11 @@ def generate_video(
 
     Returns:
         生成的影片檔案路徑
+
+    Note:
+        person_generation 參數會自動根據模式設置：
+        - Text-to-video/Extension: 使用 "allow_all"
+        - Image-to-video (有 reference_images): 使用 "allow_adult"（Gemini API 限制）
     """
     console.print("\n[#E8C4F0]" + "=" * 60 + "[/#E8C4F0]")
     console.print(safe_t('common.generating', fallback='[bold #E8C4F0]🎬 Veo 影片生成[/bold #E8C4F0]'))
@@ -251,6 +256,11 @@ def generate_video(
                 uploaded_images.append(uploaded_img)
                 console.print(f"  ✓ {os.path.basename(img_path)}")
         config_params["reference_images"] = uploaded_images
+        # ✅ 使用參考圖片時，必須使用 "allow_adult"（Gemini API 限制）
+        config_params["person_generation"] = "allow_adult"
+    else:
+        # ✅ Text-to-video 或 Extension 模式，使用 "allow_all"
+        config_params["person_generation"] = "allow_all"
 
     config = types.GenerateVideosConfig(**config_params)
 

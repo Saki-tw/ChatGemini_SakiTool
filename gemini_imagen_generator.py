@@ -63,7 +63,7 @@ def generate_image(
     number_of_images: int = 1,
     aspect_ratio: str = "1:1",
     safety_filter_level: str = "block_some",
-    person_generation: str = "allow_all",
+    person_generation: str = "allow_adult",  # ✅ 修復：Gemini API 不支援 "allow_all"，僅支援 "allow_adult" 或 "dont_allow"
     show_cost: bool = True
 ) -> List[str]:
     """
@@ -76,7 +76,10 @@ def generate_image(
         number_of_images: 生成圖片數量（1-8）
         aspect_ratio: 長寬比 (1:1, 16:9, 9:16, 3:4, 4:3)
         safety_filter_level: 安全過濾級別
-        person_generation: 人物生成控制
+        person_generation: 人物生成控制（僅支援 "allow_adult" 或 "dont_allow"）
+            - "allow_adult": 允許成人（預設）
+            - "dont_allow": 禁止生成人物
+            - ⚠️ "allow_all" 僅在 Vertex AI 支援，Gemini API 不支援
         show_cost: 是否顯示成本資訊
 
     Returns:

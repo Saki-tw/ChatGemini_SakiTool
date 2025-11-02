@@ -432,7 +432,7 @@ class AsyncBatchProcessor:
         tasks = self.list_tasks(status=status, task_type=task_type)
 
         if not tasks:
-            console.print(safe_t('common.message', fallback='[#E8C4F0]沒有符合條件的任務[/#E8C4F0]'))
+            # 靜默返回，不顯示訊息（避免噪音）
             return
 
         table = Table(title=f"批次任務列表（共 {len(tasks)} 個）")

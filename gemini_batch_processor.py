@@ -107,7 +107,9 @@ class BatchProcessor:
                         task.priority = TaskPriority[task.priority] if isinstance(task.priority, str) else task.priority
                         task.status = TaskStatus[task.status] if isinstance(task.status, str) else task.status
                         self.tasks[task.task_id] = task
-                console.print(safe_t('common.loading', fallback='[#E8C4F0]📂 載入了 {tasks_count} 個任務[/#E8C4F0]', tasks_count=len(self.tasks)))
+                # 只在有任務時才顯示
+                if len(self.tasks) > 0:
+                    console.print(safe_t('common.loading', fallback='[#E8C4F0]📂 載入了 {tasks_count} 個任務[/#E8C4F0]', tasks_count=len(self.tasks)))
             except Exception as e:
                 console.print(safe_t('error.failed', fallback='[#E8C4F0]載入任務失敗：{e}[/#E8C4F0]', e=e))
 
@@ -374,7 +376,7 @@ class BatchProcessor:
         tasks = self.list_tasks(status=status, task_type=task_type)
 
         if not tasks:
-            console.print(safe_t('common.message', fallback='[#E8C4F0]沒有符合條件的任務[/#E8C4F0]'))
+            # 靜默返回，不顯示訊息（避免噪音）
             return
 
         table = Table(title=f"批次任務列表（共 {len(tasks)} 個）")

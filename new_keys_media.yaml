@@ -1,0 +1,16 @@
+media:
+  clip:
+    analysis_title: "\n[bold #E8C4F0]🎬 AI 剪輯建議分析[/bold #E8C4F0]\n"
+    analyzing_features: "\n[#E8C4F0]🔍 分析影片內容特徵...[/#E8C4F0]"
+    detailed_suggestions: "\n[bold #E8C4F0]💡 詳細建議：[/bold #E8C4F0]\n"
+    generating_suggestions: "\n[#E8C4F0]💡 生成剪輯建議...[/#E8C4F0]"
+    no_suggestions: "[#E8C4F0]沒有生成剪輯建議[/#E8C4F0]"
+    preview_frame_warning: "[#E8C4F0]警告：提取預覽幀失敗 ({time}s): {error}[/#E8C4F0]"
+    scene_detection: "\n[#E8C4F0]📦 執行場景檢測...[/#E8C4F0]"
+    scenes_found: "✓ 檢測到 {count} 個場景"
+    suggestions_generated: "\n[#B565D8]✓ 已生成 {count} 個剪輯建議[/green]"
+    suggestions_list: "\n[bold #E8C4F0]📋 剪輯建議列表（{count} 個）[/bold #E8C4F0]\n"
+    suggestions_saved: "[#B565D8]✓ 剪輯建議已保存：{file}[/green]"
+    target_duration: "🎯 目標長度：{time}"
+    total_duration: "⏱️  總長度：{time}"
+    video_file: "📁 影片：{name}"

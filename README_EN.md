@@ -42,11 +42,11 @@ Fully automated installation for macOS and Linux. After installation, type `Chat
 
 ## 📦 Project Information
 
-**Project Name**: ChatGemini_SakiTool  
-**Version**: v1.0.6  
-**Author**: Saki-tw with Claude Code  
-**Contact**: Saki@saki-studio.com.tw  
-**Last Updated**: 2025-11-01  
+**Project Name**: ChatGemini_SakiTool
+**Version**: v1.0.7
+**Author**: Saki-tw with Claude Code
+**Contact**: Saki@saki-studio.com.tw
+**Last Updated**: 2025-11-02  
 
 **Apply for API Key**: https://aistudio.google.com/app/apikey
 **Free Monthly Quota**: Gemini 2.5 Pro provides free usage quota
@@ -56,6 +56,18 @@ Fully automated installation for macOS and Linux. After installation, type `Chat
 ---
 
 ## 🔥 Version History
+
+### 📅 v1.0.7 (2025-11-02) — CodeGemini Development Tools Integration
+
+**Core Updates**:
+
+- 🛠️ **CodeGemini Interactive Interface**: Ctrl+G quick access to development tools menu, test generator and doc generator interface refinement, vector search and batch processing integration, non-intrusive design
+
+- 🌐 **Multi-language Support Optimization**: 4-language translation system completed (Traditional Chinese, English, Japanese, Korean), improved language switching interface, optimized translation key structure
+
+- 🐛 **Media Features Bug Fixes**: Fixed Imagen/Veo/Flow Engine API parameter compatibility, enhanced person_generation parameter settings, ensured all media generation features run stably
+
+---
 
 ### 📅 v1.0.6 (2025-11-01) — Smart Model Management
 

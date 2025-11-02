@@ -22,6 +22,180 @@ except ImportError:
     model_list_manager = None
 
 
+def _arrow_key_select(models_dict: Dict[str, Tuple[str, str]], console) -> Optional[str]:
+    """
+    使用方向鍵選擇模型
+
+    Args:
+        models_dict: 模型字典 {'1': ('model-name', 'description'), ...}
+        console: Rich Console 實例
+
+    Returns:
+        選擇的模型鍵（如 '1', '2', ...），或 None 表示取消
+
+    使用方式:
+        ↑/↓: 移動選擇
+        PgUp/PgDn: 快速移動 (10個選項)
+        Home/End: 跳到開頭/結尾
+        Enter: 確認選擇
+        數字鍵: 快速跳到該選項
+        Esc/Ctrl+C: 取消
+    """
+    from prompt_toolkit import Application
+    from prompt_toolkit.key_binding import KeyBindings
+    from prompt_toolkit.keys import Keys
+    from prompt_toolkit.layout import Layout, HSplit
+    from prompt_toolkit.layout.containers import Window
+    from prompt_toolkit.layout.controls import FormattedTextControl
+    from prompt_toolkit.formatted_text import HTML
+    import sys
+
+    try:
+        # 建立排序的選項列表
+        sorted_items = sorted(
+            models_dict.items(),
+            key=lambda x: int(x[0]) if x[0].isdigit() else 999
+        )
+
+        # 當前選擇的索引
+        selected_index = [0]  # 使用列表以便在閉包中修改
+
+        def get_formatted_text_list():
+            """生成格式化的選項列表"""
+            result = []
+            result.append(('', '\n'))
+            result.append(('class:header', '🔽 使用 ↑↓ 鍵選擇，Enter 確認，Esc 取消\n'))
+            result.append(('', '\n'))
+
+            for idx, (key, (model_name, desc)) in enumerate(sorted_items):
+                if idx == selected_index[0]:
+                    # 高亮當前選項
+                    result.append(('class:selected', f'  ▶ [{key}] {desc.split("（")[0]}\n'))
+                else:
+                    result.append(('', f'    [{key}] {desc.split("（")[0]}\n'))
+
+            result.append(('', '\n'))
+            return result
+
+        # 建立鍵綁定
+        kb = KeyBindings()
+
+        @kb.add(Keys.Up)
+        def move_up(event):
+            if selected_index[0] > 0:
+                selected_index[0] -= 1
+
+        @kb.add(Keys.Down)
+        def move_down(event):
+            if selected_index[0] < len(sorted_items) - 1:
+                selected_index[0] += 1
+
+        @kb.add(Keys.PageUp)
+        def page_up(event):
+            selected_index[0] = max(0, selected_index[0] - 10)
+
+        @kb.add(Keys.PageDown)
+        def page_down(event):
+            selected_index[0] = min(len(sorted_items) - 1, selected_index[0] + 10)
+
+        @kb.add(Keys.Home)
+        def go_home(event):
+            selected_index[0] = 0
+
+        @kb.add(Keys.End)
+        def go_end(event):
+            selected_index[0] = len(sorted_items) - 1
+
+        @kb.add(Keys.Enter)
+        def confirm(event):
+            event.app.exit(result=sorted_items[selected_index[0]][0])
+
+        @kb.add(Keys.Escape)
+        @kb.add('c-c')
+        def cancel(event):
+            event.app.exit(result=None)
+
+        # 數字鍵快速跳轉
+        number_input = ['']  # 累積的數字輸入
+
+        for digit in '0123456789':
+            def make_digit_handler(d):
+                def handle_digit(event):
+                    number_input[0] += d
+                    # 檢查是否有匹配的選項
+                    for idx, (key, _) in enumerate(sorted_items):
+                        if key == number_input[0]:
+                            selected_index[0] = idx
+                            number_input[0] = ''  # 重置
+                            break
+                    # 如果累積的數字超過2位，重置
+                    if len(number_input[0]) > 2:
+                        number_input[0] = ''
+                return handle_digit
+            kb.add(digit)(make_digit_handler(digit))
+
+        # 建立布局
+        text_control = FormattedTextControl(
+            text=get_formatted_text_list,
+            focusable=True,
+            show_cursor=False
+        )
+
+        window = Window(
+            content=text_control,
+            wrap_lines=False
+        )
+
+        layout = Layout(HSplit([window]))
+
+        # 建立應用程式
+        app = Application(
+            layout=layout,
+            key_bindings=kb,
+            full_screen=False,
+            mouse_support=False,
+            style=None
+        )
+
+        # 運行應用程式
+        result = app.run()
+        console.print()  # 換行
+        return result
+
+    except (KeyboardInterrupt, EOFError):
+        console.print()
+        return None
+    except Exception as e:
+        logger.debug(f"方向鍵選單失敗: {e}")
+        console.print(f"\n[yellow]⚠️  方向鍵選單不可用: {e}[/yellow]\n")
+        return None
+
+
+def _filter_ansi_sequences(input_string: str) -> str:
+    """
+    過濾 ANSI 轉義序列（方向鍵等控制字元）
+
+    ANSI 轉義序列格式: ESC [ <parameters> <command>
+    例如: ↑ = \\x1b[A, ↓ = \\x1b[B, → = \\x1b[C, ← = \\x1b[D
+
+    Args:
+        input_string: 原始輸入字串（可能包含 ANSI 序列）
+
+    Returns:
+        過濾後的字串（移除所有 ANSI 轉義序列並去除首尾空白）
+
+    Examples:
+        >>> _filter_ansi_sequences("^[[A^[[B")
+        ""
+        >>> _filter_ansi_sequences("hello^[[A")
+        "hello"
+        >>> _filter_ansi_sequences("^[[Agemini-2.5-pro^[[B")
+        "gemini-2.5-pro"
+    """
+    import re
+    return re.sub(r'\x1b\[[0-9;]*[A-Za-z]', '', input_string).strip()
+
+
 def _save_model_choice(model_name: str):
     """保存使用者選擇的模型"""
     try:
@@ -116,8 +290,13 @@ def _get_available_models() -> Optional[List[str]]:
         return None
 
 
-def select_model() -> str:
-    """選擇 Gemini 模型（含思考模式資訊與價格預估）"""
+def select_model(use_arrow_keys: bool = True) -> str:
+    """
+    選擇 Gemini 模型（含思考模式資訊與價格預估）
+
+    Args:
+        use_arrow_keys: 是否使用方向鍵選單（預設 True）
+    """
     from rich.console import Console
     from rich.table import Table
     from rich.panel import Panel
@@ -220,8 +399,32 @@ def select_model() -> str:
     console.print(f"\n[#B565D8]0.[/#B565D8] {custom_model_text}")
     console.print("[dim]─[/dim]" * 60)
 
+    if use_arrow_keys:
+        console.print("\n[dim]💡 提示：使用 ↑↓ 方向鍵選擇模型，Enter 確認，或直接輸入數字[/dim]")
+    else:
+        console.print("\n[dim]💡 提示：請輸入數字選擇模型[/dim]")
+
     # 預先獲取可用模型列表（用於自訂模型驗證）
     available_models = _get_available_models()
+
+    # 🎯 方向鍵選單模式
+    if use_arrow_keys:
+        try:
+            selected_key = _arrow_key_select(display_models, console)
+            if selected_key is not None:
+                if selected_key == '0':
+                    # 處理自訂模型（下面會處理）
+                    pass
+                elif selected_key in display_models:
+                    model_name, _ = display_models[selected_key]
+                    _save_model_choice(model_name)
+                    return model_name
+        except KeyboardInterrupt:
+            # Ctrl+C 或其他中斷，回到文字輸入模式
+            console.print("\n[dim]已切換到文字輸入模式[/dim]")
+        except Exception as e:
+            logger.debug(f"方向鍵選單失敗，回到文字輸入: {e}")
+            console.print("\n[dim]方向鍵選單不可用，使用文字輸入模式[/dim]")
 
     while True:
         # 使用 i18n 翻譯提示文字,降級為硬編碼
@@ -230,7 +433,8 @@ def select_model() -> str:
         except (NameError, AttributeError, TypeError):
             prompt_text = f"請輸入選項 (1-{len(display_models)} 或 0)"
 
-        choice = Prompt.ask(f"\n{prompt_text}")
+        choice_raw = Prompt.ask(f"\n{prompt_text}")
+        choice = _filter_ansi_sequences(choice_raw)
 
         # 支援 exit/quit 退出
         if choice.lower() in ('exit', 'quit', 'q'):
@@ -255,7 +459,8 @@ def select_model() -> str:
                     input_prompt = t('model.enter_name')
                 except (NameError, AttributeError):
                     input_prompt = "請輸入模型名稱"
-                custom_model = Prompt.ask(input_prompt)
+                custom_model_raw = Prompt.ask(input_prompt)
+                custom_model = _filter_ansi_sequences(custom_model_raw)
 
                 if custom_model:
                     _save_model_choice(custom_model)
@@ -283,7 +488,8 @@ def select_model() -> str:
                 enter_prompt = t('model.enter_from_list')
             except (NameError, AttributeError):
                 enter_prompt = "請輸入模型名稱（必須是上列其中一個）"
-            custom_model = Prompt.ask(enter_prompt)
+            custom_model_raw = Prompt.ask(enter_prompt)
+            custom_model = _filter_ansi_sequences(custom_model_raw)
 
             if not custom_model:
                 try:

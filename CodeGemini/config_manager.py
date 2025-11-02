@@ -332,7 +332,7 @@ def _validate_and_suggest_path(
 
     # 處理空輸入
     if not path_input or path_input.strip() == "":
-        console.print(safe_t('codegemini.config.path_empty', fallback='[#DDA0DD]⚠ 路徑不能為空[/#DDA0DD]'))
+        console.print(safe_t('codegemini.config.path_empty', fallback='[#B565D8]⚠ 路徑不能為空[/#B565D8]'))
         return (path_input, False)
 
     # 移除首尾空白
@@ -359,7 +359,7 @@ def _validate_and_suggest_path(
     # 檢查父目錄是否存在
     parent_dir = path_obj.parent
     if not parent_dir.exists():
-        console.print(safe_t('codegemini.config.parent_dir_missing', fallback='[#DDA0DD]⚠ 父目錄不存在: {dir}[/#DDA0DD]', dir=parent_dir))
+        console.print(safe_t('codegemini.config.parent_dir_missing', fallback='[#B565D8]⚠ 父目錄不存在: {dir}[/#B565D8]', dir=parent_dir))
 
         if create_if_missing:
             if Confirm.ask(safe_t('codegemini.config.create_parent_dir', fallback='是否創建父目錄？'), default=True):
@@ -370,13 +370,13 @@ def _validate_and_suggest_path(
                     console.print(safe_t('codegemini.config.parent_dir_create_failed', fallback='[red]✗ 創建父目錄失敗: {error}[/red]', error=e))
                     return (path_input, False)
             else:
-                console.print(safe_t('codegemini.config.path_cancelled', fallback='[#DDA0DD]已取消，路徑可能無法使用[/#DDA0DD]'))
+                console.print(safe_t('codegemini.config.path_cancelled', fallback='[#B565D8]已取消，路徑可能無法使用[/#B565D8]'))
                 return (path_input, False)
 
     # 檢查路徑是否已存在
     if path_obj.exists():
         if path_obj.is_file():
-            console.print(safe_t('codegemini.config.path_is_file', fallback='[#DDA0DD]⚠ 此路徑指向檔案，而非目錄: {path}[/#DDA0DD]', path=path_obj))
+            console.print(safe_t('codegemini.config.path_is_file', fallback='[#B565D8]⚠ 此路徑指向檔案，而非目錄: {path}[/#B565D8]', path=path_obj))
             console.print(safe_t('codegemini.config.path_should_be_dir', fallback='[dim]建議: 向量資料庫路徑應為目錄[/dim]'))
             if not Confirm.ask(safe_t('codegemini.config.confirm_use_path', fallback='確定要使用此路徑？'), default=False):
                 return (path_input, False)
@@ -411,14 +411,23 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
     from rich.table import Table
     from rich.panel import Panel
     from rich.prompt import Prompt, Confirm
+    import sys
+    from pathlib import Path
+
+    # 確保可以 import utils
+    project_root = Path(__file__).parent.parent
+    if str(project_root) not in sys.path:
+        sys.path.insert(0, str(project_root))
+
+    from utils.input_helpers import normalize_fullwidth_input
 
     console = Console()
 
     while True:
         console.clear()
         console.print(Panel.fit(
-            "[bold #DDA0DD]CodeGemini 配置管理[/bold #DDA0DD]",
-            border_style="#DDA0DD"
+            "[bold #B565D8]CodeGemini 配置管理[/bold #B565D8]",
+            border_style="#B565D8"
         ))
 
         # 顯示當前配置
@@ -426,7 +435,7 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
 
         table = Table(title="[bold]Codebase Embedding 配置[/bold]", show_header=True)
         console_width = console.width or 120
-        table.add_column("設定項", style="#DDA0DD", width=max(20, int(console_width * 0.25)))
+        table.add_column("設定項", style="#B565D8", width=max(20, int(console_width * 0.25)))
         table.add_column("當前值", style="green", width=max(25, int(console_width * 0.30)))
         table.add_column("說明", style="dim", width=max(30, int(console_width * 0.35)))
 
@@ -457,7 +466,7 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
         )
 
         console.print(table)
-        console.print(safe_t("config.menu.other_options", fallback="\n[bold #DDA0DD]其他選項：[/bold #DDA0DD]"))
+        console.print(safe_t("config.menu.other_options", fallback="\n[bold #B565D8]其他選項：[/bold #B565D8]"))
         console.print(safe_t("config.menu.reset", fallback="  6. 重置為預設配置"))
         console.print(safe_t("config.menu.view_path", fallback="  7. 查看配置檔案路徑"))
         console.print(safe_t("config.menu.view_modules", fallback="  8. 查看已啟用模組（背景載入狀態）"))
@@ -466,12 +475,21 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
         # ✅ V-5 修復：記憶上次選擇
         last_choice = config_manager.get_last_menu_choice()
 
-        choice = Prompt.ask(
-            "\n[bold #DDA0DD]請選擇要修改的設定[/bold #DDA0DD]",
-            choices=["0", "1", "2", "3", "4", "5", "6", "7", "8"],
-            default=last_choice,
-            show_default=True
-        )
+        # 使用不限制輸入的方式，然後手動規範化和驗證
+        while True:
+            choice_raw = Prompt.ask(
+                "\n[bold #B565D8]請選擇要修改的設定 [0/1/2/3/4/5/6/7/8][/bold #B565D8]",
+                default=last_choice,
+                show_default=True
+            )
+            # 規範化全形輸入
+            choice = normalize_fullwidth_input(choice_raw)
+
+            # 驗證輸入
+            if choice in ["0", "1", "2", "3", "4", "5", "6", "7", "8"]:
+                break
+            else:
+                console.print(f"[yellow]⚠ 無效的選項：{choice_raw}，請輸入 0-8 之間的數字[/yellow]")
 
         # 儲存選擇（除了「返回」選項）
         if choice != "0":
@@ -487,19 +505,19 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 default=emb_config.enabled
             )
             config_manager.update_codebase_embedding_config(enabled=new_enabled)
-            console.print(safe_t('codegemini.config.updated_enabled', fallback='[#DA70D6]✓ 已更新啟用狀態[/green]'))
+            console.print(safe_t('codegemini.config.updated_enabled', fallback='[#B565D8]✓ 已更新啟用狀態[/#B565D8]'))
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "2":
             # 修改向量資料庫路徑（✅ V-7: 路徑輸入驗證與建議）
-            console.print(safe_t("config.vector.path_title", fallback="\n[plum]📁 向量資料庫路徑配置[/plum]"))
+            console.print(safe_t("config.vector.path_title", fallback="\n[#B565D8]📁 向量資料庫路徑配置[/#B565D8]"))
             console.print(safe_t("config.vector.path_usage", fallback="[dim]· 用途: 儲存程式碼向量 embedding 資料[/dim]"))
             console.print(safe_t("config.vector.path_format", fallback="[dim]· 格式: 可使用相對路徑（相對於 Cache 目錄）或絕對路徑[/dim]"))
             console.print(safe_t("config.vector.path_current", fallback="[dim]· 當前路徑: {path}[/dim]\n").format(path=emb_config.vector_db_path))
 
             while True:
                 new_path = Prompt.ask(
-                    "[plum]請輸入新的向量資料庫路徑[/plum]",
+                    "[#B565D8]請輸入新的向量資料庫路徑[/#B565D8]",
                     default=emb_config.vector_db_path
                 )
 
@@ -511,10 +529,10 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
 
                 if is_valid:
                     config_manager.update_codebase_embedding_config(vector_db_path=validated_path)
-                    console.print(safe_t('codegemini.config.updated_path', fallback='\n[#DA70D6]✓ 已更新向量資料庫路徑[/green]'))
+                    console.print(safe_t('codegemini.config.updated_path', fallback='\n[#B565D8]✓ 已更新向量資料庫路徑[/#B565D8]'))
                     break
                 else:
-                    console.print(safe_t('codegemini.config.path_validation_failed', fallback='\n[#DDA0DD]路徑驗證失敗，請重新輸入[/#DDA0DD]'))
+                    console.print(safe_t('codegemini.config.path_validation_failed', fallback='\n[#B565D8]路徑驗證失敗，請重新輸入[/#B565D8]'))
                     if not Confirm.ask(safe_t('codegemini.config.retry_input', fallback='是否重新輸入？'), default=True):
                         console.print(safe_t('codegemini.config.keep_original_path', fallback='[dim]已取消，保留原路徑[/dim]'))
                         break
@@ -528,18 +546,18 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 default=emb_config.orthogonal_mode
             )
             config_manager.update_codebase_embedding_config(orthogonal_mode=new_orthogonal)
-            console.print(safe_t('codegemini.config.updated_orthogonal', fallback='[#DA70D6]✓ 已更新正交模式[/green]'))
+            console.print(safe_t('codegemini.config.updated_orthogonal', fallback='[#B565D8]✓ 已更新正交模式[/#B565D8]'))
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "4":
             # 修改向量相關係數閾值
-            console.print(safe_t("config.vector.threshold_desc", fallback="\n[plum]向量相關係數閾值說明：[/plum]"))
+            console.print(safe_t("config.vector.threshold_desc", fallback="\n[#B565D8]向量相關係數閾值說明：[/#B565D8]"))
             console.print(safe_t("config.vector.threshold_095", fallback="  - 0.95: 非常嚴格（只過濾幾乎完全相同的內容）"))
             console.print(safe_t("config.vector.threshold_085", fallback="  - 0.85: 建議值（過濾高度相似的內容）"))
             console.print(safe_t("config.vector.threshold_075", fallback="  - 0.75: 寬鬆（過濾明顯相似的內容）"))
 
             # ✅ M3 修復：使用選項而非自由輸入
-            console.print(safe_t("config.vector.threshold_options", fallback="\n[plum]向量相關係數閾值選項：[/plum]"))
+            console.print(safe_t("config.vector.threshold_options", fallback="\n[#B565D8]向量相關係數閾值選項：[/#B565D8]"))
 
             options = {
                 "1": ("非常嚴格", 0.95),
@@ -552,7 +570,12 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 marker = "✓" if val == emb_config.similarity_threshold else " "
                 console.print(safe_t("config.vector.threshold_item", fallback="  {key}. [{marker}] {desc} ({val})").format(key=key, marker=marker, desc=desc, val=val if val else '自訂'))
 
-            choice_threshold = Prompt.ask("請選擇", choices=list(options.keys()), default="2")
+            while True:
+                choice_threshold_raw = Prompt.ask("請選擇 [1/2/3/4]", default="2")
+                choice_threshold = normalize_fullwidth_input(choice_threshold_raw)
+                if choice_threshold in options.keys():
+                    break
+                console.print(f"[yellow]⚠ 無效的選項：{choice_threshold_raw}[/yellow]")
 
             if choice_threshold == "4":
                 # 僅在選擇「自訂」時才要求輸入
@@ -563,31 +586,31 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 try:
                     new_threshold = float(new_threshold_str)
                 except ValueError:
-                    console.print(safe_t('codegemini.config.invalid_value', fallback='[dim #DDA0DD]✗ 無效的數值[/red]'))
+                    console.print(safe_t('codegemini.config.invalid_value', fallback='[dim #B565D8]✗ 無效的數值[/red]'))
                     console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
                     continue
             else:
                 _, new_threshold = options[choice_threshold]
 
             if config_manager.update_codebase_embedding_config(similarity_threshold=new_threshold):
-                console.print(safe_t('codegemini.config.updated_threshold', fallback='[plum]✓ 已更新向量相關係數閾值[/plum]'))
+                console.print(safe_t('codegemini.config.updated_threshold', fallback='[#B565D8]✓ 已更新向量相關係數閾值[/#B565D8]'))
             else:
-                console.print(safe_t('codegemini.config.threshold_update_failed', fallback='[#DDA0DD]✗ 更新失敗（向量相關係數閾值應在 0.0-1.0 之間）[/#DDA0DD]'))
+                console.print(safe_t('codegemini.config.threshold_update_failed', fallback='[#B565D8]✗ 更新失敗（向量相關係數閾值應在 0.0-1.0 之間）[/#B565D8]'))
 
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "5":
             # 修改向量資料庫集合名稱（✅ M2: 中文命名明確性改善）
-            console.print(safe_t("config.vector.collection_title", fallback="\n[plum]📋 向量資料庫集合名稱配置[/plum]"))
+            console.print(safe_t("config.vector.collection_title", fallback="\n[#B565D8]📋 向量資料庫集合名稱配置[/#B565D8]"))
             console.print(safe_t("config.vector.collection_usage", fallback="[dim]· 用途說明: 在 ChromaDB 中唯一識別此程式碼庫的向量集合[/dim]"))
             console.print(safe_t("config.vector.collection_format", fallback="[dim]· 格式限制: 僅限英文字母 (a-z, A-Z)、數字 (0-9)、底線 (_)[/dim]"))
             console.print(safe_t("config.vector.collection_forbidden", fallback="[dim]· 禁止內容: 空格、連字號 (-) 等特殊符號、中文字元[/dim]"))
             console.print(safe_t("config.vector.collection_length", fallback="[dim]· 建議長度: 3-32 字元[/dim]"))
-            console.print(safe_t("config.vector.collection_valid", fallback="\n[plum]✓ 有效範例:[/plum]"))
+            console.print(safe_t("config.vector.collection_valid", fallback="\n[#B565D8]✓ 有效範例:[/#B565D8]"))
             console.print(safe_t("config.vector.example1", fallback="  [orchid1]codebase_main[/orchid1] (基礎命名)"))
             console.print(safe_t("config.vector.example2", fallback="  [orchid1]project_v2_embeddings[/orchid1] (含版本號)"))
             console.print(safe_t("config.vector.example3", fallback="  [orchid1]ChatGemini_SakiTool[/orchid1] (專案名稱)"))
-            console.print(safe_t("config.vector.collection_invalid", fallback="\n[#DDA0DD]✗ 無效範例 (會被拒絕):[/#DDA0DD]"))
+            console.print(safe_t("config.vector.collection_invalid", fallback="\n[#B565D8]✗ 無效範例 (會被拒絕):[/#B565D8]"))
             console.print(safe_t("config.vector.invalid1", fallback="  [dim]my-project[/dim] → 含連字號 (-)"))
             console.print(safe_t("config.vector.invalid2", fallback="  [dim]code base[/dim] → 含空格"))
             console.print(safe_t("config.vector.invalid3", fallback="  [dim]專案名稱[/dim] → 含中文字元\n"))
@@ -595,16 +618,16 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
             import re
             while True:
                 new_collection_name = Prompt.ask(
-                    "[plum]請輸入向量資料庫集合名稱 (限英數底線)[/plum]",
+                    "[#B565D8]請輸入向量資料庫集合名稱 (限英數底線)[/#B565D8]",
                     default=emb_config.collection_name
                 )
 
                 # 格式驗證
                 if re.match(r'^[a-zA-Z0-9_]+$', new_collection_name):
-                    console.print(safe_t('codegemini.config.collection_format_valid', fallback='\n[plum]✓ 格式驗證通過: {name}[/plum]', name=new_collection_name))
+                    console.print(safe_t('codegemini.config.collection_format_valid', fallback='\n[#B565D8]✓ 格式驗證通過: {name}[/#B565D8]', name=new_collection_name))
                     break
                 else:
-                    console.print(safe_t('codegemini.config.collection_format_invalid', fallback='\n[#DDA0DD]❌ 名稱格式不符合規則[/#DDA0DD]'))
+                    console.print(safe_t('codegemini.config.collection_format_invalid', fallback='\n[#B565D8]❌ 名稱格式不符合規則[/#B565D8]'))
                     console.print(safe_t('codegemini.config.collection_invalid_reason', fallback='[dim]· 原因: 包含不允許的字元[/dim]'))
                     console.print(safe_t('codegemini.config.collection_allowed_chars', fallback='[dim]· 允許: 英文字母 (a-zA-Z)、數字 (0-9)、底線 (_)[/dim]'))
                     console.print(safe_t('codegemini.config.collection_refer_examples', fallback='[dim]· 請參考上方有效範例重新輸入[/dim]\n'))
@@ -613,20 +636,20 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
             config_manager.update_codebase_embedding_config(
                 collection_name=new_collection_name
             )
-            console.print(safe_t('codegemini.config.updated_collection', fallback='[plum]✓ 已更新向量資料庫集合名稱[/plum]'))
+            console.print(safe_t('codegemini.config.updated_collection', fallback='[#B565D8]✓ 已更新向量資料庫集合名稱[/#B565D8]'))
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "6":
             # 重置為預設配置
             if Confirm.ask(safe_t('codegemini.config.confirm_reset', fallback='[bold red]確定要重置所有配置為預設值嗎？[/bold red]'), default=False):
                 config_manager.reset_to_defaults()
-                console.print(safe_t('codegemini.config.reset_done', fallback='[#DA70D6]✓ 配置已重置為預設值[/green]'))
+                console.print(safe_t('codegemini.config.reset_done', fallback='[#B565D8]✓ 配置已重置為預設值[/#B565D8]'))
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "7":
             # 查看配置檔案路徑
-            console.print(safe_t('codegemini.config.file_path', fallback='\n[#DDA0DD]配置檔案路徑：[/#DDA0DD] {path}', path=config_manager.config_path))
-            console.print(safe_t('codegemini.config.file_exists', fallback='[#DDA0DD]檔案存在：[/#DDA0DD] {exists}', exists='是' if config_manager.config_path.exists() else '否'))
+            console.print(safe_t('codegemini.config.file_path', fallback='\n[#B565D8]配置檔案路徑：[/#B565D8] {path}', path=config_manager.config_path))
+            console.print(safe_t('codegemini.config.file_exists', fallback='[#B565D8]檔案存在：[/#B565D8] {exists}', exists='是' if config_manager.config_path.exists() else '否'))
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 
         elif choice == "8":
@@ -634,13 +657,13 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
             try:
                 from smart_background_loader import get_smart_loader
 
-                console.print(safe_t('config.modules.title', fallback='\n[bold #DDA0DD]📦 已啟用模組狀態[/bold #DDA0DD]\n'))
+                console.print(safe_t('config.modules.title', fallback='\n[bold #B565D8]📦 已啟用模組狀態[/bold #B565D8]\n'))
 
                 loader = get_smart_loader()
                 stats = loader.get_stats()
 
                 # 顯示統計資訊
-                console.print(safe_t('config.modules.summary', fallback='[#DDA0DD]載入統計：[/#DDA0DD]'))
+                console.print(safe_t('config.modules.summary', fallback='[#B565D8]載入統計：[/#B565D8]'))
                 console.print(safe_t('config.modules.total', fallback='  · 總任務數: {total}').format(total=stats['total_tasks']))
                 console.print(safe_t('config.modules.loaded', fallback='  · 已載入: {loaded} ({rate:.1%})').format(
                     loaded=stats['loaded_tasks'],
@@ -651,10 +674,10 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 console.print(safe_t('config.modules.foreground', fallback='  · 前景載入時間: {time:.2f}s').format(time=stats['foreground_load_time']))
 
                 # 顯示模組詳細列表
-                console.print(safe_t('config.modules.detail', fallback='\n[#DDA0DD]模組詳細列表：[/#DDA0DD]'))
+                console.print(safe_t('config.modules.detail', fallback='\n[#B565D8]模組詳細列表：[/#B565D8]'))
 
                 from rich.table import Table
-                module_table = Table(show_header=True, header_style="bold #DDA0DD", border_style="#DDA0DD")
+                module_table = Table(show_header=True, header_style="bold #B565D8", border_style="#B565D8")
                 module_table.add_column("模組名稱", style="#87CEEB", width=25)
                 module_table.add_column("狀態", style="white", width=12)
                 module_table.add_column("優先級", style="white", width=12)
@@ -682,7 +705,7 @@ def interactive_config_menu(config_manager: ConfigManager) -> None:
                 console.print(safe_t('config.modules.note', fallback='\n[dim]💡 提示：背景載入器會在使用者操作時自動載入模組，無需手動干預[/dim]'))
 
             except Exception as e:
-                console.print(safe_t('config.modules.error', fallback='[#DDA0DD]✗ 無法獲取模組狀態: {e}[/#DDA0DD]', e=str(e)))
+                console.print(safe_t('config.modules.error', fallback='[#B565D8]✗ 無法獲取模組狀態: {e}[/#B565D8]', e=str(e)))
 
             console.input(safe_t('common.press_enter', fallback='\n按 Enter 繼續...'))
 

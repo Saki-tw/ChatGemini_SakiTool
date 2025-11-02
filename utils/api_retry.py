@@ -124,7 +124,7 @@ def show_error_solutions(error: Exception, operation_name: str = "API 調用"):
     """
     error_str = str(error).lower()
 
-    console.print(f"\n[#DDA0DD]💡 解決方案：[/#DDA0DD]")
+    console.print(f"\n[#B565D8]💡 解決方案：[/#B565D8]")
 
     # API 金鑰相關錯誤
     if "401" in error_str or "unauthorized" in error_str or "invalid api key" in error_str:
@@ -262,7 +262,7 @@ def api_retry(
                 try:
                     # 顯示進度
                     if show_progress and attempt == 1:
-                        console.print(f"\n[#DDA0DD]🔄 {operation_name}中...[/#DDA0DD]")
+                        console.print(f"\n[#B565D8]🔄 {operation_name}中...[/#B565D8]")
 
                     # 執行 API 調用
                     result = func(*args, **kwargs)
@@ -274,7 +274,7 @@ def api_retry(
                         success_rate = ((attempt - retry_stats['failures']) / attempt) * 100
 
                         console.print(
-                            f"\n[#DA70D6]✓ {operation_name}成功（第 {attempt} 次嘗試）[/green]"
+                            f"\n[#B565D8]✓ {operation_name}成功（第 {attempt} 次嘗試）[/green]"
                         )
                         console.print(
                             f"   [dim]耗時：{total_time:.1f} 秒（含重試）[/dim]"
@@ -282,14 +282,14 @@ def api_retry(
 
                         # 顯示重試統計
                         if show_progress:
-                            console.print(f"\n[#DDA0DD]📊 重試統計：[/#DDA0DD]")
+                            console.print(f"\n[#B565D8]📊 重試統計：[/#B565D8]")
                             console.print(f"   - 總嘗試次數：{attempt}")
                             console.print(f"   - 失敗次數：{retry_stats['failures']}")
                             console.print(f"   - 成功率：{success_rate:.0f}%")
 
                             if retry_stats['failures'] >= 2:
                                 console.print(
-                                    "   - [#DDA0DD]建議：網路連線可能不穩定，建議檢查網路狀況[/#DDA0DD]"
+                                    "   - [#B565D8]建議：網路連線可能不穩定，建議檢查網路狀況[/#B565D8]"
                                 )
 
                     return result
@@ -305,7 +305,7 @@ def api_retry(
                     # 顯示錯誤
                     error_prefix = "⚠️ " if retryable else "✗"
                     console.print(
-                        f"\n[#DDA0DD]{error_prefix} {operation_name}失敗（第 {attempt}/{retries} 次）[/#DDA0DD]"
+                        f"\n[#B565D8]{error_prefix} {operation_name}失敗（第 {attempt}/{retries} 次）[/#B565D8]"
                     )
                     console.print(f"   錯誤：{str(e)[:100]}")
                     console.print(f"   原因：{error_reason}")
@@ -313,7 +313,7 @@ def api_retry(
                     # 不可重試
                     if not retryable:
                         console.print(
-                            f"\n[dim #DDA0DD]⚠️  此錯誤無法透過重試解決[/red]\n"
+                            f"\n[dim #B565D8]⚠️  此錯誤無法透過重試解決[/red]\n"
                         )
 
                         # 提供解決建議
@@ -323,7 +323,7 @@ def api_retry(
                     # 最後一次嘗試
                     if attempt == retries:
                         console.print(
-                            f"\n[dim #DDA0DD]✗ {operation_name}失敗（已達最大重試次數）[/red]\n"
+                            f"\n[dim #B565D8]✗ {operation_name}失敗（已達最大重試次數）[/red]\n"
                         )
 
                         # 仍然顯示解決方案
@@ -342,7 +342,7 @@ def api_retry(
                     retry_stats['total_delay'] += delay
 
                     # 顯示重試提示
-                    console.print(f"\n   [#DDA0DD]⏳ {delay:.0f} 秒後自動重試...[/#DDA0DD]")
+                    console.print(f"\n   [#B565D8]⏳ {delay:.0f} 秒後自動重試...[/#B565D8]")
                     time.sleep(delay)
 
             # 理論上不會到這裡

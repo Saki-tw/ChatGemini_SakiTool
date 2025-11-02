@@ -239,7 +239,7 @@ class MediaPreprocessor:
     def display_stats(self) -> None:
         """顯示統計資訊（Rich 格式）"""
         if not self.enable_cache:
-            console.print("[#DDA0DD]快取已停用[/#DDA0DD]")
+            console.print("[#B565D8]快取已停用[/#B565D8]")
             return
 
         self.cache.display_stats()
@@ -395,26 +395,26 @@ if __name__ == "__main__":
     # 測試圖片處理（使用實際存在的測試檔案）
     test_image = "test_image.jpg"  # 假設存在
 
-    console.print("[#DDA0DD]測試 1：首次處理圖片[/#DDA0DD]")
+    console.print("[#B565D8]測試 1：首次處理圖片[/#B565D8]")
     # 如果測試檔案存在，才執行
     if Path(test_image).exists():
         result1 = preprocessor.process_image(test_image)
         console.print(f"處理結果大小：{len(result1)} bytes")
 
-        console.print("\n[#DDA0DD]測試 2：再次處理相同圖片（應命中快取）[/#DDA0DD]")
+        console.print("\n[#B565D8]測試 2：再次處理相同圖片（應命中快取）[/#B565D8]")
         result2 = preprocessor.process_image(test_image)
         console.print(f"處理結果大小：{len(result2)} bytes")
 
-        console.print("\n[#DDA0DD]測試 3：失效快取[/#DDA0DD]")
+        console.print("\n[#B565D8]測試 3：失效快取[/#B565D8]")
         invalidated = preprocessor.invalidate(test_image)
         console.print(f"失效項目數：{invalidated}")
 
-        console.print("\n[#DDA0DD]測試 4：失效後再次處理[/#DDA0DD]")
+        console.print("\n[#B565D8]測試 4：失效後再次處理[/#B565D8]")
         result3 = preprocessor.process_image(test_image)
         console.print(f"處理結果大小：{len(result3)} bytes")
     else:
-        console.print(f"[#DDA0DD]警告：測試檔案 {test_image} 不存在，跳過測試[/#DDA0DD]")
+        console.print(f"[#B565D8]警告：測試檔案 {test_image} 不存在，跳過測試[/#B565D8]")
 
     # 顯示統計
-    console.print("\n[#DDA0DD]統計資訊[/#DDA0DD]")
+    console.print("\n[#B565D8]統計資訊[/#B565D8]")
     preprocessor.display_stats()

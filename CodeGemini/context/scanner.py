@@ -170,10 +170,10 @@ class CodebaseScanner:
 
         # 檢查快取
         if self.cache_enabled and project_path in self._cache:
-            console.print(safe_t("scanner.cache.using", fallback="[#DDA0DD]使用快取的掃描結果[/#DDA0DD]"))
+            console.print(safe_t("scanner.cache.using", fallback="[#B565D8]使用快取的掃描結果[/#B565D8]"))
             return self._cache[project_path]
 
-        console.print(safe_t("scanner.scan.starting", fallback="\n[#DDA0DD]🔍 掃描專案：{path}[/#DDA0DD]\n").format(path=project_path))
+        console.print(safe_t("scanner.scan.starting", fallback="\n[#B565D8]🔍 掃描專案：{path}[/#B565D8]\n").format(path=project_path))
 
         with Progress(
             SpinnerColumn(),
@@ -208,7 +208,7 @@ class CodebaseScanner:
         # 步驟 5：建立符號索引（選用）
         symbol_index = None
         if build_symbol_index and project_type == ProjectType.PYTHON:
-            console.print(safe_t("scanner.symbol.indexing", fallback="[#DDA0DD]建立符號索引...[/#DDA0DD]"))
+            console.print(safe_t("scanner.symbol.indexing", fallback="[#B565D8]建立符號索引...[/#B565D8]"))
             symbol_index = self.build_symbol_index(project_path, source_files)
 
         # 步驟 6：生成專案結構樹
@@ -561,7 +561,7 @@ class CodebaseScanner:
         """顯示掃描摘要"""
         console.print(safe_t("scanner.scan.completed", fallback="\n[bold green]✅ 掃描完成[/bold green]\n"))
 
-        console.print(safe_t("scanner.info.title", fallback="[bold #DDA0DD]專案資訊：[/bold #DDA0DD]"))
+        console.print(safe_t("scanner.info.title", fallback="[bold #B565D8]專案資訊：[/bold #B565D8]"))
         console.print(safe_t("scanner.info.type", fallback="  專案類型：{type}").format(type=context.project_type.value))
         console.print(safe_t("scanner.info.files", fallback="  檔案總數：{count}").format(count=context.file_count))
         console.print(safe_t("scanner.info.source", fallback="    - 源碼：{count}").format(count=len(context.source_files)))
@@ -569,16 +569,16 @@ class CodebaseScanner:
         console.print(safe_t("scanner.info.config", fallback="    - 配置：{count}").format(count=len(context.config_files)))
 
         if context.frameworks:
-            console.print(safe_t("scanner.frameworks.title", fallback="\n[bold #DDA0DD]檢測到的框架：[/bold #DDA0DD]"))
+            console.print(safe_t("scanner.frameworks.title", fallback="\n[bold #B565D8]檢測到的框架：[/bold #B565D8]"))
             for fw in context.frameworks:
                 version_str = f" ({fw.version})" if fw.version else ""
                 console.print(f"  - {fw.name}{version_str}")
 
         if context.dependencies:
-            console.print(safe_t("scanner.deps.title", fallback="\n[bold #DDA0DD]依賴套件：[/bold #DDA0DD]{count} 個").format(count=len(context.dependencies)))
+            console.print(safe_t("scanner.deps.title", fallback="\n[bold #B565D8]依賴套件：[/bold #B565D8]{count} 個").format(count=len(context.dependencies)))
 
         if context.symbol_index:
-            console.print(safe_t("scanner.symbol.title", fallback="\n[bold #DDA0DD]符號索引：[/bold #DDA0DD]"))
+            console.print(safe_t("scanner.symbol.title", fallback="\n[bold #B565D8]符號索引：[/bold #B565D8]"))
             console.print(safe_t("scanner.symbol.classes", fallback="  類別：{count}").format(count=len(context.symbol_index.classes)))
             console.print(safe_t("scanner.symbol.functions", fallback="  函數：{count}").format(count=len(context.symbol_index.functions)))
 
@@ -588,9 +588,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print(safe_t("scanner.usage.title", fallback="[#DDA0DD]用法：[/#DDA0DD]"))
+        console.print(safe_t("scanner.usage.title", fallback="[#B565D8]用法：[/#B565D8]"))
         console.print(safe_t("scanner.usage.syntax", fallback='  python scanner.py <專案路徑>'))
-        console.print(safe_t("scanner.usage.example_title", fallback="\n[#DDA0DD]範例：[/#DDA0DD]"))
+        console.print(safe_t("scanner.usage.example_title", fallback="\n[#B565D8]範例：[/#B565D8]"))
         console.print('  python scanner.py .')
         sys.exit(1)
 
@@ -605,11 +605,11 @@ def main():
 
         # 顯示專案結構樹
         if context.project_structure:
-            console.print(safe_t("scanner.structure.title", fallback="\n[bold #DDA0DD]專案結構：[/bold #DDA0DD]"))
+            console.print(safe_t("scanner.structure.title", fallback="\n[bold #B565D8]專案結構：[/bold #B565D8]"))
             console.print(context.project_structure)
 
     except Exception as e:
-        console.print(safe_t("scanner.error", fallback="\n[dim #DDA0DD]錯誤：{error}[/red]").format(error=e))
+        console.print(safe_t("scanner.error", fallback="\n[dim #B565D8]錯誤：{error}[/red]").format(error=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

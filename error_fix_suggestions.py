@@ -4,6 +4,7 @@
 提供一鍵式修復方案，自動偵測系統並給出對應的解決步驟
 """
 import os
+from utils import safe_t
 import platform
 import subprocess
 from pathlib import Path
@@ -129,7 +130,7 @@ def _convert_paths_to_file_info(paths: List[str]) -> List[Dict]:
             elif time_diff.seconds > 60:
                 time_ago = f"{time_diff.seconds // 60} 分鐘前"
             else:
-                time_ago = "剛才"
+                time_ago = safe_t("error_handler.error_fix_suggestions.msg_0001", fallback="剛才")
 
             file_infos.append({
                 'name': os.path.basename(path_str),
@@ -209,7 +210,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
                     elif time_diff.seconds > 60:
                         time_ago = f"{time_diff.seconds // 60} 分鐘前"
                     else:
-                        time_ago = "剛才"
+                        time_ago = safe_t("error_handler.error_fix_suggestions.msg_0002", fallback="剛才")
 
                     similar_files.append({
                         'name': filename,
@@ -238,12 +239,12 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
 
                 if len(selected_files) > 1:
                     console.print(
-                        f"\n[plum]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
-                        f"當前將使用: {selected_files[0]['name']}[/plum]\n"
+                        f"\n[#B565D8]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
+                        f"當前將使用: {selected_files[0]['name']}[/#B565D8]\n"
                     )
                 else:
                     console.print(
-                        f"\n[plum]✅ 已選擇: {selected_files[0]['name']}[/plum]"
+                        f"\n[#B565D8]✅ 已選擇: {selected_files[0]['name']}[/#B565D8]"
                     )
 
                 simplified_path = _simplify_path(selected_path)
@@ -293,7 +294,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
                 )
 
                 if result.stdout:
-                    console.print("\n[plum]🔍 搜尋結果[/plum]")
+                    console.print("\n[#B565D8]🔍 搜尋結果[/#B565D8]")
                     lines = result.stdout.strip().split('\n')
                     console.print(f"[dim]找到 {len(lines)} 個檔案[/dim]\n")
 
@@ -311,11 +312,11 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
 
                                 if len(selected_files) > 1:
                                     console.print(
-                                        f"\n[plum]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
-                                        f"當前將使用: {selected_files[0]['name']}[/plum]\n"
+                                        f"\n[#B565D8]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
+                                        f"當前將使用: {selected_files[0]['name']}[/#B565D8]\n"
                                     )
                                 else:
-                                    console.print(f"\n[plum]✅ 已選擇: {selected_files[0]['name']}[/plum]")
+                                    console.print(f"\n[#B565D8]✅ 已選擇: {selected_files[0]['name']}[/#B565D8]")
 
                                 simplified_path = _simplify_path(selected_path)
                                 console.print(f"[dim]路徑: {simplified_path}[/dim]\n")
@@ -859,7 +860,7 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         f'       -c copy\n'
         f'       "{repaired_full_path}"',
         border_style="#E8C4F0",
-        title="修復檔案"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0003", fallback="修復檔案")
     ))
 
     console.print("\n   [#E8C4F0]⚠️  注意：[/#E8C4F0]")
@@ -881,7 +882,7 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         f'       -c:v libx264 -c:a aac\n'
         f'       "{converted_full_path}"',
         border_style="#E8C4F0",
-        title="重新編碼"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0004", fallback="重新編碼")
     ))
 
     # 估算處理時間
@@ -1015,7 +1016,7 @@ def suggest_json_parse_failed(
     console.print(Panel(
         preview_text,
         border_style="#E8C4F0",
-        title="JSON 內容"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0005", fallback="JSON 內容")
     ))
     console.print()
 
@@ -1091,7 +1092,7 @@ def suggest_json_parse_failed(
         f'# （需要自行實作導入功能）\n'
         f'python import_subtitles.py "{temp_file}"',
         border_style="#E8C4F0",
-        title="手動修復"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0006", fallback="手動修復")
     ))
     console.print()
 
@@ -1177,7 +1178,7 @@ def suggest_video_file_not_found(file_path: str, auto_fix: bool = True) -> Optio
                     elif time_diff.seconds > 60:
                         time_ago = f"{time_diff.seconds // 60} 分鐘前"
                     else:
-                        time_ago = "剛才"
+                        time_ago = safe_t("error_handler.error_fix_suggestions.msg_0007", fallback="剛才")
 
                     similar_files_dict.append({
                         'name': name,
@@ -1199,11 +1200,11 @@ def suggest_video_file_not_found(file_path: str, auto_fix: bool = True) -> Optio
 
                             if len(selected_files) > 1:
                                 console.print(
-                                    f"\n[plum]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
-                                    f"當前將使用: {selected_files[0]['name']}[/plum]\n"
+                                    f"\n[#B565D8]ℹ️ 您選擇了 {len(selected_files)} 個檔案，"
+                                    f"當前將使用: {selected_files[0]['name']}[/#B565D8]\n"
                                 )
                             else:
-                                console.print(f"\n[plum]✅ 已選擇: {selected_files[0]['name']}[/plum]")
+                                console.print(f"\n[#B565D8]✅ 已選擇: {selected_files[0]['name']}[/#B565D8]")
 
                             simplified_path = _simplify_path(selected_path)
                             console.print(f"[dim]路徑: {simplified_path}[/dim]\n")
@@ -1478,7 +1479,7 @@ def suggest_video_transcode_failed(
         f'       "{output_path}"',
         border_style="#E8C4F0",
         padding=(0, 2),
-        title="快速複製"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0008", fallback="快速複製")
     ))
     console.print("   [dim]優點：速度極快，無品質損失[/dim]")
     console.print("   [dim]缺點：無法改變格式或解析度[/dim]\n")
@@ -1491,7 +1492,7 @@ def suggest_video_transcode_failed(
         f'       "{output_path}"',
         border_style="#E8C4F0",
         padding=(0, 2),
-        title="標準編碼"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0009", fallback="標準編碼")
     ))
     console.print("   [dim]優點：相容性好，可調整參數[/dim]")
     console.print("   [dim]缺點：速度較慢[/dim]\n")
@@ -1504,7 +1505,7 @@ def suggest_video_transcode_failed(
         f'       "{output_path}"',
         border_style="#E8C4F0",
         padding=(0, 2),
-        title="快速編碼"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0010", fallback="快速編碼")
     ))
     console.print("   [dim]優點：速度快[/dim]")
     console.print("   [dim]缺點：品質稍降[/dim]\n")
@@ -1551,7 +1552,7 @@ def suggest_video_upload_failed(
         size_mb = size_bytes / (1024 * 1024)
 
         # 獲取影片時長
-        duration_str = "未知"
+        duration_str = safe_t("error_handler.error_fix_suggestions.msg_0011", fallback="未知")
         try:
             import subprocess
             import json
@@ -1744,7 +1745,7 @@ def suggest_empty_file(file_path: str) -> None:
         'wget -c "https://example.com/video.mp4"\n'
         f'     -O "{file_path}"',
         border_style="#E8C4F0",
-        title="斷點續傳下載"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0012", fallback="斷點續傳下載")
     ))
     console.print()
 
@@ -1764,7 +1765,7 @@ def suggest_empty_file(file_path: str) -> None:
         f'rsync -avz --progress source:/path/to/video.mp4\n'
         f'      "{file_path}"',
         border_style="#E8C4F0",
-        title="可靠傳輸"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0013", fallback="可靠傳輸")
     ))
     console.print()
 
@@ -1807,7 +1808,7 @@ def suggest_empty_file(file_path: str) -> None:
     console.print(Panel(
         f'find {parent_dir} -type f -size 0 -delete',
         border_style="#E8C4F0",
-        title="⚠️  危險操作"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0014", fallback="⚠️  危險操作")
     ))
     console.print()
 
@@ -1899,7 +1900,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
         console.print(Panel(
             f'mv "{file_path}" "{new_path}"',
             border_style="#E8C4F0",
-            title="修正副檔名"
+            title=safe_t("error_handler.error_fix_suggestions.msg_0015", fallback="修正副檔名")
         ))
         console.print("\n   [dim]然後使用新路徑重新執行[/dim]\n")
 
@@ -1940,7 +1941,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
     console.print(Panel(
         f'convert "{file_path}" "{repaired}"',
         border_style="#E8C4F0",
-        title="使用 ImageMagick 修復"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0016", fallback="使用 ImageMagick 修復")
     ))
     console.print()
 
@@ -1972,7 +1973,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
             f'       -vf "scale=iw/2:ih/2"\n'
             f'       "{resized}"',
             border_style="#E8C4F0",
-            title="壓縮圖片（縮小為原尺寸的 1/2）"
+            title=safe_t("error_handler.error_fix_suggestions.msg_0017", fallback="壓縮圖片（縮小為原尺寸的 1/2）")
         ))
         console.print()
 
@@ -2542,7 +2543,7 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
         file_path: 影片檔案路徑
         stream_type: 缺少的串流類型 ("audio" 或 "video")
     """
-    stream_name = "音訊" if stream_type == "audio" else "視訊"
+    stream_name = safe_t("error_handler.error_fix_suggestions.msg_0018", fallback="音訊") if stream_type == "audio" else "視訊"
     
     console.print(f"\n[dim #E8C4F0]✗ 影片檔案不包含有效{stream_name}串流：{file_path}[/red]\n")
 
@@ -2959,7 +2960,7 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
             '  identify "$img" 2>&1 | grep -q "identify:" && echo "損壞: $img" || echo "正常: $img"\n'
             'done',
             border_style="#E8C4F0",
-            title="批次驗證"
+            title=safe_t("error_handler.error_fix_suggestions.msg_0019", fallback="批次驗證")
         ))
     console.print()
 
@@ -2983,7 +2984,7 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
         '  ffmpeg -i "$img" -q:v 2 "${img%.jpg}_converted.jpg"\n'
         'done',
         border_style="#E8C4F0",
-        title="高品質轉換"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0020", fallback="高品質轉換")
     ))
     console.print()
 
@@ -2994,7 +2995,7 @@ def suggest_no_images_loaded(attempted_count: int, file_paths: list) -> None:
         console.print(Panel(
             f'chmod 644 {os.path.dirname(file_paths[0]) or "."}/*.{{jpg,png}}',
             border_style="#E8C4F0",
-            title="添加讀取權限"
+            title=safe_t("error_handler.error_fix_suggestions.msg_0021", fallback="添加讀取權限")
         ))
     console.print()
 
@@ -3078,7 +3079,7 @@ def suggest_no_video_stream(file_path: str) -> None:
         '  -c:v libx264 -tune stillimage -c:a copy \\\n'
         '  -shortest output.mp4',
         border_style="#E8C4F0",
-        title="添加封面圖片"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0022", fallback="添加封面圖片")
     ))
     console.print()
 
@@ -3087,7 +3088,7 @@ def suggest_no_video_stream(file_path: str) -> None:
     console.print(Panel(
         f'file "{file_path}"',
         border_style="#E8C4F0",
-        title="檢查檔案類型"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0023", fallback="檢查檔案類型")
     ))
     console.print()
 
@@ -3134,7 +3135,7 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
         console.print(Panel(
             f'chmod +r "{file_path}"',
             border_style="#E8C4F0",
-            title="添加讀取權限"
+            title=safe_t("error_handler.error_fix_suggestions.msg_0024", fallback="添加讀取權限")
         ))
         return
 
@@ -3159,7 +3160,7 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
     console.print(Panel(
         f'ffprobe -v error "{file_path}"',
         border_style="#E8C4F0",
-        title="詳細錯誤診斷"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0025", fallback="詳細錯誤診斷")
     ))
     console.print()
 
@@ -3168,7 +3169,7 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
     console.print(Panel(
         f'ffmpeg -i "{file_path}" -c copy "{file_path}.fixed.mp4"',
         border_style="#E8C4F0",
-        title="重新封裝"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0026", fallback="重新封裝")
     ))
     console.print()
 
@@ -3235,7 +3236,7 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
     console.print(Panel(
         f'ffprobe -v error -show_format -show_streams "{file_path}"',
         border_style="#E8C4F0",
-        title="檢查影片資訊"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0027", fallback="檢查影片資訊")
     ))
     console.print()
 
@@ -3247,7 +3248,7 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
         '  -c:a aac -b:a 128k \\\n'
         f'  "{file_path}.compressed.mp4"',
         border_style="#E8C4F0",
-        title="壓縮影片"
+        title=safe_t("error_handler.error_fix_suggestions.msg_0028", fallback="壓縮影片")
     ))
     console.print()
 

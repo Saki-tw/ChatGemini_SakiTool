@@ -115,13 +115,13 @@ class MultiFileEditor:
         # 生成編輯 ID
         edit_id = f"edit_{int(time.time())}"
 
-        console.print(safe_t('codegemini.editor.batch_edit_start', fallback='\n[#DDA0DD]✏️  開始批次編輯（ID: {id}）[/#DDA0DD]\n', id=edit_id))
+        console.print(safe_t('codegemini.editor.batch_edit_start', fallback='\n[#B565D8]✏️  開始批次編輯（ID: {id}）[/#B565D8]\n', id=edit_id))
 
         # 步驟 1：驗證變更
         validation = self.validate_changes(changes)
 
         if not validation.is_valid:
-            console.print(safe_t('codegemini.editor.validation_failed', fallback='[dim #DDA0DD]✗ 驗證失敗：[/red]'))
+            console.print(safe_t('codegemini.editor.validation_failed', fallback='[dim #B565D8]✗ 驗證失敗：[/red]'))
             for error in validation.errors:
                 console.print(f"  - {error}")
 
@@ -134,7 +134,7 @@ class MultiFileEditor:
 
         # 顯示警告
         if validation.warnings:
-            console.print(safe_t('codegemini.editor.warnings', fallback='[#DDA0DD]⚠️  警告：[/#DDA0DD]'))
+            console.print(safe_t('codegemini.editor.warnings', fallback='[#B565D8]⚠️  警告：[/#B565D8]'))
             for warning in validation.warnings:
                 console.print(f"  - {warning}")
 
@@ -143,9 +143,9 @@ class MultiFileEditor:
         if self.auto_backup:
             try:
                 backup_id = self.create_backup([c.file_path for c in changes])
-                console.print(safe_t('codegemini.editor.backup_created', fallback='[#DA70D6]✓ 已建立備份：{id}[/green]', id=backup_id))
+                console.print(safe_t('codegemini.editor.backup_created', fallback='[#B565D8]✓ 已建立備份：{id}[/#B565D8]', id=backup_id))
             except Exception as e:
-                console.print(safe_t('codegemini.editor.backup_failed', fallback='[#DDA0DD]警告：備份失敗 - {error}[/#DDA0DD]', error=e))
+                console.print(safe_t('codegemini.editor.backup_failed', fallback='[#B565D8]警告：備份失敗 - {error}[/#B565D8]', error=e))
 
         # 步驟 3：執行變更
         result = EditResult(
@@ -172,8 +172,8 @@ class MultiFileEditor:
                     result.error_messages.append(f"{change.file_path}: {str(e)}")
 
                     # 原子性：若有失敗，回滾所有變更
-                    console.print(safe_t('codegemini.editor.error_occurred', fallback='\n[dim #DDA0DD]✗ 錯誤：{file} - {error}[/red]', file=change.file_path, error=e))
-                    console.print(safe_t('codegemini.editor.rolling_back', fallback='[#DDA0DD]回滾所有變更...[/#DDA0DD]'))
+                    console.print(safe_t('codegemini.editor.error_occurred', fallback='\n[dim #B565D8]✗ 錯誤：{file} - {error}[/red]', file=change.file_path, error=e))
+                    console.print(safe_t('codegemini.editor.rolling_back', fallback='[#B565D8]回滾所有變更...[/#B565D8]'))
 
                     if backup_id:
                         self.rollback(edit_id, backup_id)
@@ -192,9 +192,9 @@ class MultiFileEditor:
                     message=commit_message or f"CodeGemini edit {edit_id}",
                     files=[c.file_path for c in changes]
                 )
-                console.print(safe_t('codegemini.editor.git_commit_created', fallback='[#DA70D6]✓ 已建立 Git commit[/green]'))
+                console.print(safe_t('codegemini.editor.git_commit_created', fallback='[#B565D8]✓ 已建立 Git commit[/#B565D8]'))
             except Exception as e:
-                console.print(safe_t('codegemini.editor.git_commit_failed', fallback='[#DDA0DD]警告：Git commit 失敗 - {error}[/#DDA0DD]', error=e))
+                console.print(safe_t('codegemini.editor.git_commit_failed', fallback='[#B565D8]警告：Git commit 失敗 - {error}[/#B565D8]', error=e))
 
         result.status = EditStatus.SUCCESS
         console.print(safe_t('codegemini.editor.batch_edit_complete', fallback='\n[bold green]✅ 批次編輯完成[/bold green]'))
@@ -299,16 +299,16 @@ class MultiFileEditor:
         Returns:
             bool: 是否成功回滾
         """
-        console.print(safe_t('codegemini.editor.rollback_start', fallback='\n[#DDA0DD]🔄 回滾變更（編輯 ID: {id}）[/#DDA0DD]', id=edit_id))
+        console.print(safe_t('codegemini.editor.rollback_start', fallback='\n[#B565D8]🔄 回滾變更（編輯 ID: {id}）[/#B565D8]', id=edit_id))
 
         if not backup_id:
-            console.print(safe_t('codegemini.editor.no_backup_id', fallback='[dim #DDA0DD]錯誤：沒有備份 ID，無法回滾[/red]'))
+            console.print(safe_t('codegemini.editor.no_backup_id', fallback='[dim #B565D8]錯誤：沒有備份 ID，無法回滾[/red]'))
             return False
 
         backup_path = os.path.join(self.backup_dir, backup_id)
 
         if not os.path.exists(backup_path):
-            console.print(safe_t('codegemini.editor.backup_not_found', fallback='[dim #DDA0DD]錯誤：找不到備份：{path}[/red]', path=backup_path))
+            console.print(safe_t('codegemini.editor.backup_not_found', fallback='[dim #B565D8]錯誤：找不到備份：{path}[/red]', path=backup_path))
             return False
 
         try:
@@ -323,11 +323,11 @@ class MultiFileEditor:
                     os.makedirs(os.path.dirname(target_file), exist_ok=True)
                     shutil.copy2(backup_file, target_file)
 
-            console.print(safe_t('codegemini.editor.rollback_success', fallback='[#DA70D6]✓ 已從備份還原[/green]'))
+            console.print(safe_t('codegemini.editor.rollback_success', fallback='[#B565D8]✓ 已從備份還原[/#B565D8]'))
             return True
 
         except Exception as e:
-            console.print(safe_t('codegemini.editor.rollback_failed', fallback='[dim #DDA0DD]錯誤：回滾失敗 - {error}[/red]', error=e))
+            console.print(safe_t('codegemini.editor.rollback_failed', fallback='[dim #B565D8]錯誤：回滾失敗 - {error}[/red]', error=e))
             return False
 
     def create_backup(self, files: List[str]) -> str:
@@ -384,7 +384,7 @@ class MultiFileEditor:
 
     def show_change_preview(self, changes: List[FileChange]):
         """顯示變更預覽"""
-        console.print(safe_t('codegemini.editor.change_preview', fallback='\n[bold #DDA0DD]📝 變更預覽[/bold #DDA0DD]\n'))
+        console.print(safe_t('codegemini.editor.change_preview', fallback='\n[bold #B565D8]📝 變更預覽[/bold #B565D8]\n'))
 
         for i, change in enumerate(changes, 1):
             action_emoji = {
@@ -422,7 +422,7 @@ def main():
     """測試用主程式"""
     import sys
 
-    console.print("[bold #DDA0DD]CodeGemini Multi-File Editor 測試[/bold #DDA0DD]\n")
+    console.print("[bold #B565D8]CodeGemini Multi-File Editor 測試[/bold #B565D8]\n")
 
     # 建立測試變更
     test_changes = [
@@ -454,17 +454,17 @@ def main():
             console.print("\n[bold green]✅ 測試成功[/bold green]")
 
             # 清理測試檔案
-            console.print("\n[#DDA0DD]清理測試檔案...[/#DDA0DD]")
+            console.print("\n[#B565D8]清理測試檔案...[/#B565D8]")
             for change in test_changes:
                 if os.path.exists(change.file_path):
                     os.remove(change.file_path)
-            console.print("[#DA70D6]✓ 清理完成[/green]")
+            console.print("[#B565D8]✓ 清理完成[/#B565D8]")
 
         else:
-            console.print(f"\n[dim #DDA0DD]✗ 測試失敗：{result.status.value}[/red]")
+            console.print(f"\n[dim #B565D8]✗ 測試失敗：{result.status.value}[/red]")
 
     except Exception as e:
-        console.print(f"\n[dim #DDA0DD]錯誤：{e}[/red]")
+        console.print(f"\n[dim #B565D8]錯誤：{e}[/red]")
         import traceback
         traceback.print_exc()
 

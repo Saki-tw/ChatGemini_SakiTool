@@ -21,6 +21,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from functools import lru_cache
 from collections import OrderedDict, defaultdict
 import time
+from utils.i18n import safe_t
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +66,7 @@ class FileCache:
         self._hit_count = 0
         self._miss_count = 0
 
-        logger.info(f"✓ FileCache 已初始化（容量: {maxsize} 檔案）")
+        logger.info(safe_t("file.manager.cache.initialized", "檔案快取已初始化（最大容量：{maxsize}）", maxsize=maxsize))
 
     def _generate_cache_key(self, file_path: str, mtime: float) -> str:
         """生成快取鍵（檔案路徑 + 修改時間）"""
@@ -90,7 +91,7 @@ class FileCache:
                 cached_file.access_count += 1
                 cached_file.last_access_time = time.time()
                 self._hit_count += 1
-                logger.debug(f"✓ 快取命中: {file_path} (訪問次數: {cached_file.access_count})")
+                logger.debug(safe_t("file.manager.cache.hit", "快取命中：{file_path}（訪問次數：{count}）", file_path=file_path, count=cached_file.access_count))
                 return cached_file
             else:
                 # 快取未命中
@@ -121,7 +122,7 @@ class FileCache:
             if len(self._cache) > self.maxsize:
                 # 移除最舊的（OrderedDict 第一個）
                 oldest_key, oldest_file = self._cache.popitem(last=False)
-                logger.debug(f"⚠ 快取已滿,淘汰: {oldest_file.file_path}")
+                logger.debug(safe_t("file.manager.cache.evicted", "快取淘汰：{file_path}", file_path=oldest_file.file_path))
 
     def invalidate(self, file_path: str):
         """使特定檔案的快取失效"""
@@ -129,7 +130,7 @@ class FileCache:
             keys_to_remove = [k for k in self._cache.keys() if k.startswith(f"{file_path}::")]
             for key in keys_to_remove:
                 self._cache.pop(key, None)
-                logger.debug(f"✓ 快取已失效: {file_path}")
+                logger.debug(safe_t("file.manager.cache.invalidated", "快取失效：{file_path}", file_path=file_path))
 
     def clear(self):
         """清空所有快取"""
@@ -137,7 +138,7 @@ class FileCache:
             self._cache.clear()
             self._hit_count = 0
             self._miss_count = 0
-            logger.info("✓ 檔案快取已清空")
+            logger.info(safe_t("file.manager.cache.cleared", "快取已清空"))
 
     def get_stats(self) -> Dict:
         """獲取快取統計資訊"""
@@ -184,7 +185,7 @@ class SmartPreloader:
         self._occurrence: Dict[str, int] = defaultdict(int)
         self._lock = threading.Lock()
 
-        logger.info(f"✓ SmartPreloader 已初始化（信心度閾值: {min_confidence}）")
+        logger.info(safe_t("file.manager.preloader.initialized", "智能預載入器已初始化（最小信心度：{confidence}）", confidence=min_confidence))
 
     def record_access(self, file_paths: List[str]):
         """記錄檔案訪問模式"""
@@ -229,7 +230,7 @@ class SmartPreloader:
             related_files = [f for f, conf in candidates[:top_k]]
 
             if related_files:
-                logger.debug(f"✓ 智能預載: {file_path} → {related_files}")
+                logger.debug(safe_t("file.manager.preloader.related", "預載相關檔案：{file_path} -> {related_files}", file_path=file_path, related_files=related_files))
 
             return related_files
 
@@ -238,7 +239,7 @@ class SmartPreloader:
         with self._lock:
             self._cooccurrence.clear()
             self._occurrence.clear()
-            logger.info("✓ 預載入統計已清空")
+            logger.info(safe_t("file.manager.preloader.cleared", "預載入器統計資料已清空"))
 
 
 # ============================================================================
@@ -305,10 +306,10 @@ def _read_text_file_with_cache(file_path: str, file_cache: FileCache) -> Optiona
                 file_cache.put(file_path, content, mtime)
                 return content
         except Exception as e:
-            logger.error(f"無法讀取檔案 {file_path}: {e}")
+            logger.error(safe_t("file.manager.read.error", "讀取檔案失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
             return None
     except Exception as e:
-        logger.error(f"無法讀取檔案 {file_path}: {e}")
+        logger.error(safe_t("file.manager.read.error", "讀取檔案失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
         return None
 
 
@@ -344,7 +345,7 @@ def _process_text_files_batch(file_paths: List[str], file_cache: FileCache, max_
                     content = future.result()
                     results[file_path] = content
                 except Exception as e:
-                    logger.error(f"批次讀取失敗 {file_path}: {e}")
+                    logger.error(safe_t("file.manager.batch.error", "批次處理檔案失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
                     results[file_path] = None
 
     return results
@@ -401,11 +402,16 @@ def process_file_attachments(user_input: str, enable_cache: bool = True, enable_
             pass
 
     # 偵測檔案路徑模式
+    # 從 i18n 動態生成正則表達式中的關鍵字
+    keyword_attach = safe_t('file.manager.pattern.attach', '附加')
+    keyword_read = safe_t('file.manager.pattern.read', '讀取')
+    keyword_upload = safe_t('file.manager.pattern.upload', '上傳')
+
     file_patterns = [
-        r'@([^\s]+)',           # @file.txt
-        r'附加\s+([^\s]+)',     # 附加 file.txt
-        r'讀取\s+([^\s]+)',     # 讀取 file.txt
-        r'上傳\s+([^\s]+)',     # 上傳 file.mp4
+        r'@([^\s]+)',                                    # @file.txt
+        rf'{keyword_attach}\s+([^\s]+)',                 # 附加 file.txt
+        rf'{keyword_read}\s+([^\s]+)',                   # 讀取 file.txt
+        rf'{keyword_upload}\s+([^\s]+)',                 # 上傳 file.mp4
     ]
 
     # 文字檔副檔名（直接讀取）
@@ -435,9 +441,9 @@ def process_file_attachments(user_input: str, enable_cache: bool = True, enable_
                         from gemini_error_fix import suggest_file_not_found
                         suggest_file_not_found(file_path)
                     except ImportError:
-                        print(f"⚠️  找不到檔案: {file_path}")
+                        print(safe_t("file.manager.file.not_found", "檔案不存在：{file_path}", file_path=file_path))
                 else:
-                    print(f"⚠️  找不到檔案: {file_path}")
+                    print(safe_t("file.manager.file.not_found", "檔案不存在：{file_path}", file_path=file_path))
                 continue
 
             # 判斷檔案類型
@@ -448,19 +454,21 @@ def process_file_attachments(user_input: str, enable_cache: bool = True, enable_
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        files_content.append(f"\n\n[檔案: {file_path}]\n```{ext[1:]}\n{content}\n```\n")
-                        print(f"✅ 已讀取文字檔: {file_path}")
+                        file_label = safe_t('file.manager.file.label', '檔案')
+                        files_content.append(f"\n\n[{file_label}: {file_path}]\n```{ext[1:]}\n{content}\n```\n")
+                        print(safe_t("file.manager.text.loaded", "已載入文字檔案：{file_path}", file_path=file_path))
                 except UnicodeDecodeError:
                     # 嘗試其他編碼
                     try:
                         with open(file_path, 'r', encoding='latin-1') as f:
                             content = f.read()
-                            files_content.append(f"\n\n[檔案: {file_path}]\n```\n{content}\n```\n")
-                            print(f"✅ 已讀取文字檔: {file_path} (latin-1)")
+                            file_label = safe_t('file.manager.file.label', '檔案')
+                            files_content.append(f"\n\n[{file_label}: {file_path}]\n```\n{content}\n```\n")
+                            print(safe_t("file.manager.text.loaded_latin1", "已載入文字檔案（Latin-1 編碼）：{file_path}", file_path=file_path))
                     except Exception as e:
-                        print(f"⚠️  無法讀取檔案 {file_path}: {e}")
+                        print(safe_t("file.manager.read.failed", "讀取檔案失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
                 except Exception as e:
-                    print(f"⚠️  無法讀取檔案 {file_path}: {e}")
+                    print(safe_t("file.manager.read.failed", "讀取檔案失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
 
             elif ext in MEDIA_EXTENSIONS:
                 # 媒體檔：上傳 API
@@ -471,26 +479,27 @@ def process_file_attachments(user_input: str, enable_cache: bool = True, enable_
                             try:
                                 global_media_viewer.show_file_info(file_path)
                             except Exception as e:
-                                logger.debug(f"媒體查看器顯示失敗: {e}")
+                                logger.debug(safe_t("file.manager.media_viewer.error", "媒體查看器錯誤：{error}", error=str(e)))
 
                         uploaded_file = global_file_manager.upload_file(file_path)
                         uploaded_files.append(uploaded_file)
-                        print(f"✅ 已上傳媒體檔: {file_path}")
+                        print(safe_t("file.manager.media.uploaded", "媒體檔案已上傳：{file_path}", file_path=file_path))
                     except Exception as e:
-                        print(f"⚠️  上傳失敗 {file_path}: {e}")
+                        print(safe_t("file.manager.upload.failed", "上傳失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
                 else:
-                    print(f"⚠️  檔案管理器未啟用,無法上傳 {file_path}")
+                    print(safe_t("file.manager.upload.disabled", "檔案管理器未啟用，無法上傳：{file_path}", file_path=file_path))
 
             else:
                 # 未知類型：嘗試當文字檔讀取
-                print(f"⚠️  未知檔案類型 {ext},嘗試當文字檔讀取...")
+                print(safe_t("file.manager.unknown_type", "未知檔案類型 {ext}，嘗試當文字檔讀取", ext=ext))
                 try:
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
-                        files_content.append(f"\n\n[檔案: {file_path}]\n```\n{content}\n```\n")
-                        print(f"✅ 已讀取檔案: {file_path}")
+                        file_label = safe_t('file.manager.file.label', '檔案')
+                        files_content.append(f"\n\n[{file_label}: {file_path}]\n```\n{content}\n```\n")
+                        print(safe_t("file.manager.file.loaded", "檔案已載入：{file_path}", file_path=file_path))
                 except Exception as e:
-                    print(f"⚠️  無法處理檔案 {file_path}: {e}")
+                    print(safe_t("file.manager.process.failed", "處理檔案失敗：{file_path}，錯誤：{error}", file_path=file_path, error=str(e)))
 
     # 移除檔案路徑標記
     for pattern in file_patterns:

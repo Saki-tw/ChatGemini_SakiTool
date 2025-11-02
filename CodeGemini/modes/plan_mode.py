@@ -129,8 +129,8 @@ class PlanMode:
         Returns:
             Plan: 生成的計畫
         """
-        console.print(safe_t('codegemini.plan.enter_mode', fallback="\n[bold #DDA0DD]🎯 進入規劃模式...[/bold #DDA0DD]"))
-        console.print(safe_t('codegemini.plan.task', fallback="[#DDA0DD]任務：{task}[/#DDA0DD]\n", task=task))
+        console.print(safe_t('codegemini.plan.enter_mode', fallback="\n[bold #B565D8]🎯 進入規劃模式...[/bold #B565D8]"))
+        console.print(safe_t('codegemini.plan.task', fallback="[#B565D8]任務：{task}[/#B565D8]\n", task=task))
 
         self.mode_active = True
 
@@ -138,7 +138,7 @@ class PlanMode:
         plan = self._analyze_and_plan(task, context or {})
         self.current_plan = plan
 
-        console.print(safe_t('codegemini.plan.generated', fallback="[#DA70D6]✓ 計畫生成完成[/green]"))
+        console.print(safe_t('codegemini.plan.generated', fallback="[#B565D8]✓ 計畫生成完成[/#B565D8]"))
 
         return plan
 
@@ -154,11 +154,11 @@ class PlanMode:
             Optional[Plan]: 如果批准則返回計畫，否則返回 None
         """
         if not self.mode_active:
-            console.print(safe_t('codegemini.plan.not_in_mode', fallback="[#DDA0DD]⚠️  未在規劃模式中[/#DDA0DD]"))
+            console.print(safe_t('codegemini.plan.not_in_mode', fallback="[#B565D8]⚠️  未在規劃模式中[/#B565D8]"))
             return None
 
         if not self.current_plan:
-            console.print(safe_t('codegemini.plan.no_plan', fallback="[dim #DDA0DD]✗ 無有效計畫[/red]"))
+            console.print(safe_t('codegemini.plan.no_plan', fallback="[dim #B565D8]✗ 無有效計畫[/red]"))
             return None
 
         self.mode_active = False
@@ -178,7 +178,7 @@ class PlanMode:
 
             return approved_plan
         else:
-            console.print(safe_t('codegemini.plan.rejected', fallback="\n[bold #DDA0DD]⚠️  計畫已拒絕[/bold #DDA0DD]"))
+            console.print(safe_t('codegemini.plan.rejected', fallback="\n[bold #B565D8]⚠️  計畫已拒絕[/bold #B565D8]"))
             if feedback:
                 console.print(safe_t('codegemini.plan.feedback', fallback="反饋：{feedback}", feedback=feedback))
 
@@ -201,7 +201,7 @@ class PlanMode:
         if not self.current_plan:
             raise ValueError(safe_t('codegemini.plan.error_no_plan_update', fallback="無有效計畫可更新"))
 
-        console.print(safe_t('codegemini.plan.updating', fallback="\n[#DDA0DD]📝 根據反饋更新計畫...[/#DDA0DD]"))
+        console.print(safe_t('codegemini.plan.updating', fallback="\n[#B565D8]📝 根據反饋更新計畫...[/#B565D8]"))
         console.print(safe_t('codegemini.plan.feedback_detail', fallback="反饋：{feedback}\n", feedback=feedback))
 
         self.current_plan.feedback.append(feedback)
@@ -210,7 +210,7 @@ class PlanMode:
         # 目前僅記錄反饋
         self.current_plan.updated_at = datetime.now()
 
-        console.print(safe_t('codegemini.plan.updated', fallback="[#DA70D6]✓ 計畫已更新[/green]"))
+        console.print(safe_t('codegemini.plan.updated', fallback="[#B565D8]✓ 計畫已更新[/#B565D8]"))
 
         return self.current_plan
 
@@ -224,24 +224,24 @@ class PlanMode:
         display_plan = plan or self.current_plan
 
         if not display_plan:
-            console.print(safe_t('codegemini.plan.no_plan_display', fallback="[#DDA0DD]⚠️  無計畫可展示[/#DDA0DD]"))
+            console.print(safe_t('codegemini.plan.no_plan_display', fallback="[#B565D8]⚠️  無計畫可展示[/#B565D8]"))
             return
 
         # 標題
-        console.print(safe_t('codegemini.plan.separator', fallback=f"\n[bold #DDA0DD]{'=' * 70}[/bold #DDA0DD]"))
+        console.print(safe_t('codegemini.plan.separator', fallback=f"\n[bold #B565D8]{'=' * 70}[/bold #B565D8]"))
         console.print(safe_t('codegemini.plan.title', fallback="[bold white]📋 實作計畫[/bold white]"))
-        console.print(safe_t('codegemini.plan.separator', fallback=f"[bold #DDA0DD]{'=' * 70}[/bold #DDA0DD]\n"))
+        console.print(safe_t('codegemini.plan.separator', fallback=f"[bold #B565D8]{'=' * 70}[/bold #B565D8]\n"))
 
         # 任務描述（使用 Markdown 渲染）
         console.print(Panel(
             Markdown(display_plan.task_description),
             title=safe_t('codegemini.plan.task_desc', fallback="[bold]任務描述[/bold]"),
-            border_style="#DDA0DD"
+            border_style="#B565D8"
         ))
 
         # 基本資訊
         info_table = Table(show_header=False, box=None)
-        info_table.add_column(safe_t('codegemini.plan.info_item', fallback="項目"), style="#DDA0DD")
+        info_table.add_column(safe_t('codegemini.plan.info_item', fallback="項目"), style="#B565D8")
         info_table.add_column(safe_t('codegemini.plan.info_value', fallback="值"), style="white")
 
         info_table.add_row(safe_t('codegemini.plan.total_steps', fallback="總步驟數"), str(len(display_plan.steps)))
@@ -249,9 +249,9 @@ class PlanMode:
         info_table.add_row(safe_t('codegemini.plan.created_at', fallback="建立時間"), display_plan.created_at.strftime("%Y-%m-%d %H:%M:%S"))
 
         if display_plan.approved:
-            info_table.add_row(safe_t('codegemini.plan.status', fallback="狀態"), safe_t('codegemini.plan.status_approved', fallback="[#DA70D6]✅ 已批准[/green]"))
+            info_table.add_row(safe_t('codegemini.plan.status', fallback="狀態"), safe_t('codegemini.plan.status_approved', fallback="[#B565D8]✅ 已批准[/#B565D8]"))
         else:
-            info_table.add_row(safe_t('codegemini.plan.status', fallback="狀態"), safe_t('codegemini.plan.status_pending', fallback="[#DDA0DD]⏳ 待批准[/#DDA0DD]"))
+            info_table.add_row(safe_t('codegemini.plan.status', fallback="狀態"), safe_t('codegemini.plan.status_pending', fallback="[#B565D8]⏳ 待批准[/#B565D8]"))
 
         console.print(info_table)
         console.print()
@@ -268,7 +268,7 @@ class PlanMode:
             for i, fb in enumerate(display_plan.feedback, 1):
                 console.print(f"  {i}. {fb}")
 
-        console.print(safe_t('codegemini.plan.separator_end', fallback="\n[bold #DDA0DD]{'=' * 70}[/bold #DDA0DD]\n"))
+        console.print(safe_t('codegemini.plan.separator_end', fallback="\n[bold #B565D8]{'=' * 70}[/bold #B565D8]\n"))
 
     def _display_step(self, step: PlanStep) -> None:
         """展示單個步驟"""
@@ -509,7 +509,7 @@ class PlanMode:
 
 def main():
     """Plan Mode 命令列工具"""
-    console.print(safe_t('codegemini.plan.demo_title', fallback="\n[bold #DDA0DD]CodeGemini Plan Mode Demo[/bold #DDA0DD]\n"))
+    console.print(safe_t('codegemini.plan.demo_title', fallback="\n[bold #B565D8]CodeGemini Plan Mode Demo[/bold #B565D8]\n"))
 
     # 建立 PlanMode 實例
     pm = PlanMode()
@@ -524,14 +524,14 @@ def main():
     pm.display_plan()
 
     # 模擬用戶批准
-    console.print(safe_t('codegemini.plan.demo_review', fallback="[#DDA0DD]➜ 用戶審查計畫...[/#DDA0DD]"))
+    console.print(safe_t('codegemini.plan.demo_review', fallback="[#B565D8]➜ 用戶審查計畫...[/#B565D8]"))
     console.input(safe_t('codegemini.plan.demo_approve_prompt', fallback="\n按 Enter 鍵批准計畫..."))
 
     # 退出規劃模式
     approved_plan = pm.exit_plan_mode(approved=True, feedback=safe_t('codegemini.plan.demo_feedback', fallback="計畫清楚完整"))
 
     if approved_plan:
-        console.print(safe_t('codegemini.plan.demo_approved', fallback="\n[#DA70D6]✓ 計畫已批准，可以開始執行[/green]"))
+        console.print(safe_t('codegemini.plan.demo_approved', fallback="\n[#B565D8]✓ 計畫已批准，可以開始執行[/#B565D8]"))
 
         # 展示進度
         progress = approved_plan.get_progress()

@@ -297,6 +297,20 @@ class LoadingPlan:
             estimated_time=0.05  # gemini_cache_manager: 50.8ms
         )
 
+        loader.register_task(
+            name='checkpoint',
+            loader=lambda: __import__('gemini_checkpoint'),
+            priority=LoadPriority.HIGH,
+            estimated_time=0.1  # 38KB，檢查點系統
+        )
+
+        loader.register_task(
+            name='streaming_display',
+            loader=lambda: __import__('gemini_streaming_display'),
+            priority=LoadPriority.HIGH,
+            estimated_time=0.03  # 11KB，串流顯示
+        )
+
         # Tier 2: 常用功能（使用者首次輸入時載入）
         # 預估可用時間：5-10 秒
 
@@ -319,6 +333,13 @@ class LoadingPlan:
             loader=lambda: __import__('gemini_smart_triggers'),
             priority=LoadPriority.MEDIUM,
             estimated_time=0.02
+        )
+
+        loader.register_task(
+            name='file_manager',
+            loader=lambda: __import__('gemini_file_manager'),
+            priority=LoadPriority.MEDIUM,
+            estimated_time=0.05  # 20KB，檔案處理功能
         )
 
         # Tier 3: 低頻功能（API 回應等待時載入）
@@ -360,6 +381,23 @@ class LoadingPlan:
             loader=lambda: __import__('gemini_flow_engine'),
             priority=LoadPriority.IDLE,
             estimated_time=0.3
+        )
+
+        # Update 系統相關模組（條件式載入）
+        # 這些模組不會自動載入，需要明確觸發
+
+        loader.register_task(
+            name='updater',
+            loader=lambda: __import__('gemini_updater'),
+            priority=LoadPriority.CRITICAL,  # 啟動時載入
+            estimated_time=0.01  # 非常輕量
+        )
+
+        loader.register_task(
+            name='upgrade',
+            loader=lambda: __import__('gemini_upgrade'),
+            priority=LoadPriority.HIGH,  # 發現更新後載入
+            estimated_time=0.05  # 相對較重（14KB）
         )
 
 
@@ -431,6 +469,18 @@ def get_module_lazy(name: str) -> Optional[Any]:
 
     # 未載入則同步載入
     return loader.load_now(name)
+
+
+def on_update_available():
+    """
+    發現有更新可用時調用
+
+    觸發 upgrade 模組的預載入，讓使用者輸入 /upgrade 時無需等待
+    """
+    loader = get_smart_loader()
+    # 預載入 upgrade 模組（使用者很可能會執行更新）
+    loader.trigger_loading(LoadPriority.HIGH, available_time=1.0)
+    logger.debug("🎯 觸發 upgrade 模組預載入（發現可用更新）")
 
 
 if __name__ == "__main__":

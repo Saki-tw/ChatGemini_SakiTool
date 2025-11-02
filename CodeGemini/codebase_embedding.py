@@ -29,8 +29,13 @@ import threading
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-# 導入 FAISS（必須依賴，< 50MB）
-import faiss
+# 導入 FAISS（可選依賴，優雅降級）
+try:
+    import faiss
+    HAS_FAISS = True
+except ImportError:
+    HAS_FAISS = False
+    faiss = None
 
 # 設置 logger
 logger = logging.getLogger(__name__)

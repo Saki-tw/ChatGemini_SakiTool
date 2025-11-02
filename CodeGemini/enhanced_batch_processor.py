@@ -330,7 +330,9 @@ class EnhancedBatchProcessor:
                         task = EnhancedBatchTask(**task_data)
                         self.tasks[task.task_id] = task
 
-                self._print(safe_t("batch.load.tasks", fallback="[#DDA0DD]📂 載入了 {count} 個任務[/#DDA0DD]").format(count=len(self.tasks)))
+                # 只在有任務時才顯示
+                if len(self.tasks) > 0:
+                    self._print(safe_t("batch.load.tasks", fallback="[#DDA0DD]📂 載入了 {count} 個任務[/#DDA0DD]").format(count=len(self.tasks)))
             except Exception as e:
                 self._print(safe_t("batch.load.tasks_failed", fallback="[#DDA0DD]載入任務失敗：{error}[/#DDA0DD]").format(error=e))
 
@@ -347,7 +349,9 @@ class EnhancedBatchProcessor:
                         group = TaskGroup(**group_data)
                         self.groups[group.group_id] = group
 
-                self._print(safe_t("batch.load.groups", fallback="[#DDA0DD]📂 載入了 {count} 個任務群組[/#DDA0DD]").format(count=len(self.groups)))
+                # 只在有群組時才顯示
+                if len(self.groups) > 0:
+                    self._print(safe_t("batch.load.groups", fallback="[#DDA0DD]📂 載入了 {count} 個任務群組[/#DDA0DD]").format(count=len(self.groups)))
             except Exception as e:
                 self._print(safe_t("batch.load.groups_failed", fallback="[#DDA0DD]載入群組失敗：{error}[/#DDA0DD]").format(error=e))
 
@@ -902,7 +906,7 @@ class EnhancedBatchProcessor:
         tasks = self.list_tasks(status=status, task_type=task_type, group_id=group_id)
 
         if not tasks:
-            self._print(safe_t("batch.task.no_matches", fallback="[#DDA0DD]沒有符合條件的任務[/#DDA0DD]"))
+            # 靜默返回，不顯示訊息（避免噪音）
             return
 
         if RICH_AVAILABLE and self.console:

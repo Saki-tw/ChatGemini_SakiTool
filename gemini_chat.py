@@ -31,6 +31,20 @@ v2.2 啟動速度優化：
 """
 import sys
 import os
+
+# 🔍 DEBUG: 安裝 print 追蹤器（臨時調試用）
+try:
+    import debug_print_trace
+    debug_print_trace.install()
+except:
+    pass
+
+# 🔇 抑制 Google SDK 的 API key 警告（必須在最前面）
+os.environ['PYTHONWARNINGS'] = 'ignore::UserWarning'
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning)
+warnings.filterwarnings('ignore', message='Both GOOGLE_API_KEY and GEMINI_API_KEY are set')
+
 import json
 import logging
 import re
@@ -39,6 +53,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, List
 from dotenv import load_dotenv
+
 from rich.console import Console
 from rich.prompt import Prompt, Confirm
 from utils.i18n import safe_t
@@ -59,6 +74,8 @@ COLOR_FORGET_ME_NOT_LIGHT = "#B0E0E6"
 # ==========================================
 import utils  # 自動初始化 i18n 並注入 t() 到 builtins
 from utils import safe_t  # 導入安全翻譯函數,支援降級運行
+from utils.interactive_menu import show_menu  # 互動式選單（支援上下鍵）
+from utils.media_menu_builder import build_media_menu_options  # 媒體選單建構器
 
 # ==========================================
 # 動態模組載入器
@@ -701,6 +718,9 @@ LAST_THINKING_PROCESS = None   # 儲存最近一次的思考過程（英文原�
 LAST_THINKING_TRANSLATED = None  # 儲存最近一次的翻譯（繁體中文）
 CTRL_T_PRESS_COUNT = 0  # Ctrl+T 按壓次數（0=未顯示, 1=顯示翻譯, 2=顯示雙語）
 
+# CodeGemini 選單請求旗標（用於 Ctrl+G 延遲執行）
+_show_codegemini_menu_requested = False
+
 # 推薦的模型列表
 RECOMMENDED_MODELS: Dict[str, tuple] = {
     '1': ('gemini-2.5-pro', safe_t('chat.model_gemini_25_pro', fallback='Gemini 2.5 Pro - 最強大（思考模式）')),
@@ -737,7 +757,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
         def __init__(self):
             self.commands = ['cache', 'media', 'video', 'veo', 'model', 'clear', 'exit', 'help', 'debug', 'test', 'lang', 'language']
             if CODEGEMINI_ENABLED:
-                self.commands.extend(['cli', 'gemini-cli'])
+                self.commands.extend(['cli', 'gemini-cli', 'codegemini'])
             if CODEBASE_EMBEDDING_ENABLED:
                 self.commands.extend(['/search_code', '/search_history'])
 
@@ -1058,8 +1078,8 @@ if PROMPT_TOOLKIT_AVAILABLE:
                 'en': 'Hint: Ask a question and get AI response first, then press Ctrl+T'
             }.get(current_lang, '提示：請先提問讓 AI 回答後再按 Ctrl+T')
 
-            console.print(safe_t('common.message', fallback=f'\n[#E8C4F0]{no_thinking_msg}[/#E8C4F0]\n'))
-            console.print(safe_t('common.message', fallback=f'[dim COLOR_MACARON_PURPLE_LIGHT]{hint_msg}[/dim COLOR_MACARON_PURPLE_LIGHT]\n'))
+            console.print(f'\n[#E8C4F0]{no_thinking_msg}[/#E8C4F0]\n')
+            console.print(f'[dim #E8C4F0]{hint_msg}[/dim #E8C4F0]\n')
             event.app.current_buffer.insert_text("")
             return
 
@@ -1080,7 +1100,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
                 'en': 'Translation'
             }.get(current_lang, '翻譯')
 
-            console.print(safe_t('common.message', fallback=f'\n[#B565D8]━━━ 🧠 思考過程（{lang_display}） ━━━[/#B565D8]'))
+            console.print(f'\n[#B565D8]━━━ 🧠 思考過程（{lang_display}） ━━━[/#B565D8]')
 
             # 如果有翻譯且翻譯功能啟用,顯示翻譯；否則顯示原文
             if TRANSLATOR_ENABLED and global_translator and LAST_THINKING_TRANSLATED:
@@ -1088,7 +1108,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
             else:
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
                 if TRANSLATOR_ENABLED and global_translator:
-                    console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                    console.print('[dim #E8C4F0]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #E8C4F0]')
 
             console.print("[#B565D8]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#B565D8]\n")
 
@@ -1105,7 +1125,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
                 'en': 'Bilingual Comparison'
             }.get(current_lang, '雙語對照')
 
-            console.print(safe_t('common.message', fallback=f'\n[#B565D8]━━━ 🧠 思考過程（{bilingual_title}） ━━━[/#B565D8]'))
+            console.print(f'\n[#B565D8]━━━ 🧠 思考過程（{bilingual_title}） ━━━[/#B565D8]')
 
             if TRANSLATOR_ENABLED and global_translator and LAST_THINKING_TRANSLATED:
                 # 根據當前語言顯示對應的旗幟和語言名稱
@@ -1116,15 +1136,15 @@ if PROMPT_TOOLKIT_AVAILABLE:
                     'en': {'flag': '🇬🇧', 'name': 'English'}
                 }.get(current_lang, {'flag': '🇹🇼', 'name': '繁體中文'})
 
-                console.print(safe_t('common.message', fallback=f'[bold COLOR_MACARON_PURPLE]{lang_info["flag"]} {lang_info["name"]}：[/bold COLOR_MACARON_PURPLE]'))
+                console.print(f'[bold #B565D8]{lang_info["flag"]} {lang_info["name"]}：[/bold #B565D8]')
                 console.print(f"[dim]{LAST_THINKING_TRANSLATED}[/dim]\n")
-                console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]🇬🇧 English (Original)：[/bold COLOR_MACARON_PURPLE]'))
+                console.print('[bold #B565D8]🇬🇧 English (Original)：[/bold #B565D8]')
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
             else:
-                console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]🇬🇧 English (Original)：[/bold COLOR_MACARON_PURPLE]'))
+                console.print('[bold #B565D8]🇬🇧 English (Original)：[/bold #B565D8]')
                 console.print(f"[dim]{LAST_THINKING_PROCESS}[/dim]")
                 if TRANSLATOR_ENABLED and global_translator:
-                    console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                    console.print('[dim #E8C4F0]💡 提示：翻譯功能可能未啟用或無可用引擎[/dim #E8C4F0]')
 
             console.print("[#B565D8]━━━━━━━━━━━━━━━━━━━━━━━━━━[/#B565D8]\n")
 
@@ -1142,7 +1162,7 @@ if PROMPT_TOOLKIT_AVAILABLE:
                 'en': '💭 Thinking process hidden'
             }.get(current_lang, '💭 思考過程已隱藏')
 
-            console.print(safe_t('common.message', fallback=f'\n[#E8C4F0]{hidden_msg}[/#E8C4F0]\n'))
+            console.print(f'\n[#E8C4F0]{hidden_msg}[/#E8C4F0]\n')
 
         # 保存 UI 偏好到配置（新增）
         if codegemini_config_manager:
@@ -1160,16 +1180,44 @@ if PROMPT_TOOLKIT_AVAILABLE:
         """Alt+Enter: 插入新行（多行編輯）"""
         event.app.current_buffer.insert_text('\n')
 
+    @key_bindings.add('c-g')
+    def show_codegemini_menu(event):
+        """Ctrl+G: 快速進入 CodeGemini 互動式選單"""
+        try:
+            from codegemini_manager import get_codegemini_manager, is_codegemini_loaded
+
+            manager = get_codegemini_manager()
+
+            # 檢查 CodeGemini 是否已啟用
+            if not manager.is_loaded:
+                console.print('\n[yellow]⚠️  CodeGemini 尚未啟用[/yellow]')
+                console.print('[dim]請先輸入 [bold]/codegemini[/bold] 啟用功能[/dim]\n')
+                event.app.current_buffer.insert_text("")
+                return
+
+            # 設置旗標，通知主迴圈顯示選單（避免 prompt_toolkit 衝突）
+            global _show_codegemini_menu_requested
+            _show_codegemini_menu_requested = True
+
+            # 顯示提示訊息
+            console.print('\n[#B565D8]🤖 進入 CodeGemini 模式...[/#B565D8]')
+
+            # 退出當前輸入，讓主迴圈處理選單顯示
+            event.app.exit()
+        except Exception as e:
+            console.print(f'[red]✗ Ctrl+G 執行失敗：{e}[/red]')
+            event.app.current_buffer.insert_text("")
+
     @key_bindings.add('c-d')
     def show_help_hint(event):
         """Ctrl+D: 顯示輸入提示"""
-        console.print(safe_t('common.message', fallback='\n[#B565D8]💡 輸入提示：[/#B565D8]'))
-        console.print(safe_t('common.message', fallback='  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）'))
-        console.print(safe_t('common.message', fallback='  • [bold]Ctrl+T[/bold] - 切換思考過程顯示'))
-        console.print(safe_t('common.message', fallback='  • [bold]↑/↓[/bold] - 瀏覽歷史記錄'))
-        console.print(safe_t('common.message', fallback='  • [bold]Tab[/bold] - 自動補全指令與語法'))
-        console.print(safe_t('common.message', fallback='  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens'))
-        console.print(safe_t('common.message', fallback='  • [bold][max_token:500][/bold] - 限制最大回應量（獨立使用,含動態計價）'))
+        console.print('\n[#B565D8]💡 輸入提示：[/#B565D8]')
+        console.print('  • [bold]Alt+Enter[/bold] - 插入新行（多行輸入）')
+        console.print('  • [bold]Ctrl+T[/bold] - 切換思考過程顯示')
+        console.print('  • [bold]↑/↓[/bold] - 瀏覽歷史記錄')
+        console.print('  • [bold]Tab[/bold] - 自動補全指令與語法')
+        console.print('  • [bold][think:1000,response:500][/bold] - 指定思考與回應 tokens')
+        console.print('  • [bold][max_token:500][/bold] - 限制最大回應量（獨立使用,含動態計價）')
         console.print()
         event.app.current_buffer.insert_text("")
 
@@ -1288,7 +1336,7 @@ def get_user_input(prompt_text: str = None) -> str:
     if PROMPT_TOOLKIT_AVAILABLE:
         try:
             # 使用簡單的字串提示（避免 HTML 解析錯誤）
-            return prompt(
+            result = prompt(
                 prompt_text,
                 history=input_history,
                 auto_suggest=AutoSuggestFromHistory(),
@@ -1300,7 +1348,9 @@ def get_user_input(prompt_text: str = None) -> str:
                 prompt_continuation=lambda width, line_number, is_soft_wrap: '... ',  # 多行續行提示
                 complete_while_typing=True,  # 打字時即時補全
                 style=input_style,  # 應用自訂樣式
-            ).strip()
+            )
+            # 🔧 修正：檢查 None（Ctrl+G 等快捷鍵會返回 None）
+            return result.strip() if result is not None else ""
         except (KeyboardInterrupt, EOFError):
             return ""
         except Exception as e:
@@ -1669,7 +1719,7 @@ def send_message(
 
                     if SHOW_THINKING_PROCESS and not thinking_displayed:
                         # 首次顯示思考標題
-                        console.print(safe_t('common.message', fallback='\n[dim COLOR_MACARON_PURPLE]━━━ 🧠 思考過程（即時串流） ━━━[/dim COLOR_MACARON_PURPLE]'))
+                        console.print('\n[dim #B565D8]━━━ 🧠 思考過程（即時串流） ━━━[/dim #B565D8]')
                         thinking_displayed = True
 
                     if SHOW_THINKING_PROCESS:
@@ -1682,7 +1732,7 @@ def send_message(
                     if not answer_started:
                         # 首次輸出回應時的處理
                         if thinking_displayed:
-                            console.print("[dim COLOR_MACARON_PURPLE]\n━━━━━━━━━━━━━━━[/dim COLOR_MACARON_PURPLE]\n")
+                            console.print("[dim #B565D8]\n━━━━━━━━━━━━━━━[/dim #B565D8]\n")
                             print("Gemini: ", end="", flush=True)
                         answer_started = True
 
@@ -1702,7 +1752,7 @@ def send_message(
             console.print(Panel(
                 Markdown(response_text),
                 title="[#B565D8]📝 格式化輸出[/#B565D8]",
-                border_style="COLOR_MACARON_PURPLE_LIGHT"
+                border_style="#E8C4F0"
             ))
 
         # 保存思考過程
@@ -1713,7 +1763,7 @@ def send_message(
         # 檢查：如果使用者要求思考模式但 Gemini 沒有回傳思考內容
         if supports_thinking and use_thinking and not thinking_process:
             console.print(safe_t('common.warning', fallback='\n[yellow]⚠️  Gemini 拒絕使用思考模式[/yellow]'))
-            console.print(safe_t('common.message', fallback='[dim yellow]可能原因：問題過於簡單、或 API 配置限制[/dim yellow]\n'))
+            console.print('[dim yellow]可能原因：問題過於簡單、或 API 配置限制[/dim yellow]\n')
             logger.warning(f"使用者要求思考模式但未收到思考內容 - 模型: {model_name}, use_thinking={use_thinking}, thinking_budget={thinking_budget}")
 
         # 翻譯思考過程（無論是否顯示都先翻譯,以便 Ctrl+T 使用）
@@ -1734,17 +1784,17 @@ def send_message(
         # 如果有思考過程但未顯示,給予提示
         if thinking_process and not SHOW_THINKING_PROCESS:
             if TRANSLATOR_ENABLED and global_translator and global_translator.translation_enabled:
-                console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💭 已產生思考摘要 (Ctrl+T 顯示翻譯思路)[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                console.print('[dim #E8C4F0]💭 已產生思考摘要 (Ctrl+T 顯示翻譯思路)[/dim #E8C4F0]')
             else:
-                console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💭 已產生思考摘要 (Ctrl+T 顯示思路)[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                console.print('[dim #E8C4F0]💭 已產生思考摘要 (Ctrl+T 顯示思路)[/dim #E8C4F0]')
 
         # 如果啟用翻譯且已顯示思考,則追加翻譯
         if thinking_process and SHOW_THINKING_PROCESS and TRANSLATOR_ENABLED and global_translator and global_translator.translation_enabled and LAST_THINKING_TRANSLATED:
             if LAST_THINKING_TRANSLATED != thinking_process:
-                console.print(safe_t('common.message', fallback='\n[dim COLOR_MACARON_PURPLE]━━━ 🌐 思考過程翻譯 ━━━[/dim COLOR_MACARON_PURPLE]'))
-                console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE]【繁體中文】[/dim COLOR_MACARON_PURPLE]'))
+                console.print('\n[dim #B565D8]━━━ 🌐 思考過程翻譯 ━━━[/dim #B565D8]')
+                console.print('[dim #B565D8]【繁體中文】[/dim #B565D8]')
                 console.print(f"[dim]{LAST_THINKING_TRANSLATED}[/dim]")
-                console.print("[dim COLOR_MACARON_PURPLE]━━━━━━━━━━━━━━━[/dim COLOR_MACARON_PURPLE]\n")
+                console.print("[dim #B565D8]━━━━━━━━━━━━━━━[/dim #B565D8]\n")
 
         print()  # 額外換行
 
@@ -1899,9 +1949,9 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
             caches = list(global_cache_manager.list_caches())
             if caches:
                 valid_caches = [c for c in caches if c.expire_time > datetime.now()]
-                console.print(safe_t('common.message', fallback='\n[#B565D8]💾 快取狀態：{cache_count} 個有效快取（可節省 75-90% 成本）[/#B565D8]', cache_count=len(valid_caches)))
+                console.print(f'\n[#B565D8]💾 快取狀態：{len(valid_caches)} 個有效快取（可節省 75-90% 成本）[/#B565D8]')
             else:
-                console.print(safe_t('common.message', fallback="\n[#E8C4F0]💾 快取狀態：無快取（提示：輸入 'cache' 了解如何建立）[/#E8C4F0]"))
+                console.print("\n[#E8C4F0]💾 快取狀態：無快取（提示：輸入 'cache' 了解如何建立）[/#E8C4F0]")
         except Exception as e:
             logger.debug(f"快取狀態檢查失敗: {e}")
 
@@ -1920,7 +1970,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
         console.print()  # 空行分隔
 
     # 簡潔的指令提示（馬卡龍紫色系）
-    console.print(safe_t('common.message', fallback='\n[#B565D8]💡 請按 [/#B565D8][#E8C4F0]/[/#E8C4F0][#B565D8] 顯示完整指令列表[/#B565D8]'))
+    console.print('\n[#B565D8]💡 請按 [/#B565D8][#E8C4F0]/[/#E8C4F0][#B565D8] 顯示完整指令列表[/#B565D8]')
     console.print("[#E8C4F0]" + "-" * 60 + "[/#E8C4F0]")
     console.print()
 
@@ -1973,6 +2023,24 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
             user_input = get_user_input(prompt_hint + ": ")
 
+            # 🔧 檢查 Ctrl+G CodeGemini 選單請求旗標
+            global _show_codegemini_menu_requested
+            if _show_codegemini_menu_requested:
+                _show_codegemini_menu_requested = False  # 重置旗標
+                try:
+                    from codegemini_manager import get_codegemini_manager
+                    manager = get_codegemini_manager()
+                    if manager.is_loaded:
+                        console.print()  # 空行分隔
+                        manager.show_menu(console)
+                    else:
+                        console.print('[yellow]⚠️  CodeGemini 尚未啟用[/yellow]')
+                        console.print('[dim]請先輸入 [bold]/codegemini[/bold] 啟用功能[/dim]\n')
+                except Exception as e:
+                    console.print(f'[red]✗ CodeGemini 選單顯示失敗：{e}[/red]\n')
+                    logger.error(f"CodeGemini 選單顯示失敗: {e}")
+                continue  # 顯示選單後，繼續等待下一個輸入
+
             if not user_input:
                 continue
 
@@ -1987,43 +2055,44 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     console.print("\n" + "=" * 60)
                     console.print(safe_t('chat.help.commands.title', fallback='[#B565D8]📋 完整指令列表[/#B565D8]'))
                     console.print("=" * 60)
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]基本指令：[/#E8C4F0]'))
+                    console.print('[#E8C4F0]基本指令：[/#E8C4F0]')
                     console.print('  exit, quit      - ' + safe_t('chat.help.commands.exit', fallback='退出程式'))
                     console.print('  model           - ' + safe_t('chat.help.commands.model', fallback='切換模型'))
                     console.print('  clear           - ' + safe_t('chat.help.commands.clear', fallback='清除對話歷史'))
                     console.print('  lang, language  - ' + safe_t('chat.help.commands.lang', fallback='切換語言（zh-TW/en/ja/ko）🆕'))
                     console.print('  cache           - ' + safe_t('chat.help.commands.cache', fallback='快取管理選單'))
-                    console.print('  media           - ' + safe_t('chat.help.commands.media', fallback='影音功能選單（Flow/Veo/分析/處理）'))
-                    console.print('  config          - ' + safe_t('common.message', fallback='配置管理（資料庫設定）'))
+                    console.print('  media           - ' + safe_t('chat.help.commands.media', fallback='多媒體創作中心（影片生成/影片處理/音訊處理/AI分析）'))
+                    console.print('  config          - ' + '配置管理（資料庫設定）')
                     if CODEGEMINI_ENABLED:
-                        console.print('  cli             - ' + safe_t('chat.help.commands.cli', fallback='Gemini CLI 管理工具'))
-                    console.print('  debug, test     - ' + safe_t('common.message', fallback='除錯與測試工具'))
+                        console.print('  cli             - ' + safe_t('chat.help.commands.cli', fallback='CodeGemini AI 代碼輔助'))
+                    console.print('  debug, test     - ' + '除錯與測試工具')
+                    console.print('  /doctor         - ' + '系統診斷（環境檢查）')
                     console.print('  help            - ' + safe_t('chat.help.commands.help', fallback='顯示詳細幫助系統'))
                     console.print()
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]系統更新：[/#E8C4F0]'))
-                    console.print('  /upgrade        - ' + safe_t('common.message', fallback='執行系統更新（智能合併配置）'))
+                    console.print('[#E8C4F0]系統更新：[/#E8C4F0]')
+                    console.print('  /upgrade        - ' + '執行系統更新（智能合併配置）')
                     console.print()
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]記憶體管理：[/#E8C4F0]'))
-                    console.print('  /clear-memory   - ' + safe_t('common.message', fallback='清理記憶體快取'))
-                    console.print('  /memory-stats   - ' + safe_t('common.message', fallback='顯示記憶體統計'))
-                    console.print('  /help-memory    - ' + safe_t('common.message', fallback='記憶體管理說明'))
+                    console.print('[#E8C4F0]記憶體管理：[/#E8C4F0]')
+                    console.print('  /clear-memory   - ' + '清理記憶體快取')
+                    console.print('  /memory-stats   - ' + '顯示記憶體統計')
+                    console.print('  /help-memory    - ' + '記憶體管理說明')
                     console.print()
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]檢查點系統：[/#E8C4F0]'))
-                    console.print('  /checkpoints    - ' + safe_t('common.message', fallback='列出所有檢查點'))
-                    console.print('  /checkpoint [描述] - ' + safe_t('common.message', fallback='建立手動檢查點'))
-                    console.print('  /rewind [ID]    - ' + safe_t('common.message', fallback='回溯至檢查點'))
-                    console.print('  /help-checkpoint - ' + safe_t('common.message', fallback='檢查點系統說明'))
+                    console.print('[#E8C4F0]檢查點系統：[/#E8C4F0]')
+                    console.print('  /checkpoints    - ' + '列出所有檢查點')
+                    console.print('  /checkpoint [描述] - ' + '建立手動檢查點')
+                    console.print('  /rewind [ID]    - ' + '回溯至檢查點')
+                    console.print('  /help-checkpoint - ' + '檢查點系統說明')
                     if HISTORY_MANAGER_AVAILABLE:
                         console.print()
-                        console.print(safe_t('common.message', fallback='[#E8C4F0]對話歷史：[/#E8C4F0]'))
-                        console.print('  /search <關鍵字> - ' + safe_t('common.message', fallback='搜尋對話歷史'))
-                        console.print('  /history        - ' + safe_t('common.message', fallback='顯示最近對話'))
-                        console.print('  /export [格式]  - ' + safe_t('common.message', fallback='匯出對話記錄'))
-                        console.print('  /stats          - ' + safe_t('common.message', fallback='對話統計資訊'))
+                        console.print('[#E8C4F0]對話歷史：[/#E8C4F0]')
+                        console.print('  /search <關鍵字> - ' + '搜尋對話歷史')
+                        console.print('  /history        - ' + '顯示最近對話')
+                        console.print('  /export [格式]  - ' + '匯出對話記錄')
+                        console.print('  /stats          - ' + '對話統計資訊')
                     console.print()
                     console.print(safe_t('chat.help.commands.thinking_mode', fallback='[#E8C4F0]思考模式：[/#E8C4F0]'))
                     console.print('  [think:auto]    - ' + safe_t('chat.help.commands.think_auto', fallback='動態思考（預設）'))
-                    console.print('  [think:數字]    - ' + safe_t('common.message', fallback='指定思考預算'))
+                    console.print('  [think:數字]    - ' + '指定思考預算')
                     console.print('  [no-think]      - ' + safe_t('chat.help.commands.think_off', fallback='停用思考'))
                     console.print()
                     console.print(safe_t('chat.help.commands.output_control', fallback='[#E8C4F0]輸出控制：[/#E8C4F0]'))
@@ -2055,14 +2124,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     'model': '/model',  # 保留斜線
                     'cache': 'cache',
                     'clear': 'clear',
-                    'media': 'media',
-                    'video': 'media',
-                    'veo': 'media',
+                    'media': 'media',  # 多媒體創作中心（已移除 video/veo 別名）
                     'debug': 'debug',
                     'test': 'debug',
+                    'doctor': '/doctor',  # 系統診斷指令
                     'config': 'config',
                     'cli': 'cli',
                     'gemini-cli': 'cli',
+                    'codegemini': 'codegemini',
                     'upgrade': 'upgrade',
                     'budget': '/budget',  # 保留斜線
                     'clear-memory': '/clear-memory',  # 保留斜線
@@ -2097,14 +2166,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     suggestions = get_close_matches(base_cmd, slash_command_whitelist.keys(), n=3, cutoff=0.6)
 
                     if suggestions:
-                        console.print(f"\n[#B565D8]❌ 未知指令: /{slash_cmd}[/#B565D8]")
-                        console.print(f"[#E8C4F0]💡 您是否想要輸入以下指令？[/#E8C4F0]")
+                        console.print(f"\n[#B565D8]{safe_t('command.unknown', fallback='❌ 未知指令: /{slash_cmd}')}[/#B565D8]".format(slash_cmd=slash_cmd))
+                        console.print(f"[#E8C4F0]{safe_t('command.did_you_mean', fallback='💡 您是否想要輸入以下指令？')}[/#E8C4F0]")
                         for sug in suggestions:
                             console.print(f"   • /{sug}")
                         console.print()
                     else:
-                        console.print(f"\n[#B565D8]❌ 未知指令: /{slash_cmd}[/#B565D8]")
-                        console.print(f"[#E8C4F0]💡 輸入 [bold]/[/bold] 或 [bold]/help[/bold] 查看可用指令[/#E8C4F0]\n")
+                        console.print(f"\n[#B565D8]{safe_t('command.unknown', fallback='❌ 未知指令: /{slash_cmd}')}[/#B565D8]".format(slash_cmd=slash_cmd))
+                        console.print(f"[#E8C4F0]{safe_t('command.help_hint', fallback='💡 輸入 [bold]/[/bold] 或 [bold]/help[/bold] 查看可用指令')}[/#E8C4F0]\n")
                     continue
 
             # 處理指令
@@ -2137,7 +2206,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 if INTERACTIVE_LANG_MENU_AVAILABLE:
                     try:
                         show_language_menu(save_to_env=True)
-                        console.print(safe_t('common.message', fallback='[dim]💡 語言設定已更新,新訊息將使用選擇的語言[/dim]\n'))
+                        console.print('[dim]💡 語言設定已更新,新訊息將使用選擇的語言[/dim]\n')
                     except Exception as e:
                         console.print(safe_t('error.failed', fallback='[red]❌ 語言切換失敗: {e}[/red]', e=e))
 
@@ -2150,20 +2219,20 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             )
 
                             if solutions:
-                                console.print(f"\n[yellow]💡 建議的解決方案：[/yellow]")
+                                console.print(f"\n[yellow]{safe_t('error.suggested_solutions', fallback='💡 建議的解決方案：')}[/yellow]")
                                 for i, sol in enumerate(solutions, 1):
                                     console.print(f"\n[cyan]{i}. {sol.title}[/cyan]")
                                     console.print(f"   {sol.description}")
                                     if sol.command:
-                                        console.print(f"   [green]執行：[/green] {sol.command}")
+                                        console.print(f"   [green]{safe_t('error.solution_execute', fallback='執行：')}[/green] {sol.command}")
                                     if sol.manual_steps:
-                                        console.print(f"   [yellow]手動步驟：[/yellow]")
+                                        console.print(f"   [yellow]{safe_t('error.solution_manual', fallback='手動步驟：')}[/yellow]")
                                         for step in sol.manual_steps:
                                             console.print(f"     {step}")
                 else:
                     console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  互動式語言選單不可用[/#E8C4F0]'))
-                    console.print(safe_t('common.message', fallback='[#87CEEB]💡 請使用: python3 gemini_lang.py --set <語言代碼>[/#87CEEB]'))
-                    console.print(safe_t('common.message', fallback='[dim]   可用語言: zh-TW, en, ja, ko[/dim]\n'))
+                    console.print('[#87CEEB]💡 請使用: python3 gemini_lang.py --set <語言代碼>[/#87CEEB]')
+                    console.print('[dim]   可用語言: zh-TW, en, ja, ko[/dim]\n')
                 continue
 
             elif user_input.lower() == 'help':
@@ -2369,7 +2438,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         print(safe_t("chat.help.commands.cache", fallback="  cache       - 快取管理選單"))
                         print(safe_t("chat.help.commands.media", fallback="  media       - 影音功能選單（Flow/Veo/分析/處理）"))
                         if CODEGEMINI_ENABLED:
-                            print(safe_t("chat.help.commands.cli", fallback="  cli         - Gemini CLI 管理工具"))
+                            print(safe_t("chat.help.commands.cli", fallback="  cli         - CodeGemini AI 代碼輔助"))
                         print(safe_t("chat.help.commands.model", fallback="  model       - 切換模型"))
                         print(safe_t("chat.help.commands.model_list", fallback="  /model      - 查看所有可用模型（含分類）"))
                         print(safe_t("chat.help.commands.model_update", fallback="  /model update - 從 API 更新模型列表"))
@@ -2412,9 +2481,9 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 # 🔧 F-2 修復：實際清空對話歷史記憶體快取
                 stats = chat_logger.conversation_manager.get_stats()
 
-                console.print(safe_t('common.message', fallback='\n[#B565D8]📊 對話狀態[/#B565D8]'))
-                console.print(safe_t('common.message', fallback='   記憶體快取：{active_messages} 條', active_messages=stats['active_messages']))
-                console.print(safe_t('common.message', fallback='   [dim]硬碟已存檔：{archived_messages} 條[/dim]\n', archived_messages=stats['archived_messages']))
+                console.print('\n[#B565D8]📊 對話狀態[/#B565D8]')
+                console.print(f'   記憶體快取：{stats['active_messages']} 條')
+                console.print(f'   [dim]硬碟已存檔：{stats['archived_messages']} 條[/dim]\n')
 
                 if Confirm.ask(
                     safe_t('chat.clear_memory_confirm_title', fallback='[#B565D8]清空記憶體快取嗎？[/#B565D8]') + '\n' +
@@ -2428,7 +2497,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         archive_file=stats['archive_file']
                     ))
                 else:
-                    console.print(safe_t('common.message', fallback='\n[dim]已取消[/dim]'))
+                    console.print('\n[dim]已取消[/dim]')
 
                 continue
 
@@ -2439,7 +2508,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     console.print()
                     success = upgrade_interactive()
                     if success:
-                        console.print(safe_t('common.message', fallback='\n[#B565D8]💡 請重新啟動程式以使用新版本[/#B565D8]\n'))
+                        console.print('\n[#B565D8]💡 請重新啟動程式以使用新版本[/#B565D8]\n')
                     console.print()
                 except ImportError:
                     console.print(safe_t('error.failed', fallback='[red]✗ 更新模組未安裝[/red]\n', e='ImportError'))
@@ -2455,14 +2524,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         )
 
                         if solutions:
-                            console.print(f"\n[yellow]💡 建議的解決方案：[/yellow]")
+                            console.print(f"\n[yellow]{safe_t('error.suggested_solutions', fallback='💡 建議的解決方案：')}[/yellow]")
                             for i, sol in enumerate(solutions, 1):
                                 console.print(f"\n[cyan]{i}. {sol.title}[/cyan]")
                                 console.print(f"   {sol.description}")
                                 if sol.command:
-                                    console.print(f"   [green]執行：[/green] {sol.command}")
+                                    console.print(f"   [green]{safe_t('error.solution_execute', fallback='執行：')}[/green] {sol.command}")
                                 if sol.manual_steps:
-                                    console.print(f"   [yellow]手動步驟：[/yellow]")
+                                    console.print(f"   [yellow]{safe_t('error.solution_manual', fallback='手動步驟：')}[/yellow]")
                                     for step in sol.manual_steps:
                                         console.print(f"     {step}")
                 continue
@@ -2588,161 +2657,170 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 ))
                 continue
 
+            elif user_input.lower() == '/doctor':
+                # 系統診斷指令
+                import sys
+                try:
+                    from rich.panel import Panel as DoctorPanel
+                except ImportError:
+                    DoctorPanel = None
+
+                console.print()
+                if DoctorPanel:
+                    console.print(DoctorPanel.fit(
+                        "[bold #E8C4F0]🏥 ChatGemini 系統診斷[/bold #E8C4F0]",
+                        border_style="#E8C4F0"
+                    ))
+                else:
+                    console.print("\n" + "="*60)
+                    console.print(f"{safe_t('debug.system_diagnostic', fallback='🏥 ChatGemini 系統診斷')}")
+                    console.print("="*60)
+                console.print()
+
+                # 檢查 Python 版本
+                py_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+                py_status = "✅" if sys.version_info >= (3, 10) else "⚠️"
+                console.print(f"{py_status} {safe_t('debug.python_version', fallback='Python 版本: {version}').format(version=py_version)}")
+
+                # 檢查虛擬環境
+                venv_status = "✅" if 'venv_py314' in sys.prefix else "❌"
+                console.print(f"{venv_status} {safe_t('debug.virtual_environment', fallback='虛擬環境: {path}').format(path=sys.prefix)}")
+
+                # 檢查核心依賴
+                console.print(f"\n[#E8C4F0]{safe_t('debug.core_dependencies', fallback='核心依賴檢查：')}[/#E8C4F0]")
+                # 套件名稱 -> (模組名稱, 描述)
+                core_deps = {
+                    'google-genai': ('google.genai', 'Google Gemini SDK'),
+                    'rich': ('rich', 'Rich 終端介面'),
+                    'python-dotenv': ('dotenv', '環境變數管理'),
+                    'deep-translator': ('deep_translator', '翻譯引擎')
+                }
+
+                for pkg_name, (module_name, desc) in core_deps.items():
+                    try:
+                        __import__(module_name)
+                        console.print(f"  ✅ {desc} ({pkg_name})")
+                    except ImportError:
+                        console.print(f"  ❌ {desc} ({pkg_name}) - {safe_t('debug.not_installed', fallback='未安裝')}")
+
+                # 檢查功能模組
+                console.print(f"\n[#E8C4F0]{safe_t('debug.module_status', fallback='功能模組狀態：')}[/#E8C4F0]")
+                console.print(f"  {'✅' if PRICING_ENABLED else '❌'} {safe_t('debug.pricing_system', fallback='計價系統')}")
+                console.print(f"  {'✅' if CACHE_ENABLED else '❌'} {safe_t('debug.cache_management', fallback='快取管理')}")
+                console.print(f"  {'✅' if HISTORY_MANAGER_AVAILABLE else '❌'} {safe_t('debug.conversation_history', fallback='對話歷史')}")
+                console.print(f"  {'✅' if FILE_MANAGER_ENABLED else '❌'} {safe_t('debug.file_management', fallback='檔案管理')}")
+                console.print(f"  {'✅' if TRANSLATOR_ENABLED else '❌'} {safe_t('debug.translation_engine', fallback='翻譯引擎')}")
+                console.print(f"  {'✅' if FLOW_ENGINE_ENABLED else '❌'} Flow Engine")
+                console.print(f"  {'✅' if VIDEO_PREPROCESSOR_ENABLED else '❌'} {safe_t('debug.video_preprocessor', fallback='影片預處理')}")
+                console.print(f"  {'✅' if VIDEO_COMPOSITOR_ENABLED else '❌'} {safe_t('debug.video_compositor', fallback='影片合成')}")
+
+                # 檢查環境變數
+                console.print(f"\n[#E8C4F0]{safe_t('debug.environment_config', fallback='環境配置：')}[/#E8C4F0]")
+                api_key = os.getenv('GEMINI_API_KEY', '')
+                console.print(f"  {'✅' if api_key else '❌'} GEMINI_API_KEY: {safe_t('debug.api_key_configured' if api_key else 'debug.api_key_not_configured', fallback=('已設定' if api_key else '未設定'))}")
+
+                lang = os.getenv('GEMINI_LANG', 'auto')
+                console.print(f"  ✅ GEMINI_LANG: {lang}")
+
+                # 檢查磁碟空間
+                console.print(f"\n[#E8C4F0]{safe_t('debug.system_resources', fallback='系統資源：')}[/#E8C4F0]")
+                try:
+                    import shutil
+                    total, used, free = shutil.disk_usage("/")
+                    free_gb = free // (2**30)
+                    console.print(f"  ✅ {safe_t('debug.available_disk_space', fallback='可用磁碟空間: {space} GB').format(space=free_gb)}")
+                except Exception as e:
+                    console.print(f"  ⚠️ {safe_t('debug.cannot_check_disk_space', fallback='無法檢查磁碟空間: {error}').format(error=e)}")
+
+                console.print()
+                if DoctorPanel:
+                    console.print(DoctorPanel.fit(
+                        "[dim]💡 診斷完成。如有錯誤請檢查相關設定。[/dim]",
+                        border_style="dim"
+                    ))
+                else:
+                    console.print("="*60)
+                    console.print(f"{safe_t('debug.diagnostic_complete', fallback='💡 診斷完成。如有錯誤請檢查相關設定。')}")
+                    console.print("="*60)
+                console.print()
+                continue
+
             elif user_input.lower() == '/budget':
                 # 顯示預算使用狀態
                 if PRICING_ENABLED:
                     status = global_pricing_calculator.get_budget_status()
 
                     if not status['enabled']:
-                        console.print(safe_t('common.message', fallback="⚠️ 預算控制未啟用"))
+                        console.print("⚠️ 預算控制未啟用")
                         continue
 
                     console.print("\n" + "="*60)
-                    console.print(safe_t('common.message', fallback='💰 預算使用摘要'))
+                    console.print('💰 預算使用摘要')
                     console.print("="*60)
 
                     # 每日預算
-                    console.print(safe_t('common.message', fallback=f"\n📅 今日使用：${status['daily_cost']:.4f} / ${status['daily_limit']:.2f}"))
-                    console.print(safe_t('common.message', fallback=f"   剩餘：${status['daily_remaining']:.4f}"))
-                    console.print(safe_t('common.message', fallback=f"   使用率：{status['daily_usage_percent']:.1f}%"))
+                    console.print(f"\n📅 今日使用：${status['daily_cost']:.4f} / ${status['daily_limit']:.2f}")
+                    console.print(f"   剩餘：${status['daily_remaining']:.4f}")
+                    console.print(f"   使用率：{status['daily_usage_percent']:.1f}%")
 
                     # 進度條
                     bar_length = 40
                     filled = int(bar_length * status['daily_usage_percent'] / 100)
                     bar = "█" * filled + "░" * (bar_length - filled)
-                    console.print(safe_t('common.message', fallback=f"   [{bar}]"))
+                    console.print(f"   [{bar}]")
 
                     # 每月預算
-                    console.print(safe_t('common.message', fallback=f"\n📆 本月使用：${status['monthly_cost']:.4f} / ${status['monthly_limit']:.2f}"))
-                    console.print(safe_t('common.message', fallback=f"   剩餘：${status['monthly_remaining']:.4f}"))
-                    console.print(safe_t('common.message', fallback=f"   使用率：{status['monthly_usage_percent']:.1f}%"))
+                    console.print(f"\n📆 本月使用：${status['monthly_cost']:.4f} / ${status['monthly_limit']:.2f}")
+                    console.print(f"   剩餘：${status['monthly_remaining']:.4f}")
+                    console.print(f"   使用率：{status['monthly_usage_percent']:.1f}%")
 
                     # 月度進度條
                     filled_monthly = int(bar_length * status['monthly_usage_percent'] / 100)
                     bar_monthly = "█" * filled_monthly + "░" * (bar_length - filled_monthly)
-                    console.print(safe_t('common.message', fallback=f"   [{bar_monthly}]"))
+                    console.print(f"   [{bar_monthly}]")
 
                     console.print("="*60)
                 else:
-                    console.print(safe_t('common.message', fallback="⚠️ 計價模組未啟用"))
+                    console.print("⚠️ 計價模組未啟用")
                 continue
 
             elif user_input.lower() == '/model':
-                # 顯示所有可用模型
+                # 使用互動式模型選擇器
                 try:
-                    from gemini_model_list import GeminiModelList
-                    from rich.console import Console
-                    from rich.table import Table
-                    from rich.panel import Panel
-                    from rich.pager import Pager
-                    import io
+                    from gemini_model_selector import select_model
 
-                    # 創建模型列表管理器
-                    model_manager = GeminiModelList()
-
-                    # 創建輸出緩衝區
-                    output_buffer = io.StringIO()
-                    temp_console = Console(file=output_buffer, force_terminal=True, width=100)
-
-                    # 標題
-                    temp_console.print("\n")
-                    temp_console.print(Panel.fit(
-                        "[bold #E8C4F0]🤖 所有可用的 Gemini 模型[/bold #E8C4F0]",
-                        border_style="#E8C4F0"
-                    ))
-                    temp_console.print()
-
-                    # 獲取所有模型並分類
-                    all_models = model_manager.get_all_models()
-
-                    # 分類模型
-                    gemini_25 = [m for m in all_models if m.startswith('gemini-2.5')]
-                    gemini_20 = [m for m in all_models if m.startswith('gemini-2.0')]
-                    gemini_15 = [m for m in all_models if m.startswith('gemini-1.5') or 'er-1.5' in m]
-                    experimental = [m for m in all_models if 'exp' in m and m not in gemini_20]
-                    other = [m for m in all_models if m not in gemini_25 + gemini_20 + gemini_15 + experimental]
-
-                    categories = [
-                        ("🌟 Gemini 2.5 系列（推薦）", gemini_25, "#B565D8"),
-                        ("⚡ Gemini 2.0 系列", gemini_20, "#E8C4F0"),
-                        ("🔧 Gemini 1.5 系列", gemini_15, "#DDA0DD"),
-                        ("🧪 實驗版", experimental, "#BA55D3"),
-                        ("📦 其他版本", other, "#9370DB"),
-                    ]
-
-                    for title, models, color in categories:
-                        if not models:
-                            continue
-
-                        temp_console.print(f"[bold {color}]{title}[/bold {color}]")
-                        temp_console.print(f"[dim]總共 {len(models)} 個模型[/dim]\n")
-
-                        # 創建表格
-                        table = Table(show_header=True, header_style=f"bold {color}", border_style=color, box=None)
-                        table.add_column("#", style=color, width=4, justify="right")
-                        table.add_column("模型名稱", style="white", no_wrap=False)
-                        table.add_column("類型", style=color, width=15)
-
-                        for idx, model in enumerate(models, 1):
-                            # 判斷模型類型
-                            if 'flash' in model.lower():
-                                model_type = "⚡ Flash"
-                            elif 'pro' in model.lower():
-                                model_type = "💎 Pro"
-                            elif 'lite' in model.lower():
-                                model_type = "🪶 Lite"
-                            elif 'exp' in model.lower():
-                                model_type = "🧪 實驗"
-                            else:
-                                model_type = "📦 標準"
-
-                            table.add_row(str(idx), model, model_type)
-
-                        temp_console.print(table)
-                        temp_console.print()
-
-                    # 顯示快取資訊
-                    cache_info = model_manager.get_cache_info()
-                    temp_console.print("[dim]─[/dim]" * 50)
-                    if cache_info['exists']:
-                        temp_console.print(f"[dim]ℹ️  快取資訊：上次更新 {cache_info['last_update']},共 {cache_info['count']} 個模型[/dim]")
-                    temp_console.print(f"[dim]💡 使用 '/model update' 強制更新模型列表[/dim]")
-                    temp_console.print()
-
-                    # 獲取輸出內容
-                    output_content = output_buffer.getvalue()
-
-                    # 使用 Rich Pager 顯示（支援翻頁）
-                    with Pager(styles=True):
-                        console.print(output_content, end="")
-
-                    # 顯示返回提示
                     console.print()
-                    input(safe_t("chat.common.press_enter", fallback="按 Enter 返回選單..."))
+                    new_model = select_model()
+
+                    if new_model:
+                        current_model = new_model
+                        console.print(f"\n[#B565D8]{safe_t('model.switched', fallback='✓ 已切換到模型：{model}')}[/#B565D8]\n".format(model=current_model))
+                    else:
+                        console.print(f"\n[dim]{safe_t('model.switch_cancelled', fallback='已取消模型切換')}[/dim]\n")
 
                 except ImportError as e:
-                    console.print(f"[#B565D8]⚠️ 無法載入模型列表管理器：{e}[/#B565D8]")
+                    console.print(f"[#B565D8]{safe_t('model.cannot_load_selector', fallback='⚠️ 無法載入模型選擇器：{error}').format(error=e)}[/#B565D8]")
                 except Exception as e:
-                    console.print(f"[#B565D8]⚠️ 顯示模型列表時發生錯誤：{e}[/#B565D8]")
+                    console.print(f"[#B565D8]{safe_t('model.selection_error', fallback='⚠️ 選擇模型時發生錯誤：{error}').format(error=e)}[/#B565D8]")
                 continue
 
             elif user_input.lower() == '/model update':
                 # 強制更新模型列表
                 try:
                     from gemini_model_list import GeminiModelList
-                    console.print("[#E8C4F0]🔄 正在從 API 更新模型列表...[/#E8C4F0]")
+                    console.print(f"[#E8C4F0]{safe_t('model.updating_list', fallback='🔄 正在從 API 更新模型列表...')}[/#E8C4F0]")
 
                     model_manager = GeminiModelList()
                     success = model_manager.update_models(force=True)
 
                     if success:
                         cache_info = model_manager.get_cache_info()
-                        console.print(f"[#B565D8]✅ 模型列表已更新！共 {cache_info['count']} 個模型[/#B565D8]")
+                        console.print(f"[#B565D8]{safe_t('model.list_updated', fallback='✅ 模型列表已更新！共 {count} 個模型')}[/#B565D8]".format(count=cache_info['count']))
                     else:
-                        console.print("[#B565D8]❌ 更新失敗,請檢查網路連線和 API 金鑰[/#B565D8]")
+                        console.print(f"[#B565D8]{safe_t('model.update_failed', fallback='❌ 更新失敗,請檢查網路連線和 API 金鑰')}[/#B565D8]")
 
                 except Exception as e:
-                    console.print(f"[#B565D8]⚠️ 更新模型列表時發生錯誤：{e}[/#B565D8]")
+                    console.print(f"[#B565D8]{safe_t('model.update_error', fallback='⚠️ 更新模型列表時發生錯誤：{error}').format(error=e)}[/#B565D8]")
 
                     # 智能錯誤診斷
                     if error_diagnostics:
@@ -2753,50 +2831,50 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         )
 
                         if solutions:
-                            console.print(f"\n[yellow]💡 建議的解決方案：[/yellow]")
+                            console.print(f"\n[yellow]{safe_t('error.suggested_solutions', fallback='💡 建議的解決方案：')}[/yellow]")
                             for i, sol in enumerate(solutions, 1):
                                 console.print(f"\n[cyan]{i}. {sol.title}[/cyan]")
                                 console.print(f"   {sol.description}")
                                 if sol.command:
-                                    console.print(f"   [green]執行：[/green] {sol.command}")
+                                    console.print(f"   [green]{safe_t('error.solution_execute', fallback='執行：')}[/green] {sol.command}")
                                 if sol.manual_steps:
-                                    console.print(f"   [yellow]手動步驟：[/yellow]")
+                                    console.print(f"   [yellow]{safe_t('error.solution_manual', fallback='手動步驟：')}[/yellow]")
                                     for step in sol.manual_steps:
                                         console.print(f"     {step}")
                 continue
 
             elif user_input.lower() == 'cache':
                 if not CACHE_ENABLED:
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]快取功能未啟用（gemini_cache_manager.py 未找到）[/#E8C4F0]'))
+                    console.print('[#E8C4F0]快取功能未啟用（gemini_cache_manager.py 未找到）[/#E8C4F0]')
                     continue
 
-                console.print(safe_t('common.message', fallback='\n[#B565D8]💾 快取與思考管理[/#B565D8]\n'))
-                console.print(safe_t('common.message', fallback='優化成本與效能的關鍵設定！\n'))
-                console.print(safe_t('common.message', fallback='指令：'))
-                console.print(safe_t('common.message', fallback='  [快取管理]'))
-                console.print(safe_t('common.message', fallback='  1. 列出所有快取'))
-                console.print(safe_t('common.message', fallback='  2. 建立新快取'))
-                console.print(safe_t('common.message', fallback='  3. 刪除快取'))
+                console.print('\n[#B565D8]💾 快取與思考管理[/#B565D8]\n')
+                console.print('優化成本與效能的關鍵設定！\n')
+                console.print('指令：')
+                console.print('  [快取管理]')
+                console.print('  1. 列出所有快取')
+                console.print('  2. 建立新快取')
+                console.print('  3. 刪除快取')
 
                 # 只在支援思考模式的模型顯示
                 if any(tm in model_name for tm in THINKING_MODELS):
-                    console.print(safe_t('common.message', fallback='\n  [思考模式配置]'))
-                    console.print(safe_t('common.message', fallback='  4. 設定預設思考模式'))
-                    console.print(safe_t('common.message', fallback='  5. 查看思考費用試算'))
+                    console.print('\n  [思考模式配置]')
+                    console.print('  4. 設定預設思考模式')
+                    console.print('  5. 查看思考費用試算')
 
                     # 顯示翻譯功能選項
-                    if TRANSLATOR_ENABLED:
+                    if TRANSLATOR_ENABLED and global_translator:
                         trans_status = safe_t('chat.status_enabled', fallback='✅ 啟用') if global_translator.translation_enabled else safe_t('chat.status_disabled', fallback='❌ 停用')
-                        console.print(safe_t('common.message', fallback='  6. 切換思考翻譯 (當前: {trans_status})', trans_status=trans_status))
+                        console.print(f'  6. 切換思考翻譯 (當前: {trans_status})')
 
-                console.print(safe_t('common.message', fallback='\n  0. 返回\n'))
+                console.print('\n  0. 返回\n')
 
                 cache_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇: "))
 
                 if cache_choice == '1':
                     global_cache_manager.list_caches()
                 elif cache_choice == '2':
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]建立快取（最低 token 需求：gemini-2.5-flash=1024, gemini-2.5-pro=4096）[/#B565D8]'))
+                    console.print('\n[#B565D8]建立快取（最低 token 需求：gemini-2.5-flash=1024, gemini-2.5-pro=4096）[/#B565D8]')
                     content_input = Prompt.ask(safe_t("chat.cache.content_input_prompt", fallback="輸入要快取的內容（或檔案路徑）: "))
                     if os.path.isfile(content_input):
                         with open(content_input, 'r', encoding='utf-8') as f:
@@ -2816,7 +2894,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             ttl_hours=ttl_hours
                         )
                     except Exception as e:
-                        console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]建立失敗：{e}[/red]', e=e))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]建立失敗：{e}[/red]', e=e))
 
                 elif cache_choice == '3':
                     cache_id = Prompt.ask(safe_t("chat.cache.delete_prompt", fallback="輸入要刪除的快取名稱或 ID: "))
@@ -2824,8 +2902,8 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                 elif cache_choice == '4' and any(tm in model_name for tm in THINKING_MODELS):
                     # 設定預設思考模式
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]🧠 思考模式配置[/#B565D8]\n'))
-                    console.print(safe_t('common.message', fallback='當前模型：{model_name}', model_name=model_name))
+                    console.print('\n[#B565D8]🧠 思考模式配置[/#B565D8]\n')
+                    console.print(f'當前模型：{model_name}')
 
                     # 根據模型決定範圍
                     is_pro = '2.5-pro' in model_name or '2.0-pro' in model_name
@@ -2836,37 +2914,37 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         MAX_TOKENS = 32768
                         MIN_TOKENS = 128
                         ALLOW_DISABLE = False
-                        console.print(safe_t('common.message', fallback='思考範圍：{MIN_TOKENS:,} - {MAX_TOKENS:,} tokens（無法停用）\n', MIN_TOKENS=MIN_TOKENS, MAX_TOKENS=MAX_TOKENS))
+                        console.print(f'思考範圍：{MIN_TOKENS:,} - {MAX_TOKENS:,} tokens（無法停用）\n')
                     elif is_lite:
                         MAX_TOKENS = 24576
                         MIN_TOKENS = 512
                         ALLOW_DISABLE = True
-                        console.print(safe_t('common.message', fallback='思考範圍：0 (停用) 或 {MIN_TOKENS:,} - {MAX_TOKENS:,} tokens\n', MIN_TOKENS=MIN_TOKENS, MAX_TOKENS=MAX_TOKENS))
+                        console.print(f'思考範圍：0 (停用) 或 {MIN_TOKENS:,} - {MAX_TOKENS:,} tokens\n')
                     else:  # flash
                         MAX_TOKENS = 24576
                         MIN_TOKENS = 0
                         ALLOW_DISABLE = True
-                        console.print(safe_t('common.message', fallback='思考範圍：0 (停用) 或 1 - {MAX_TOKENS:,} tokens\n', MAX_TOKENS=MAX_TOKENS))
+                        console.print(f'思考範圍：0 (停用) 或 1 - {MAX_TOKENS:,} tokens\n')
 
-                    console.print(safe_t('common.message', fallback='選擇預設思考模式：'))
-                    console.print(safe_t('common.message', fallback='  [1] 動態模式（推薦）- AI 自動決定思考量'))
-                    console.print(safe_t('common.message', fallback='  [2] 輕度思考 (2,000 tokens)'))
-                    console.print(safe_t('common.message', fallback='  [3] 中度思考 (5,000 tokens)'))
-                    console.print(safe_t('common.message', fallback='  [4] 深度思考 (10,000 tokens)'))
-                    console.print(safe_t('common.message', fallback='  [5] 極限思考 ({MAX_TOKENS:,} tokens)', MAX_TOKENS=MAX_TOKENS))
-                    console.print(safe_t('common.message', fallback='  [6] 自訂 tokens'))
+                    console.print('選擇預設思考模式：')
+                    console.print('  [1] 動態模式（推薦）- AI 自動決定思考量')
+                    console.print('  [2] 輕度思考 (2,000 tokens)')
+                    console.print('  [3] 中度思考 (5,000 tokens)')
+                    console.print('  [4] 深度思考 (10,000 tokens)')
+                    console.print(f'  [5] 極限思考 ({MAX_TOKENS:,} tokens)')
+                    console.print('  [6] 自訂 tokens')
                     if ALLOW_DISABLE:
-                        console.print(safe_t('common.message', fallback='  [7] 停用思考 (0 tokens)'))
-                    console.print(safe_t('common.message', fallback='  [0] 返回上一頁\n'))
+                        console.print('  [7] 停用思考 (0 tokens)')
+                    console.print('  [0] 返回上一頁\n')
 
                     think_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇: "))
 
                     if think_choice == '0':
                         # 返回上一頁,不設定思考模式
-                        console.print(safe_t('common.message', fallback='[#B565D8]✓ 已取消設定[/#B565D8]'))
+                        console.print('[#B565D8]✓ 已取消設定[/#B565D8]')
                     elif think_choice == '1':
                         console.print(safe_t('common.completed', fallback='\n✓ 已設定為動態模式'))
-                        console.print(safe_t('common.message', fallback='💡 提示：每次對話可用 [think:auto] 覆蓋'))
+                        console.print('💡 提示：每次對話可用 [think:auto] 覆蓋')
                     elif think_choice in ['2', '3', '4', '5', '6', '7']:
                         budget_map = {'2': 2000, '3': 5000, '4': 10000, '5': MAX_TOKENS, '7': 0}
                         if think_choice == '6':
@@ -2874,13 +2952,13 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             if custom.isdigit():
                                 budget = max(MIN_TOKENS, min(int(custom), MAX_TOKENS))
                             else:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效輸入,使用預設 5000[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效輸入,使用預設 5000[/#E8C4F0]')
                                 budget = 5000
                         elif think_choice == '7':
                             if ALLOW_DISABLE:
                                 budget = 0
                             else:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]{model_name} 無法停用思考,使用最小值 {MIN_TOKENS}[/#E8C4F0]', model_name=model_name, MIN_TOKENS=MIN_TOKENS))
+                                console.print(f'[#E8C4F0]{model_name} 無法停用思考,使用最小值 {MIN_TOKENS}[/#E8C4F0]')
                                 budget = MIN_TOKENS
                         else:
                             budget = budget_map[think_choice]
@@ -2893,19 +2971,19 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 cost_usd = (budget / 1000) * input_price
                                 cost_twd = cost_usd * USD_TO_TWD
                                 console.print(safe_t('common.completed', fallback='\n✓ 已設定思考預算：{budget} tokens', budget=f'{budget:,}'))
-                                console.print(safe_t('common.message', fallback='💰 預估每次思考費用：NT$ {cost_twd} (${cost_usd})', cost_twd=f'{cost_twd:.4f}', cost_usd=f'{cost_usd:.6f}'))
+                                console.print(f'💰 預估每次思考費用：NT$ {cost_twd:.4f} (${cost_usd:.6f})')
                             except (KeyError, AttributeError, TypeError) as e:
                                 logger.warning(f"預算費用估算失敗 (預算: {budget}): {e}")
                                 console.print(safe_t('common.completed', fallback='\n✓ 已設定思考預算：{budget} tokens', budget=f'{budget:,}'))
                         else:
                             console.print(safe_t('common.completed', fallback='\n✓ 已設定思考預算：{budget:,} tokens', budget=budget))
 
-                        console.print(safe_t('common.message', fallback='💡 提示：每次對話可用 [think:{budget}] 覆蓋', budget=budget))
+                        console.print(f'💡 提示：每次對話可用 [think:{budget}] 覆蓋')
 
                 elif cache_choice == '5' and any(tm in model_name for tm in THINKING_MODELS):
                     # 思考費用試算
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]💰 思考費用試算器[/#B565D8]\n'))
-                    console.print(safe_t('common.message', fallback='當前模型：{model_name}', model_name=model_name))
+                    console.print('\n[#B565D8]💰 思考費用試算器[/#B565D8]\n')
+                    console.print(f'當前模型：{model_name}')
 
                     # 根據模型決定範圍
                     is_pro = '2.5-pro' in model_name or '2.0-pro' in model_name
@@ -2922,7 +3000,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         MAX_TOKENS = 24576
                         MIN_TOKENS = 1
 
-                    console.print(safe_t('common.message', fallback='思考範圍：{MIN_TOKENS:,} - {MAX_TOKENS:,} tokens\n', MIN_TOKENS=MIN_TOKENS, MAX_TOKENS=MAX_TOKENS))
+                    console.print(f'思考範圍：{MIN_TOKENS:,} - {MAX_TOKENS:,} tokens\n')
 
                     tokens_input = Prompt.ask(safe_t("chat.thinking.tokens_input_prompt", fallback="輸入思考 tokens 數量 ({min}-{max}): ").format(min=MIN_TOKENS, max=MAX_TOKENS))
                     if tokens_input.isdigit():
@@ -2935,55 +3013,55 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 cost_usd = (tokens / 1000) * input_price
                                 cost_twd = cost_usd * USD_TO_TWD
 
-                                console.print(safe_t('common.message', fallback='\n[#B565D8]費用試算結果：[/#B565D8]'))
-                                console.print(safe_t('common.message', fallback='  思考 Tokens：{tokens:,}', tokens=tokens))
-                                console.print(safe_t('common.message', fallback='  單次費用：NT$ {cost_twd:.4f} (${cost_usd:.6f})', cost_twd=cost_twd, cost_usd=cost_usd))
-                                console.print(safe_t('common.message', fallback='  10 次費用：NT$ {cost_twd_10:.4f}', cost_twd_10=cost_twd*10))
-                                console.print(safe_t('common.message', fallback='  100 次費用：NT$ {cost_twd_100:.2f}', cost_twd_100=cost_twd*100))
-                                console.print(safe_t('common.message', fallback='\n  費率：NT$ {rate:.4f} / 1K tokens', rate=input_price * USD_TO_TWD))
+                                console.print('\n[#B565D8]費用試算結果：[/#B565D8]')
+                                console.print(f'  思考 Tokens：{tokens:,}')
+                                console.print(f'  單次費用：NT$ {cost_twd:.4f} (${cost_usd:.6f})')
+                                console.print(f'  10 次費用：NT$ {cost_twd*10:.4f}')
+                                console.print(f'  100 次費用：NT$ {cost_twd*100:.2f}')
+                                console.print(f'\n  費率：NT$ {input_price * USD_TO_TWD:.4f} / 1K tokens')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]計算失敗：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]計算失敗：{e}[/red]', e=e))
                         else:
-                            console.print(safe_t('common.message', fallback='[#E8C4F0]計價功能未啟用[/#E8C4F0]'))
+                            console.print('[#E8C4F0]計價功能未啟用[/#E8C4F0]')
                     else:
-                        console.print(safe_t('common.message', fallback='[#E8C4F0]無效輸入[/#E8C4F0]'))
+                        console.print('[#E8C4F0]無效輸入[/#E8C4F0]')
 
                     input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
-                elif cache_choice == '6' and any(tm in model_name for tm in THINKING_MODELS) and TRANSLATOR_ENABLED:
+                elif cache_choice == '6' and any(tm in model_name for tm in THINKING_MODELS) and TRANSLATOR_ENABLED and global_translator:
                     # 翻譯開關
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]🌐 思考過程翻譯設定[/#B565D8]\n'))
+                    console.print('\n[#B565D8]🌐 思考過程翻譯設定[/#B565D8]\n')
 
                     # 顯示翻譯器狀態
                     trans_status = global_translator.get_status()
                     status_text = safe_t('chat.status_enabled', fallback='✅ 啟用') if trans_status['translation_enabled'] else safe_t('chat.status_disabled', fallback='❌ 停用')
-                    console.print(safe_t('common.message', fallback='當前狀態: {status}', status=status_text))
-                    console.print(safe_t('common.message', fallback='翻譯引擎: {engine}', engine=trans_status['current_engine']))
+                    console.print(f'當前狀態: {status_text}')
+                    console.print(f'翻譯引擎: {trans_status['current_engine']}')
 
-                    console.print(safe_t('common.message', fallback='\n【可用引擎】'))
+                    console.print('\n【可用引擎】')
                     for engine, status in trans_status['engines'].items():
                         console.print(f"  {engine}: {status}")
 
-                    console.print(safe_t('common.message', fallback='\n【使用統計】'))
-                    console.print(safe_t('common.message', fallback='  已翻譯字元: {translated_chars:,}', translated_chars=trans_status['translated_chars']))
-                    console.print(safe_t('common.message', fallback='  免費額度剩餘: {free_quota:,} / 500,000 字元', free_quota=trans_status['free_quota_remaining']))
-                    console.print(safe_t('common.message', fallback='  快取項目: {cache_size} 個', cache_size=trans_status['cache_size']))
+                    console.print('\n【使用統計】')
+                    console.print(f'  已翻譯字元: {translated_chars:,}')
+                    console.print(f'  免費額度剩餘: {free_quota:,} / 500,000 字元')
+                    console.print(f'  快取項目: {trans_status['cache_size']} 個')
 
-                    console.print(safe_t('common.message', fallback='\n選項：'))
-                    console.print(safe_t('common.message', fallback='  [1] 切換翻譯功能（啟用/停用）'))
-                    console.print(safe_t('common.message', fallback='  [2] 清除翻譯快取'))
-                    console.print(safe_t('common.message', fallback='  [0] 返回\n'))
+                    console.print('\n選項：')
+                    console.print('  [1] 切換翻譯功能（啟用/停用）')
+                    console.print('  [2] 清除翻譯快取')
+                    console.print('  [0] 返回\n')
 
                     trans_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇: "))
 
                     if trans_choice == '1':
                         new_state = global_translator.toggle_translation()
                         status_text = safe_t('chat.status_active', fallback='✅ 已啟用') if new_state else safe_t('chat.status_inactive', fallback='❌ 已停用')
-                        console.print(safe_t('common.message', fallback='\n{status_text} 思考過程翻譯', status_text=status_text))
+                        console.print(f'\n{status_text} 思考過程翻譯')
                         if new_state:
-                            console.print(safe_t('common.message', fallback='💡 思考過程將自動翻譯為繁體中文'))
+                            console.print('💡 思考過程將自動翻譯為繁體中文')
                         else:
-                            console.print(safe_t('common.message', fallback='💡 思考過程將顯示英文原文'))
+                            console.print('💡 思考過程將顯示英文原文')
                     elif trans_choice == '2':
                         global_translator.clear_cache()
                         console.print(safe_t('common.completed', fallback='\n✓ 翻譯快取已清除'))
@@ -2993,124 +3071,32 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 continue
 
             elif user_input.lower() in ['cli', 'gemini-cli']:
-                # Gemini CLI 管理選單
+                # CodeGemini CLI 模式（直接顯示選單）
+                # 注意：推薦使用 /codegemini 啟用後，再用 Ctrl+G 呼叫選單
                 try:
                     if not CODEGEMINI_ENABLED:
-                        console.print(safe_t('common.message', fallback='[#E8C4F0]CodeGemini 功能未啟用（CodeGemini.py 未找到）[/#E8C4F0]'))
+                        console.print('[#E8C4F0]CodeGemini 功能未啟用（codegemini_manager.py 未找到）[/#E8C4F0]')
                         continue
 
-                    # 檢查 CodeGemini 是否已載入完成
-                    if not is_codegemini_ready():
-                        console.print(safe_t('common.message', fallback='[yellow]⏳ CodeGemini 配置管理器正在背景載入中...[/yellow]'))
-                        console.print(safe_t('common.message', fallback='[dim]首次啟動需要載入配置,請稍候或繼續使用其他功能[/dim]\n'))
-                        # 同步載入
-                        get_codegemini_config_manager()
-                        if is_codegemini_ready():
-                            console.print(safe_t('common.message', fallback='[green]✓ CodeGemini 配置管理器已就緒[/green]\n'))
-                        else:
-                            console.print(safe_t('error.failed', fallback='[red]✗ CodeGemini 配置管理器載入失敗[/red]'))
-                            continue
+                    # 延遲導入 CodeGeminiManager
+                    from codegemini_manager import get_codegemini_manager
 
-                    while True:
-                        console.print("\n" + "=" * 60)
-                        console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]🛠️  Gemini CLI 管理工具[/bold COLOR_MACARON_PURPLE]'))
-                        console.print("=" * 60)
-                        console.print(safe_t('common.message', fallback='\n  [1] 顯示 Gemini CLI 狀態'))
-                        console.print(safe_t('common.message', fallback='  [2] 啟動 Gemini CLI session'))
-                        console.print(safe_t('common.message', fallback='  [3] 管理 checkpoints'))
-                        console.print(safe_t('common.message', fallback='  [4] 安裝/更新 Gemini CLI'))
-                        console.print(safe_t('common.message', fallback='  [5] 配置 API Key'))
-                        console.print(safe_t('common.message', fallback='\n  [0] 返回\n'))
+                    # 取得或建立 CodeGemini Manager 實例
+                    manager = get_codegemini_manager()
 
-                        cli_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇: "))
+                    # 載入模組（如果尚未載入）
+                    if not manager.is_loaded:
+                        console.print('[yellow]⏳ 正在載入 CodeGemini 開發工具...[/yellow]')
+                        manager.load(console)
+                    else:
+                        console.print('[green]✓ CodeGemini 已啟用[/green]')
+                        console.print('[dim]已載入：測試生成、文檔生成、代碼增強、向量搜尋、批次處理[/dim]\n')
 
-                        if cli_choice == '0':
-                            break
-
-                        elif cli_choice == '1':
-                            # 顯示狀態
-                            try:
-                                cg = CodeGemini()
-                                cg.print_status()
-                            except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
-                            input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
-
-                        elif cli_choice == '2':
-                            # 啟動 Gemini CLI
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]啟動 Gemini CLI...[/#B565D8]'))
-                            script_path = Path(__file__).parent / "CodeGemini" / "gemini-with-context.sh"
-                            if script_path.exists():
-                                try:
-                                    subprocess.run([str(script_path)], check=True)
-                                except Exception as e:
-                                    console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]啟動失敗：{e}[/red]', e=e))
-                            else:
-                                console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]腳本不存在：{script_path}[/red]', script_path=script_path))
-                            input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
-
-                        elif cli_choice == '3':
-                            # 管理 checkpoints
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]Checkpoint 管理...[/#B565D8]'))
-                            script_path = Path(__file__).parent / "CodeGemini" / "checkpoint-manager.sh"
-                            if script_path.exists():
-                                try:
-                                    subprocess.run([str(script_path)], check=True)
-                                except Exception as e:
-                                    console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]啟動失敗：{e}[/red]', e=e))
-                            else:
-                                console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]腳本不存在：{script_path}[/red]', script_path=script_path))
-                            input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
-
-                        elif cli_choice == '4':
-                            # 安裝/更新
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]安裝/更新 Gemini CLI[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] 安裝'))
-                            console.print(safe_t('common.message', fallback='  [2] 更新'))
-                            console.print(safe_t('common.message', fallback='  [3] 卸載'))
-                            console.print(safe_t('common.message', fallback='  [0] 返回\n'))
-
-                            install_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇: "))
-
-                            try:
-                                cg = CodeGemini()
-                                if install_choice == '1':
-                                    if cg.cli_manager.install():
-                                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 安裝成功[/#B565D8]'))
-                                    else:
-                                        console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 安裝失敗[/red]'))
-                                elif install_choice == '2':
-                                    if cg.cli_manager.update():
-                                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 更新成功[/#B565D8]'))
-                                    else:
-                                        console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 更新失敗[/red]'))
-                                elif install_choice == '3':
-                                    confirm = Prompt.ask(safe_t("chat.cli.uninstall_confirm", fallback="確定要卸載 Gemini CLI？(yes/no): ")).lower()
-                                    if confirm == 'yes':
-                                        if cg.cli_manager.uninstall():
-                                            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 卸載成功[/#B565D8]'))
-                                        else:
-                                            console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 卸載失敗[/red]'))
-                                    else:
-                                        console.print(safe_t('common.message', fallback='[#E8C4F0]已取消[/#E8C4F0]'))
-                            except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
-                            input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
-
-                        elif cli_choice == '5':
-                            # 配置 API Key
-                            try:
-                                cg = CodeGemini()
-                                if cg.api_key_manager.setup_interactive():
-                                    console.print(safe_t('common.completed', fallback='[#B565D8]✓ API Key 設定完成[/#B565D8]'))
-                                else:
-                                    console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ API Key 設定失敗[/red]'))
-                            except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
-                            input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
+                    # 顯示功能選單
+                    manager.show_menu(console)
 
                 except Exception as e:
-                    console.print(f"[red]✗ CLI 管理錯誤: {e}[/red]")
+                    console.print(f"[red]✗ CodeGemini 錯誤: {e}[/red]")
                     if error_diagnostics:
                         error_msg, solutions = error_diagnostics.diagnose_and_suggest(
                             error=e,
@@ -3118,16 +3104,41 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             context={'command': 'cli', 'error_type': type(e).__name__}
                         )
                         if solutions:
-                            console.print(f"\n[yellow]💡 建議的解決方案：[/yellow]")
+                            console.print(f"\n[yellow]{safe_t('error.suggested_solutions', fallback='💡 建議的解決方案：')}[/yellow]")
                             for i, sol in enumerate(solutions, 1):
                                 console.print(f"\n[cyan]{i}. {sol.title}[/cyan]")
                                 console.print(f"   {sol.description}")
                                 if sol.command:
-                                    console.print(f"   [green]執行：[/green] {sol.command}")
+                                    console.print(f"   [green]{safe_t('error.solution_execute', fallback='執行：')}[/green] {sol.command}")
                                 if sol.manual_steps:
-                                    console.print(f"   [yellow]手動步驟：[/yellow]")
+                                    console.print(f"   [yellow]{safe_t('error.solution_manual', fallback='手動步驟：')}[/yellow]")
                                     for step in sol.manual_steps:
                                         console.print(f"     {step}")
+
+                continue
+
+            elif user_input.lower() == 'codegemini':
+                # CodeGemini 開發工具啟用
+                try:
+                    from codegemini_manager import get_codegemini_manager, is_codegemini_loaded
+
+                    manager = get_codegemini_manager()
+
+                    if manager.is_loaded:
+                        console.print('\n[bold #B565D8]✓ CodeGemini 已啟用[/bold #B565D8]')
+                        console.print('[dim]所有功能已就緒：測試生成、文檔生成、代碼增強、向量搜尋、批次處理[/dim]')
+                        console.print('\n[#87CEEB]💡 使用方式：[/#87CEEB]')
+                        console.print('[dim]  • 按 [bold]Ctrl+G[/bold] 呼叫功能選單（測試/文檔/增強/搜尋/批次/資料庫）[/dim]\n')
+                    else:
+                        console.print('\n[#B565D8]⏳ 正在啟用 CodeGemini...[/#B565D8]')
+                        manager.load(console)
+                        console.print('\n[bold #B565D8]✓ CodeGemini 已啟用[/bold #B565D8]')
+                        console.print('[dim]所有功能已就緒：測試生成、文檔生成、代碼增強、向量搜尋、批次處理[/dim]')
+                        console.print('\n[#87CEEB]💡 使用方式：[/#87CEEB]')
+                        console.print('[dim]  • 按 [bold]Ctrl+G[/bold] 呼叫功能選單（測試/文檔/增強/搜尋/批次/資料庫）[/dim]\n')
+                except Exception as e:
+                    console.print(f'[red]✗ CodeGemini 啟用失敗：{e}[/red]')
+                    logger.error(f"CodeGemini 啟用失敗: {e}")
 
                 continue
 
@@ -3150,78 +3161,51 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         console.print(safe_t('error.failed', fallback='[#B565D8]✗ 配置管理錯誤: {e}[/#B565D8]', e=e))
                 else:
                     console.print(safe_t('common.loading', fallback='[#B565D8]✗ CodeGemini 配置管理器未載入[/#B565D8]'))
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]請確認：[/#E8C4F0]'))
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]  1. CodeGemini 模組已安裝[/#E8C4F0]'))
-                    console.print(safe_t('common.message', fallback='[#E8C4F0]  2. CodeGemini/config_manager.py 存在[/#E8C4F0]'))
+                    console.print('[#E8C4F0]請確認：[/#E8C4F0]')
+                    console.print('[#E8C4F0]  1. CodeGemini 模組已安裝[/#E8C4F0]')
+                    console.print('[#E8C4F0]  2. CodeGemini/config_manager.py 存在[/#E8C4F0]')
 
                 continue
 
-            elif user_input.lower() in ['media', 'video', 'veo']:
+            elif user_input.lower() == 'media':
                 # ==========================================
                 # 多媒體創作中心 - 精簡版選單
                 # ==========================================
                 try:
                     while True:
-                        console.print("\n" + "=" * 60)
-                        console.print(safe_t('media_menu.title', fallback='[bold COLOR_MACARON_PURPLE]🎬 多媒體創作中心[/bold COLOR_MACARON_PURPLE]'))
-                        console.print("=" * 60)
+                        # 建立選單選項（根據功能啟用狀態動態生成）
+                        menu_options = build_media_menu_options(
+                            FLOW_ENGINE_ENABLED=FLOW_ENGINE_ENABLED,
+                            IMAGEN_GENERATOR_ENABLED=IMAGEN_GENERATOR_ENABLED,
+                            VIDEO_PREPROCESSOR_ENABLED=VIDEO_PREPROCESSOR_ENABLED,
+                            VIDEO_COMPOSITOR_ENABLED=VIDEO_COMPOSITOR_ENABLED,
+                            VIDEO_EFFECTS_ENABLED=VIDEO_EFFECTS_ENABLED,
+                            SUBTITLE_GENERATOR_ENABLED=SUBTITLE_GENERATOR_ENABLED,
+                            AUDIO_PROCESSOR_ENABLED=AUDIO_PROCESSOR_ENABLED,
+                            MEDIA_VIEWER_ENABLED=MEDIA_VIEWER_ENABLED,
+                            VIDEO_ANALYZER_ENABLED=VIDEO_ANALYZER_ENABLED
+                        )
 
-                        # 第一層：AI 生成（核心功能）
-                        console.print(safe_t('media_menu.section.ai_generation', fallback='\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 創作生成[/bold COLOR_MACARON_PURPLE_LIGHT]'))
-                        if FLOW_ENGINE_ENABLED:
-                            console.print(safe_t('media_menu.item.flow_video', fallback='  [1] Flow 影片生成（1080p 長影片,自然語言）'))
-                        console.print(safe_t('media_menu.item.veo_video', fallback='  [2] Veo 影片生成（8秒快速生成）'))
-                        if IMAGEN_GENERATOR_ENABLED:
-                            console.print(safe_t('media_menu.item.imagen_generate', fallback='  [12] Imagen 圖像生成（Text-to-Image）'))
-                            console.print(safe_t('media_menu.item.vision_imagen', fallback='  [13] 智能圖片創作（Gemini Vision + Imagen）'))
-                            # [14] 圖像編輯已移除 - Imagen API 不支援 edit_image() 方法
-                            # [15] 圖像放大已移除 - 僅 Vertex AI 支援,Gemini Developer API 不支援
+                        # 顯示互動式選單（支援上下鍵導航）
+                        media_choice = show_menu(
+                            title='🎬 多媒體創作中心',
+                            options=menu_options
+                        )
 
-                        # 第二層：影片處理工具
-                        console.print(safe_t('media_menu.section.video_processing', fallback='\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 影片處理[/bold COLOR_MACARON_PURPLE_LIGHT]'))
-                        if VIDEO_PREPROCESSOR_ENABLED or VIDEO_COMPOSITOR_ENABLED:
-                            if VIDEO_PREPROCESSOR_ENABLED:
-                                console.print(safe_t('media_menu.item.video_preprocess', fallback='  [3] 影片預處理（分割/關鍵幀/資訊）'))
-                            if VIDEO_COMPOSITOR_ENABLED:
-                                console.print(safe_t('media_menu.item.video_concat', fallback='  [4] 影片合併（無損拼接）'))
-                        if VIDEO_EFFECTS_ENABLED:
-                            console.print(safe_t('media_menu.item.video_trim', fallback='  [15] 時間裁切（無損剪輯）'))
-                            console.print(safe_t('media_menu.item.video_filter', fallback='  [16] 濾鏡特效（7種風格）'))
-                            console.print(safe_t('media_menu.item.video_speed', fallback='  [17] 速度調整（快轉/慢動作）'))
-                            console.print(safe_t('media_menu.item.video_watermark', fallback='  [18] 添加浮水印'))
-                        if SUBTITLE_GENERATOR_ENABLED:
-                            console.print(safe_t('media_menu.item.subtitle_generate', fallback='  [19] 生成字幕（語音辨識+翻譯）'))
-                            console.print(safe_t('media_menu.item.subtitle_burn', fallback='  [20] 燒錄字幕（嵌入影片）'))
-
-                        # 第三層：音訊處理
-                        if AUDIO_PROCESSOR_ENABLED:
-                            console.print(safe_t('media_menu.section.audio_processing', fallback='\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> 音訊處理[/bold COLOR_MACARON_PURPLE_LIGHT]'))
-                            console.print(safe_t('media_menu.audio_group', fallback='  [7] 提取音訊  [8] 合併音訊  [9] 音量調整'))
-                            console.print(safe_t('media_menu.audio_group2', fallback='  [10] 背景音樂  [11] 淡入淡出'))
-
-                        # 第四層：AI 分析
-                        console.print(safe_t('media_menu.section.ai_analysis', fallback='\n[bold COLOR_MACARON_PURPLE_LIGHT]>>> AI 分析工具[/bold COLOR_MACARON_PURPLE_LIGHT]'))
-                        if MEDIA_VIEWER_ENABLED:
-                            console.print(safe_t('media_menu.item.media_analyzer', fallback='  [0] 媒體分析器（圖片/影片 AI 分析）'))
-                        if VIDEO_ANALYZER_ENABLED:
-                            console.print(safe_t('media_menu.item.video_chat', fallback='  [21] 影片互動對話（上傳後連續提問）'))
-                        console.print(safe_t('media_menu.analysis_group', fallback='  [5] 影片內容分析  [6] 圖像內容分析'))
-
-                        console.print(safe_t('media_menu.back', fallback='\n  [99] 返回主選單\n'))
-
-                        # 使用 rich.prompt.Prompt 支援方向鍵編輯
-                        media_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇"))
+                        # 處理取消操作（ESC 或取消按鈕）
+                        if media_choice is None:
+                            break
 
                         if media_choice == '99':
                             break
 
                         elif media_choice == '0' and MEDIA_VIEWER_ENABLED:
                             # 媒體檔案查看器
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎬 媒體檔案查看器[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎬 媒體檔案查看器[/#B565D8]\n')
                             file_path = Prompt.ask(safe_t("chat.media.file_path_prompt", fallback="檔案路徑："))
 
                             if not os.path.isfile(file_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3242,7 +3226,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     os.system(f'open "{file_path}"')
 
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '1' and FLOW_ENGINE_ENABLED:
@@ -3251,7 +3235,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                             description = Prompt.ask(safe_t("chat.media.veo.describe_prompt", fallback="請描述您想要的影片內容："))
                             if not description:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]未輸入描述,取消操作[/#E8C4F0]'))
+                                console.print('[#E8C4F0]未輸入描述,取消操作[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3260,7 +3244,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                             # 智能建議：長影片自動使用最佳參數
                             if target_duration > 60:
-                                console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💡 長影片建議使用最佳參數：1080p, 16:9[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                                console.print('[dim #E8C4F0]💡 長影片建議使用最佳參數：1080p, 16:9[/dim #E8C4F0]')
 
                             # 預設使用最佳參數（1080p, 16:9）
                             resolution = "1080p"
@@ -3270,20 +3254,20 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             custom_settings = Prompt.ask(safe_t("chat.media.veo.use_default_prompt", fallback="\n使用預設最佳參數（1080p, 16:9）？(Y/n): ")).lower()
                             if custom_settings == 'n':
                                 # 解析度選擇
-                                console.print(safe_t('common.message', fallback='\n[#B565D8]解析度：[/#B565D8]'))
-                                console.print(safe_t('common.message', fallback='  [1] 1080p (推薦)'))
+                                console.print('\n[#B565D8]解析度：[/#B565D8]')
+                                console.print('  [1] 1080p (推薦)')
                                 console.print("  [2] 720p")
                                 resolution_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇："))
                                 resolution = "1080p" if resolution_choice != '2' else "720p"
 
                                 # 比例選擇
-                                console.print(safe_t('common.message', fallback='\n[#B565D8]比例：[/#B565D8]'))
-                                console.print(safe_t('common.message', fallback='  [1] 16:9 (橫向,預設)'))
-                                console.print(safe_t('common.message', fallback='  [2] 9:16 (直向)'))
+                                console.print('\n[#B565D8]比例：[/#B565D8]')
+                                console.print('  [1] 16:9 (橫向,預設)')
+                                console.print('  [2] 9:16 (直向)')
                                 ratio_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇："))
                                 aspect_ratio = "16:9" if ratio_choice != '2' else "9:16"
 
-                            console.print(safe_t('common.generating', fallback='\n[dim COLOR_MACARON_PURPLE]⏳ 準備生成 {target_duration}秒 影片（{resolution}, {aspect_ratio}）...[/dim COLOR_MACARON_PURPLE]', target_duration=target_duration, resolution=resolution, aspect_ratio=aspect_ratio))
+                            console.print(safe_t('common.generating', fallback='\n[dim #B565D8]⏳ 準備生成 {target_duration}秒 影片（{resolution}, {aspect_ratio}）...[/dim #B565D8]', target_duration=target_duration, resolution=resolution, aspect_ratio=aspect_ratio))
 
                             try:
                                 # 初始化 Flow Engine（傳入計價器與影片配置）
@@ -3311,32 +3295,32 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 else:
                                     console.print(safe_t('common.generating', fallback='\n[#E8C4F0]已取消生成[/#E8C4F0]'))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
 
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '2':
                             # Veo 基本生成
                             console.print(safe_t('common.generating', fallback='\n[#B565D8]🎬 Veo 基本影片生成[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='使用獨立工具：'))
+                            console.print('使用獨立工具：')
                             console.print("  python gemini_veo_generator.py\n")
-                            console.print(safe_t('common.message', fallback='功能：'))
+                            console.print('功能：')
                             console.print(safe_t('common.generating', fallback='  - 文字生成影片（8 秒,Veo 3.1）'))
-                            console.print(safe_t('common.message', fallback='  - 支援參考圖片'))
-                            console.print(safe_t('common.message', fallback='  - 自訂長寬比'))
+                            console.print('  - 支援參考圖片')
+                            console.print('  - 自訂長寬比')
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '3' and VIDEO_PREPROCESSOR_ENABLED:
                             # 影片預處理
                             console.print(safe_t('common.processing', fallback='\n[#B565D8]✂️ 影片預處理工具[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='功能：'))
-                            console.print(safe_t('common.message', fallback='  1. 查詢影片資訊（解析度/時長/編碼/大小）'))
-                            console.print(safe_t('common.message', fallback='  2. 分割影片（固定時長分段）'))
-                            console.print(safe_t('common.message', fallback='  3. 提取關鍵幀（等距提取）'))
-                            console.print(safe_t('common.message', fallback='  4. 檢查檔案大小（API 限制 < 2GB）\n'))
-                            console.print(safe_t('common.message', fallback='使用方式：'))
-                            console.print(safe_t('common.message', fallback='  python gemini_video_preprocessor.py <影片路徑> <指令>'))
-                            console.print(safe_t('common.message', fallback='\n範例：'))
+                            console.print('功能：')
+                            console.print('  1. 查詢影片資訊（解析度/時長/編碼/大小）')
+                            console.print('  2. 分割影片（固定時長分段）')
+                            console.print('  3. 提取關鍵幀（等距提取）')
+                            console.print('  4. 檢查檔案大小（API 限制 < 2GB）\n')
+                            console.print('使用方式：')
+                            console.print('  python gemini_video_preprocessor.py <影片路徑> <指令>')
+                            console.print('\n範例：')
                             console.print("  python gemini_video_preprocessor.py video.mp4 info")
                             console.print("  python gemini_video_preprocessor.py video.mp4 split")
                             console.print("  python gemini_video_preprocessor.py video.mp4 keyframes")
@@ -3344,15 +3328,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                         elif media_choice == '4' and VIDEO_COMPOSITOR_ENABLED:
                             # 影片合併
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎞️ 影片合併工具[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='功能：'))
-                            console.print(safe_t('common.message', fallback='  - 無損合併多段影片（ffmpeg concat demuxer）'))
-                            console.print(safe_t('common.message', fallback='  - 保持原始品質（禁止有損壓縮）'))
-                            console.print(safe_t('common.message', fallback='  - 替換影片片段（Insert 功能）\n'))
-                            console.print(safe_t('common.message', fallback='使用方式：'))
-                            console.print(safe_t('common.message', fallback='  python gemini_video_compositor.py concat <影片1> <影片2> ...'))
-                            console.print(safe_t('common.message', fallback='  python gemini_video_compositor.py replace <基礎影片> <新片段> <時間點>'))
-                            console.print(safe_t('common.message', fallback='\n範例：'))
+                            console.print('\n[#B565D8]🎞️ 影片合併工具[/#B565D8]\n')
+                            console.print('功能：')
+                            console.print('  - 無損合併多段影片（ffmpeg concat demuxer）')
+                            console.print('  - 保持原始品質（禁止有損壓縮）')
+                            console.print('  - 替換影片片段（Insert 功能）\n')
+                            console.print('使用方式：')
+                            console.print('  python gemini_video_compositor.py concat <影片1> <影片2> ...')
+                            console.print('  python gemini_video_compositor.py replace <基礎影片> <新片段> <時間點>')
+                            console.print('\n範例：')
                             console.print("  python gemini_video_compositor.py concat seg1.mp4 seg2.mp4 seg3.mp4")
                             console.print("  python gemini_video_compositor.py replace base.mp4 new.mp4 10.5")
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
@@ -3360,10 +3344,10 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         elif media_choice == '5':
                             # 影片分析
                             console.print(safe_t('common.analyzing', fallback='\n[#B565D8]🎥 影片分析工具[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='使用獨立工具：'))
-                            console.print(safe_t('common.message', fallback='  python gemini_video_analyzer.py <影片路徑>\n'))
-                            console.print(safe_t('common.message', fallback='功能：'))
-                            console.print(safe_t('common.message', fallback='  - 自動提取關鍵幀'))
+                            console.print('使用獨立工具：')
+                            console.print('  python gemini_video_analyzer.py <影片路徑>\n')
+                            console.print('功能：')
+                            console.print('  - 自動提取關鍵幀')
                             console.print(safe_t('common.analyzing', fallback='  - Gemini 分析影片內容'))
                             console.print(safe_t('common.generating', fallback='  - 生成詳細描述'))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
@@ -3371,25 +3355,25 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         elif media_choice == '6':
                             # 圖像分析
                             console.print(safe_t('common.analyzing', fallback='\n[#B565D8]🖼️ 圖像分析工具[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='使用獨立工具：'))
-                            console.print(safe_t('common.message', fallback='  python gemini_image_analyzer.py <圖片路徑>\n'))
-                            console.print(safe_t('common.message', fallback='功能：'))
+                            console.print('使用獨立工具：')
+                            console.print('  python gemini_image_analyzer.py <圖片路徑>\n')
+                            console.print('功能：')
                             console.print(safe_t('common.analyzing', fallback='  - Gemini Vision 圖像分析'))
-                            console.print(safe_t('common.message', fallback='  - 支援多種圖片格式'))
-                            console.print(safe_t('common.message', fallback='  - 詳細內容描述'))
+                            console.print('  - 支援多種圖片格式')
+                            console.print('  - 詳細內容描述')
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '7' and AUDIO_PROCESSOR_ENABLED:
                             # 提取音訊
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎵 提取音訊[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎵 提取音訊[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
                             if not video_path or not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]音訊格式：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] AAC (預設)'))
+                            console.print('\n[#B565D8]音訊格式：[/#B565D8]')
+                            console.print('  [1] AAC (預設)')
                             console.print("  [2] MP3")
                             console.print("  [3] WAV")
                             format_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇："))
@@ -3401,27 +3385,27 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.extract_audio(video_path, format=audio_format)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 音訊已提取：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '8' and AUDIO_PROCESSOR_ENABLED:
                             # 合併音訊
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎵 合併音訊[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎵 合併音訊[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
                             audio_path = Prompt.ask(safe_t("chat.media.audio_path_prompt", fallback="音訊路徑："))
 
                             if not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]影片檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]影片檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
                             if not os.path.isfile(audio_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]音訊檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]音訊檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]合併模式：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] 替換（取代原音訊,預設）'))
-                            console.print(safe_t('common.message', fallback='  [2] 混合（與原音訊混合）'))
+                            console.print('\n[#B565D8]合併模式：[/#B565D8]')
+                            console.print('  [1] 替換（取代原音訊,預設）')
+                            console.print('  [2] 混合（與原音訊混合）')
                             mode_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇："))
                             replace_mode = mode_choice != '2'
 
@@ -3430,15 +3414,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.merge_audio(video_path, audio_path, replace=replace_mode)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 音訊已合併：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '9' and AUDIO_PROCESSOR_ENABLED:
                             # 音量調整
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎵 音量調整[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎵 音量調整[/#B565D8]\n')
                             file_path = Prompt.ask(safe_t("chat.media.av_path_prompt", fallback="影片/音訊路徑："))
                             if not os.path.isfile(file_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3446,11 +3430,11 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             try:
                                 volume = float(volume_input) if volume_input else 1.0
                                 if volume <= 0:
-                                    console.print(safe_t('common.message', fallback='[#E8C4F0]音量必須大於0[/#E8C4F0]'))
+                                    console.print('[#E8C4F0]音量必須大於0[/#E8C4F0]')
                                     input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                     continue
                             except ValueError:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效的數值[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效的數值[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3459,21 +3443,21 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.adjust_volume(file_path, volume)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 音量已調整：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '10' and AUDIO_PROCESSOR_ENABLED:
                             # 添加背景音樂
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎵 添加背景音樂[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎵 添加背景音樂[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
                             music_path = Prompt.ask(safe_t("chat.media.music_path_prompt", fallback="背景音樂路徑："))
 
                             if not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]影片檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]影片檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
                             if not os.path.isfile(music_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]音樂檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]音樂檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3484,7 +3468,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 music_volume = float(volume_input) if volume_input else 0.3
                                 fade_duration = float(fade_input) if fade_input else 2.0
                             except ValueError:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效的數值[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效的數值[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3497,15 +3481,15 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 )
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 背景音樂已添加：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '11' and AUDIO_PROCESSOR_ENABLED:
                             # 淡入淡出
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎵 音訊淡入淡出[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎵 音訊淡入淡出[/#B565D8]\n')
                             file_path = Prompt.ask(safe_t("chat.media.av_path_prompt", fallback="影片/音訊路徑："))
                             if not os.path.isfile(file_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3516,7 +3500,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 fade_in = float(fade_in_input) if fade_in_input else 2.0
                                 fade_out = float(fade_out_input) if fade_out_input else 2.0
                             except ValueError:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效的數值[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效的數值[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3525,7 +3509,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.fade_in_out(file_path, fade_in=fade_in, fade_out=fade_out)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 淡入淡出已完成：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '12' and IMAGEN_GENERATOR_ENABLED:
@@ -3534,7 +3518,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             prompt = Prompt.ask(safe_t("chat.imagen.describe_prompt", fallback="請描述您想生成的圖片："))
 
                             if not prompt:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]未輸入描述[/#E8C4F0]'))
+                                console.print('[#E8C4F0]未輸入描述[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3542,10 +3526,10 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             if not negative_prompt:
                                 negative_prompt = None
 
-                            console.print(safe_t('common.message', fallback='\n選擇長寬比：'))
-                            console.print(safe_t('common.message', fallback='  1. 1:1 (正方形,預設)'))
-                            console.print(safe_t('common.message', fallback='  2. 16:9 (橫向)'))
-                            console.print(safe_t('common.message', fallback='  3. 9:16 (直向)'))
+                            console.print('\n選擇長寬比：')
+                            console.print('  1. 1:1 (正方形,預設)')
+                            console.print('  2. 16:9 (橫向)')
+                            console.print('  3. 9:16 (直向)')
                             aspect_choice = Prompt.ask(safe_t("chat.imagen.aspect_choice_prompt", fallback="請選擇 (1-3, 預設=1): ")) or '1'
                             aspect_ratios = {'1': '1:1', '2': '16:9', '3': '9:16'}
                             aspect_ratio = aspect_ratios.get(aspect_choice, '1:1')
@@ -3568,7 +3552,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     for path in output_paths:
                                         os.system(f'open "{path}"')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         # ==========================================
@@ -3580,7 +3564,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         # 移除日期：2025-10-31
                         # ==========================================
                         # elif media_choice == '13' and IMAGEN_GENERATOR_ENABLED:
-                        #     console.print(safe_t('common.message', fallback='\n[#B565D8]✏️ Imagen 圖片編輯[/#B565D8]\n'))
+                        #     console.print('\n[#B565D8]✏️ Imagen 圖片編輯[/#B565D8]\n')
                         #     console.print(safe_t('error.api_not_supported',
                         #                         fallback='❌ Imagen API 不支援圖片編輯功能\n'
                         #                                  '💡 建議：使用 [12] Imagen 圖像生成重新創作'))
@@ -3594,18 +3578,18 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             # 智能圖片創作
                             from gemini_vision_imagen import create_image_with_vision
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎨 智能圖片創作（Gemini Vision + Imagen）[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='[dim #E8C4F0]透過 Gemini Vision 分析原圖 + Imagen 生成新圖[/dim #E8C4F0]\n'))
+                            console.print('\n[#B565D8]🎨 智能圖片創作（Gemini Vision + Imagen）[/#B565D8]\n')
+                            console.print('[dim #E8C4F0]透過 Gemini Vision 分析原圖 + Imagen 生成新圖[/dim #E8C4F0]\n')
 
                             source_path = Prompt.ask(safe_t("chat.media.source_image", fallback="原圖路徑："))
                             if not source_path or not os.path.isfile(source_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
                             instruction = Prompt.ask(safe_t("chat.media.edit_instruction", fallback="\n編輯指示（例：把背景改成藍色天空）："))
                             if not instruction:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]未輸入指示[/#E8C4F0]'))
+                                console.print('[#E8C4F0]未輸入指示[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3634,7 +3618,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         # 移除日期：2025-10-31
                         # ==========================================
                         # elif media_choice == '14' and IMAGEN_GENERATOR_ENABLED:
-                        #     console.print(safe_t('common.message', fallback='\n[#B565D8]🔍 Imagen 圖片放大[/#B565D8]\n'))
+                        #     console.print('\n[#B565D8]🔍 Imagen 圖片放大[/#B565D8]\n')
                         #     console.print(safe_t('error.api_not_supported',
                         #                         fallback='❌ Imagen upscale_image 僅 Vertex AI 支援\n'
                         #                                  '💡 Gemini Developer API 不提供此功能'))
@@ -3643,11 +3627,11 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                         elif media_choice == '15' and VIDEO_EFFECTS_ENABLED:
                             # 時間裁切（無損）
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]✂️ 時間裁切（無損）[/#B565D8]\n'))
+                            console.print('\n[#B565D8]✂️ 時間裁切（無損）[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
 
                             if not video_path or not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3661,29 +3645,29 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 effects = VideoEffects()
                                 output_path = effects.trim_video(video_path, start_time=start_time, end_time=end_time)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 影片已裁切：{output_path}[/#B565D8]', output_path=output_path))
-                                console.print(safe_t('common.message', fallback='[dim]提示：使用 -c copy 無損裁切,保持原始品質[/dim]'))
+                                console.print('[dim]提示：使用 -c copy 無損裁切,保持原始品質[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '16' and VIDEO_EFFECTS_ENABLED:
                             # 濾鏡效果
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🎨 濾鏡效果[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🎨 濾鏡效果[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
 
                             if not video_path or not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]選擇濾鏡：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] 黑白 (grayscale)'))
-                            console.print(safe_t('common.message', fallback='  [2] 復古 (sepia)'))
-                            console.print(safe_t('common.message', fallback='  [3] 懷舊 (vintage)'))
-                            console.print(safe_t('common.message', fallback='  [4] 銳化 (sharpen)'))
-                            console.print(safe_t('common.message', fallback='  [5] 模糊 (blur)'))
-                            console.print(safe_t('common.message', fallback='  [6] 增亮 (brighten)'))
-                            console.print(safe_t('common.message', fallback='  [7] 增強對比 (contrast)'))
+                            console.print('\n[#B565D8]選擇濾鏡：[/#B565D8]')
+                            console.print('  [1] 黑白 (grayscale)')
+                            console.print('  [2] 復古 (sepia)')
+                            console.print('  [3] 懷舊 (vintage)')
+                            console.print('  [4] 銳化 (sharpen)')
+                            console.print('  [5] 模糊 (blur)')
+                            console.print('  [6] 增亮 (brighten)')
+                            console.print('  [7] 增強對比 (contrast)')
                             filter_choice = Prompt.ask(safe_t("chat.media.choose_1_7", fallback="請選擇 (1-7): "))
 
                             filter_map = {
@@ -3698,14 +3682,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             filter_name = filter_map.get(filter_choice)
 
                             if not filter_name:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效的選擇[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效的選擇[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]品質設定：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] 高品質 (CRF 18, slow)'))
-                            console.print(safe_t('common.message', fallback='  [2] 中品質 (CRF 23, medium, 預設)'))
-                            console.print(safe_t('common.message', fallback='  [3] 低品質 (CRF 28, fast)'))
+                            console.print('\n[#B565D8]品質設定：[/#B565D8]')
+                            console.print('  [1] 高品質 (CRF 18, slow)')
+                            console.print('  [2] 中品質 (CRF 23, medium, 預設)')
+                            console.print('  [3] 低品質 (CRF 28, fast)')
                             quality_choice = Prompt.ask(safe_t("chat.media.quality_choice", fallback="請選擇 (1-3, 預設=2): ")) or '2'
                             quality_map = {'1': 'high', '2': 'medium', '3': 'low'}
                             quality = quality_map.get(quality_choice, 'medium')
@@ -3714,42 +3698,42 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 effects = VideoEffects()
                                 output_path = effects.apply_filter(video_path, filter_name=filter_name, quality=quality)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 濾鏡已套用：{output_path}[/#B565D8]', output_path=output_path))
-                                console.print(safe_t('common.message', fallback='[dim]注意：濾鏡需要重新編碼,已使用高品質設定[/dim]'))
+                                console.print('[dim]注意：濾鏡需要重新編碼,已使用高品質設定[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '17' and VIDEO_EFFECTS_ENABLED:
                             # 速度調整
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]⚡ 速度調整[/#B565D8]\n'))
+                            console.print('\n[#B565D8]⚡ 速度調整[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
 
                             if not video_path or not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]速度倍數：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  0.5 = 慢動作（一半速度）'))
-                            console.print(safe_t('common.message', fallback='  1.0 = 正常速度'))
-                            console.print(safe_t('common.message', fallback='  2.0 = 快轉（兩倍速度）'))
+                            console.print('\n[#B565D8]速度倍數：[/#B565D8]')
+                            console.print('  0.5 = 慢動作（一半速度）')
+                            console.print('  1.0 = 正常速度')
+                            console.print('  2.0 = 快轉（兩倍速度）')
                             speed_input = Prompt.ask(safe_t("chat.media.speed_input", fallback="\n請輸入速度倍數（預設1.0）："))
 
                             try:
                                 speed_factor = float(speed_input) if speed_input else 1.0
                                 if speed_factor <= 0:
-                                    console.print(safe_t('common.message', fallback='[#E8C4F0]速度必須大於0[/#E8C4F0]'))
+                                    console.print('[#E8C4F0]速度必須大於0[/#E8C4F0]')
                                     input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                     continue
                             except ValueError:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效的數值[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效的數值[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]品質設定：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] 高品質 (CRF 18, slow)'))
-                            console.print(safe_t('common.message', fallback='  [2] 中品質 (CRF 23, medium, 預設)'))
-                            console.print(safe_t('common.message', fallback='  [3] 低品質 (CRF 28, fast)'))
+                            console.print('\n[#B565D8]品質設定：[/#B565D8]')
+                            console.print('  [1] 高品質 (CRF 18, slow)')
+                            console.print('  [2] 中品質 (CRF 23, medium, 預設)')
+                            console.print('  [3] 低品質 (CRF 28, fast)')
                             quality_choice = Prompt.ask(safe_t("chat.media.quality_choice", fallback="請選擇 (1-3, 預設=2): ")) or '2'
                             quality_map = {'1': 'high', '2': 'medium', '3': 'low'}
                             quality = quality_map.get(quality_choice, 'medium')
@@ -3758,33 +3742,33 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 effects = VideoEffects()
                                 output_path = effects.adjust_speed(video_path, speed_factor=speed_factor, quality=quality)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 速度已調整：{output_path}[/#B565D8]', output_path=output_path))
-                                console.print(safe_t('common.message', fallback='[dim]注意：同時調整影片和音訊速度,已使用高品質設定[/dim]'))
+                                console.print('[dim]注意：同時調整影片和音訊速度,已使用高品質設定[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '18' and VIDEO_EFFECTS_ENABLED:
                             # 添加浮水印
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]💧 添加浮水印[/#B565D8]\n'))
+                            console.print('\n[#B565D8]💧 添加浮水印[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
                             watermark_path = Prompt.ask(safe_t("chat.media.watermark_path", fallback="浮水印圖片路徑："))
 
                             if not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]影片檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]影片檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
                             if not os.path.isfile(watermark_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]浮水印檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]浮水印檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]浮水印位置：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] 左上角'))
-                            console.print(safe_t('common.message', fallback='  [2] 右上角'))
-                            console.print(safe_t('common.message', fallback='  [3] 左下角'))
-                            console.print(safe_t('common.message', fallback='  [4] 右下角（預設）'))
-                            console.print(safe_t('common.message', fallback='  [5] 中央'))
+                            console.print('\n[#B565D8]浮水印位置：[/#B565D8]')
+                            console.print('  [1] 左上角')
+                            console.print('  [2] 右上角')
+                            console.print('  [3] 左下角')
+                            console.print('  [4] 右下角（預設）')
+                            console.print('  [5] 中央')
                             position_choice = Prompt.ask(safe_t("chat.media.position_choice", fallback="請選擇 (1-5, 預設=4): ")) or '4'
 
                             position_map = {
@@ -3800,11 +3784,11 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             try:
                                 opacity = float(opacity_input) if opacity_input else 0.7
                                 if not 0 <= opacity <= 1:
-                                    console.print(safe_t('common.message', fallback='[#E8C4F0]不透明度必須在 0.0-1.0 之間[/#E8C4F0]'))
+                                    console.print('[#E8C4F0]不透明度必須在 0.0-1.0 之間[/#E8C4F0]')
                                     input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                     continue
                             except ValueError:
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]無效的數值[/#E8C4F0]'))
+                                console.print('[#E8C4F0]無效的數值[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3815,9 +3799,9 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     position=position, opacity=opacity
                                 )
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 浮水印已添加：{output_path}[/#B565D8]', output_path=output_path))
-                                console.print(safe_t('common.message', fallback='[dim]注意：添加浮水印需要重新編碼,已使用高品質設定[/dim]'))
+                                console.print('[dim]注意：添加浮水印需要重新編碼,已使用高品質設定[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '19' and SUBTITLE_GENERATOR_ENABLED:
@@ -3826,13 +3810,13 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
 
                             if not video_path or not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
                             # 字幕格式選擇
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]字幕格式：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] SRT (預設)'))
+                            console.print('\n[#B565D8]字幕格式：[/#B565D8]')
+                            console.print('  [1] SRT (預設)')
                             console.print("  [2] VTT")
                             format_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇："))
                             subtitle_format = "vtt" if format_choice == '2' else "srt"
@@ -3843,12 +3827,12 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                             target_lang = "zh-TW"
                             if translate:
-                                console.print(safe_t('common.message', fallback='\n[#B565D8]目標語言：[/#B565D8]'))
-                                console.print(safe_t('common.message', fallback='  [1] 繁體中文 (zh-TW, 預設)'))
-                                console.print(safe_t('common.message', fallback='  [2] 英文 (en)'))
-                                console.print(safe_t('common.message', fallback='  [3] 日文 (ja)'))
-                                console.print(safe_t('common.message', fallback='  [4] 韓文 (ko)'))
-                                console.print(safe_t('common.message', fallback='  [5] 自訂'))
+                                console.print('\n[#B565D8]目標語言：[/#B565D8]')
+                                console.print('  [1] 繁體中文 (zh-TW, 預設)')
+                                console.print('  [2] 英文 (en)')
+                                console.print('  [3] 日文 (ja)')
+                                console.print('  [4] 韓文 (ko)')
+                                console.print('  [5] 自訂')
                                 lang_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇："))
 
                                 lang_map = {
@@ -3884,24 +3868,24 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
                                     console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 燒錄完成：{video_with_subs}[/#B565D8]', video_with_subs=video_with_subs))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                                 import traceback
                                 traceback.print_exc()
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '20' and SUBTITLE_GENERATOR_ENABLED:
                             # 燒錄字幕
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]🔥 燒錄字幕[/#B565D8]\n'))
+                            console.print('\n[#B565D8]🔥 燒錄字幕[/#B565D8]\n')
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
                             subtitle_path = Prompt.ask(safe_t("chat.media.subtitle_path_prompt", fallback="字幕檔案路徑："))
 
                             if not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]影片檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]影片檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
                             if not os.path.isfile(subtitle_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]字幕檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]字幕檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
@@ -3910,27 +3894,27 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = generator.burn_subtitles(video_path, subtitle_path)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 字幕已燒錄：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '21' and VIDEO_ANALYZER_ENABLED:
                             # 影片互動對話
                             console.print(safe_t('common.analyzing', fallback='\n[#B565D8]💬 影片互動對話[/#B565D8]\n'))
-                            console.print(safe_t('common.message', fallback='[dim]上傳影片後可進行連續提問,支援方向鍵瀏覽歷史記錄[/dim]\n'))
+                            console.print('[dim]上傳影片後可進行連續提問,支援方向鍵瀏覽歷史記錄[/dim]\n')
 
                             # get_user_input 已在全局定義,無需導入
                             video_path = get_user_input(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
 
                             if not video_path or not os.path.isfile(video_path):
-                                console.print(safe_t('common.message', fallback='[#E8C4F0]檔案不存在[/#E8C4F0]'))
+                                console.print('[#E8C4F0]檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
 
                             # 選擇模型
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]選擇分析模型：[/#B565D8]'))
-                            console.print(safe_t('common.message', fallback='  [1] gemini-2.5-pro (推薦,支援思考模式)'))
-                            console.print(safe_t('common.message', fallback='  [2] gemini-2.5-flash (快速)'))
-                            console.print(safe_t('common.message', fallback='  [3] gemini-2.5-flash-lite (超快速)'))
+                            console.print('\n[#B565D8]選擇分析模型：[/#B565D8]')
+                            console.print('  [1] gemini-2.5-pro (推薦,支援思考模式)')
+                            console.print('  [2] gemini-2.5-flash (快速)')
+                            console.print('  [3] gemini-2.5-flash-lite (超快速)')
                             model_choice = get_user_input(safe_t("chat.common.choose_prompt", fallback="請選擇 (預設=1): ")) or '1'
 
                             model_map = {
@@ -3945,25 +3929,25 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 analyzer = VideoAnalyzer(model_name=model_name)
 
                                 # 上傳影片
-                                console.print(safe_t('common.processing', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]⏳ 上傳並處理影片...[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                                console.print(safe_t('common.processing', fallback='\n[dim #E8C4F0]⏳ 上傳並處理影片...[/dim #E8C4F0]'))
                                 video_file = analyzer.upload_video(video_path)
 
                                 # 進入互動模式
                                 analyzer.interactive_video_chat(video_file)
 
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
                                 import traceback
                                 traceback.print_exc()
 
                             input(safe_t("chat.common.press_enter", fallback="\n按 Enter 繼續..."))
 
                         else:
-                            console.print(safe_t('common.message', fallback='\n[#E8C4F0]無效選項或功能未啟用[/#E8C4F0]'))
+                            console.print('\n[#E8C4F0]無效選項或功能未啟用[/#E8C4F0]')
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                 except Exception as e:
-                    console.print(f"[red]✗ 多媒體功能錯誤: {e}[/red]")
+                    console.print(f"[red]{safe_t('media.function_error', fallback='✗ 多媒體功能錯誤: {error}').format(error=e)}[/red]")
                     if error_diagnostics:
                         error_msg, solutions = error_diagnostics.diagnose_and_suggest(
                             error=e,
@@ -3971,14 +3955,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             context={'command': 'media', 'error_type': type(e).__name__}
                         )
                         if solutions:
-                            console.print(f"\n[yellow]💡 建議的解決方案：[/yellow]")
+                            console.print(f"\n[yellow]{safe_t('error.suggested_solutions', fallback='💡 建議的解決方案：')}[/yellow]")
                             for i, sol in enumerate(solutions, 1):
                                 console.print(f"\n[cyan]{i}. {sol.title}[/cyan]")
                                 console.print(f"   {sol.description}")
                                 if sol.command:
-                                    console.print(f"   [green]執行：[/green] {sol.command}")
+                                    console.print(f"   [green]{safe_t('error.solution_execute', fallback='執行：')}[/green] {sol.command}")
                                 if sol.manual_steps:
-                                    console.print(f"   [yellow]手動步驟：[/yellow]")
+                                    console.print(f"   [yellow]{safe_t('error.solution_manual', fallback='手動步驟：')}[/yellow]")
                                     for step in sol.manual_steps:
                                         console.print(f"     {step}")
 
@@ -3991,31 +3975,31 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                 while True:
                     console.print("\n" + "=" * 60)
-                    console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]🔧 除錯與測試工具[/bold COLOR_MACARON_PURPLE]'))
+                    console.print('[bold #B565D8]🔧 除錯與測試工具[/bold #B565D8]')
                     console.print("=" * 60)
 
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]測試模組：[/#B565D8]'))
-                    console.print(safe_t('common.message', fallback='  [1] 環境檢查'))
-                    console.print(safe_t('common.message', fallback='  [2] 主程式功能測試'))
-                    console.print(safe_t('common.message', fallback='  [3] Flow Engine 測試'))
-                    console.print(safe_t('common.message', fallback='  [4] 終端輸入測試'))
+                    console.print('\n[#B565D8]測試模組：[/#B565D8]')
+                    console.print('  [1] 環境檢查')
+                    console.print('  [2] 主程式功能測試')
+                    console.print('  [3] Flow Engine 測試')
+                    console.print('  [4] 終端輸入測試')
 
                     if CODEBASE_EMBEDDING_ENABLED:
                         console.print("\n[#B565D8]Codebase Embedding：[/#B565D8]")
-                        console.print(safe_t('common.message', fallback='  [5] 搜尋對話記錄'))
-                        console.print(safe_t('common.message', fallback='  [6] 查看向量資料庫統計'))
+                        console.print('  [5] 搜尋對話記錄')
+                        console.print('  [6] 查看向量資料庫統計')
 
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]性能監控：[/#B565D8]'))
-                    console.print(safe_t('common.message', fallback='  [7] 查看性能摘要'))
+                    console.print('\n[#B565D8]性能監控：[/#B565D8]')
+                    console.print('  [7] 查看性能摘要')
                     console.print(safe_t('common.analyzing', fallback='  [8] 查看瓶頸分析報告'))
-                    console.print(safe_t('common.message', fallback='  [9] 匯出性能報告'))
+                    console.print('  [9] 匯出性能報告')
 
                     if TOOLS_MANAGER_AVAILABLE:
-                        console.print(safe_t('common.message', fallback='\n[#B565D8]工具管理：[/#B565D8]'))
-                        console.print(safe_t('common.message', fallback='  [10] 工具調用統計'))
-                        console.print(safe_t('common.message', fallback='  [11] 工具調用詳細報告'))
+                        console.print('\n[#B565D8]工具管理：[/#B565D8]')
+                        console.print('  [10] 工具調用統計')
+                        console.print('  [11] 工具調用詳細報告')
 
-                    console.print(safe_t('common.message', fallback='\n  [0] 返回主選單\n'))
+                    console.print('\n  [0] 返回主選單\n')
 
                     debug_choice = Prompt.ask(safe_t("chat.common.choose_prompt", fallback="請選擇: "))
 
@@ -4032,18 +4016,18 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                     if debug_choice in test_scripts:
                         script_name, description = test_scripts[debug_choice]
-                        console.print(safe_t('common.message', fallback='\n[#B565D8]執行 {description}...[/#B565D8]\n', description=description))
+                        console.print(f'\n[#B565D8]執行 {description}...[/#B565D8]\n')
                         test_script = Path(__file__).parent / "testTool" / script_name
 
                         if not test_script.exists():
-                            console.print(safe_t('error.not_found', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]錯誤：找不到 testTool/{script_name}[/red]', script_name=script_name))
+                            console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：找不到 testTool/{script_name}[/red]', script_name=script_name))
                         else:
                             try:
                                 subprocess.run([sys.executable, str(test_script)], check=True)
                             except subprocess.CalledProcessError:
                                 console.print(safe_t('common.completed', fallback='[#E8C4F0]測試完成（部分項目未通過）[/#E8C4F0]'))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]執行錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]執行錯誤：{e}[/red]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4051,7 +4035,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         # 搜尋對話記錄
                         if not codebase_embedding:
                             console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  Codebase Embedding 未啟用[/#E8C4F0]'))
-                            console.print(safe_t('common.message', fallback='[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]'))
+                            console.print('[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]')
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                             continue
 
@@ -4068,7 +4052,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         import time
                         time.sleep(0.2)  # 視覺反饋
                         embedding_active_mode = 'search'
-                        console.print(safe_t('common.message', fallback='\n[#B565D8]🔍 搜尋對話記錄[/#B565D8]'))
+                        console.print('\n[#B565D8]🔍 搜尋對話記錄[/#B565D8]')
                         query = Prompt.ask(safe_t("chat.codegemini.search_query", fallback="\n請輸入搜尋關鍵字: "))
 
                         if query:
@@ -4079,27 +4063,27 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 找到 {len(results)} 條相關對話[/#B565D8]\n', results_count=len(results)))
                                     for i, r in enumerate(results, 1):
                                         similarity = r.get('similarity', 0)
-                                        console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]═══ 結果 {i} (相似度: {similarity:.2%}) ═══[/bold COLOR_MACARON_PURPLE]', i=i, similarity=similarity))
-                                        console.print(safe_t('common.message', fallback='[#E8C4F0]問題：[/#E8C4F0] {question}', question=r.get('question', 'N/A')))
+                                        console.print(f'[bold #B565D8]═══ 結果 {i} (相似度: {similarity:.2%}) ═══[/bold #B565D8]')
+                                        console.print(f'[#E8C4F0]問題：[/#E8C4F0] {r.get('question')}')
 
                                         # 答案截斷顯示
                                         answer = r.get('answer', 'N/A')
                                         answer_preview = answer[:200] + "..." if len(answer) > 200 else answer
-                                        console.print(safe_t('common.message', fallback='[#B565D8]回答：[/#B565D8] {answer_preview}', answer_preview=answer_preview))
+                                        console.print(f'[#B565D8]回答：[/#B565D8] {answer_preview}')
 
                                         # 顯示元數據
                                         timestamp = r.get('timestamp', 'N/A')
                                         session_id = r.get('session_id', 'N/A')
-                                        console.print(safe_t('common.message', fallback='[dim]時間：{timestamp} | Session：{session_id}[/dim]\n', timestamp=timestamp, session_id=session_id))
+                                        console.print(f'[dim]時間：{timestamp} | Session：{session_id}[/dim]\n')
                                 else:
                                     console.print(safe_t('common.warning', fallback='\n[#E8C4F0]⚠️  未找到相關對話[/#E8C4F0]'))
                                     console.print(safe_t('common.saving', fallback='[dim]   提示：對話會在 EMBEDDING_AUTO_SAVE_CONVERSATIONS = True 時自動儲存[/dim]'))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]✗ 搜尋錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 搜尋錯誤：{e}[/red]', e=e))
                                 import traceback
                                 traceback.print_exc()
                         else:
-                            console.print(safe_t('common.message', fallback='[#E8C4F0]請輸入搜尋關鍵字[/#E8C4F0]'))
+                            console.print('[#E8C4F0]請輸入搜尋關鍵字[/#E8C4F0]')
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4107,7 +4091,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         # 查看向量資料庫統計
                         if not codebase_embedding:
                             console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  Codebase Embedding 未啟用[/#E8C4F0]'))
-                            console.print(safe_t('common.message', fallback='[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]'))
+                            console.print('[dim]   請在 config.py 中設置 EMBEDDING_ENABLE_ON_STARTUP = True 並重啟[/dim]')
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                             continue
 
@@ -4115,19 +4099,19 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             stats = codebase_embedding.get_stats()
 
                             console.print("\n" + "=" * 60)
-                            console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]📊 向量資料庫統計資訊[/bold COLOR_MACARON_PURPLE]'))
+                            console.print('[bold #B565D8]📊 向量資料庫統計資訊[/bold #B565D8]')
                             console.print("=" * 60 + "\n")
 
                             # 基本統計
                             total_chunks = stats.get('total_chunks', 0)
                             total_files = stats.get('total_files', 0)
-                            console.print(safe_t('common.message', fallback='[#B565D8]總分塊數：[/#B565D8] {total_chunks:,}', total_chunks=total_chunks))
-                            console.print(safe_t('common.message', fallback='[#B565D8]總檔案數：[/#B565D8] {total_files:,}', total_files=total_files))
+                            console.print(f'[#B565D8]總分塊數：[/#B565D8] {total_chunks:,}')
+                            console.print(f'[#B565D8]總檔案數：[/#B565D8] {total_files:,}')
 
                             # 分塊類型統計
                             chunk_types = stats.get('chunk_type_counts', {})
                             if chunk_types:
-                                console.print(safe_t('common.message', fallback='\n[#B565D8]分塊類型分布：[/#B565D8]'))
+                                console.print('\n[#B565D8]分塊類型分布：[/#B565D8]')
                                 for chunk_type, count in chunk_types.items():
                                     percentage = (count / total_chunks * 100) if total_chunks > 0 else 0
                                     console.print(f"  • {chunk_type}: {count:,} ({percentage:.1f}%)")
@@ -4135,12 +4119,12 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             # 資料庫資訊
                             db_path = stats.get('db_path', 'N/A')
                             db_size_mb = stats.get('db_size_mb', 0)
-                            console.print(safe_t('common.message', fallback='\n[#B565D8]資料庫路徑：[/#B565D8] {db_path}', db_path=db_path))
-                            console.print(safe_t('common.message', fallback='[#B565D8]資料庫大小：[/#B565D8] {db_size_mb:.2f} MB', db_size_mb=db_size_mb))
+                            console.print(f'\n[#B565D8]資料庫路徑：[/#B565D8] {db_path}')
+                            console.print(f'[#B565D8]資料庫大小：[/#B565D8] {db_size_mb:.2f} MB')
 
                             # 健康狀態提示
                             if total_chunks == 0:
-                                console.print(safe_t('common.message', fallback='\n[#E8C4F0]ℹ️  資料庫為空[/#E8C4F0]'))
+                                console.print('\n[#E8C4F0]ℹ️  資料庫為空[/#E8C4F0]')
                                 console.print(safe_t('common.saving', fallback='[dim]   提示：在 config.py 中啟用 EMBEDDING_AUTO_SAVE_CONVERSATIONS 以自動儲存對話[/dim]'))
                             else:
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 資料庫運作正常[/#B565D8]'))
@@ -4148,7 +4132,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             console.print("\n" + "=" * 60)
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='\n[dim COLOR_MACARON_PURPLE_LIGHT]✗ 獲取統計失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 獲取統計失敗：{e}[/red]', e=e))
                             import traceback
                             traceback.print_exc()
 
@@ -4157,7 +4141,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                     elif debug_choice == '7':
                         # 查看性能摘要
                         console.print("\n" + "=" * 60)
-                        console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]⚡ 性能監控摘要[/bold COLOR_MACARON_PURPLE]'))
+                        console.print('[bold #B565D8]⚡ 性能監控摘要[/bold #B565D8]')
                         console.print("=" * 60 + "\n")
 
                         try:
@@ -4167,19 +4151,19 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                             if summary['total_operations'] == 0:
                                 console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  尚無性能數據[/#E8C4F0]'))
-                                console.print(safe_t('common.message', fallback='[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'))
+                                console.print('[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]')
                             else:
                                 monitor.print_summary()
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 獲取性能摘要失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取性能摘要失敗：{e}[/red]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                     elif debug_choice == '8':
                         # 查看瓶頸分析報告
                         console.print("\n" + "=" * 60)
-                        console.print(safe_t('common.analyzing', fallback='[bold COLOR_MACARON_PURPLE_LIGHT]🔍 瓶頸分析報告[/bold COLOR_MACARON_PURPLE_LIGHT]'))
+                        console.print(safe_t('common.analyzing', fallback='[bold #E8C4F0]🔍 瓶頸分析報告[/bold #E8C4F0]'))
                         console.print("=" * 60 + "\n")
 
                         try:
@@ -4189,18 +4173,18 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                             if summary['total_operations'] == 0:
                                 console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  尚無性能數據[/#E8C4F0]'))
-                                console.print(safe_t('common.message', fallback='[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'))
+                                console.print('[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]')
                             else:
                                 monitor.print_bottleneck_report(top_n=10)
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 獲取瓶頸分析失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取瓶頸分析失敗：{e}[/red]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                     elif debug_choice == '9':
                         # 匯出性能報告
-                        console.print(safe_t('common.message', fallback='\n[#B565D8]📁 匯出性能報告[/#B565D8]\n'))
+                        console.print('\n[#B565D8]📁 匯出性能報告[/#B565D8]\n')
 
                         try:
                             from utils.performance_monitor import get_performance_monitor
@@ -4211,7 +4195,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
 
                             if summary['total_operations'] == 0:
                                 console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  尚無性能數據可匯出[/#E8C4F0]'))
-                                console.print(safe_t('common.message', fallback='[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]'))
+                                console.print('[dim]   提示：性能監控會自動追蹤主要操作的執行時間和資源使用情況[/dim]')
                             else:
                                 # 產生檔案名稱（帶時間戳記）
                                 timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -4221,10 +4205,10 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 monitor.export_report(report_path)
 
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 性能報告已匯出至：[/#B565D8]{report_path}', report_path=report_path))
-                                console.print(safe_t('common.message', fallback="[dim]   包含 {total_operations} 個操作的詳細統計資料[/dim]", total_operations=summary['total_operations']))
+                                console.print(f"[dim]   包含 {summary['total_operations']} 個操作的詳細統計資料[/dim]")
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 匯出報告失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 匯出報告失敗：{e}[/red]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4233,7 +4217,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         try:
                             auto_tool_manager.print_stats(detailed=False)
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 獲取工具統計失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取工具統計失敗：{e}[/red]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4242,12 +4226,12 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         try:
                             auto_tool_manager.print_stats(detailed=True)
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]✗ 獲取工具詳細報告失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取工具詳細報告失敗：{e}[/red]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                     else:
-                        console.print(safe_t('common.message', fallback='\n[#E8C4F0]無效選項[/#E8C4F0]'))
+                        console.print('\n[#E8C4F0]無效選項[/#E8C4F0]')
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                 continue
@@ -4283,17 +4267,17 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                 try:
                     # 檢測任務規劃意圖
                     if detect_task_planning_intent(user_input):
-                        console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💡 偵測到任務規劃需求,增強提示中...[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                        console.print('[dim #E8C4F0]💡 偵測到任務規劃需求,增強提示中...[/dim #E8C4F0]')
                         user_input = enhance_prompt_with_context(user_input, intent="task_planning")
 
                     # 檢測網頁搜尋意圖
                     elif detect_web_search_intent(user_input):
-                        console.print(safe_t('common.message', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💡 偵測到網頁搜尋需求,增強提示中...[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                        console.print('[dim #E8C4F0]💡 偵測到網頁搜尋需求,增強提示中...[/dim #E8C4F0]')
                         user_input = enhance_prompt_with_context(user_input, intent="web_search")
 
                     # 檢測代碼分析意圖
                     elif detect_code_analysis_intent(user_input):
-                        console.print(safe_t('common.analyzing', fallback='[dim COLOR_MACARON_PURPLE_LIGHT]💡 偵測到代碼分析需求,增強提示中...[/dim COLOR_MACARON_PURPLE_LIGHT]'))
+                        console.print(safe_t('common.analyzing', fallback='[dim #E8C4F0]💡 偵測到代碼分析需求,增強提示中...[/dim #E8C4F0]'))
                         user_input = enhance_prompt_with_context(user_input, intent="code_analysis")
 
                 except Exception as e:
@@ -4411,19 +4395,19 @@ def handle_clear_memory_command(chat_logger) -> str:
     active = stats['active_messages']
 
     # 顯示當前狀態
-    console.print(safe_t('common.message', fallback='\n[plum]當前活躍訊息數: {active} 條[/plum]', active=active))
+    console.print(f'\n[#B565D8]當前活躍訊息數: {active} 條[/#B565D8]')
 
     if active == 0:
-        console.print(safe_t('common.message', fallback='[dim]記憶體已是空的,無需清理[/dim]\n'))
+        console.print('[dim]記憶體已是空的,無需清理[/dim]\n')
         return 'continue'
 
     # 確認清理（保留對話記錄）
     console.print(safe_t('common.warning', fallback='\n[#E8C4F0]⚠️  清理記憶體將：[/#E8C4F0]'))
-    console.print(safe_t('common.message', fallback='  • 保留當前對話到磁碟'))
-    console.print(safe_t('common.message', fallback='  • 釋放記憶體中的歷史記錄'))
+    console.print('  • 保留當前對話到磁碟')
+    console.print('  • 釋放記憶體中的歷史記錄')
     console.print(safe_t('common.saving', fallback='  • 不影響已保存的對話日誌\n'))
 
-    if Confirm.ask(safe_t('chat.confirm_clear_memory', fallback='[plum]確定要清理記憶體嗎？[/plum]'), default=False):
+    if Confirm.ask(safe_t('chat.confirm_clear_memory', fallback='[#B565D8]確定要清理記憶體嗎？[/#B565D8]'), default=False):
         # 觸發存檔（強制存檔所有訊息）
         if hasattr(chat_logger.conversation_manager, '_archive_old_messages'):
             # 先存檔所有訊息
@@ -4452,7 +4436,7 @@ def handle_clear_memory_command(chat_logger) -> str:
 
         return 'clear_memory'
     else:
-        console.print(safe_t('common.message', fallback='[dim]已取消[/dim]\n'))
+        console.print('[dim]已取消[/dim]\n')
         return 'continue'
 
 
@@ -4475,8 +4459,8 @@ def handle_memory_stats_command(chat_logger) -> str:
     mem_info = chat_logger.conversation_manager.check_memory_usage()
 
     # 建立統計表格
-    table = Table(title=safe_t('chat.memory_stats_title', fallback='[plum]📊 記憶體統計[/plum]'), show_header=True)
-    table.add_column("項目", style="plum")
+    table = Table(title=safe_t('chat.memory_stats_title', fallback='[#B565D8]📊 記憶體統計[/#B565D8]'), show_header=True)
+    table.add_column("項目", style="#B565D8")
     table.add_column("數值", style="orchid1", justify="right")
 
     table.add_row(safe_t('chat.memory_stats_active', fallback='活躍訊息'), f"{stats['active_messages']} 條")
@@ -4498,7 +4482,7 @@ def handle_memory_stats_command(chat_logger) -> str:
 
     console.print("\n")
     console.print(table)
-    console.print(safe_t('common.message', fallback='\n[dim]存檔位置: {archive_file}[/dim]\n', archive_file=stats['archive_file']))
+    console.print(f'\n[dim]存檔位置: {stats['archive_file']}[/dim]\n')
 
     return 'show_memory_stats'
 
@@ -4514,7 +4498,7 @@ def handle_memory_help_command() -> str:
     """
     from rich import box
 
-    help_text = """[plum]記憶體管理命令[/plum]
+    help_text = f"""[#E8C4F0]記憶體管理命令[/#E8C4F0]
 
 [orchid1]/clear-memory[/orchid1]
   手動清理記憶體,保存對話到磁碟
@@ -4534,7 +4518,7 @@ def handle_memory_help_command() -> str:
 [dim]提示：系統會自動管理記憶體,僅在收到警告時才需要手動清理。[/dim]
 """
 
-    console.print(Panel(help_text, border_style="plum", box=box.ROUNDED))
+    console.print(Panel(help_text, border_style="#E8C4F0", box=box.ROUNDED))
     return 'continue'
 
 
@@ -4558,8 +4542,8 @@ def handle_checkpoints_command() -> str:
     try:
         manager = get_checkpoint_manager()
         manager.show_checkpoints_ui(limit=20)
-        console.print(safe_t('common.message', fallback='\n[dim]使用 /rewind <ID> 回溯至指定檢查點[/dim]'))
-        console.print(safe_t('common.message', fallback='[dim]使用 /checkpoint <描述> 建立手動檢查點[/dim]\n'))
+        console.print('\n[dim]使用 /rewind <ID> 回溯至指定檢查點[/dim]')
+        console.print('[dim]使用 /checkpoint <描述> 建立手動檢查點[/dim]\n')
     except Exception as e:
         console.print(safe_t('error.failed', fallback='[red]✗[/red] 檢查點系統錯誤: {e}', e=e))
 
@@ -4583,8 +4567,8 @@ def handle_rewind_command(checkpoint_id: str) -> str:
         return 'continue'
 
     if not checkpoint_id:
-        console.print(safe_t('common.message', fallback='[#E8C4F0]請指定檢查點 ID[/#E8C4F0]'))
-        console.print(safe_t('common.message', fallback='[dim]範例: /rewind a1b2c3d4[/dim]\n'))
+        console.print('[#E8C4F0]請指定檢查點 ID[/#E8C4F0]')
+        console.print('[dim]範例: /rewind a1b2c3d4[/dim]\n')
         return 'continue'
 
     try:
@@ -4626,8 +4610,8 @@ def handle_checkpoint_command(description: str = "") -> str:
 
         # 掃描當前專案檔案（這裡簡化為空列表,實際應掃描最近修改的檔案）
         # TODO: 整合檔案監控系統,自動偵測變更的檔案
-        console.print(safe_t('common.message', fallback='\n[#87CEEB]建立檢查點...[/#87CEEB]'))
-        console.print(safe_t('common.message', fallback='[dim]描述: {description}[/dim]\n', description=description))
+        console.print('\n[#87CEEB]建立檢查點...[/#87CEEB]')
+        console.print(f'[dim]描述: {description}[/dim]\n')
 
         manager = get_checkpoint_manager()
 
@@ -4640,7 +4624,7 @@ def handle_checkpoint_command(description: str = "") -> str:
         )
 
         console.print(safe_t('common.completed', fallback='[green]✓[/green] 檢查點已建立: [#87CEEB]{checkpoint.id[:8]}[/#87CEEB]', checkpoint_id=checkpoint.id[:8]))
-        console.print(safe_t('common.message', fallback='[dim]使用 /checkpoints 查看所有檢查點[/dim]\n'))
+        console.print('[dim]使用 /checkpoints 查看所有檢查點[/dim]\n')
 
     except Exception as e:
         console.print(safe_t('error.failed', fallback='[red]✗[/red] 建立檢查點失敗: {e}', e=e))
@@ -4682,7 +4666,7 @@ def handle_checkpoint_help_command() -> str:
 [bright_cyan]/help-checkpoint[/bright_cyan]
   顯示此說明訊息
 
-[bold COLOR_MACARON_PURPLE_LIGHT]檢查點類型：[/bold COLOR_MACARON_PURPLE_LIGHT]
+[bold #E8C4F0]檢查點類型：[/bold #E8C4F0]
   🤖 [dim]auto[/dim]     - 自動檢查點（檔案變更前）
   👤 [dim]manual[/dim]   - 手動檢查點（使用者建立）
   📸 [dim]snapshot[/dim] - 完整快照（非增量）
@@ -4691,13 +4675,14 @@ def handle_checkpoint_help_command() -> str:
 [dim]提示：檢查點儲存於 .checkpoints/ 目錄,使用 SQLite + gzip 壓縮[/dim]
 """
 
-    console.print(Panel(help_text, border_style="COLOR_FORGET_ME_NOT", box=box.ROUNDED))
+    console.print(Panel(help_text, border_style=COLOR_FORGET_ME_NOT, box=box.ROUNDED))
     return 'continue'
 
 
 def main():
     """主程式"""
-    console.print(safe_t('common.message', fallback='[bold COLOR_MACARON_PURPLE]Gemini 對話工具（新 SDK 版本）[/bold COLOR_MACARON_PURPLE]\n'))
+    # 啟動歡迎訊息（不使用 common.message，因為它用於其他用途）
+    console.print('[bold #B565D8]Gemini 對話工具（新 SDK 版本）[/bold #B565D8]\n')
 
     # 啟動 CodeGemini 背景載入（不阻塞啟動）
     if CODEGEMINI_ENABLED:
@@ -4898,9 +4883,9 @@ if __name__ == "__main__":
 
         if result:
             console.print(safe_t('common.completed', fallback='\n[bold green]✅ 配置完成！[/bold green]'))
-            console.print(safe_t('common.message', fallback='[dim]請再次執行 python gemini_chat.py 開始對話[/dim]\n'))
+            console.print('[dim]請再次執行 python gemini_chat.py 開始對話[/dim]\n')
         else:
-            console.print(safe_t('common.message', fallback='\n[#E8C4F0]配置已取消[/#E8C4F0]\n'))
+            console.print('\n[#E8C4F0]配置已取消[/#E8C4F0]\n')
 
         sys.exit(0)
 

@@ -14,6 +14,7 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.prompt import Confirm, IntPrompt, Prompt
 from rich import box
+from i18n_utils import t
 
 # 信心度閾值
 CONFIDENCE_THRESHOLD = 0.85
@@ -81,17 +82,16 @@ class SmartFileSelector:
 
         cost_info = self.estimate_file_processing_cost(selected_count)
 
-        pricing_text = (
-            f"[plum]💰 預估成本[/plum]\n"
-            f"  選擇檔案數: [orchid1]{selected_count}[/orchid1] 個\n"
-            f"  單檔成本: [dim]NT${cost_info['single_file_cost_twd']:.4f}[/dim]\n"
-            f"  總成本: [bold orchid1]NT${cost_info['total_cost_twd']:.2f}[/bold orchid1] "
-            f"[dim](${cost_info['total_cost_usd']:.6f} USD)[/dim]"
+        pricing_text = t("file.selector.pricing.estimate",
+            selected_count=selected_count,
+            single_cost=cost_info['single_file_cost_twd'],
+            total_cost_twd=cost_info['total_cost_twd'],
+            total_cost_usd=cost_info['total_cost_usd']
         )
 
         self.console.print(Panel(
             pricing_text,
-            border_style="plum",
+            border_style="#B565D8",
             box=box.ROUNDED
         ))
 
@@ -111,15 +111,17 @@ class SmartFileSelector:
     def _display_file_table(
         self,
         files: List[Dict],
-        title: str = "檔案列表",
+        title: str = None,
         show_selection_index: bool = True
     ):
         """顯示檔案表格"""
+        if title is None:
+            title = t("file.selector.table.title")
         table = Table(
-            title=f"[plum]{title}[/plum]",
+            title=f"[#B565D8]{title}[/#B565D8]",
             box=box.SIMPLE,
             show_header=True,
-            header_style="bold plum"
+            header_style="bold #B565D8"
         )
 
         console_width = console.width or 120
@@ -127,16 +129,16 @@ class SmartFileSelector:
         if show_selection_index:
             table.add_column("#", style="dim", width=max(3, int(console_width * 0.03)), justify="right")
 
-        table.add_column("檔名", style="orchid1", no_wrap=False)
-        table.add_column("信心度", style="medium_orchid", justify="center", width=max(8, int(console_width * 0.08)))
-        table.add_column("大小", style="dim", justify="right", width=max(8, int(console_width * 0.08)))
-        table.add_column("修改時間", style="dim", width=max(14, int(console_width * 0.12)))
+        table.add_column(t("file.selector.table.filename"), style="orchid1", no_wrap=False)
+        table.add_column(t("file.selector.table.confidence"), style="medium_orchid", justify="center", width=max(8, int(console_width * 0.08)))
+        table.add_column(t("file.selector.table.size"), style="dim", justify="right", width=max(8, int(console_width * 0.08)))
+        table.add_column(t("file.selector.table.modified"), style="dim", width=max(14, int(console_width * 0.12)))
 
         for i, file_info in enumerate(files, 1):
-            name = file_info.get('name', '未知')
+            name = file_info.get('name', t('file.selector.unknown'))
             confidence = file_info.get('similarity', 0.0)
             size_mb = file_info.get('size', 0) / (1024 * 1024)
-            time_ago = file_info.get('time_ago', '未知')
+            time_ago = file_info.get('time_ago', t('file.selector.unknown'))
 
             confidence_str = f"{int(confidence * 100)}%"
             size_str = f"{size_mb:.1f} MB"
@@ -152,7 +154,7 @@ class SmartFileSelector:
     def _multi_select_files(
         self,
         files: List[Dict],
-        prompt_text: str = "輸入要選擇的檔案編號"
+        prompt_text: str = None
     ) -> List[Dict]:
         """
         多選檔案介面
@@ -164,16 +166,18 @@ class SmartFileSelector:
         Returns:
             選中的檔案列表
         """
+        if prompt_text is None:
+            prompt_text = t("file.selector.prompt.select")
         self.console.print(
-            f"\n[plum]{prompt_text}[/plum]\n"
-            f"[dim]· 可輸入多個編號 (用空格或逗號分隔)，例如: 1 3 5 或 1,3,5[/dim]\n"
-            f"[dim]· 輸入 'all' 選擇全部，輸入 'cancel' 取消[/dim]\n"
+            f"\n[#B565D8]{prompt_text}[/#B565D8]\n"
+            f"[dim]{t('file.selector.prompt.help_multi')}[/dim]\n"
+            f"[dim]{t('file.selector.prompt.help_all_cancel')}[/dim]\n"
         )
 
         while True:
             try:
                 choice_str = Prompt.ask(
-                    "[plum]選擇[/plum]",
+                    f"[#B565D8]{t('file.selector.choice')}[/#B565D8]",
                     default="cancel"
                 )
 
@@ -194,13 +198,13 @@ class SmartFileSelector:
                 valid_indices = [i for i in indices if 1 <= i <= len(files)]
 
                 if not valid_indices:
-                    self.console.print("[#E8C4F0]⚠ 未輸入有效編號，請重新輸入[/#E8C4F0]")
+                    self.console.print(f"[#E8C4F0]{t('file.selector.error.no_valid')}[/#E8C4F0]")
                     continue
 
                 selected = [files[i - 1] for i in valid_indices]
 
                 # 顯示選中的檔案
-                self.console.print(f"\n[plum]✓ 已選擇 {len(selected)} 個檔案:[/plum]")
+                self.console.print(f"\n[#B565D8]{t('file.selector.selected', count=len(selected))}[/#B565D8]")
                 for idx in valid_indices:
                     self.console.print(f"  [dim]{idx}.[/dim] [orchid1]{files[idx-1]['name']}[/orchid1]")
 
@@ -208,15 +212,15 @@ class SmartFileSelector:
                 self._display_pricing_estimate(len(selected))
 
                 # 確認
-                if Confirm.ask("[plum]確認選擇?[/plum]", default=True):
+                if Confirm.ask(f"[#B565D8]{t('file.selector.confirm')}[/#B565D8]", default=True):
                     return selected
                 else:
-                    self.console.print("[dim]請重新選擇...[/dim]\n")
+                    self.console.print(f"[dim]{t('file.selector.reselect')}[/dim]\n")
 
             except (ValueError, IndexError):
-                self.console.print("[#E8C4F0]⚠ 輸入格式錯誤，請輸入有效編號[/#E8C4F0]")
+                self.console.print(f"[#E8C4F0]{t('file.selector.error.invalid_format')}[/#E8C4F0]")
             except (KeyboardInterrupt, EOFError):
-                self.console.print("\n[#E8C4F0]已取消[/#E8C4F0]")
+                self.console.print(f"\n[#E8C4F0]{t('file.selector.cancelled')}[/#E8C4F0]")
                 return []
 
     def select_high_confidence(
@@ -245,18 +249,18 @@ class SmartFileSelector:
 
         self.console.print(
             Panel(
-                f"[plum]🎯 最佳匹配[/plum]\n"
-                f"  檔名: [orchid1]{best_match['name']}[/orchid1]\n"
-                f"  信心度: [bold medium_orchid]{int(confidence * 100)}%[/bold medium_orchid]\n"
-                f"  路徑: [dim]{best_match['path']}[/dim]",
-                border_style="plum",
+                t("file.selector.best_match",
+                  name=best_match['name'],
+                  confidence=int(confidence * 100),
+                  path=best_match['path']),
+                border_style="#B565D8",
                 box=box.ROUNDED
             )
         )
 
         # 選項1: 預設使用最佳匹配
         use_default = Confirm.ask(
-            "\n[plum]使用預設最佳匹配?[/plum] (否則手動選擇)",
+            f"\n[#B565D8]{t('file.selector.use_default')}[/#B565D8]",
             default=True
         )
 
@@ -265,30 +269,28 @@ class SmartFileSelector:
             return [best_match]
 
         # 選項2: 手動選擇
-        self.console.print("\n[plum]📋 手動選擇模式[/plum]\n")
+        self.console.print(f"\n[#B565D8]{t('file.selector.manual_mode')}[/#B565D8]\n")
 
         # 顯示 top_n 個檔案
         display_files = similar_files[:top_n]
-        self._display_file_table(display_files, title=f"信心度排序 (前 {top_n} 個)")
+        self._display_file_table(display_files, title=t("file.selector.sorted_confidence", top_n=top_n))
 
         # 提供選項
         self.console.print(
-            f"\n[plum]選項:[/plum]\n"
-            f"  [dim]1-{len(display_files)}:[/dim] 選擇對應檔案 (可多選)\n"
-            f"  [dim]0:[/dim] 顯示全部檔案 (依時間排序)\n"
-            f"  [dim]cancel:[/dim] 取消\n"
+            t("file.selector.options.high_confidence",
+              max_num=len(display_files))
         )
 
         choice = Prompt.ask(
-            "[plum]請選擇[/plum]",
+            f"[#B565D8]{t('file.selector.please_select')}[/#B565D8]",
             default="cancel"
         ).strip().lower()
 
         if choice == '0' or choice == 'all':
             # 顯示全部 (時間排序)
             all_files_sorted = self._sort_by_time(similar_files.copy())
-            self.console.print("\n[plum]📅 全部檔案 (依時間排序)[/plum]\n")
-            self._display_file_table(all_files_sorted, title="時間排序 (最近到最遠)")
+            self.console.print(f"\n[#B565D8]{t('file.selector.all_files_time')}[/#B565D8]\n")
+            self._display_file_table(all_files_sorted, title=t("file.selector.sorted_time"))
             return self._multi_select_files(all_files_sorted)
 
         elif choice == 'cancel':
@@ -296,7 +298,7 @@ class SmartFileSelector:
 
         else:
             # 直接從 top_n 中選擇 (支援多選)
-            return self._multi_select_files(display_files, "從上方列表選擇檔案")
+            return self._multi_select_files(display_files, t("file.selector.select_from_list"))
 
     def select_low_confidence(
         self,
@@ -318,8 +320,7 @@ class SmartFileSelector:
         """
         self.console.print(
             Panel(
-                "[#E8C4F0]⚠ 信心度較低 (<85%)[/#E8C4F0]\n"
-                "[dim]自動顯示多個候選檔案供您選擇[/dim]",
+                t("file.selector.low_confidence_warning"),
                 border_style="#E8C4F0",
                 box=box.ROUNDED
             )
@@ -339,38 +340,36 @@ class SmartFileSelector:
         combined_files = top_by_confidence + top_by_time
 
         # 顯示表格 (分段顯示)
-        self.console.print("\n[plum]📊 信心度排序 (前 3 個)[/plum]")
+        self.console.print(f"\n[#B565D8]{t('file.selector.top_confidence')}[/#B565D8]")
         self._display_file_table(top_by_confidence, title="", show_selection_index=True)
 
         if top_by_time:
-            self.console.print("\n[plum]📅 時間排序 (最近 3 個)[/plum]")
+            self.console.print(f"\n[#B565D8]{t('file.selector.top_time')}[/#B565D8]")
             # 重新編號從 4 開始
             for i, f in enumerate(top_by_time, 4):
                 size_mb = f.get('size', 0) / (1024 * 1024)
                 confidence = int(f.get('similarity', 0.0) * 100)
                 self.console.print(
                     f"  [dim]{i}.[/dim] [orchid1]{f['name']}[/orchid1] "
-                    f"[dim]({confidence}% · {size_mb:.1f} MB · {f.get('time_ago', '未知')})[/dim]"
+                    f"[dim]({confidence}% · {size_mb:.1f} MB · {f.get('time_ago', t('file.selector.unknown'))})[/dim]"
                 )
 
         # 選項
         self.console.print(
-            f"\n[plum]選項:[/plum]\n"
-            f"  [dim]1-{len(combined_files)}:[/dim] 選擇對應檔案 (可多選)\n"
-            f"  [dim]7 或 all:[/dim] 顯示全部檔案 (依時間排序)\n"
-            f"  [dim]cancel:[/dim] 取消\n"
+            t("file.selector.options.low_confidence",
+              max_num=len(combined_files))
         )
 
         choice = Prompt.ask(
-            "[plum]請選擇[/plum]",
+            f"[#B565D8]{t('file.selector.please_select')}[/#B565D8]",
             default="cancel"
         ).strip().lower()
 
         if choice == '7' or choice == 'all':
             # 顯示全部 (時間排序)
             all_files_sorted = self._sort_by_time(similar_files.copy())
-            self.console.print("\n[plum]📅 全部檔案 (依時間排序)[/plum]\n")
-            self._display_file_table(all_files_sorted, title="時間排序 (最近到最遠)")
+            self.console.print(f"\n[#B565D8]{t('file.selector.all_files_time')}[/#B565D8]\n")
+            self._display_file_table(all_files_sorted, title=t("file.selector.sorted_time"))
             return self._multi_select_files(all_files_sorted)
 
         elif choice == 'cancel':
@@ -378,7 +377,7 @@ class SmartFileSelector:
 
         else:
             # 從 combined_files 中選擇 (支援多選)
-            return self._multi_select_files(combined_files, "從上方列表選擇檔案")
+            return self._multi_select_files(combined_files, t("file.selector.select_from_list"))
 
     def smart_select(
         self,
@@ -400,7 +399,7 @@ class SmartFileSelector:
             選中的檔案列表，若取消則返回 None
         """
         if not similar_files:
-            self.console.print("[#E8C4F0]⚠ 未找到相似檔案[/#E8C4F0]")
+            self.console.print(f"[#E8C4F0]{t('file.selector.no_files')}[/#E8C4F0]")
             return None
 
         # 確保按信心度排序
@@ -410,10 +409,9 @@ class SmartFileSelector:
         best_confidence = similar_files[0].get('similarity', 0.0)
 
         self.console.print(
-            f"\n[plum]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/plum]\n"
-            f"[plum]🔍 智能檔案選擇器[/plum]\n"
-            f"[dim]找到 {len(similar_files)} 個相似檔案，最高信心度: {int(best_confidence * 100)}%[/dim]\n"
-            f"[plum]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[/plum]\n"
+            t("file.selector.header",
+              count=len(similar_files),
+              confidence=int(best_confidence * 100))
         )
 
         # 路徑選擇
@@ -487,7 +485,7 @@ if __name__ == "__main__":
         }
     ]
 
-    console.print("\n[bold plum]測試 1: 高信心度情境 (92%)[/bold plum]")
+    console.print("\n[bold #B565D8]測試 1: 高信心度情境 (92%)[/bold plum]")
     selector = SmartFileSelector()
     result = selector.smart_select(test_files)
     console.print(f"\n[green]選擇結果:[/green] {[f['name'] for f in result] if result else '已取消'}")
@@ -497,6 +495,6 @@ if __name__ == "__main__":
     for f in test_files_low:
         f['similarity'] *= 0.8  # 降低信心度到 <0.85
 
-    console.print("\n[bold plum]測試 2: 低信心度情境 (<85%)[/bold plum]")
+    console.print("\n[bold #B565D8]測試 2: 低信心度情境 (<85%)[/bold plum]")
     result2 = selector.smart_select(test_files_low)
     console.print(f"\n[green]選擇結果:[/green] {[f['name'] for f in result2] if result2 else '已取消'}")

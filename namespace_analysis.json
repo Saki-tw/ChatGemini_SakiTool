@@ -1,0 +1,67 @@
+{
+  "duplicates": {
+    "common": [
+      24,
+      4242,
+      4320
+    ],
+    "chat": [
+      265,
+      1493,
+      2044
+    ],
+    "pricing": [
+      486,
+      1705,
+      1839
+    ],
+    "translator": [
+      611,
+      1722,
+      3608
+    ],
+    "thinking": [
+      633,
+      1824
+    ],
+    "cache": [
+      659,
+      1451,
+      1781,
+      1991
+    ],
+    "checkpoint": [
+      708,
+      3071
+    ],
+    "media": [
+      843,
+      1418,
+      1673,
+      4414
+    ],
+    "codegemini": [
+      930,
+      1497
+    ],
+    "error": [
+      1384,
+      1653,
+      4328
+    ],
+    "recovery": [
+      1405,
+      1709,
+      1834
+    ]
+  },
+  "new_keys_by_namespace": {
+    "error_handler": 128,
+    "error": 58,
+    "common": 8,
+    "batch": 15,
+    "flow": 32,
+    "media": 14,
+    "async_batch": 38
+  }
+}

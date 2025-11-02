@@ -88,34 +88,34 @@ class ClipAdvisor:
         Returns:
             剪輯建議列表
         """
-        console.print(safe_t('media.clip.analysis_title', fallback='\n[bold #E8C4F0]🎬 AI 剪輯建議分析[/bold #E8C4F0]\n'))
-        console.print(safe_t('media.clip.video_file', fallback='📁 影片：{name}', name=os.path.basename(video_path)))
+        console.print(safe_t('media.clip.analysis_title'))
+        console.print(safe_t('media.clip.video_file', name=os.path.basename(video_path)))
 
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print(safe_t('error.video_info_failed', fallback='[dim #E8C4F0]錯誤：無法獲取影片資訊[/red]'))
+            console.print(safe_t('error.video_info_failed'))
             return []
 
         duration = info['duration']
-        console.print(safe_t('media.clip.total_duration', fallback='⏱️  總長度：{time}', time=self._format_time(duration)))
+        console.print(safe_t('media.clip.total_duration', time=self._format_time(duration)))
 
         if target_duration:
-            console.print(safe_t('media.clip.target_duration', fallback='🎯 目標長度：{time}', time=self._format_time(target_duration)))
+            console.print(safe_t('media.clip.target_duration', time=self._format_time(target_duration)))
 
         # 2. 場景檢測（如果啟用）
         scenes = []
         if self.use_scene_detection:
-            console.print(safe_t('media.clip.scene_detection', fallback='\n[#E8C4F0]📦 執行場景檢測...[/#E8C4F0]'))
+            console.print(safe_t('media.clip.scene_detection'))
             scenes = self.scene_detector.detect_scenes(video_path, num_keyframes=20)
-            console.print(safe_t('media.clip.scenes_found', fallback='✓ 檢測到 {count} 個場景', count=len(scenes)))
+            console.print(safe_t('media.clip.scenes_found', count=len(scenes)))
 
         # 3. 分析內容特徵
-        console.print(safe_t('media.clip.analyzing_features', fallback='\n[#E8C4F0]🔍 分析影片內容特徵...[/#E8C4F0]'))
+        console.print(safe_t('media.clip.analyzing_features'))
         content_features = self._analyze_content_features(video_path, scenes, duration)
 
         # 4. 生成剪輯建議
-        console.print(safe_t('media.clip.generating_suggestions', fallback='\n[#E8C4F0]💡 生成剪輯建議...[/#E8C4F0]'))
+        console.print(safe_t('media.clip.generating_suggestions'))
         suggestions = self._generate_suggestions(
             video_path,
             scenes,
@@ -129,7 +129,7 @@ class ClipAdvisor:
         # 5. 排序並篩選
         suggestions = self._rank_and_filter_suggestions(suggestions, num_suggestions)
 
-        console.print(safe_t('media.clip.suggestions_generated', fallback='\n[#B565D8]✓ 已生成 {count} 個剪輯建議[/green]', count=len(suggestions)))
+        console.print(safe_t('media.clip.suggestions_generated', count=len(suggestions)))
 
         return suggestions
 
@@ -265,16 +265,16 @@ class ClipAdvisor:
             end_time=end_time,
             duration=duration,
             clip_type="intro",
-            description="影片開場片段",
-            reasoning="開場片段可以吸引觀眾注意,建立影片基調",
+            description=safe_t('media.clip.suggestion.intro.description'),
+            reasoning=safe_t('media.clip.suggestion.intro.reasoning'),
             confidence=0.9,
             engagement_score=8.0,
             tags=["opening", "intro", "start"],
             frame_preview=frame_path,
             editing_tips=[
-                "可添加標題文字或 Logo",
-                "考慮添加背景音樂淡入效果",
-                "確保音量平衡"
+                safe_t('media.clip.suggestion.intro.tip1'),
+                safe_t('media.clip.suggestion.intro.tip2'),
+                safe_t('media.clip.suggestion.intro.tip3')
             ]
         )
 
@@ -300,16 +300,16 @@ class ClipAdvisor:
             end_time=end_time,
             duration=clip_duration,
             clip_type="outro",
-            description="影片結尾片段",
-            reasoning="結尾片段可以總結內容,引導後續行動",
+            description=safe_t('media.clip.suggestion.outro.description'),
+            reasoning=safe_t('media.clip.suggestion.outro.reasoning'),
             confidence=0.9,
             engagement_score=7.5,
             tags=["ending", "outro", "conclusion"],
             frame_preview=frame_path,
             editing_tips=[
-                "可添加 CTA（行動呼籲）",
-                "考慮添加相關影片推薦",
-                "添加音樂淡出效果"
+                safe_t('media.clip.suggestion.outro.tip1'),
+                safe_t('media.clip.suggestion.outro.tip2'),
+                safe_t('media.clip.suggestion.outro.tip3')
             ]
         )
 
@@ -338,15 +338,15 @@ class ClipAdvisor:
             duration=duration,
             clip_type="key_moment",
             description=moment['description'],
-            reasoning=f"關鍵時刻：{analysis.get('reasoning', '重要場景或轉折點')}",
+            reasoning=safe_t('media.clip.suggestion.key_moment.reasoning_prefix') + analysis.get('reasoning', safe_t('media.clip.suggestion.key_moment.reasoning_default')),
             confidence=0.85,
             engagement_score=analysis.get('engagement_score', 8.5),
             tags=analysis.get('tags', ['important', 'key']),
             frame_preview=frame_path,
             editing_tips=analysis.get('tips', [
-                "考慮添加特效或慢動作",
-                "可能適合添加字幕說明",
-                "確保音訊清晰"
+                safe_t('media.clip.suggestion.key_moment.tip1'),
+                safe_t('media.clip.suggestion.key_moment.tip2'),
+                safe_t('media.clip.suggestion.key_moment.tip3')
             ])
         )
 
@@ -392,15 +392,15 @@ class ClipAdvisor:
                 duration=scene_duration,
                 clip_type="highlight",
                 description=scene.description,
-                reasoning=f"高質量場景：{analysis.get('reasoning', '視覺效果好,內容豐富')}",
+                reasoning=safe_t('media.clip.suggestion.highlight.reasoning_prefix') + analysis.get('reasoning', safe_t('media.clip.suggestion.highlight.reasoning_default')),
                 confidence=score,
                 engagement_score=analysis.get('engagement_score', score * 10),
                 tags=scene.key_elements + analysis.get('extra_tags', []),
                 frame_preview=scene.start_frame_path,
                 editing_tips=analysis.get('tips', [
-                    "可作為獨立短片發布",
-                    "適合社群媒體分享",
-                    "考慮添加背景音樂"
+                    safe_t('media.clip.suggestion.highlight.tip1'),
+                    safe_t('media.clip.suggestion.highlight.tip2'),
+                    safe_t('media.clip.suggestion.highlight.tip3')
                 ])
             ))
 
@@ -440,16 +440,18 @@ class ClipAdvisor:
                 end_time=end_time,
                 duration=duration,
                 clip_type="transition",
-                description=f"從「{current_scene.description}」到「{next_scene.description}」",
-                reasoning=f"場景轉換點：{transition_type}",
+                description=safe_t('media.clip.suggestion.transition.description_template',
+                                 from_scene=current_scene.description,
+                                 to_scene=next_scene.description),
+                reasoning=safe_t('media.clip.suggestion.transition.reasoning_prefix') + transition_type,
                 confidence=0.7,
                 engagement_score=6.0,
                 tags=["transition", transition_type, "scene_change"],
                 frame_preview=frame_path,
                 editing_tips=[
-                    f"建議使用{transition_type}轉場效果",
-                    "確保音訊順暢過渡",
-                    "可添加轉場音效"
+                    safe_t('media.clip.suggestion.transition.tip1', transition_type=transition_type),
+                    safe_t('media.clip.suggestion.transition.tip2'),
+                    safe_t('media.clip.suggestion.transition.tip3')
                 ]
             ))
 
@@ -461,57 +463,57 @@ class ClipAdvisor:
         keywords = description.lower()
 
         analysis = {
-            'reasoning': '重要場景或轉折點',
+            'reasoning': safe_t('media.clip.analysis.moment.default_reasoning'),
             'engagement_score': 8.0,
             'tags': ['important', 'key'],
             'tips': [
-                "考慮添加特效或慢動作",
-                "可能適合添加字幕說明",
-                "確保音訊清晰"
+                safe_t('media.clip.analysis.moment.tip1'),
+                safe_t('media.clip.analysis.moment.tip2'),
+                safe_t('media.clip.analysis.moment.tip3')
             ]
         }
 
         # 根據關鍵字調整
         if any(word in keywords for word in ['person', 'people', 'face', '人物', '人']):
-            analysis['tags'].append('人物')
+            analysis['tags'].append(safe_t('media.clip.analysis.moment.tag_person'))
             analysis['engagement_score'] += 0.5
-            analysis['tips'].append("人物特寫可提升觀眾連結")
+            analysis['tips'].append(safe_t('media.clip.analysis.moment.tip_person'))
 
         if any(word in keywords for word in ['action', 'moving', 'motion', '動作', '運動']):
-            analysis['tags'].append('動態')
+            analysis['tags'].append(safe_t('media.clip.analysis.moment.tag_action'))
             analysis['engagement_score'] += 0.5
-            analysis['tips'].append("動態畫面可考慮慢動作效果")
+            analysis['tips'].append(safe_t('media.clip.analysis.moment.tip_action'))
 
         if any(word in keywords for word in ['text', 'sign', 'writing', '文字', '標誌']):
-            analysis['tags'].append('資訊')
-            analysis['reasoning'] = '包含重要文字或標誌資訊'
+            analysis['tags'].append(safe_t('media.clip.analysis.moment.tag_info'))
+            analysis['reasoning'] = safe_t('media.clip.analysis.moment.reasoning_text')
 
         return analysis
 
     def _analyze_scene_for_highlight(self, scene: Scene) -> Dict:
         """分析場景作為精彩片段的潛力"""
         analysis = {
-            'reasoning': '視覺效果好,內容豐富',
+            'reasoning': safe_t('media.clip.analysis.highlight.default_reasoning'),
             'engagement_score': scene.confidence * 10,
             'extra_tags': [],
             'tips': [
-                "可作為獨立短片發布",
-                "適合社群媒體分享"
+                safe_t('media.clip.analysis.highlight.tip1'),
+                safe_t('media.clip.analysis.highlight.tip2')
             ]
         }
 
         # 根據場景元素調整
         if len(scene.key_elements) > 5:
-            analysis['reasoning'] = '內容元素豐富,視覺層次多'
+            analysis['reasoning'] = safe_t('media.clip.analysis.highlight.reasoning_rich')
             analysis['engagement_score'] += 0.5
 
         # 根據場景長度調整
         duration = scene.end_time - scene.start_time
         if 8 <= duration <= 12:
             analysis['extra_tags'].append('optimal_length')
-            analysis['tips'].append("長度適中,適合各平台")
+            analysis['tips'].append(safe_t('media.clip.analysis.highlight.tip_optimal_length'))
         elif duration > 15:
-            analysis['tips'].append("可考慮剪輯為多個片段")
+            analysis['tips'].append(safe_t('media.clip.analysis.highlight.tip_long'))
 
         return analysis
 
@@ -522,11 +524,11 @@ class ClipAdvisor:
         similarity = len(common_elements) / max(len(scene1.key_elements), len(scene2.key_elements), 1)
 
         if similarity > 0.5:
-            return "淡入淡出（內容相關）"
+            return safe_t('media.clip.transition.type_fade_related')
         elif similarity > 0.2:
-            return "交叉淡化（部分相關）"
+            return safe_t('media.clip.transition.type_cross_partial')
         else:
-            return "切換（對比場景）"
+            return safe_t('media.clip.transition.type_cut_contrast')
 
     def _extract_preview_frame(self, video_path: str, timestamp: float) -> str:
         """提取預覽幀"""
@@ -551,7 +553,7 @@ class ClipAdvisor:
             subprocess.run(cmd, capture_output=True, check=True)
             return str(frame_path)
         except Exception as e:
-            console.print(safe_t('media.clip.preview_frame_warning', fallback='[#E8C4F0]警告：提取預覽幀失敗 ({time}s): {error}[/#E8C4F0]', time=timestamp, error=e))
+            console.print(safe_t('media.clip.preview_frame_warning', time=timestamp, error=e))
             return ""
 
     def _rank_and_filter_suggestions(
@@ -576,19 +578,19 @@ class ClipAdvisor:
     def display_suggestions(self, suggestions: List[ClipSuggestion]):
         """顯示剪輯建議"""
         if not suggestions:
-            console.print(safe_t('media.clip.no_suggestions', fallback='[#E8C4F0]沒有生成剪輯建議[/#E8C4F0]'))
+            console.print(safe_t('media.clip.no_suggestions'))
             return
 
-        console.print(safe_t('media.clip.suggestions_list', fallback='\n[bold #E8C4F0]📋 剪輯建議列表（{count} 個）[/bold #E8C4F0]\n', count=len(suggestions)))
+        console.print(safe_t('media.clip.suggestions_list', count=len(suggestions)))
 
         # 創建表格
         table = Table(show_header=True, header_style="bold #B565D8")
         console_width = console.width or 120
-        table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
-        table.add_column("類型", width=max(10, int(console_width * 0.10)))
-        table.add_column("時間範圍", width=max(18, int(console_width * 0.15)))
-        table.add_column("描述", width=max(35, int(console_width * 0.50)))
-        table.add_column("評分", justify="right", width=max(8, int(console_width * 0.08)))
+        table.add_column(safe_t('media.clip.table.column_id'), style="dim", width=max(4, int(console_width * 0.03)))
+        table.add_column(safe_t('media.clip.table.column_type'), width=max(10, int(console_width * 0.10)))
+        table.add_column(safe_t('media.clip.table.column_time_range'), width=max(18, int(console_width * 0.15)))
+        table.add_column(safe_t('media.clip.table.column_description'), width=max(35, int(console_width * 0.50)))
+        table.add_column(safe_t('media.clip.table.column_score'), justify="right", width=max(8, int(console_width * 0.08)))
 
         for suggestion in suggestions:
             # 類型顏色
@@ -624,21 +626,21 @@ class ClipAdvisor:
         console.print(table)
 
         # 顯示詳細資訊
-        console.print(safe_t('media.clip.detailed_suggestions', fallback='\n[bold #E8C4F0]💡 詳細建議：[/bold #E8C4F0]\n'))
+        console.print(safe_t('media.clip.detailed_suggestions'))
         for suggestion in suggestions[:5]:  # 只顯示前 5 個的詳細資訊
             self._display_suggestion_detail(suggestion)
 
     def _display_suggestion_detail(self, suggestion: ClipSuggestion):
         """顯示單個建議的詳細資訊"""
         content = f"""
-[#E8C4F0]時間：[/#E8C4F0] {self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)
-[#E8C4F0]類型：[/#E8C4F0] {suggestion.clip_type}
-[#E8C4F0]描述：[/#E8C4F0] {suggestion.description}
-[#E8C4F0]推薦理由：[/#E8C4F0] {suggestion.reasoning}
-[#E8C4F0]評分：[/#E8C4F0] {suggestion.engagement_score:.1f}/10
-[#E8C4F0]標籤：[/#E8C4F0] {', '.join(suggestion.tags)}
+{safe_t('media.clip.detail.time_label')} {self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)
+{safe_t('media.clip.detail.type_label')} {suggestion.clip_type}
+{safe_t('media.clip.detail.description_label')} {suggestion.description}
+{safe_t('media.clip.detail.reasoning_label')} {suggestion.reasoning}
+{safe_t('media.clip.detail.score_label')} {suggestion.engagement_score:.1f}/10
+{safe_t('media.clip.detail.tags_label')} {', '.join(suggestion.tags)}
 
-[#E8C4F0]編輯建議：[/#E8C4F0]
+{safe_t('media.clip.detail.editing_tips_label')}
 """
         for tip in suggestion.editing_tips:
             content += f"  • {tip}\n"
@@ -681,19 +683,22 @@ class ClipAdvisor:
         elif format == 'txt':
             output_file = output_dir / f"{video_name}_clip_suggestions_{timestamp}.txt"
             with open(output_file, 'w', encoding='utf-8') as f:
-                f.write(f"影片剪輯建議 - {os.path.basename(video_path)}\n")
-                f.write(f"生成時間：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write(f"總建議數：{len(suggestions)}\n")
+                f.write(safe_t('media.clip.save.txt_header', video=os.path.basename(video_path)) + "\n")
+                f.write(safe_t('media.clip.save.txt_generated_time', time=datetime.now().strftime('%Y-%m-%d %H:%M:%S')) + "\n")
+                f.write(safe_t('media.clip.save.txt_total_suggestions', count=len(suggestions)) + "\n")
                 f.write("=" * 80 + "\n\n")
 
                 for suggestion in suggestions:
                     f.write(f"#{suggestion.id} - {suggestion.clip_type.upper()}\n")
-                    f.write(f"時間：{self._format_time(suggestion.start_time)} - {self._format_time(suggestion.end_time)} ({suggestion.duration:.1f}s)\n")
-                    f.write(f"描述：{suggestion.description}\n")
-                    f.write(f"推薦理由：{suggestion.reasoning}\n")
-                    f.write(f"評分：{suggestion.engagement_score:.1f}/10\n")
-                    f.write(f"標籤：{', '.join(suggestion.tags)}\n")
-                    f.write("編輯建議：\n")
+                    f.write(safe_t('media.clip.save.txt_time',
+                                 start=self._format_time(suggestion.start_time),
+                                 end=self._format_time(suggestion.end_time),
+                                 duration=suggestion.duration) + "\n")
+                    f.write(safe_t('media.clip.save.txt_description', description=suggestion.description) + "\n")
+                    f.write(safe_t('media.clip.save.txt_reasoning', reasoning=suggestion.reasoning) + "\n")
+                    f.write(safe_t('media.clip.save.txt_score', score=suggestion.engagement_score) + "\n")
+                    f.write(safe_t('media.clip.save.txt_tags', tags=', '.join(suggestion.tags)) + "\n")
+                    f.write(safe_t('media.clip.save.txt_editing_tips') + "\n")
                     for tip in suggestion.editing_tips:
                         f.write(f"  • {tip}\n")
                     f.write("-" * 80 + "\n\n")
@@ -714,10 +719,10 @@ class ClipAdvisor:
                     f.write(f"* COMMENT: {suggestion.clip_type} - {suggestion.reasoning}\n\n")
 
         else:
-            console.print(safe_t('error.unsupported_format', fallback='[dim #E8C4F0]不支援的格式：{format}[/red]', format=format))
+            console.print(safe_t('error.unsupported_format', format=format))
             return ""
 
-        console.print(safe_t('media.clip.suggestions_saved', fallback='[#B565D8]✓ 剪輯建議已保存：{file}[/green]', file=output_file))
+        console.print(safe_t('media.clip.suggestions_saved', file=output_file))
         return str(output_file)
 
     def _format_time(self, seconds: float) -> str:
@@ -755,7 +760,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(safe_t('error.video_not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
+        console.print(safe_t('error.video_not_found', path=args.video))
         return
 
     # 創建建議器

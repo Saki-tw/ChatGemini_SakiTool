@@ -144,6 +144,7 @@ MODULES = {
     'codebase_embedding': {
         'enabled': False,
         'required': False,
+        'lazy_load': True,  # 延遲載入，使用 /codegemini 啟動時才載入
         'description': 'Codebase Embedding（程式碼庫向量化、對話記錄搜尋）',
         'dependencies': ['numpy'],
         'file': 'CodeGemini/codebase_embedding.py',

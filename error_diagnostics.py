@@ -10,6 +10,7 @@
 """
 
 import os
+from utils import safe_t
 import shutil
 import subprocess
 from dataclasses import dataclass
@@ -133,26 +134,26 @@ class ErrorDiagnostics:
 
         solutions = [
             Solution(
-                title="清理臨時檔案",
+                title=safe_t("error_handler.error_diagnostics.msg_0001", fallback="清理臨時檔案"),
                 description=f"當前剩餘空間：{free_gb:.2f} GB。清理系統臨時檔案可釋放空間。",
                 command=f"find /tmp -type f -name '*.tmp' -o -name '*.temp' | xargs rm -f",
                 priority=1,
                 auto_fixable=False  # 需要用戶確認
             ),
             Solution(
-                title="清理專案臨時檔案",
-                description="清理本專案的臨時音訊/影片檔案",
+                title=safe_t("error_handler.error_diagnostics.msg_0002", fallback="清理專案臨時檔案"),
+                description=safe_t("error_handler.error_diagnostics.msg_0003", fallback="清理本專案的臨時音訊/影片檔案"),
                 command=f"find {output_dir} -type f -name '*_temp.*' -o -name '*_tmp.*' | xargs rm -f",
                 priority=2,
                 auto_fixable=False
             ),
             Solution(
-                title="更改輸出目錄",
-                description="將輸出目錄改為空間較大的磁碟",
+                title=safe_t("error_handler.error_diagnostics.msg_0004", fallback="更改輸出目錄"),
+                description=safe_t("error_handler.error_diagnostics.msg_0005", fallback="將輸出目錄改為空間較大的磁碟"),
                 manual_steps=[
-                    "1. 使用 df -h 查看可用磁碟空間",
-                    "2. 修改輸出路徑參數至空間充足的目錄",
-                    "3. 重新執行操作"
+                    safe_t("error_handler.error_diagnostics.msg_0006", fallback="1. 使用 df -h 查看可用磁碟空間"),
+                    safe_t("error_handler.error_diagnostics.msg_0007", fallback="2. 修改輸出路徑參數至空間充足的目錄"),
+                    safe_t("error_handler.error_diagnostics.msg_0008", fallback="3. 重新執行操作")
                 ],
                 priority=3
             )
@@ -170,9 +171,9 @@ class ErrorDiagnostics:
         for f in input_files + [output_file]:
             if f and os.path.exists(f):
                 if not os.access(f, os.R_OK):
-                    problem_files.append((f, '讀取'))
+                    problem_files.append((f, safe_t("error_handler.error_diagnostics.msg_0009", fallback="讀取")))
                 elif f == output_file and not os.access(os.path.dirname(f) or '.', os.W_OK):
-                    problem_files.append((f, '寫入'))
+                    problem_files.append((f, safe_t("error_handler.error_diagnostics.msg_0010", fallback="寫入")))
 
         solutions = []
 
@@ -190,8 +191,8 @@ class ErrorDiagnostics:
         if output_file:
             output_dir = os.path.dirname(output_file) or '.'
             solutions.append(Solution(
-                title="修復輸出目錄權限",
-                description="確保對輸出目錄有寫入權限",
+                title=safe_t("error_handler.error_diagnostics.msg_0011", fallback="修復輸出目錄權限"),
+                description=safe_t("error_handler.error_diagnostics.msg_0012", fallback="確保對輸出目錄有寫入權限"),
                 command=f"chmod 755 '{output_dir}'",
                 priority=2,
                 auto_fixable=False
@@ -205,27 +206,27 @@ class ErrorDiagnostics:
 
         solutions = [
             Solution(
-                title="驗證檔案完整性",
-                description="使用 ffprobe 檢查檔案是否真的損壞",
+                title=safe_t("error_handler.error_diagnostics.msg_0013", fallback="驗證檔案完整性"),
+                description=safe_t("error_handler.error_diagnostics.msg_0014", fallback="使用 ffprobe 檢查檔案是否真的損壞"),
                 command=f"ffprobe -v error '{input_files[0]}'" if input_files else None,
                 priority=1,
                 auto_fixable=False
             ),
             Solution(
-                title="嘗試修復檔案",
-                description="使用 ffmpeg 重新封裝檔案（可能修復輕微損壞）",
+                title=safe_t("error_handler.error_diagnostics.msg_0015", fallback="嘗試修復檔案"),
+                description=safe_t("error_handler.error_diagnostics.msg_0016", fallback="使用 ffmpeg 重新封裝檔案（可能修復輕微損壞）"),
                 command=f"ffmpeg -i '{input_files[0]}' -c copy '{input_files[0]}.repaired.mp4'" if input_files else None,
                 priority=2,
                 auto_fixable=False
             ),
             Solution(
-                title="重新下載或獲取檔案",
-                description="如果檔案確實損壞，建議重新獲取原始檔案",
+                title=safe_t("error_handler.error_diagnostics.msg_0017", fallback="重新下載或獲取檔案"),
+                description=safe_t("error_handler.error_diagnostics.msg_0018", fallback="如果檔案確實損壞，建議重新獲取原始檔案"),
                 manual_steps=[
-                    "1. 確認檔案來源",
-                    "2. 重新下載或複製檔案",
-                    "3. 驗證檔案完整性（檢查檔案大小、MD5 等）",
-                    "4. 重新執行操作"
+                    safe_t("error_handler.error_diagnostics.msg_0019", fallback="1. 確認檔案來源"),
+                    safe_t("error_handler.error_diagnostics.msg_0020", fallback="2. 重新下載或複製檔案"),
+                    safe_t("error_handler.error_diagnostics.msg_0021", fallback="3. 驗證檔案完整性（檢查檔案大小、MD5 等）"),
+                    safe_t("error_handler.error_diagnostics.msg_0022", fallback="4. 重新執行操作")
                 ],
                 priority=3
             )
@@ -239,19 +240,19 @@ class ErrorDiagnostics:
 
         solutions = [
             Solution(
-                title="檢查檔案串流資訊",
-                description="確認檔案是否包含音訊軌",
+                title=safe_t("error_handler.error_diagnostics.msg_0023", fallback="檢查檔案串流資訊"),
+                description=safe_t("error_handler.error_diagnostics.msg_0024", fallback="確認檔案是否包含音訊軌"),
                 command=f"ffprobe -v error -show_streams '{input_files[0]}'" if input_files else None,
                 priority=1,
                 auto_fixable=False
             ),
             Solution(
-                title="使用其他檔案",
-                description="如果檔案確實沒有音訊，請使用包含音訊的檔案",
+                title=safe_t("error_handler.error_diagnostics.msg_0025", fallback="使用其他檔案"),
+                description=safe_t("error_handler.error_diagnostics.msg_0026", fallback="如果檔案確實沒有音訊，請使用包含音訊的檔案"),
                 manual_steps=[
-                    "1. 確認影片檔案是否包含音軌",
-                    "2. 如果是無聲影片，請先添加音軌",
-                    "3. 或使用其他包含音訊的影片"
+                    safe_t("error_handler.error_diagnostics.msg_0027", fallback="1. 確認影片檔案是否包含音軌"),
+                    safe_t("error_handler.error_diagnostics.msg_0028", fallback="2. 如果是無聲影片，請先添加音軌"),
+                    safe_t("error_handler.error_diagnostics.msg_0029", fallback="3. 或使用其他包含音訊的影片")
                 ],
                 priority=2
             )
@@ -265,15 +266,15 @@ class ErrorDiagnostics:
 
         solutions = [
             Solution(
-                title="轉換為常見格式",
-                description="將檔案轉換為 H.264/AAC 格式（最廣泛支援）",
+                title=safe_t("error_handler.error_diagnostics.msg_0030", fallback="轉換為常見格式"),
+                description=safe_t("error_handler.error_diagnostics.msg_0031", fallback="將檔案轉換為 H.264/AAC 格式（最廣泛支援）"),
                 command=f"ffmpeg -i '{input_files[0]}' -c:v libx264 -c:a aac '{input_files[0]}.converted.mp4'" if input_files else None,
                 priority=1,
                 auto_fixable=False
             ),
             Solution(
-                title="檢查 ffmpeg 編碼器",
-                description="查看 ffmpeg 支援的編碼器",
+                title=safe_t("error_handler.error_diagnostics.msg_0032", fallback="檢查 ffmpeg 編碼器"),
+                description=safe_t("error_handler.error_diagnostics.msg_0033", fallback="查看 ffmpeg 支援的編碼器"),
                 command="ffmpeg -codecs",
                 priority=2,
                 auto_fixable=False
@@ -304,19 +305,19 @@ class ErrorDiagnostics:
 
             if similar_files:
                 solutions.append(Solution(
-                    title="可能的相似檔案",
+                    title=safe_t("error_handler.error_diagnostics.msg_0034", fallback="可能的相似檔案"),
                     description=f"在 {parent_dir} 找到相似檔案：{', '.join(similar_files[:3])}",
                     manual_steps=[
-                        "1. 確認檔案路徑是否正確",
-                        "2. 檢查上述相似檔案是否為目標檔案",
-                        "3. 更正檔案路徑後重試"
+                        safe_t("error_handler.error_diagnostics.msg_0035", fallback="1. 確認檔案路徑是否正確"),
+                        safe_t("error_handler.error_diagnostics.msg_0036", fallback="2. 檢查上述相似檔案是否為目標檔案"),
+                        safe_t("error_handler.error_diagnostics.msg_0037", fallback="3. 更正檔案路徑後重試")
                     ],
                     priority=1
                 ))
 
             solutions.append(Solution(
-                title="檢查檔案路徑",
-                description="確認檔案是否存在於指定位置",
+                title=safe_t("error_handler.error_diagnostics.msg_0038", fallback="檢查檔案路徑"),
+                description=safe_t("error_handler.error_diagnostics.msg_0039", fallback="確認檔案是否存在於指定位置"),
                 command=f"ls -lh '{parent_dir}'",
                 priority=2,
                 auto_fixable=False
@@ -328,19 +329,19 @@ class ErrorDiagnostics:
         """解決字型問題"""
         solutions = [
             Solution(
-                title="安裝中文字型",
-                description="字幕燒錄需要中文字型支援",
+                title=safe_t("error_handler.error_diagnostics.msg_0040", fallback="安裝中文字型"),
+                description=safe_t("error_handler.error_diagnostics.msg_0041", fallback="字幕燒錄需要中文字型支援"),
                 command="brew install --cask font-noto-sans-cjk",  # macOS
                 priority=1,
                 auto_fixable=False
             ),
             Solution(
-                title="指定字型檔案",
-                description="在字幕樣式中明確指定字型檔案路徑",
+                title=safe_t("error_handler.error_diagnostics.msg_0042", fallback="指定字型檔案"),
+                description=safe_t("error_handler.error_diagnostics.msg_0043", fallback="在字幕樣式中明確指定字型檔案路徑"),
                 manual_steps=[
-                    "1. 找到系統中的字型檔案（.ttf 或 .otf）",
-                    "2. 在字幕參數中指定字型路徑",
-                    "3. 重新執行燒錄"
+                    safe_t("error_handler.error_diagnostics.msg_0044", fallback="1. 找到系統中的字型檔案（.ttf 或 .otf）"),
+                    safe_t("error_handler.error_diagnostics.msg_0045", fallback="2. 在字幕參數中指定字型路徑"),
+                    safe_t("error_handler.error_diagnostics.msg_0046", fallback="3. 重新執行燒錄")
                 ],
                 priority=2
             )
@@ -352,32 +353,32 @@ class ErrorDiagnostics:
         """解決記憶體不足問題"""
         solutions = [
             Solution(
-                title="降低處理品質",
-                description="使用較低的解析度或位元率",
+                title=safe_t("error_handler.error_diagnostics.msg_0047", fallback="降低處理品質"),
+                description=safe_t("error_handler.error_diagnostics.msg_0048", fallback="使用較低的解析度或位元率"),
                 manual_steps=[
-                    "1. 調整輸出解析度（如 1080p → 720p）",
-                    "2. 降低位元率參數",
-                    "3. 重新執行操作"
+                    safe_t("error_handler.error_diagnostics.msg_0049", fallback="1. 調整輸出解析度（如 1080p → 720p）"),
+                    safe_t("error_handler.error_diagnostics.msg_0050", fallback="2. 降低位元率參數"),
+                    safe_t("error_handler.error_diagnostics.msg_0051", fallback="3. 重新執行操作")
                 ],
                 priority=1
             ),
             Solution(
-                title="分段處理",
-                description="將大檔案分段處理後再合併",
+                title=safe_t("error_handler.error_diagnostics.msg_0052", fallback="分段處理"),
+                description=safe_t("error_handler.error_diagnostics.msg_0053", fallback="將大檔案分段處理後再合併"),
                 manual_steps=[
-                    "1. 使用 ffmpeg 將影片分段",
-                    "2. 逐段處理",
-                    "3. 合併處理後的片段"
+                    safe_t("error_handler.error_diagnostics.msg_0054", fallback="1. 使用 ffmpeg 將影片分段"),
+                    safe_t("error_handler.error_diagnostics.msg_0055", fallback="2. 逐段處理"),
+                    safe_t("error_handler.error_diagnostics.msg_0056", fallback="3. 合併處理後的片段")
                 ],
                 priority=2
             ),
             Solution(
-                title="釋放系統記憶體",
-                description="關閉其他應用程式以釋放記憶體",
+                title=safe_t("error_handler.error_diagnostics.msg_0057", fallback="釋放系統記憶體"),
+                description=safe_t("error_handler.error_diagnostics.msg_0058", fallback="關閉其他應用程式以釋放記憶體"),
                 manual_steps=[
-                    "1. 關閉不必要的應用程式",
-                    "2. 清理系統快取",
-                    "3. 重新執行操作"
+                    safe_t("error_handler.error_diagnostics.msg_0059", fallback="1. 關閉不必要的應用程式"),
+                    safe_t("error_handler.error_diagnostics.msg_0060", fallback="2. 清理系統快取"),
+                    safe_t("error_handler.error_diagnostics.msg_0061", fallback="3. 重新執行操作")
                 ],
                 priority=3
             )
@@ -398,7 +399,7 @@ class ErrorDiagnostics:
 
             # 提取函數名稱
             func_match = re.search(r"(\w+\.?\w+)\(\)", error_str)
-            func_name = func_match.group(1) if func_match else "函數"
+            func_name = func_match.group(1) if func_match else safe_t("error_handler.error_diagnostics.msg_0062", fallback="函數")
 
             solutions.append(Solution(
                 title=f"移除不支援的參數 '{param_name}'",
@@ -406,7 +407,7 @@ class ErrorDiagnostics:
                 manual_steps=[
                     f"1. 檢查 {func_name} 的版本和文檔",
                     f"2. 移除或替換 '{param_name}' 參數",
-                    "3. 或升級相關套件到支援該參數的版本"
+                    safe_t("error_handler.error_diagnostics.msg_0063", fallback="3. 或升級相關套件到支援該參數的版本")
                 ],
                 priority=1
             ))
@@ -445,14 +446,14 @@ class ErrorDiagnostics:
                     return files_modified
 
                 solutions.append(Solution(
-                    title="Rich Console 不支援 flush 參數",
+                    title=safe_t("error_handler.error_diagnostics.msg_0064", fallback="Rich Console 不支援 flush 參數"),
                     description="Rich 的 console.print() 會自動處理輸出緩衝，不需要 flush 參數",
                     manual_steps=[
-                        "1. 移除 console.print() 中的 flush=True 參數",
-                        "2. 如需立即輸出，Rich 會自動處理",
+                        safe_t("error_handler.error_diagnostics.msg_0065", fallback="1. 移除 console.print() 中的 flush=True 參數"),
+                        safe_t("error_handler.error_diagnostics.msg_0066", fallback="2. 如需立即輸出，Rich 會自動處理"),
                         "3. 或改用標準 print() 函數（支援 flush 參數）"
                     ],
-                    command="# 自動搜尋並修復所有 console.print(flush=True)",
+                    command=safe_t("error_handler.error_diagnostics.msg_0067", fallback="# 自動搜尋並修復所有 console.print(flush=True)"),
                     priority=1,
                     auto_fixable=True,
                     fix_function=fix_console_flush
@@ -472,12 +473,12 @@ class ErrorDiagnostics:
         # 特殊處理：config_manager 導入錯誤（ChatGemini 內部模組）
         if module_name == "config_manager" and context.get('command') == 'config':
             solutions.append(Solution(
-                title="CodeGemini 配置管理器路徑問題",
+                title=safe_t("error_handler.error_diagnostics.msg_0068", fallback="CodeGemini 配置管理器路徑問題"),
                 description="config_manager 是 CodeGemini 內部模組，應該從 CodeGemini.config_manager 導入",
                 manual_steps=[
-                    "1. 檢查 CodeGemini/ 目錄是否存在",
-                    "2. 檢查 CodeGemini/config_manager.py 是否存在",
-                    "3. 系統將自動嘗試重新載入配置管理器"
+                    safe_t("error_handler.error_diagnostics.msg_0069", fallback="1. 檢查 CodeGemini/ 目錄是否存在"),
+                    safe_t("error_handler.error_diagnostics.msg_0070", fallback="2. 檢查 CodeGemini/config_manager.py 是否存在"),
+                    safe_t("error_handler.error_diagnostics.msg_0071", fallback="3. 系統將自動嘗試重新載入配置管理器")
                 ],
                 priority=1,
                 auto_fixable=True
@@ -505,7 +506,7 @@ class ErrorDiagnostics:
         if module_name in package_map:
             actual_package = package_map[module_name]
             if module_name == "interactive_config_menu":
-                solutions[0].title = "導入路徑錯誤"
+                solutions[0].title = safe_t("error_handler.error_diagnostics.msg_0072", fallback="導入路徑錯誤")
                 solutions[0].description = f"'{module_name}' 應該從 '{actual_package}' 導入"
                 solutions[0].command = None
                 solutions[0].manual_steps = [
@@ -529,12 +530,12 @@ class ErrorDiagnostics:
 
             solutions.append(Solution(
                 title=f"'{object_type}' 物件缺少屬性 '{attr_name}'",
-                description="這可能是因為版本不相容或 API 變更",
+                description=safe_t("error_handler.error_diagnostics.msg_0073", fallback="這可能是因為版本不相容或 API 變更"),
                 manual_steps=[
-                    "1. 檢查相關套件的版本",
-                    "2. 查看最新的 API 文檔",
-                    "3. 確認屬性名稱是否正確",
-                    "4. 考慮更新或降級相關套件"
+                    safe_t("error_handler.error_diagnostics.msg_0074", fallback="1. 檢查相關套件的版本"),
+                    safe_t("error_handler.error_diagnostics.msg_0075", fallback="2. 查看最新的 API 文檔"),
+                    safe_t("error_handler.error_diagnostics.msg_0076", fallback="3. 確認屬性名稱是否正確"),
+                    safe_t("error_handler.error_diagnostics.msg_0077", fallback="4. 考慮更新或降級相關套件")
                 ],
                 priority=1
             ))
@@ -548,13 +549,13 @@ class ErrorDiagnostics:
         # API 金鑰錯誤
         if "401" in error_str or "unauthorized" in error_str.lower():
             solutions.append(Solution(
-                title="API 金鑰無效",
-                description="請檢查 API 金鑰是否正確設定",
+                title=safe_t("error_handler.error_diagnostics.msg_0078", fallback="API 金鑰無效"),
+                description=safe_t("error_handler.error_diagnostics.msg_0079", fallback="請檢查 API 金鑰是否正確設定"),
                 manual_steps=[
-                    "1. 確認環境變數 GEMINI_API_KEY 已設定",
-                    "2. 檢查 API 金鑰是否正確",
-                    "3. 確認 API 金鑰尚未過期",
-                    "4. 到 https://makersuite.google.com/app/apikey 重新生成金鑰"
+                    safe_t("error_handler.error_diagnostics.msg_0080", fallback="1. 確認環境變數 GEMINI_API_KEY 已設定"),
+                    safe_t("error_handler.error_diagnostics.msg_0081", fallback="2. 檢查 API 金鑰是否正確"),
+                    safe_t("error_handler.error_diagnostics.msg_0082", fallback="3. 確認 API 金鑰尚未過期"),
+                    safe_t("error_handler.error_diagnostics.msg_0083", fallback="4. 到 https://makersuite.google.com/app/apikey 重新生成金鑰")
                 ],
                 command="echo $GEMINI_API_KEY",
                 priority=1
@@ -563,12 +564,12 @@ class ErrorDiagnostics:
         # 速率限制
         elif "429" in error_str or "rate limit" in error_str.lower():
             solutions.append(Solution(
-                title="API 速率限制",
-                description="請求過於頻繁，需要降低請求頻率",
+                title=safe_t("error_handler.error_diagnostics.msg_0084", fallback="API 速率限制"),
+                description=safe_t("error_handler.error_diagnostics.msg_0085", fallback="請求過於頻繁，需要降低請求頻率"),
                 manual_steps=[
-                    "1. 等待一段時間後重試",
-                    "2. 在請求間加入延遲",
-                    "3. 考慮升級 API 配額"
+                    safe_t("error_handler.error_diagnostics.msg_0086", fallback="1. 等待一段時間後重試"),
+                    safe_t("error_handler.error_diagnostics.msg_0087", fallback="2. 在請求間加入延遲"),
+                    safe_t("error_handler.error_diagnostics.msg_0088", fallback="3. 考慮升級 API 配額")
                 ],
                 priority=1
             ))
@@ -576,12 +577,12 @@ class ErrorDiagnostics:
         # 配額用盡
         elif "quota" in error_str.lower() or "resource exhausted" in error_str.lower():
             solutions.append(Solution(
-                title="API 配額已用盡",
-                description="已達到 API 使用限制",
+                title=safe_t("error_handler.error_diagnostics.msg_0089", fallback="API 配額已用盡"),
+                description=safe_t("error_handler.error_diagnostics.msg_0090", fallback="已達到 API 使用限制"),
                 manual_steps=[
-                    "1. 檢查配額使用情況",
-                    "2. 等待配額重置（通常為每分鐘或每日）",
-                    "3. 考慮升級到付費方案"
+                    safe_t("error_handler.error_diagnostics.msg_0091", fallback="1. 檢查配額使用情況"),
+                    safe_t("error_handler.error_diagnostics.msg_0092", fallback="2. 等待配額重置（通常為每分鐘或每日）"),
+                    safe_t("error_handler.error_diagnostics.msg_0093", fallback="3. 考慮升級到付費方案")
                 ],
                 priority=1
             ))
@@ -589,12 +590,12 @@ class ErrorDiagnostics:
         # 伺服器錯誤
         elif any(code in error_str for code in ["500", "503", "502", "504"]):
             solutions.append(Solution(
-                title="API 伺服器錯誤",
-                description="Gemini API 伺服器暫時無法使用",
+                title=safe_t("error_handler.error_diagnostics.msg_0094", fallback="API 伺服器錯誤"),
+                description=safe_t("error_handler.error_diagnostics.msg_0095", fallback="Gemini API 伺服器暫時無法使用"),
                 manual_steps=[
-                    "1. 等待幾分鐘後重試",
-                    "2. 檢查 Google Cloud 服務狀態",
-                    "3. 如持續發生，請回報問題"
+                    safe_t("error_handler.error_diagnostics.msg_0096", fallback="1. 等待幾分鐘後重試"),
+                    safe_t("error_handler.error_diagnostics.msg_0097", fallback="2. 檢查 Google Cloud 服務狀態"),
+                    safe_t("error_handler.error_diagnostics.msg_0098", fallback="3. 如持續發生，請回報問題")
                 ],
                 priority=1
             ))
@@ -700,7 +701,7 @@ class ErrorDiagnostics:
         if auto_fixable_solutions:
             console.print("\n[#B565D8]🔧 自動修復選項：[/#B565D8]")
             try:
-                response = input("是否要自動修復此問題？(y/n): ").strip().lower()
+                response = input(safe_t("error_handler.error_diagnostics.msg_0099", fallback="是否要自動修復此問題？(y/n): ")).strip().lower()
                 if response in ['y', 'yes', 'Y', 'YES']:
                     # 執行第一個可自動修復的方案
                     solution = auto_fixable_solutions[0]
@@ -775,4 +776,4 @@ if __name__ == "__main__":
         'stderr': 'Disk quota exceeded'
     }
 
-    display_error_with_solutions(error, "音訊提取", context)
+    display_error_with_solutions(error, safe_t("error_handler.error_diagnostics.msg_0100", fallback="音訊提取"), context)

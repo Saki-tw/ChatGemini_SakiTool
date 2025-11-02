@@ -37,7 +37,7 @@ try:
     API_RETRY_AVAILABLE = True
 except ImportError:
     API_RETRY_AVAILABLE = False
-    print("⚠️  api_retry_wrapper 未找到,將不使用自動重試機制")
+    console.print(safe_t('upload.helper.warning.retry_not_found', fallback='⚠️  api_retry_wrapper 未找到,將不使用自動重試機制'))
 
 try:
     from error_fix_suggestions import (
@@ -50,7 +50,7 @@ try:
 except ImportError:
     ERROR_FIX_AVAILABLE = False
     error_logger = None
-    print("⚠️  error_fix_suggestions 未找到,將不使用智能錯誤診斷")
+    console.print(safe_t('upload.helper.warning.error_fix_not_found', fallback='⚠️  error_fix_suggestions 未找到,將不使用智能錯誤診斷'))
 
 console = Console()
 
@@ -176,10 +176,10 @@ class ChunkedUploader:
                 if progress.get('file_hash') == current_hash:
                     return progress
                 else:
-                    console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️ 檔案已被修改,無法續傳[/#E8C4F0]'))
+                    console.print(safe_t('upload.helper.warning.file_modified', fallback='[#E8C4F0]⚠️ 檔案已被修改,無法續傳[/#E8C4F0]'))
                     return None
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[#E8C4F0]⚠️ 讀取進度檔案失敗：{e}[/#E8C4F0]', e=e))
+            console.print(safe_t('upload.helper.error.load_progress_failed', fallback='[#E8C4F0]⚠️ 讀取進度檔案失敗：{e}[/#E8C4F0]', e=e))
             return None
 
         return None
@@ -201,7 +201,7 @@ class ChunkedUploader:
             with open(progress_file, 'w', encoding='utf-8') as f:
                 json.dump(progress, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[#E8C4F0]⚠️ 儲存進度檔案失敗：{e}[/#E8C4F0]', e=e))
+            console.print(safe_t('upload.helper.error.save_progress_failed', fallback='[#E8C4F0]⚠️ 儲存進度檔案失敗：{e}[/#E8C4F0]', e=e))
 
     def _delete_progress(self, file_path: str):
         """
@@ -215,7 +215,7 @@ class ChunkedUploader:
             if progress_file.exists():
                 progress_file.unlink()
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[#E8C4F0]⚠️ 刪除進度檔案失敗：{e}[/#E8C4F0]', e=e))
+            console.print(safe_t('upload.helper.error.delete_progress_failed', fallback='[#E8C4F0]⚠️ 刪除進度檔案失敗：{e}[/#E8C4F0]', e=e))
 
     def _create_new_progress(self, file_path: str, file_size: int) -> Dict:
         """
@@ -366,7 +366,7 @@ class ChunkedUploader:
             console=console,
         ) as progress_bar:
             task = progress_bar.add_task(
-                f"上傳中... ({len(uploaded_chunks)}/{total_chunks} 分塊)",
+                safe_t('upload.helper.progress.uploading_chunks', fallback='上傳中... ({uploaded}/{total} 分塊)', uploaded=len(uploaded_chunks), total=total_chunks),
                 total=file_size
             )
 
@@ -523,7 +523,7 @@ class FileUploadHelper:
             console.print(safe_t('common.message', fallback='   策略：[#B565D8]快速上傳（小檔案）[/green]\n'))
             return self._upload_small_file(file_path, display_name, mime_type, timeout, max_retries)
         else:
-            file_size_text = '大' if file_category == 'large' else '中等'
+            file_size_text = safe_t('upload.helper.file_size.large', fallback='大') if file_category == 'large' else safe_t('upload.helper.file_size.medium', fallback='中等')
             console.print(safe_t('common.message', fallback='   策略：[#E8C4F0]優化上傳（{file_size_text}檔案）[/#E8C4F0]\n', file_size_text=file_size_text))
             return self._upload_large_file(file_path, display_name, mime_type, timeout, max_retries)
 

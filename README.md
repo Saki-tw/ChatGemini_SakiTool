@@ -51,11 +51,11 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 
 ## 📦 專案資訊
 
-**專案名稱**: ChatGemini_SakiTool  
-**版本**: v1.0.6  
-**作者**: Saki-tw with Claude Code  
-**聯絡**: Saki@saki-studio.com.tw  
-**最後更新**: 2025-11-01
+**專案名稱**: ChatGemini_SakiTool
+**版本**: v1.0.7
+**作者**: Saki-tw with Claude Code
+**聯絡**: Saki@saki-studio.com.tw
+**最後更新**: 2025-11-02
 
 **申請 API 金鑰**：https://aistudio.google.com/app/apikey
 **每月免費額度**：Gemini 2.5 Pro 提供免費使用額度
@@ -63,6 +63,18 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 ---
 
 ## 🔥 版本進化歷程
+
+### 📅 v1.0.7（2025-11-02）— 🤖 CodeGemini 開發工具整合
+
+**核心更新**：
+
+- 🛠️ **CodeGemini 互動介面實裝**：Ctrl+G 快速呼叫開發工具選單、測試生成器與文檔生成器介面完善、向量搜尋與批次處理功能整合、非侵入式設計不干擾正常對話流程
+
+- 🌐 **多語言支援優化**：完成 4 種語言翻譯體系（繁中、英、日、韓）、語言切換介面改善、翻譯鍵結構優化
+
+- 🐛 **媒體功能修復**：修正 Imagen/Veo/Flow Engine API 參數相容性、補強 person_generation 參數設定、確保所有媒體生成功能穩定運行
+
+---
 
 ### 📅 v1.0.6（2025-11-01）— 🎯 智能模型管理
 
@@ -179,11 +191,38 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 - **字幕生成**：語音辨識、多語言翻譯、SRT/VTT 格式
 
 ### 💻 CodeGemini
+
+#### 🔍 程式碼分析與搜尋
 - **FAISS 高速索引**：查詢複雜度從 O(n) 降至 O(log n)
 - **語意搜尋**：理解程式碼意義而非僅關鍵字匹配
 - **正交去重**：確保向量內容線性獨立
 - **增量更新**：單檔更新無需重建整個索引
 - **對話歷史檢索**：搜尋歷史對話內容
+
+#### 🤖 自動生成工具
+- **測試程式碼生成**：自動生成 pytest/unittest 測試案例
+  - 正常情況、邊界條件、異常處理測試
+  - Mock 物件自動處理
+  - 批次處理與預覽模式
+  - 詳細文檔：[README_test_gen.md](CodeGemini/generators/README_test_gen.md)
+
+- **Docstring 生成**：自動生成專業文檔註解
+  - 支援 Google/NumPy/Sphinx 風格
+  - 類型提示感知
+  - 批次處理與自動備份
+
+#### 🔒 安全掃描工具
+- **硬編碼密碼檢測**：掃描敏感資訊洩露
+  - 10 種敏感模式（password, api_key, secret_key 等）
+  - 智能排除安全用法
+  - 兩階段驗證（正則 + Gemini）
+
+- **SQL 注入 / XSS 檢測**：自動化安全漏洞掃描
+  - 5 種 SQL 注入檢測模式
+  - 6 種 XSS 檢測模式
+  - 多語言支援（Python, JavaScript, TypeScript, Java, PHP, Ruby）
+  - 客製化修復建議與程式碼範例
+  - 多種輸出格式（Text/JSON/Markdown）
 
 #### 🔌 MCP 智慧整合系統
 - **7 種工具自動偵測**：檔案操作、Git 管理、網頁搜尋、序列推理等

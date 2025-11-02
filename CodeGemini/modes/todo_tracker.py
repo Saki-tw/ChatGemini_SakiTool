@@ -146,14 +146,14 @@ class TodoTracker:
         todo = self._get_todo_by_index(index)
 
         if not todo:
-            console.print(safe_t('codegemini.todo.not_found', fallback="[dim #DDA0DD]✗ 任務不存在：#{index}[/red]", index=index))
+            console.print(safe_t('codegemini.todo.not_found', fallback="[dim #B565D8]✗ 任務不存在：#{index}[/red]", index=index))
             return False
 
         # 如果要設為 in_progress，檢查是否已有其他 in_progress 任務
         if status == TodoStatus.IN_PROGRESS:
             in_progress_todos = [t for t in self.todos if t.is_in_progress]
             if in_progress_todos:
-                console.print(safe_t('codegemini.todo.already_in_progress', fallback="[#DDA0DD]⚠️  已有進行中的任務：{content}[/#DDA0DD]", content=in_progress_todos[0].content))
+                console.print(safe_t('codegemini.todo.already_in_progress', fallback="[#B565D8]⚠️  已有進行中的任務：{content}[/#B565D8]", content=in_progress_todos[0].content))
                 # 自動將其標記為 completed
                 in_progress_todos[0].mark_completed()
 
@@ -166,7 +166,7 @@ class TodoTracker:
         elif status == TodoStatus.COMPLETED:
             todo.mark_completed()
 
-        console.print(safe_t('codegemini.todo.status_updated', fallback="[#DA70D6]✓ 任務 #{index} 狀態更新：{old} → {new}[/green]", index=index, old=old_status.value, new=status.value))
+        console.print(safe_t('codegemini.todo.status_updated', fallback="[#B565D8]✓ 任務 #{index} 狀態更新：{old} → {new}[/#B565D8]", index=index, old=old_status.value, new=status.value))
 
         return True
 
@@ -222,16 +222,16 @@ class TodoTracker:
         percentage = progress_info["progress_percentage"]
 
         console.print(safe_t('codegemini.todo.total_tasks', fallback="總任務：{total}", total=total))
-        console.print(safe_t('codegemini.todo.completed_tasks', fallback="已完成：[#DA70D6]{completed}[/green]", completed=completed))
-        console.print(safe_t('codegemini.todo.in_progress_tasks', fallback="進行中：[#DDA0DD]{count}[/#DDA0DD]", count=progress_info['in_progress']))
+        console.print(safe_t('codegemini.todo.completed_tasks', fallback="已完成：[#B565D8]{completed}[/#B565D8]", completed=completed))
+        console.print(safe_t('codegemini.todo.in_progress_tasks', fallback="進行中：[#B565D8]{count}[/#B565D8]", count=progress_info['in_progress']))
         console.print(safe_t('codegemini.todo.pending_tasks', fallback="待處理：[dim]{count}[/dim]", count=progress_info['pending']))
-        console.print(safe_t('codegemini.todo.progress_percentage', fallback="進度：[#DDA0DD]{percentage:.1f}%[/#DDA0DD]", percentage=percentage))
+        console.print(safe_t('codegemini.todo.progress_percentage', fallback="進度：[#B565D8]{percentage:.1f}%[/#B565D8]", percentage=percentage))
 
         # 進度條視覺化
         bar_length = 50
         filled_length = int(bar_length * completed / total) if total > 0 else 0
         bar = "█" * filled_length + "░" * (bar_length - filled_length)
-        console.print(safe_t('codegemini.todo.progress_bar', fallback="\n[#DDA0DD]{bar}[/#DDA0DD] {percentage:.0f}%\n", bar=bar, percentage=percentage))
+        console.print(safe_t('codegemini.todo.progress_bar', fallback="\n[#B565D8]{bar}[/#B565D8] {percentage:.0f}%\n", bar=bar, percentage=percentage))
 
     def display_todos(self, show_completed: bool = True) -> None:
         """
@@ -241,12 +241,12 @@ class TodoTracker:
             show_completed: 是否顯示已完成任務
         """
         if not self.todos:
-            console.print(safe_t('codegemini.todo.no_tasks', fallback="[#DDA0DD]⚠️  無任務[/#DDA0DD]"))
+            console.print(safe_t('codegemini.todo.no_tasks', fallback="[#B565D8]⚠️  無任務[/#B565D8]"))
             return
 
         console.print(safe_t('codegemini.todo.list_title', fallback="\n[bold]📋 任務列表[/bold]\n"))
 
-        table = Table(show_header=True, header_style="bold #DA70D6")
+        table = Table(show_header=True, header_style="bold #B565D8")
         console_width = console.width or 120
         table.add_column("#", style="dim", width=max(4, int(console_width * 0.03)))
         table.add_column(safe_t('codegemini.todo.status_column', fallback="狀態"), style="white", width=max(10, int(console_width * 0.12)))
@@ -259,9 +259,9 @@ class TodoTracker:
 
             # 狀態圖示
             if todo.is_completed:
-                status_text = safe_t('codegemini.todo.status_completed', fallback="[#DA70D6]✅ 完成[/green]")
+                status_text = safe_t('codegemini.todo.status_completed', fallback="[#B565D8]✅ 完成[/#B565D8]")
             elif todo.is_in_progress:
-                status_text = safe_t('codegemini.todo.status_in_progress', fallback="[#DDA0DD]⏳ 進行中[/#DDA0DD]")
+                status_text = safe_t('codegemini.todo.status_in_progress', fallback="[#B565D8]⏳ 進行中[/#B565D8]")
             else:  # pending
                 status_text = safe_t('codegemini.todo.status_pending', fallback="[dim]⏸️  待處理[/dim]")
 
@@ -292,11 +292,11 @@ class TodoTracker:
         todo = self._get_todo_by_index(index)
 
         if not todo:
-            console.print(safe_t('codegemini.todo.not_found', fallback="[dim #DDA0DD]✗ 任務不存在：#{index}[/red]", index=index))
+            console.print(safe_t('codegemini.todo.not_found', fallback="[dim #B565D8]✗ 任務不存在：#{index}[/red]", index=index))
             return False
 
         self.todos.remove(todo)
-        console.print(safe_t('codegemini.todo.removed', fallback="[#DA70D6]✓ 任務 #{index} 已移除[/green]", index=index))
+        console.print(safe_t('codegemini.todo.removed', fallback="[#B565D8]✓ 任務 #{index} 已移除[/#B565D8]", index=index))
 
         return True
 
@@ -309,7 +309,7 @@ class TodoTracker:
             self.todos.remove(todo)
 
         if count > 0:
-            console.print(safe_t('codegemini.todo.cleared', fallback="[#DA70D6]✓ 清除了 {count} 個已完成任務[/green]", count=count))
+            console.print(safe_t('codegemini.todo.cleared', fallback="[#B565D8]✓ 清除了 {count} 個已完成任務[/#B565D8]", count=count))
 
         return count
 
@@ -325,7 +325,7 @@ class TodoTracker:
 
 def main():
     """Todo Tracker 命令列工具"""
-    console.print(safe_t('codegemini.todo.demo_title', fallback="\n[bold #DDA0DD]CodeGemini Todo Tracker Demo[/bold #DDA0DD]\n"))
+    console.print(safe_t('codegemini.todo.demo_title', fallback="\n[bold #B565D8]CodeGemini Todo Tracker Demo[/bold #B565D8]\n"))
 
     tracker = TodoTracker()
 

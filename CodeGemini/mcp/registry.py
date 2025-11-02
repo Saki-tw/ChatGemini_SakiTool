@@ -23,10 +23,23 @@ import urllib.error
 from typing import Optional, Dict, List, Any
 from pathlib import Path
 from dataclasses import dataclass, asdict
-from rich.console import Console
-from utils.i18n import safe_t
 
-console = Console()
+# 優雅降級：rich 不可用時使用標準輸出
+try:
+    from rich.console import Console
+    console = Console()
+    HAS_RICH = True
+except ImportError:
+    HAS_RICH = False
+    console = None
+
+# 優雅降級：i18n 不可用時使用預設文字
+try:
+    from utils.i18n import safe_t
+except ImportError:
+    def safe_t(key, fallback, **kwargs):
+        """降級版本的 safe_t"""
+        return fallback.format(**kwargs) if kwargs else fallback
 
 
 @dataclass
@@ -132,10 +145,10 @@ class MCPRegistry:
 
             data = cls._fetch_from_endpoint(endpoint)
             if data:
-                console.print(safe_t("registry.fetch.success", fallback="[dim #DDA0DD]✓ 成功獲取數據（端點 {num}）[/dim #DDA0DD]").format(num=i+1))
+                console.print(safe_t("registry.fetch.success", fallback="[dim #B565D8]✓ 成功獲取數據（端點 {num}）[/dim #B565D8]").format(num=i+1))
                 return data
 
-        console.print(safe_t("registry.fetch.all_failed", fallback="[#DDA0DD]⚠️  所有 Registry 端點均無法訪問[/#DDA0DD]"))
+        console.print(safe_t("registry.fetch.all_failed", fallback="[#B565D8]⚠️  所有 Registry 端點均無法訪問[/#B565D8]"))
         return None
 
     @classmethod
@@ -161,7 +174,7 @@ class MCPRegistry:
                 console.print(safe_t("registry.cache.expired", fallback="[dim]⚠️  快取已過期（{hours:.1f} 小時）[/dim]").format(hours=age/3600))
                 return None
 
-            console.print(safe_t("registry.cache.using", fallback="[dim #DDA0DD]✓ 使用快取數據（{hours:.1f} 小時前）[/dim #DDA0DD]").format(hours=age/3600))
+            console.print(safe_t("registry.cache.using", fallback="[dim #B565D8]✓ 使用快取數據（{hours:.1f} 小時前）[/dim #B565D8]").format(hours=age/3600))
             return cache_data.get('servers')
 
         except Exception as e:
@@ -222,14 +235,14 @@ class MCPRegistry:
             return servers
 
         # 網路也失敗，嘗試使用過期快取（優雅降級）
-        console.print(safe_t("registry.fallback.trying", fallback="[#DDA0DD]⚠️  嘗試使用過期快取...[/#DDA0DD]"))
+        console.print(safe_t("registry.fallback.trying", fallback="[#B565D8]⚠️  嘗試使用過期快取...[/#B565D8]"))
         if cls.CACHE_FILE.exists():
             try:
                 with open(cls.CACHE_FILE, 'r', encoding='utf-8') as f:
                     cache_data = json.load(f)
                     servers = cache_data.get('servers')
                     if servers:
-                        console.print(safe_t("registry.fallback.success", fallback="[#DDA0DD]✓ 使用過期快取（降級模式）[/#DDA0DD]"))
+                        console.print(safe_t("registry.fallback.success", fallback="[#B565D8]✓ 使用過期快取（降級模式）[/#B565D8]"))
                         return servers
             except:
                 pass
@@ -373,7 +386,7 @@ class MCPRegistry:
         if not check_result['required']:
             return  # 無環境變數需求
 
-        console.print(safe_t("registry.env.hint", fallback="\n[#DDA0DD]💡 提示：{name} Server 需要以下環境變數[/#DDA0DD]").format(name=server_name))
+        console.print(safe_t("registry.env.hint", fallback="\n[#B565D8]💡 提示：{name} Server 需要以下環境變數[/#B565D8]").format(name=server_name))
 
         for env_var, description in check_result['required'].items():
             is_set = env_var in check_result['present']
@@ -393,7 +406,7 @@ def main():
     """Registry 客戶端測試工具"""
     import sys
 
-    console.print("\n[bold #DDA0DD]CodeGemini MCP Registry Client[/bold #DDA0DD]\n")
+    console.print("\n[bold #B565D8]CodeGemini MCP Registry Client[/bold #B565D8]\n")
 
     if len(sys.argv) < 2:
         console.print(safe_t("registry.usage.header", fallback="用法："))
@@ -413,7 +426,7 @@ def main():
         metadata = MCPRegistry.fetch_server_info(server_name)
 
         if metadata:
-            console.print(f"\n[#DDA0DD]📦 {metadata.name}[/#DDA0DD]")
+            console.print(f"\n[#B565D8]📦 {metadata.name}[/#B565D8]")
             console.print(safe_t("registry.info.description", fallback="描述：{desc}").format(desc=metadata.description))
             console.print(safe_t("registry.info.package", fallback="套件：{pkg}").format(pkg=metadata.package))
             console.print(safe_t("registry.info.version", fallback="版本：{ver}").format(ver=metadata.version))
@@ -436,7 +449,7 @@ def main():
         MCPRegistry.print_env_setup_hint(server_name)
 
     elif command == "refresh":
-        console.print(safe_t("registry.refresh.starting", fallback="[#DDA0DD]🔄 強制更新快取...[/#DDA0DD]"))
+        console.print(safe_t("registry.refresh.starting", fallback="[#B565D8]🔄 強制更新快取...[/#B565D8]"))
         servers = MCPRegistry._get_servers_data(force_refresh=True)
         if servers:
             console.print(safe_t("registry.refresh.success", fallback="[green]✓ 已更新，共 {count} 個 Server[/green]").format(count=len(servers)))

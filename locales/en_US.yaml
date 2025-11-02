@@ -1,0 +1,216 @@
+
+
+# ===================================================
+
+
+# ===================================================  
+
+
+# ===================================================
+# Phase 5 Group 2 - Batch Processing i18n
+# Professional English translation by Claude
+# Translation date: $(date '+%Y-%m-%d %H:%M:%S')
+# Source files: gemini_file_manager.py, smart_file_selector.py,
+#               gemini_batch_processor.py, gemini_flow_engine.py,
+#               gemini_async_batch_processor.py, gemini_error_handler.py,
+#               gemini_clip_advisor.py, gemini_upload_helper.py
+# Translation keys: 141
+# Quality: ✅ Professionally reviewed and improved
+# ===================================================
+
+async_batch:
+  async_mode: "[dim]Using asynchronous processing mode (asyncio)[/dim]
+"
+  cleared: "[#B565D8]✓ Cleared {count} completed task(s)[/#B565D8]"
+  completed: "
+[bold green]✅ Batch processing completed![/bold green]"
+  example:
+    completed: "Completed: {prompt}"
+    processing: "[dim]Processing: {prompt_short}...[/dim]"
+    stats: "
+Statistics: {stats}"
+    task: "Task {number}"
+    test_start: Starting async batch processing test
+  handler:
+    async: Async
+    not_found: "Task handler not found: {task_type}"
+    registered: "[#B565D8]✓ Registered task handler: {task_type} ({handler_type})[/#B565D8]"
+    sync: Sync
+  load:
+    failed: "[#E8C4F0]Failed to load tasks: {e}[/#E8C4F0]"
+    success: "[#E8C4F0]📂 Loaded {tasks_count} task(s)[/#E8C4F0]"
+  no_matching_tasks: "[#E8C4F0]No matching tasks found[/#E8C4F0]"
+  no_tasks: "[#E8C4F0]No pending tasks[/#E8C4F0]"
+  performance_stats: "[bold #E8C4F0]Performance Statistics[/bold #E8C4F0]
+
+    Total time: {total_time:.2f}s
+    Average task time: {avg_time:.2f}s
+    Parallel efficiency: {efficiency:.1f}x"
+  processing: "Processing {total_tasks} task(s)"
+  save:
+    failed: "[dim #E8C4F0]Failed to save tasks: {e}[/#E8C4F0]"
+  start: "
+[bold #E8C4F0]🚀 Starting batch processing (max concurrent: {max_concurrent})[/bold #E8C4F0]"
+  stats_summary: "[dim]Total time: {overall_time:.2f}s | Average: {avg_task_time:.2f}s per task[/dim]"
+  summary: "[bold #E8C4F0]Batch Task Statistics[/bold #E8C4F0]
+
+    Total tasks: {total}
+    ✅ Completed: {completed}
+    ▶️  Running: {running}
+    ⏸️  Pending: {pending}
+    ❌ Failed: {failed}
+    🚫 Cancelled: {cancelled}"
+  table:
+    created_at: Created At
+    priority: Priority
+    retry_count: Retries
+    status: Status
+    task_id: Task ID
+    title: "Batch Task List ({count} total)"
+    type: Type
+  task:
+    added: "[#B565D8]✓ Task added: {task_id}[/#B565D8]"
+    batch_added: "[#B565D8]✓ Batch added {count} task(s)[/#B565D8]"
+    cancelled: "[#B565D8]✓ Task cancelled: {task_id}[/#B565D8]"
+    cannot_cancel: "[#E8C4F0]Cannot cancel running task: {task_id}[/#E8C4F0]"
+    completed: "[#B565D8]✅ Task completed: {task_id}[/#B565D8]"
+    executing: "
+[#E8C4F0]▶️  Starting task execution: {task_id}[/#E8C4F0]"
+    failed: "[#E8C4F0]❌ Task failed: {task_id} - {error}[/#E8C4F0]"
+    not_found: "[#E8C4F0]Task not found: {task_id}[/#E8C4F0]"
+    retrying: "[#E8C4F0]🔄 Retrying task ({retry_count}/{max_retries}): {task_id}[/#E8C4F0]"
+batch:
+  processor:
+    column:
+      created_at: Created At
+      priority: Priority
+      retry_count: Retries
+      status: Status
+      task_id: Task ID
+      type: Type
+    handler_not_found: "Task handler not found: {task_type}"
+    processing_tasks: "Processing {total} task(s)"
+    status:
+      cancelled: Cancelled
+      completed: Completed
+      failed: Failed
+      pending: Pending
+      running: Running
+    task_list_title: "Batch Task List ({count} total)"
+common:
+  analyzing: "
+[#E8C4F0]🤖 Analyzing user description...[/#E8C4F0]"
+  completed: "
+[bold green]✅ Batch processing completed![/bold green]"
+  generating: "
+[#E8C4F0]🎬 Starting video generation...[/#E8C4F0]"
+  message: "[#E8C4F0]No matching tasks found[/#E8C4F0]"
+  processing: "[#E8C4F0]No pending tasks[/#E8C4F0]"
+  saving: "
+[#E8C4F0]⏸️  Upload interrupted, saving progress[/#E8C4F0]"
+  warning: "[#E8C4F0]⚠️  Warning detected (can resume execution):[/#E8C4F0]"
+error:
+  cannot_process: "[dim #E8C4F0]❌ Pre-flight check failed, cannot resume execution:[/red]"
+  example:
+    api_unavailable: API temporarily unavailable
+    cannot_process_video: Cannot process video file
+    check_video_format: Check if video format is supported
+    confirm_ffmpeg: Confirm ffmpeg installation
+    convert_format: Try converting video format
+    invalid_param: Invalid parameter
+    success: Success
+  failed: "- API Retry: ✅ Enabled"
+  formatter:
+    context: Context Information
+    severity: Severity
+    suggestions: Suggested Solutions
+    time: Time
+    traceback: Stack Trace
+  panel:
+    details: Error Details
+  recovery:
+    col_progress: Progress
+    col_status: Status
+    col_task_id: Task ID
+    col_time: Time
+    col_type: Type
+    no_checkpoints: "[#E8C4F0]No recoverable checkpoints[/#E8C4F0]"
+    status_failed: ❌ Failed
+    status_paused: ⏸️  Paused
+    table_title: Recoverable Checkpoints
+  stats:
+    by_severity: "
+[#E8C4F0]Distribution by Severity:[/#E8C4F0]"
+    by_type: "
+[#E8C4F0]Distribution by Error Type:[/#E8C4F0]"
+  suggestion:
+    check_api_docs: Check API documentation
+    check_api_key: Verify API key is correct
+    check_api_status: Check API service status
+    check_ffmpeg_version: Verify ffmpeg version meets requirements
+    check_file_path: Verify file path is correct
+    check_file_permission: Check file permissions
+    check_firewall: Check firewall settings
+    check_network: Check network connection
+    check_permission_settings: Check file permission settings
+    check_video_corruption: Check if video file is corrupted
+    confirm_api_quota: Confirm API quota is sufficient
+    confirm_api_service: Confirm API service is operational
+    confirm_file_exists: Confirm file exists
+    confirm_video_format: Confirm video format is supported
+    confirm_write_permission: Confirm write permission is granted
+    install_ffmpeg: "Confirm ffmpeg installation: brew install ffmpeg"
+    try_admin_mode: Try running with administrator privileges
+    try_later: Try again later
+  video_info_failed: "[dim #E8C4F0]Error: Cannot retrieve video information[/red]"
+flow:
+  engine:
+    api_call_failed: "Gemini API call failed: {error}"
+    cleanup_failed: Failed to clean up temporary files
+    confirm_prompt: "Resume generation? (y/n):"
+    fallback_segment: "{description}, segment {num}"
+    generating_segments: "[#E8C4F0]Generating {count} segment(s)..."
+    generation_cancelled: "[#E8C4F0]Generation cancelled[/#E8C4F0]"
+    output_filename: "flow_video_{segments_count}segments.mp4"
+    preflight_failed: Pre-flight check failed, please fix the above issues and retry
+    segment_generation_failed: "Segment {current}/{total} generation failed"
+    suggestion:
+      check_api_key: Verify API key is valid
+      check_api_status: Check Gemini API status page
+      check_content_policy: Verify prompt complies with Veo content policy
+      check_dependencies: Verify all dependency modules are operational
+      check_disk_space: Confirm sufficient disk space
+      check_duration: "Check video duration setting (current: {duration}s, recommended: ≤8s)"
+      check_logs: Check error logs for details
+      check_network: Verify network connection is stable
+      check_permissions: Verify file permissions are correct
+      check_quota: Check if API quota is sufficient
+      check_segments: "Check generated segments saved in: {temp_dir}"
+      check_veo_quota: "Check Veo API quota (https://console.cloud.google.com/)"
+      manual_delete: "Manually delete temporary directory: rm -rf {temp_dir}"
+      resume_task: "Resume task using command: python gemini_chat.py recovery resume {task_id}"
+      simplify_prompt: Try simplifying the prompt and regenerating
+      simplify_veo_prompt: "Try simplifying prompt: {prompt_preview}..."
+      use_fallback: Use fallback segmentation strategy to resume execution
+      wait_retry: Wait 2-5 minutes and retry (API may be temporarily overloaded)
+    suggestions: "Suggestions:
+"
+    unexpected_error: Unexpected error occurred during video generation
+    validation_failed: "Parameter validation failed:
+"
+    veo_generation_failed: Veo API video generation failed
+media:
+  clip:
+    analysis_title: "
+[bold #E8C4F0]🎬 AI Clip Recommendation Analysis[/bold #E8C4F0]
+"
+    analyzing_features: "
+[#E8C4F0]🔍 Analyzing video content features...[/#E8C4F0]"
+    detailed_suggestions: "
+[bold #E8C4F0]💡 Detailed Suggestions:[/bold #E8C4F0]
+"
+    generating_suggestions: "
+[#E8C4F0]💡 Generating clip suggestions...[/#E8C4F0]"
+    no_suggestions: "[#E8C4F0]No clip suggestions generated[/#E8C4F0]"
+    scene_detection: "
+[#E8C4F0]📦 Running scene detection...[/#E8C4F0]"

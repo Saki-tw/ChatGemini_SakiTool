@@ -13,10 +13,23 @@ CodeGemini MCP 智慧偵測器
 import re
 from typing import List, Dict, Set, Optional
 from dataclasses import dataclass
-from rich.console import Console
-from utils.i18n import safe_t
 
-console = Console()
+# 優雅降級：rich 不可用時使用標準輸出
+try:
+    from rich.console import Console
+    console = Console()
+    HAS_RICH = True
+except ImportError:
+    HAS_RICH = False
+    console = None
+
+# 優雅降級：i18n 不可用時使用預設文字
+try:
+    from utils.i18n import safe_t
+except ImportError:
+    def safe_t(key, fallback, **kwargs):
+        """降級版本的 safe_t"""
+        return fallback.format(**kwargs) if kwargs else fallback
 
 
 @dataclass
@@ -210,24 +223,43 @@ class MCPServerDetector:
     def add_custom_rule(self, rule: DetectionRule):
         """新增自訂偵測規則"""
         self.rules.append(rule)
-        console.print(f"[green]✓ {safe_t('mcp.detector.rule_added', '已新增自訂規則：{name}', name=rule.server_name)}[/green]")
+        msg = safe_t('mcp.detector.rule_added', '已新增自訂規則：{name}', name=rule.server_name)
+        if HAS_RICH and console:
+            console.print(f"[green]✓ {msg}[/green]")
+        else:
+            print(f"✓ {msg}")
 
     def remove_rule(self, server_name: str):
         """移除指定 Server 的規則"""
         self.rules = [r for r in self.rules if r.server_name != server_name]
-        console.print(f"[#DDA0DD]✓ {safe_t('mcp.detector.rule_removed', '已移除規則：{name}', name=server_name)}[/#DDA0DD]")
+        msg = safe_t('mcp.detector.rule_removed', '已移除規則：{name}', name=server_name)
+        if HAS_RICH and console:
+            console.print(f"[#B565D8]✓ {msg}[/#B565D8]")
+        else:
+            print(f"✓ {msg}")
 
     def list_rules(self):
         """列出所有偵測規則"""
-        console.print(f"\n[bold #87CEEB]📋 {safe_t('mcp.detector.rules_list', 'MCP Server 偵測規則列表')}[/bold #87CEEB]\n")
+        title = f"\n📋 {safe_t('mcp.detector.rules_list', 'MCP Server 偵測規則列表')}\n"
 
-        for i, rule in enumerate(self.rules, 1):
-            console.print(f"[#87CEEB]{i}. {rule.server_name}[/#87CEEB]")
-            console.print(f"   {safe_t('mcp.detector.description', '說明')}：{rule.description}")
-            console.print(f"   {safe_t('mcp.detector.keywords_count', '關鍵字數量')}：{len(rule.keywords)}")
-            console.print(f"   {safe_t('mcp.detector.patterns_count', '模式數量')}：{len(rule.patterns)}")
-            console.print(f"   {safe_t('mcp.detector.confidence_weight', '信心度權重')}：{rule.confidence}")
-            console.print()
+        if HAS_RICH and console:
+            console.print(f"[bold #87CEEB]{title}[/bold #87CEEB]")
+            for i, rule in enumerate(self.rules, 1):
+                console.print(f"[#87CEEB]{i}. {rule.server_name}[/#87CEEB]")
+                console.print(f"   {safe_t('mcp.detector.description', '說明')}：{rule.description}")
+                console.print(f"   {safe_t('mcp.detector.keywords_count', '關鍵字數量')}：{len(rule.keywords)}")
+                console.print(f"   {safe_t('mcp.detector.patterns_count', '模式數量')}：{len(rule.patterns)}")
+                console.print(f"   {safe_t('mcp.detector.confidence_weight', '信心度權重')}：{rule.confidence}")
+                console.print()
+        else:
+            print(title)
+            for i, rule in enumerate(self.rules, 1):
+                print(f"{i}. {rule.server_name}")
+                print(f"   {safe_t('mcp.detector.description', '說明')}：{rule.description}")
+                print(f"   {safe_t('mcp.detector.keywords_count', '關鍵字數量')}：{len(rule.keywords)}")
+                print(f"   {safe_t('mcp.detector.patterns_count', '模式數量')}：{len(rule.patterns)}")
+                print(f"   {safe_t('mcp.detector.confidence_weight', '信心度權重')}：{rule.confidence}")
+                print()
 
 
 # ==================== 使用範例 ====================
@@ -247,21 +279,38 @@ def demo():
         "從雲端硬碟下載最新的簡報檔案"
     ]
 
-    console.print(f"[bold #DDA0DD]🔍 {safe_t('mcp.detector.demo_title', 'MCP Server 智慧偵測器示範')}[/bold #DDA0DD]\n")
+    title = f"🔍 {safe_t('mcp.detector.demo_title', 'MCP Server 智慧偵測器示範')}\n"
 
-    for i, test_input in enumerate(test_cases, 1):
-        console.print(f"[bold]{safe_t('mcp.detector.test', '測試')} {i}:[/bold] {test_input}")
-        results = detector.detect(test_input)
+    if HAS_RICH and console:
+        console.print(f"[bold #B565D8]{title}[/bold #B565D8]")
+        for i, test_input in enumerate(test_cases, 1):
+            console.print(f"[bold]{safe_t('mcp.detector.test', '測試')} {i}:[/bold] {test_input}")
+            results = detector.detect(test_input)
 
-        if results:
-            console.print(f"[green]✓ {safe_t('mcp.detector.detected_servers', '偵測到 {count} 個相關 Server', count=len(results))}：[/green]")
-            for result in results:
-                console.print(f"  • {result['server_name']} "
-                            f"({safe_t('mcp.detector.confidence', '信心度')}: {result['confidence']:.2f}) - {result['reason']}")
-        else:
-            console.print(f"[dim]✗ {safe_t('mcp.detector.no_servers_detected', '未偵測到需要的 MCP Server')}[/dim]")
+            if results:
+                console.print(f"[green]✓ {safe_t('mcp.detector.detected_servers', '偵測到 {count} 個相關 Server', count=len(results))}：[/green]")
+                for result in results:
+                    console.print(f"  • {result['server_name']} "
+                                f"({safe_t('mcp.detector.confidence', '信心度')}: {result['confidence']:.2f}) - {result['reason']}")
+            else:
+                console.print(f"[dim]✗ {safe_t('mcp.detector.no_servers_detected', '未偵測到需要的 MCP Server')}[/dim]")
 
-        console.print()
+            console.print()
+    else:
+        print(title)
+        for i, test_input in enumerate(test_cases, 1):
+            print(f"{safe_t('mcp.detector.test', '測試')} {i}: {test_input}")
+            results = detector.detect(test_input)
+
+            if results:
+                print(f"✓ {safe_t('mcp.detector.detected_servers', '偵測到 {count} 個相關 Server', count=len(results))}：")
+                for result in results:
+                    print(f"  • {result['server_name']} "
+                                f"({safe_t('mcp.detector.confidence', '信心度')}: {result['confidence']:.2f}) - {result['reason']}")
+            else:
+                print(f"✗ {safe_t('mcp.detector.no_servers_detected', '未偵測到需要的 MCP Server')}")
+
+            print()
 
 
 if __name__ == "__main__":

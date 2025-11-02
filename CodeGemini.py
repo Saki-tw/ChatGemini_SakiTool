@@ -1,31 +1,41 @@
 #!/usr/bin/env python3
 """
-CodeGemini - Google Gemini CLI 管理工具 (Python API)
-版本：1.0.1
+CodeGemini - ChatGemini 專案的 AI 代碼輔助工具
+版本：1.2.0
 維護者：Saki-tw (with Claude Code)
-日期：2025-10-21
+最後更新：2025-11-02
 
-用途：
-  提供 Python API 介面來管理 Google Gemini CLI
-  整合 Shell 腳本功能到 ChatGemini_SakiTool 生態系統
+專案定位：
+  CodeGemini 是 ChatGemini_SakiTool 專案的開發工具子系統，
+  整合了 Claude Code 與 Google Code Assist 兩者的功能，
+  提供強大的 AI 驅動代碼生成與增強工具。
 
 核心功能：
-  - 環境檢查與驗證
-  - Gemini CLI 安裝/更新/卸載
-  - API Key 配置管理
-  - MCP 配置管理
-  - Templates 管理
-  - 背景 Shell 管理（新增 v1.1.0）
-  - 任務追蹤系統（新增 v1.1.0）
-  - 互動式問答（新增 v1.1.0）
-  - 與 ChatGemini 整合
+  - 🧪 測試生成器 - 自動生成單元測試
+  - 📝 文檔生成器 - 生成 README 和 API 文檔
+  - 📋 Docstring 生成器 - 生成函數文檔字串
+  - 💬 代碼註釋增強 - 智能添加註釋
+  - 🔍 代碼向量搜尋 - 語義搜尋相似代碼
+  - ⚡ 批次處理器 - 批次處理多個檔案
+  - 📊 Codebase Embedding - FAISS 向量索引與正交去重
+  - 🎯 智能任務規劃 - Plan Mode（規劃與執行分離）
+  - 📦 背景 Shell 管理 - 長時間運行的命令
+  - ✅ 任務追蹤系統 - Todo Tracker
+  - 🔐 安全掃描 - 硬編碼秘密檢測
 
-相關檔案：
-  - CodeGemini/INSTALL.sh - 安裝腳本
-  - CodeGemini/CHECK.sh - 環境檢查腳本
-  - CodeGemini/SETUP-API-KEY.sh - API Key 設定腳本
-  - CodeGemini/UPDATE.sh - 更新腳本
-  - CodeGemini/UNINSTALL.sh - 卸載腳本
+啟用方式：
+  1. 輸入 /codegemini 啟用背景服務
+  2. 按 Ctrl+G 呼叫功能選單
+  3. 選擇所需功能（測試/文檔/增強/搜尋/批次/資料庫）
+
+相關目錄：
+  - CodeGemini/ - 所有子工具模組
+  - CodeGemini/core/ - 核心功能（多檔案編輯、任務規劃、批准流程）
+  - CodeGemini/modes/ - 模式管理（plan_mode, todo_tracker, interactive_qa）
+  - CodeGemini/tools/ - 工具集（web_search, web_fetch, background_shell）
+  - CodeGemini/generators/ - 生成器（測試、文檔、docstring、註釋）
+  - CodeGemini/commands/ - 指令系統
+  - CodeGemini/security/ - 安全工具
 """
 
 import os
@@ -2087,7 +2097,7 @@ class AutoModelSelector:
 # ============================================================================
 
 class CodeGemini:
-    """CodeGemini 主要類別 - Google Gemini CLI 管理工具"""
+    """CodeGemini 主要類別 - AI 代碼輔助系統（舊版，建議使用 CodeGeminiManager）"""
 
     def __init__(self):
         self.env_checker = EnvironmentChecker()
@@ -2218,7 +2228,7 @@ class CodeGemini:
         cli_info = self.cli_manager.get_status()
 
         print("\n" + "="*60)
-        print(safe_t("codegemini.title", fallback="  CodeGemini - Google Gemini CLI 管理工具"))
+        print(safe_t("codegemini.title", fallback="  CodeGemini - AI 代碼輔助系統"))
         print("="*60)
 
         print(safe_t("codegemini.env.title", fallback="\n📊 環境狀態:"))
@@ -2264,7 +2274,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="CodeGemini - Google Gemini CLI 管理工具"
+        description="CodeGemini - AI 代碼輔助系統（舊版 CLI 工具）"
     )
     parser.add_argument(
         "command",

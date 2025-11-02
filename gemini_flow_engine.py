@@ -157,15 +157,15 @@ class FlowEngine:
         Returns:
             List[SegmentPlan]: 分段計畫列表
         """
-        console.print(safe_t('common.analyzing', fallback='\n[#E8C4F0]🤖 分析使用者描述...[/#E8C4F0]'))
-        console.print(safe_t('common.message', fallback='  描述：{user_description}', user_description=user_description))
-        console.print(safe_t('common.message', fallback='  目標時長：{target_duration}秒', target_duration=target_duration))
+        console.print(safe_t('flow.engine.analyzing_description', fallback='\n[#E8C4F0]🤖 分析使用者描述...[/#E8C4F0]'))
+        console.print(safe_t('flow.engine.description_label', fallback='  描述：{user_description}', user_description=user_description))
+        console.print(safe_t('flow.engine.target_duration_label', fallback='  目標時長：{target_duration}秒', target_duration=target_duration))
 
         # 計算所需片段數量
         num_segments = (target_duration + segment_duration - 1) // segment_duration
 
         # 構建 Gemini 提示詞
-        prompt = f"""你是一個專業的影片分鏡腳本編寫者。
+        prompt = safe_t("flow.engine.segment_prompt_template", fallback="""你是一個專業的影片分鏡腳本編寫者。
 
 使用者想要生成一個影片,描述如下：
 「{user_description}」
@@ -188,7 +188,11 @@ class FlowEngine:
   ]
 }}
 
-只需要回傳 JSON,不要有其他說明文字。"""
+只需要回傳 JSON,不要有其他說明文字。""").format(
+            user_description=user_description,
+            num_segments=num_segments,
+            segment_duration=segment_duration
+        )
 
         try:
             # 調用 Gemini API
@@ -213,11 +217,11 @@ class FlowEngine:
                 # 顯示成本資訊
                 if cost > 0:
                     cost_twd = cost * USD_TO_TWD
-                    console.print(safe_t('common.generating', fallback='[dim]💰 分段計畫生成成本: NT${cost_twd:.2f} (${cost:.6f} USD)[/dim]', cost_twd=cost_twd, cost=cost))
-                    console.print(safe_t('common.message', fallback='[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]', input_tokens=input_tokens, output_tokens=output_tokens, thinking_tokens=thinking_tokens))
+                    console.print(safe_t('flow.engine.segment_plan_cost', fallback='[dim]💰 分段計畫生成成本: NT${cost_twd:.2f} (${cost:.6f} USD)[/dim]', cost_twd=cost_twd, cost=cost))
+                    console.print(safe_t('flow.engine.token_usage', fallback='[dim]   輸入: {input_tokens:,} tokens, 輸出: {output_tokens:,} tokens, 思考: {thinking_tokens:,} tokens[/dim]', input_tokens=input_tokens, output_tokens=output_tokens, thinking_tokens=thinking_tokens))
                     total_cost_twd = self.pricing.total_cost * USD_TO_TWD
                     total_cost_usd = self.pricing.total_cost
-                    console.print(safe_t('common.message', fallback='[dim]   累計成本: NT${total_cost_twd:.2f} (${total_cost_usd:.6f} USD)[/dim]', total_cost_twd=total_cost_twd, total_cost_usd=total_cost_usd))
+                    console.print(safe_t('flow.engine.accumulated_cost', fallback='[dim]   累計成本: NT${total_cost_twd:.2f} (${total_cost_usd:.6f} USD)[/dim]', total_cost_twd=total_cost_twd, total_cost_usd=total_cost_usd))
 
             # 解析回應
             response_text = response.text.strip()
@@ -246,18 +250,18 @@ class FlowEngine:
                 )
                 segments.append(segment)
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已生成 {len(segments)} 個片段計畫[/green]', segments_count=len(segments)))
+            console.print(safe_t('flow.engine.segments_generated', fallback='[#B565D8]✓ 已生成 {segments_count} 個片段計畫[/#B565D8]', segments_count=len(segments)))
 
             # 顯示計畫
             for i, seg in enumerate(segments, 1):
-                console.print(safe_t('common.message', fallback='\n[#E8C4F0]片段 {i} ({seg.scene_id})：[/#E8C4F0]', i=i, scene_id=seg.scene_id))
+                console.print(safe_t('flow.engine.segment_info', fallback='\n[#E8C4F0]片段 {i} ({scene_id})：[/#E8C4F0]', i=i, scene_id=seg.scene_id))
                 console.print(f"  {seg.prompt[:80]}...")
 
             return segments
 
         except Exception as e:
             error = APIError(
-                f"Gemini API 調用失敗：{str(e)}",
+                safe_t("flow.engine.api_call_failed", fallback="Gemini API 調用失敗：{error}").format(error=str(e)),
                 api_name="Gemini 2.0 Flash Exp",
                 context={
                     "user_description": user_description[:100],
@@ -265,17 +269,17 @@ class FlowEngine:
                     "segment_duration": segment_duration
                 },
                 suggestions=[
-                    "檢查網路連接是否正常",
-                    "確認 API 金鑰是否有效",
-                    "查看 API 配額是否足夠",
-                    "使用備案分段策略繼續執行"
+                    safe_t("flow.engine.suggestion.check_network", fallback="檢查網路連接是否正常"),
+                    safe_t("flow.engine.suggestion.check_api_key", fallback="確認 API 金鑰是否有效"),
+                    safe_t("flow.engine.suggestion.check_quota", fallback="查看 API 配額是否足夠"),
+                    safe_t("flow.engine.suggestion.use_fallback", fallback="使用備案分段策略繼續執行")
                 ],
                 cause=e
             )
             self.error_logger.log_error(error)
             ErrorFormatter.display_error(error, show_traceback=False)
 
-            console.print(safe_t('common.message', fallback='[#E8C4F0]使用備案分段策略繼續執行...[/#E8C4F0]'))
+            console.print(safe_t('flow.engine.using_fallback_strategy', fallback='[#E8C4F0]使用備案分段策略繼續執行...[/#E8C4F0]'))
             # 返回備案：簡單等分
             return self._create_fallback_segments(
                 user_description,
@@ -290,13 +294,13 @@ class FlowEngine:
         segment_duration: int
     ) -> List[SegmentPlan]:
         """創建備案分段（當 API 失敗時）"""
-        console.print(safe_t('common.message', fallback='[#E8C4F0]使用備案分段策略...[/#E8C4F0]'))
+        console.print(safe_t('flow.engine.using_fallback_strategy', fallback='[#E8C4F0]使用備案分段策略...[/#E8C4F0]'))
 
         segments = []
         for i in range(num_segments):
             segment = SegmentPlan(
                 duration=segment_duration,
-                prompt=f"{description},片段 {i+1}",
+                prompt=safe_t("flow.engine.fallback_segment", fallback="{description},片段 {num}").format(description=description, num=i+1),
                 scene_id=f"segment_{i+1}",
                 order=i+1
             )
@@ -323,13 +327,13 @@ class FlowEngine:
         Returns:
             str: 最終影片路徑
         """
-        console.print(safe_t('common.generating', fallback='\n[#E8C4F0]🎬 開始生成影片...[/#E8C4F0]'))
-        console.print(safe_t('common.message', fallback='  片段數量：{len(segments)}', segments_count=len(segments)))
-        console.print(safe_t('common.message', fallback='  Veo 模型：{veo_model}', veo_model=veo_model))
+        console.print(safe_t('flow.engine.start_generating_video', fallback='\n[#E8C4F0]🎬 開始生成影片...[/#E8C4F0]'))
+        console.print(safe_t('flow.engine.segment_count_label', fallback='  片段數量：{segments_count}', segments_count=len(segments)))
+        console.print(safe_t('flow.engine.veo_model_label', fallback='  Veo 模型：{veo_model}', veo_model=veo_model))
 
         # 🔍 飛行前檢查（預防失敗）
         if VALIDATION_AVAILABLE:
-            console.print(safe_t('common.message', fallback='\n[#E8C4F0]🔍 執行飛行前檢查...[/#E8C4F0]'))
+            console.print(safe_t('flow.engine.preflight_check', fallback='\n[#E8C4F0]🔍 執行飛行前檢查...[/#E8C4F0]'))
             preflight_results = PreflightChecker.run_full_check()
 
             # 檢查是否有錯誤
@@ -337,21 +341,21 @@ class FlowEngine:
             warnings = [r for r in preflight_results if r.level == ValidationLevel.WARNING]
 
             if errors:
-                console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]❌ 飛行前檢查失敗,無法繼續執行：[/red]'))
+                console.print(safe_t('flow.engine.preflight_failed_message', fallback='[dim #E8C4F0]❌ 飛行前檢查失敗,無法繼續執行：[/red]'))
                 for err in errors:
                     console.print(f"  ❌ {err.message}")
                     if err.suggestions:
-                        console.print(safe_t('common.message', fallback='     [#E8C4F0]建議：[/#E8C4F0]'))
+                        console.print(safe_t('flow.engine.suggestions_label', fallback='     [#E8C4F0]建議：[/#E8C4F0]'))
                         for sug in err.suggestions:
                             console.print(f"       → {sug}")
-                raise RuntimeError("飛行前檢查失敗,請修復上述問題後重試")
+                raise RuntimeError(safe_t("flow.engine.preflight_failed", fallback="飛行前檢查失敗,請修復上述問題後重試"))
 
             if warnings:
-                console.print(safe_t('common.warning', fallback='[#E8C4F0]⚠️  發現警告（可繼續執行）：[/#E8C4F0]'))
+                console.print(safe_t('flow.engine.warnings_found', fallback='[#E8C4F0]⚠️  發現警告（可繼續執行）：[/#E8C4F0]'))
                 for warn in warnings:
                     console.print(f"  ⚠️  {warn.message}")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✅ 飛行前檢查通過[/green]\n'))
+            console.print(safe_t('flow.engine.preflight_passed', fallback='[#B565D8]✅ 飛行前檢查通過[/#B565D8]\n'))
 
         # 創建任務 ID 用於恢復
         task_id = f"flow_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -384,15 +388,15 @@ class FlowEngine:
                 console=console,
             ) as progress:
                 task = progress.add_task(
-                    f"[#E8C4F0]生成 {len(segments)} 個片段...",
+                    safe_t("flow.engine.generating_segments", fallback="[#E8C4F0]生成 {count} 個片段...").format(count=len(segments)),
                     total=len(segments)
                 )
 
                 for i, segment in enumerate(segments):
                     segment_num = i + 1
                     segment_prompt_preview = segment.prompt[:60]
-                    console.print(safe_t('common.generating', fallback='\n[#E8C4F0]生成片段 {segment_num}/{segments_count}：{scene_id}[/#E8C4F0]', segment_num=segment_num, segments_count=len(segments), scene_id=segment.scene_id))
-                    console.print(safe_t('common.message', fallback='  提示詞：{prompt_preview}...', prompt_preview=segment_prompt_preview))
+                    console.print(safe_t('flow.engine.generating_segment', fallback='\n[#E8C4F0]生成片段 {segment_num}/{segments_count}：{scene_id}[/#E8C4F0]', segment_num=segment_num, segments_count=len(segments), scene_id=segment.scene_id))
+                    console.print(safe_t('flow.engine.prompt_preview', fallback='  提示詞：{prompt_preview}...', prompt_preview=segment_prompt_preview))
 
                     # 調用 Veo API 生成影片
                     try:
@@ -405,7 +409,7 @@ class FlowEngine:
                         )
 
                         segment_paths.append(segment_path)
-                        console.print(safe_t('common.completed', fallback='  [#B565D8]✓ 生成完成[/green]'))
+                        console.print(safe_t('flow.engine.generation_complete', fallback='  [#B565D8]✓ 生成完成[/#B565D8]'))
 
                         # 更新檢查點
                         self.recovery_manager.save_checkpoint(
@@ -423,7 +427,7 @@ class FlowEngine:
                     except Exception as e:
                         # 保存失敗檢查點
                         error = VideoProcessingError(
-                            f"片段 {i+1}/{len(segments)} 生成失敗",
+                            safe_t("flow.engine.segment_generation_failed", fallback="片段 {current}/{total} 生成失敗").format(current=i+1, total=len(segments)),
                             context={
                                 "segment_id": segment.scene_id,
                                 "segment_order": i + 1,
@@ -433,10 +437,10 @@ class FlowEngine:
                                 "task_id": task_id
                             },
                             suggestions=[
-                                f"使用指令恢復任務：python gemini_chat.py recovery resume {task_id}",
-                                "檢查已生成的片段保存在：" + temp_dir,
-                                "嘗試簡化提示詞後重新生成",
-                                "查看錯誤日誌以了解詳情"
+                                safe_t("flow.engine.suggestion.resume_task", fallback="使用指令恢復任務：python gemini_chat.py recovery resume {task_id}").format(task_id=task_id),
+                                safe_t("flow.engine.suggestion.check_segments", fallback="檢查已生成的片段保存在：{temp_dir}").format(temp_dir=temp_dir),
+                                safe_t("flow.engine.suggestion.simplify_prompt", fallback="嘗試簡化提示詞後重新生成"),
+                                safe_t("flow.engine.suggestion.check_logs", fallback="查看錯誤日誌以了解詳情")
                             ],
                             cause=e
                         )
@@ -459,10 +463,10 @@ class FlowEngine:
                     progress.update(task, advance=1)
 
             # 合併所有片段
-            console.print(safe_t('common.message', fallback='\n[#E8C4F0]🎞️  合併 {len(segment_paths)} 個片段...[/#E8C4F0]', segment_paths_count=len(segment_paths)))
+            console.print(safe_t('flow.engine.merging_segments', fallback='\n[#E8C4F0]🎞️  合併 {segment_paths_count} 個片段...[/#E8C4F0]', segment_paths_count=len(segment_paths)))
 
             if output_filename is None:
-                output_filename = f"flow_video_{len(segments)}segments.mp4"
+                output_filename = safe_t("flow.engine.output_filename", fallback="flow_video_{segments_count}segments.mp4").format(segments_count=len(segments))
 
             output_path = os.path.join(self.output_dir, output_filename)
 
@@ -472,10 +476,10 @@ class FlowEngine:
                 transition="none"  # 固定使用無損合併（禁止過渡效果）
             )
 
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 影片生成完成！[/green]'))
+            console.print(safe_t('flow.engine.video_generation_complete', fallback='\n[#B565D8]✅ 影片生成完成！[/#B565D8]'))
             total_duration = len(segments) * segments[0].duration
-            console.print(safe_t('common.message', fallback='  總時長：{total_duration} 秒', total_duration=total_duration))
-            console.print(safe_t('common.saving', fallback='  儲存路徑：{final_video}', final_video=final_video))
+            console.print(safe_t('flow.engine.total_duration_label', fallback='  總時長：{total_duration} 秒', total_duration=total_duration))
+            console.print(safe_t('flow.engine.save_path_label', fallback='  儲存路徑：{final_video}', final_video=final_video))
 
             # 標記任務完成並刪除檢查點
             self.recovery_manager.delete_checkpoint(task_id)
@@ -486,12 +490,12 @@ class FlowEngine:
             # 錯誤已在內部處理,僅記錄到日誌
             if not isinstance(e, (APIError, VideoProcessingError)):
                 error = VideoProcessingError(
-                    "影片生成過程發生未預期錯誤",
+                    safe_t("flow.engine.unexpected_error", fallback="影片生成過程發生未預期錯誤"),
                     context={"task_id": task_id},
                     suggestions=[
-                        f"使用指令恢復任務：python gemini_chat.py recovery resume {task_id}",
-                        "查看錯誤日誌以了解詳情",
-                        "確認所有依賴模組正常運作"
+                        safe_t("flow.engine.suggestion.resume_task", fallback="使用指令恢復任務：python gemini_chat.py recovery resume {task_id}").format(task_id=task_id),
+                        safe_t("flow.engine.suggestion.check_logs", fallback="查看錯誤日誌以了解詳情"),
+                        safe_t("flow.engine.suggestion.check_dependencies", fallback="確認所有依賴模組正常運作")
                     ],
                     cause=e
                 )
@@ -504,22 +508,22 @@ class FlowEngine:
             if os.path.exists(temp_dir):
                 try:
                     shutil.rmtree(temp_dir)
-                    console.print(safe_t('common.message', fallback='[dim]已清理臨時檔案：{temp_dir}[/dim]', temp_dir=temp_dir))
+                    console.print(safe_t('flow.engine.temp_files_cleaned', fallback='[dim]已清理臨時檔案：{temp_dir}[/dim]', temp_dir=temp_dir))
                 except (OSError, PermissionError) as e:
                     # 改善錯誤處理：記錄但不中斷
                     cleanup_error = FileProcessingError(
-                        "臨時檔案清理失敗",
+                        safe_t("flow.engine.cleanup_failed", fallback="臨時檔案清理失敗"),
                         file_path=temp_dir,
                         context={"error_type": e.__class__.__name__},
                         suggestions=[
-                            f"手動刪除臨時目錄：rm -rf {temp_dir}",
-                            "檢查檔案權限是否正確",
-                            "確認磁碟空間充足"
+                            safe_t("flow.engine.suggestion.manual_delete", fallback="手動刪除臨時目錄：rm -rf {temp_dir}").format(temp_dir=temp_dir),
+                            safe_t("flow.engine.suggestion.check_permissions", fallback="檢查檔案權限是否正確"),
+                            safe_t("flow.engine.suggestion.check_disk_space", fallback="確認磁碟空間充足")
                         ],
                         cause=e
                     )
                     self.error_logger.log_error(cleanup_error)
-                    console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：無法清理臨時檔案 {temp_dir},請手動刪除[/#E8C4F0]', temp_dir=temp_dir))
+                    console.print(safe_t('flow.engine.cleanup_warning', fallback='[#E8C4F0]警告：無法清理臨時檔案 {temp_dir},請手動刪除[/#E8C4F0]', temp_dir=temp_dir))
 
     @retry_on_error(
         max_retries=3,
@@ -560,11 +564,11 @@ class FlowEngine:
             # 檢查是否有錯誤
             errors = [r for r in validation_results if r.level == ValidationLevel.ERROR]
             if errors:
-                error_msg = "參數驗證失敗：\n"
+                error_msg = safe_t("flow.engine.validation_failed", fallback="參數驗證失敗：\n")
                 for err in errors:
                     error_msg += f"  ❌ {err.message}\n"
                     if err.suggestions:
-                        error_msg += "     建議：\n"
+                        error_msg += safe_t("flow.engine.suggestions", fallback="     建議：\n")
                         for sug in err.suggestions:
                             error_msg += f"       → {sug}\n"
 
@@ -572,9 +576,18 @@ class FlowEngine:
 
         try:
             # 構建請求配置（包含解析度與比例）
+            # ✅ 根據是否使用參考圖片設置 person_generation
+            if reference_image and os.path.exists(reference_image):
+                # Image-to-video 模式必須使用 "allow_adult"（Gemini API 限制）
+                person_gen = "allow_adult"
+            else:
+                # Text-to-video 模式使用 "allow_all"
+                person_gen = "allow_all"
+
             config = types.GenerateVideoConfig(
                 aspectRatio=self.aspect_ratio,  # 16:9 或 9:16
                 resolution=self.resolution,      # 720p 或 1080p
+                personGeneration=person_gen,     # ✅ 人物生成控制
                 generation_config=types.VideoGenerationConfig(
                     image_generation_config=types.ImageGenerationConfig(
                         seed=None  # 隨機種子
@@ -611,7 +624,7 @@ class FlowEngine:
 
         except Exception as e:
             error = APIError(
-                f"Veo API 影片生成失敗",
+                safe_t("flow.engine.veo_generation_failed", fallback="Veo API 影片生成失敗"),
                 api_name="Veo 3.1",
                 context={
                     "prompt": prompt[:100] + "..." if len(prompt) > 100 else prompt,
@@ -623,12 +636,12 @@ class FlowEngine:
                     "has_reference_image": reference_image is not None
                 },
                 suggestions=[
-                    f"檢查 Veo API 配額（https://console.cloud.google.com/）",
-                    f"確認提示詞是否符合 Veo 內容政策",
-                    f"嘗試簡化提示詞：{prompt[:50]}...",
-                    f"檢查影片時長設定（當前：{duration} 秒,建議：≤8 秒）",
-                    f"查看 Gemini API 狀態頁面",
-                    f"等待 2-5 分鐘後重試（API 可能暫時過載）"
+                    safe_t("flow.engine.suggestion.check_veo_quota", fallback="檢查 Veo API 配額（https://console.cloud.google.com/）"),
+                    safe_t("flow.engine.suggestion.check_content_policy", fallback="確認提示詞是否符合 Veo 內容政策"),
+                    safe_t("flow.engine.suggestion.simplify_veo_prompt", fallback="嘗試簡化提示詞：{prompt_preview}...").format(prompt_preview=prompt[:50]),
+                    safe_t("flow.engine.suggestion.check_duration", fallback="檢查影片時長設定（當前：{duration} 秒,建議：≤8 秒）").format(duration=duration),
+                    safe_t("flow.engine.suggestion.check_api_status", fallback="查看 Gemini API 狀態頁面"),
+                    safe_t("flow.engine.suggestion.wait_retry", fallback="等待 2-5 分鐘後重試（API 可能暫時過載）")
                 ],
                 cause=e
             )
@@ -655,28 +668,28 @@ class FlowEngine:
             str: 最終影片路徑
         """
         console.print("\n" + "="*60)
-        console.print(safe_t('common.generating', fallback='[bold #E8C4F0]Gemini Flow Engine - 自然語言影片生成[/bold #E8C4F0]'))
+        console.print(safe_t('flow.engine.flow_engine_title', fallback='[bold #E8C4F0]Gemini Flow Engine - 自然語言影片生成[/bold #E8C4F0]'))
         console.print("="*60)
-        console.print(safe_t('common.message', fallback='[#E8C4F0]影片配置：{self.resolution} @ {self.aspect_ratio} (24fps)[/#E8C4F0]', resolution=self.resolution, aspect_ratio=self.aspect_ratio))
+        console.print(safe_t('flow.engine.video_config', fallback='[#E8C4F0]影片配置：{resolution} @ {aspect_ratio} (24fps)[/#E8C4F0]', resolution=self.resolution, aspect_ratio=self.aspect_ratio))
 
         # 顯示費用預估
         if self.pricing and show_cost:
             estimate = self.pricing.estimate_flow_cost(target_duration)
-            console.print(safe_t('common.message', fallback='\n[#E8C4F0]💰 費用預估：[/#E8C4F0]'))
-            console.print(safe_t('common.message', fallback='  目標時長：{target_duration} 秒', target_duration=estimate["target_duration"]))
-            console.print(safe_t('common.message', fallback='  實際時長：{actual_duration} 秒（{num_segments} 段）', actual_duration=estimate["actual_duration"], num_segments=estimate["num_segments"]))
+            console.print(safe_t('flow.engine.cost_estimate_title', fallback='\n[#E8C4F0]💰 費用預估：[/#E8C4F0]'))
+            console.print(safe_t('flow.engine.target_duration_estimate', fallback='  目標時長：{target_duration} 秒', target_duration=estimate["target_duration"]))
+            console.print(safe_t('flow.engine.actual_duration_estimate', fallback='  實際時長：{actual_duration} 秒（{num_segments} 段）', actual_duration=estimate["actual_duration"], num_segments=estimate["num_segments"]))
             planning_cost = estimate['breakdown']['planning']
             veo_cost = estimate['breakdown']['veo']
             total_cost = estimate['breakdown']['total']
-            console.print(safe_t('common.message', fallback='  Gemini 分段計畫：{planning_cost}', planning_cost=planning_cost))
-            console.print(safe_t('common.generating', fallback='  Veo 影片生成：{veo_cost}', veo_cost=veo_cost))
-            console.print(safe_t('common.message', fallback='  [bold]預估總成本：{total_cost}[/bold]', total_cost=total_cost))
+            console.print(safe_t('flow.engine.planning_cost_label', fallback='  Gemini 分段計畫：{planning_cost}', planning_cost=planning_cost))
+            console.print(safe_t('flow.engine.veo_cost_label', fallback='  Veo 影片生成：{veo_cost}', veo_cost=veo_cost))
+            console.print(safe_t('flow.engine.total_cost_estimate', fallback='  [bold]預估總成本：{total_cost}[/bold]', total_cost=total_cost))
             console.print()
 
             # 詢問是否繼續
-            user_confirm = input("是否繼續生成？(y/n): ").strip().lower()
+            user_confirm = input(safe_t("flow.engine.confirm_prompt", fallback="是否繼續生成？(y/n): ")).strip().lower()
             if user_confirm != 'y':
-                console.print(safe_t('common.generating', fallback='[#E8C4F0]已取消生成[/#E8C4F0]'))
+                console.print(safe_t('flow.engine.generation_cancelled', fallback='[#E8C4F0]已取消生成[/#E8C4F0]'))
                 return None
 
         # 第一步：生成分段計畫
@@ -707,9 +720,9 @@ def main():
     import sys
 
     if len(sys.argv) < 2:
-        console.print(safe_t('common.message', fallback='[#E8C4F0]用法：[/#E8C4F0]'))
+        console.print(safe_t('flow.engine.usage_title', fallback='[#E8C4F0]用法：[/#E8C4F0]'))
         console.print('  python gemini_flow_engine.py "影片描述" [時長]')
-        console.print(safe_t('common.message', fallback='\n[#E8C4F0]範例：[/#E8C4F0]'))
+        console.print(safe_t('flow.engine.example_title', fallback='\n[#E8C4F0]範例：[/#E8C4F0]'))
         console.print('  python gemini_flow_engine.py "一個人走進森林,發現寶藏" 30')
         sys.exit(1)
 
@@ -723,11 +736,11 @@ def main():
             target_duration=duration
         )
 
-        console.print(safe_t('common.completed', fallback='\n[bold green]✅ 成功！影片已生成：[/bold green]'))
+        console.print(safe_t('flow.engine.success_message', fallback='\n[bold green]✅ 成功！影片已生成：[/bold green]'))
         console.print(f"   {output}")
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('flow.engine.error_message', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

@@ -352,13 +352,22 @@ class GeminiModelList:
         獲取快取資訊
 
         Returns:
-            快取資訊字典（包含 count、timestamp 等）
+            快取資訊字典（包含 exists、count、last_update、timestamp 等）
         """
         cached = load_cached_models()
         if cached:
+            timestamp_str = cached['timestamp']
+            try:
+                dt = datetime.fromisoformat(timestamp_str)
+                last_update = dt.strftime('%Y-%m-%d %H:%M:%S')
+            except:
+                last_update = timestamp_str
+
             return {
+                'exists': True,
                 'count': len(cached['models']),
-                'timestamp': cached['timestamp'],
+                'timestamp': timestamp_str,
+                'last_update': last_update,
                 'is_expired': False
             }
 
@@ -367,17 +376,28 @@ class GeminiModelList:
             try:
                 with open(CACHE_FILE, 'r', encoding='utf-8') as f:
                     cache = json.load(f)
+                timestamp_str = cache.get('timestamp', 'unknown')
+                try:
+                    dt = datetime.fromisoformat(timestamp_str)
+                    last_update = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except:
+                    last_update = timestamp_str
+
                 return {
+                    'exists': True,
                     'count': len(cache.get('models', [])),
-                    'timestamp': cache.get('timestamp', 'unknown'),
+                    'timestamp': timestamp_str,
+                    'last_update': last_update,
                     'is_expired': True
                 }
             except:
                 pass
 
         return {
+            'exists': False,
             'count': 0,
             'timestamp': None,
+            'last_update': None,
             'is_expired': False
         }
 

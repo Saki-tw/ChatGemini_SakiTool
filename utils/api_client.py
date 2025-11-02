@@ -34,7 +34,7 @@ _api_key_cache: Optional[str] = None
 def _print_error(message: str) -> None:
     """輸出錯誤訊息（根據環境選擇格式）"""
     if RICH_AVAILABLE and _console:
-        _console.print(f"[dim #DDA0DD]{message}[/red]")
+        _console.print(f"[dim #B565D8]{message}[/red]")
     else:
         print(f"錯誤：{message}", file=sys.stderr)
 
@@ -42,7 +42,7 @@ def _print_error(message: str) -> None:
 def _print_success(message: str) -> None:
     """輸出成功訊息（根據環境選擇格式）"""
     if RICH_AVAILABLE and _console:
-        _console.print(f"[#DA70D6]{message}[/green]")
+        _console.print(f"[#B565D8]{message}[/green]")
     else:
         print(f"✓ {message}")
 

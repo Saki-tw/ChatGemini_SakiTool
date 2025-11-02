@@ -192,6 +192,14 @@ def silent_check_update():
             if update_info['has_update']:
                 with open(UPDATE_AVAILABLE_FILE, 'w', encoding='utf-8') as f:
                     f.write('true')
+
+                # 🆕 觸發 upgrade 模組預載入（讓使用者執行 /upgrade 時無需等待）
+                try:
+                    from smart_background_loader import on_update_available
+                    on_update_available()
+                except Exception as e:
+                    # 預載入失敗不影響主功能
+                    pass
             else:
                 # 無更新,移除標記 (如果存在)
                 if os.path.exists(UPDATE_AVAILABLE_FILE):
@@ -234,6 +242,12 @@ def show_update_notification():
     """
     try:
         if os.path.exists(UPDATE_AVAILABLE_FILE):
+            # 🆕 確保 upgrade 模組已預載入（雙重保險）
+            try:
+                from smart_background_loader import on_update_available
+                on_update_available()
+            except:
+                pass  # 預載入失敗不影響通知顯示
             # 讀取更新資訊
             import json
             if os.path.exists(UPDATE_INFO_FILE):

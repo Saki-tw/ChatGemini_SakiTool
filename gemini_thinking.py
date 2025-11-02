@@ -31,6 +31,65 @@ except ImportError:
 # 預設日誌目錄
 DEFAULT_LOG_DIR = str(Path(__file__).parent / "ChatLogs")
 
+# ============================================================================
+# Extended Thinking 自動觸發配置
+# ============================================================================
+
+def _load_extended_thinking_config() -> Optional[Dict]:
+    """
+    載入 Extended Thinking 配置文件
+
+    配置文件查找順序：
+    1. ./extended_thinking_config.json（專案級）
+    2. ~/.chatgemini/extended_thinking_config.json（用戶級）
+    3. 使用預設配置
+
+    Returns:
+        配置字典，若載入失敗則返回 None
+    """
+    config_paths = [
+        Path.cwd() / "extended_thinking_config.json",
+        Path.home() / ".chatgemini" / "extended_thinking_config.json",
+    ]
+
+    for config_path in config_paths:
+        if config_path.exists():
+            try:
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    logger.info(f"載入 Extended Thinking 配置: {config_path}")
+                    return config.get('extended_thinking', {})
+            except Exception as e:
+                logger.warning(f"載入配置失敗 {config_path}: {e}")
+
+    return None
+
+
+# 嘗試從配置文件載入
+_config = _load_extended_thinking_config()
+
+# 觸發詞配置（多語言支援）
+DEFAULT_TRIGGER_KEYWORDS = _config.get('trigger_keywords', {}) if _config else {
+    'zh': [
+        '仔細思考', '深入分析', '詳細規劃', '慢慢想', '認真思考',
+        '深度思考', '全面分析', '徹底分析', '系統性思考', '邏輯推理'
+    ],
+    'en': [
+        'think carefully', 'analyze deeply', 'think hard', 'deep analysis',
+        'thorough analysis', 'systematic thinking', 'careful consideration',
+        'detailed planning', 'in-depth', 'comprehensive analysis'
+    ]
+}
+
+# 複雜度閾值配置
+DEFAULT_COMPLEXITY_THRESHOLDS = _config.get('complexity_thresholds', {}) if _config else {
+    'input_length': 500,        # 輸入長度超過 500 字元視為複雜任務
+    'line_count': 20,           # 輸入超過 20 行視為複雜任務
+    'code_blocks': 2,           # 包含 2 個以上代碼塊視為複雜任務
+    'file_references': 3,       # 引用 3 個以上檔案視為複雜任務
+    'question_marks': 3,        # 包含 3 個以上問號視為複雜問題
+}
+
 
 class ThinkingSignatureManager:
     """思考簽名持久化管理器
@@ -707,4 +766,313 @@ def validate_thinking_budget(thinking_budget: int, model_name: str) -> int:
 
     # 符合限制,返回原值
     return thinking_budget
+
+
+# ============================================================================
+# Extended Thinking 自動觸發功能
+# ============================================================================
+
+def analyze_input_complexity(
+    user_input: str,
+    thresholds: Optional[Dict] = None
+) -> Dict[str, any]:
+    """
+    分析使用者輸入的複雜度
+
+    Args:
+        user_input: 使用者輸入內容
+        thresholds: 自訂閾值（可選）
+
+    Returns:
+        複雜度分析結果字典
+        {
+            'input_length': 輸入長度,
+            'line_count': 行數,
+            'code_blocks': 代碼塊數量,
+            'file_references': 檔案引用數量,
+            'question_marks': 問號數量,
+            'is_complex': 是否為複雜任務,
+            'complexity_score': 複雜度分數 (0-100),
+            'triggered_factors': 觸發因素列表
+        }
+    """
+    import re
+
+    if thresholds is None:
+        thresholds = DEFAULT_COMPLEXITY_THRESHOLDS
+
+    # 基礎統計
+    input_length = len(user_input)
+    line_count = user_input.count('\n') + 1
+    question_marks = user_input.count('?') + user_input.count('？')
+
+    # 代碼塊檢測（支援多種格式）
+    code_block_patterns = [
+        r'```[\s\S]*?```',  # Markdown 代碼塊
+        r'`[^`]+`',          # 行內代碼
+        r'^\s{4,}',          # 縮排代碼（多行模式）
+    ]
+    code_blocks = 0
+    for pattern in code_block_patterns:
+        code_blocks += len(re.findall(pattern, user_input, re.MULTILINE))
+
+    # 檔案引用檢測（多種模式）
+    file_ref_patterns = [
+        r'@[\w\./\-]+',           # @filename 格式
+        r'[\w\-]+\.(py|js|ts|java|cpp|c|go|rs|rb|php)',  # 副檔名
+        r'\/[\w\-\/\.]+',         # 路徑格式
+    ]
+    file_references = 0
+    for pattern in file_ref_patterns:
+        file_references += len(re.findall(pattern, user_input))
+
+    # 計算複雜度分數（0-100）
+    complexity_score = 0
+    triggered_factors = []
+
+    # 輸入長度因素（最高 25 分）
+    if input_length > thresholds['input_length']:
+        length_score = min(25, (input_length / thresholds['input_length']) * 10)
+        complexity_score += length_score
+        triggered_factors.append(f"輸入長度: {input_length} 字元")
+
+    # 行數因素（最高 20 分）
+    if line_count > thresholds['line_count']:
+        line_score = min(20, (line_count / thresholds['line_count']) * 10)
+        complexity_score += line_score
+        triggered_factors.append(f"行數: {line_count} 行")
+
+    # 代碼塊因素（最高 25 分）
+    if code_blocks > thresholds['code_blocks']:
+        code_score = min(25, (code_blocks / thresholds['code_blocks']) * 12)
+        complexity_score += code_score
+        triggered_factors.append(f"代碼塊: {code_blocks} 個")
+
+    # 檔案引用因素（最高 20 分）
+    if file_references > thresholds['file_references']:
+        ref_score = min(20, (file_references / thresholds['file_references']) * 10)
+        complexity_score += ref_score
+        triggered_factors.append(f"檔案引用: {file_references} 個")
+
+    # 問題數量因素（最高 10 分）
+    if question_marks > thresholds['question_marks']:
+        q_score = min(10, (question_marks / thresholds['question_marks']) * 5)
+        complexity_score += q_score
+        triggered_factors.append(f"問題數量: {question_marks} 個")
+
+    # 複雜度閾值：分數 >= 40 視為複雜任務
+    is_complex = complexity_score >= 40
+
+    return {
+        'input_length': input_length,
+        'line_count': line_count,
+        'code_blocks': code_blocks,
+        'file_references': file_references,
+        'question_marks': question_marks,
+        'is_complex': is_complex,
+        'complexity_score': complexity_score,
+        'triggered_factors': triggered_factors
+    }
+
+
+def detect_trigger_keywords(
+    user_input: str,
+    custom_keywords: Optional[Dict[str, list]] = None
+) -> Dict[str, any]:
+    """
+    檢測使用者輸入中的觸發詞
+
+    Args:
+        user_input: 使用者輸入內容
+        custom_keywords: 自訂觸發詞（可選）
+
+    Returns:
+        觸發詞檢測結果字典
+        {
+            'detected': 是否檢測到觸發詞,
+            'matched_keywords': 匹配的關鍵詞列表,
+            'language': 檢測到的語言 ('zh', 'en', 'mixed')
+        }
+    """
+    keywords = custom_keywords if custom_keywords else DEFAULT_TRIGGER_KEYWORDS
+
+    matched_keywords = []
+    detected_languages = set()
+
+    # 轉小寫以進行不區分大小寫的匹配
+    user_input_lower = user_input.lower()
+
+    # 檢測各語言的觸發詞
+    for lang, keyword_list in keywords.items():
+        for keyword in keyword_list:
+            if keyword.lower() in user_input_lower:
+                matched_keywords.append(keyword)
+                detected_languages.add(lang)
+
+    # 判斷語言
+    if len(detected_languages) == 0:
+        language = 'none'
+    elif len(detected_languages) == 1:
+        language = list(detected_languages)[0]
+    else:
+        language = 'mixed'
+
+    return {
+        'detected': len(matched_keywords) > 0,
+        'matched_keywords': matched_keywords,
+        'language': language
+    }
+
+
+def should_enable_thinking(
+    user_input: str,
+    model_name: str = "",
+    custom_keywords: Optional[Dict[str, list]] = None,
+    custom_thresholds: Optional[Dict] = None,
+    force_disable: bool = False
+) -> tuple[bool, Dict[str, any]]:
+    """
+    自動判斷是否應該啟用延伸思考模式
+
+    此函數綜合考慮以下因素：
+    1. 觸發詞檢測（中英文）
+    2. 輸入複雜度分析（長度、代碼量、檔案引用等）
+    3. 模型支援能力
+
+    Args:
+        user_input: 使用者輸入內容
+        model_name: 模型名稱（用於判斷支援能力）
+        custom_keywords: 自訂觸發詞（可選）
+        custom_thresholds: 自訂複雜度閾值（可選）
+        force_disable: 強制禁用自動觸發（可選）
+
+    Returns:
+        (是否啟用思考, 詳細資訊字典)
+
+        詳細資訊包含:
+        {
+            'enabled': 是否啟用,
+            'reason': 觸發原因 ('keyword' | 'complexity' | 'both' | 'disabled'),
+            'keyword_detection': 觸發詞檢測結果,
+            'complexity_analysis': 複雜度分析結果,
+            'recommended_budget': 建議的思考預算 (-1 為自動)
+        }
+    """
+    # 強制禁用檢查
+    if force_disable:
+        return False, {
+            'enabled': False,
+            'reason': 'disabled',
+            'keyword_detection': None,
+            'complexity_analysis': None,
+            'recommended_budget': 0
+        }
+
+    # 檢查模型是否支援思考
+    from utils.thinking_helpers import supports_thinking
+    if not supports_thinking(model_name):
+        return False, {
+            'enabled': False,
+            'reason': 'unsupported_model',
+            'keyword_detection': None,
+            'complexity_analysis': None,
+            'recommended_budget': 0
+        }
+
+    # 1. 觸發詞檢測
+    keyword_result = detect_trigger_keywords(user_input, custom_keywords)
+
+    # 2. 複雜度分析
+    complexity_result = analyze_input_complexity(user_input, custom_thresholds)
+
+    # 3. 綜合判斷
+    keyword_triggered = keyword_result['detected']
+    complexity_triggered = complexity_result['is_complex']
+
+    # 決定是否啟用
+    should_enable = keyword_triggered or complexity_triggered
+
+    # 判斷觸發原因
+    if keyword_triggered and complexity_triggered:
+        reason = 'both'
+    elif keyword_triggered:
+        reason = 'keyword'
+    elif complexity_triggered:
+        reason = 'complexity'
+    else:
+        reason = 'none'
+
+    # 根據複雜度分數推薦思考預算
+    if should_enable:
+        score = complexity_result['complexity_score']
+        if score >= 80:
+            recommended_budget = 8192  # 極深思考
+        elif score >= 60:
+            recommended_budget = 4096  # 深度思考
+        elif score >= 40:
+            recommended_budget = 2048  # 標準思考
+        else:
+            recommended_budget = -1     # 動態思考（關鍵詞觸發但複雜度低）
+    else:
+        recommended_budget = -1  # 預設動態
+
+    return should_enable, {
+        'enabled': should_enable,
+        'reason': reason,
+        'keyword_detection': keyword_result,
+        'complexity_analysis': complexity_result,
+        'recommended_budget': recommended_budget
+    }
+
+
+def format_thinking_status_ui(
+    enabled: bool,
+    trigger_info: Dict[str, any],
+    show_details: bool = True
+) -> str:
+    """
+    格式化思考狀態的 UI 顯示訊息
+
+    Args:
+        enabled: 是否啟用思考
+        trigger_info: should_enable_thinking() 返回的詳細資訊
+        show_details: 是否顯示詳細資訊（預設 True）
+
+    Returns:
+        格式化的 UI 訊息字串
+    """
+    if not enabled:
+        return ""
+
+    reason = trigger_info.get('reason', 'unknown')
+    budget = trigger_info.get('recommended_budget', -1)
+
+    # 基礎訊息
+    budget_display = '自動' if budget == -1 else f'{budget:,} tokens'
+    base_msg = f"🧠 [自動啟用思考模式] 預算: {budget_display}"
+
+    if not show_details:
+        return base_msg
+
+    # 詳細資訊
+    details = []
+
+    if reason in ['keyword', 'both']:
+        kw_result = trigger_info.get('keyword_detection', {})
+        keywords = kw_result.get('matched_keywords', [])
+        if keywords:
+            details.append(f"   • 觸發詞: {', '.join(keywords[:3])}")
+
+    if reason in ['complexity', 'both']:
+        comp_result = trigger_info.get('complexity_analysis', {})
+        score = comp_result.get('complexity_score', 0)
+        factors = comp_result.get('triggered_factors', [])
+        details.append(f"   • 複雜度分數: {score:.1f}/100")
+        if factors:
+            details.append(f"   • 觸發因素: {', '.join(factors[:2])}")
+
+    if details:
+        return base_msg + "\n" + "\n".join(details)
+    else:
+        return base_msg
 

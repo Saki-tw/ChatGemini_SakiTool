@@ -380,7 +380,7 @@ class BuiltinCommands:
 
 def main():
     """測試用主程式"""
-    console.print(f"[bold #DDA0DD]{safe_t('commands.builtin.test_header', 'CodeGemini Built-in Commands 測試')}[/bold #DDA0DD]\n")
+    console.print(f"[bold #B565D8]{safe_t('commands.builtin.test_header', 'CodeGemini Built-in Commands 測試')}[/bold #B565D8]\n")
 
     # 取得所有內建命令
     commands = BuiltinCommands.get_all_commands()
@@ -389,7 +389,7 @@ def main():
 
     # 顯示每個命令的詳情
     for cmd in commands:
-        console.print(f"[bold #DDA0DD]/{cmd.name}[/bold #DDA0DD]")
+        console.print(f"[bold #B565D8]/{cmd.name}[/bold #B565D8]")
         console.print(f"  {safe_t('commands.builtin.description_label', '描述')}：{cmd.description}")
         console.print(f"  {safe_t('commands.builtin.parameters_label', '參數')}：{', '.join(cmd.parameters)}")
         console.print(f"  {safe_t('commands.builtin.tags_label', '標籤')}：{', '.join(cmd.tags)}")
@@ -398,11 +398,11 @@ def main():
     # 測試註冊到 Registry
     from .registry import CommandRegistry
 
-    console.print(f"[bold #DDA0DD]{safe_t('commands.builtin.registry_test', '測試註冊到 Registry')}：[/bold #DDA0DD]")
+    console.print(f"[bold #B565D8]{safe_t('commands.builtin.registry_test', '測試註冊到 Registry')}：[/bold #B565D8]")
     registry = CommandRegistry()
     count = BuiltinCommands.register_all(registry)
 
-    console.print(f"\n[#DA70D6]✓ {safe_t('commands.builtin.register_success', '成功註冊')} {count} {safe_t('commands.builtin.commands_unit', '個內建命令')}[/green]")
+    console.print(f"\n[#B565D8]✓ {safe_t('commands.builtin.register_success', '成功註冊')} {count} {safe_t('commands.builtin.commands_unit', '個內建命令')}[/#B565D8]")
 
     # 顯示註冊表中的命令
     registry.show_commands_table(filter_type=CommandType.BUILTIN)
