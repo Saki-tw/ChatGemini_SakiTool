@@ -693,7 +693,7 @@ client = genai.Client(api_key=API_KEY)
 from utils.path_manager import get_chat_log_dir
 DEFAULT_LOG_DIR = str(get_chat_log_dir())
 
-DEFAULT_MODEL = 'gemini-2.5-flash'
+DEFAULT_MODEL = 'gemini-3-pro-preview'
 MAX_CONTEXT_TOKENS = 2000000
 
 # 初始化（console 已在 Rich logging 配置時初始化）
@@ -723,14 +723,14 @@ _show_codegemini_menu_requested = False
 
 # 推薦的模型列表
 RECOMMENDED_MODELS: Dict[str, tuple] = {
-    '1': ('gemini-2.5-pro', safe_t('chat.model_gemini_25_pro', fallback='Gemini 2.5 Pro - 最強大（思考模式）')),
-    '2': ('gemini-2.5-flash', safe_t('chat.model_gemini_25_flash', fallback='Gemini 2.5 Flash - 快速且智慧（推薦）')),
-    '3': ('gemini-2.5-flash-lite', safe_t('chat.model_gemini_25_flash_lite', fallback='Gemini 2.5 Flash Lite - 輕量版（最便宜）')),
-    '4': ('gemini-2.0-flash-exp', safe_t('chat.model_gemini_20_flash', fallback='Gemini 2.0 Flash - 快速版')),
+    '1': ('gemini-3-pro-preview', safe_t('chat.model_gemini_3_pro', fallback='Gemini 3.0 Pro Preview - 最新最強 (推薦)')),
+    '2': ('gemini-2.5-flash', safe_t('chat.model_gemini_25_flash', fallback='Gemini 2.5 Flash - 快速且智慧')),
+    '3': ('gemini-2.5-pro', safe_t('chat.model_gemini_25_pro', fallback='Gemini 2.5 Pro - 強大穩定')),
+    '4': ('gemini-2.5-flash-lite', safe_t('chat.model_gemini_25_flash_lite', fallback='Gemini 2.5 Flash Lite - 輕量版（最便宜）')),
 }
 
 # 支援思考模式的模型
-THINKING_MODELS = ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
+THINKING_MODELS = ['gemini-3-pro-preview', 'gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.5-flash-lite']
 
 
 # ==========================================
@@ -3879,7 +3879,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             video_path = Prompt.ask(safe_t("chat.media.video_path_prompt", fallback="影片路徑："))
                             subtitle_path = Prompt.ask(safe_t("chat.media.subtitle_path_prompt", fallback="字幕檔案路徑："))
 
-                            if not os.path.isfile(video_path):
+                            if not video_path or not os.path.isfile(video_path):
                                 console.print('[#E8C4F0]影片檔案不存在[/#E8C4F0]')
                                 input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
                                 continue
@@ -4744,7 +4744,21 @@ def main():
     # 選擇模型（優先使用保存的模型或 CLI 參數）
     model_selector = module_loader.get("model_selector")
 
-    # CLI 參數優先
+    # 處理配置模式
+    if args.config_mode:
+        try:
+            from gemini_config_ui import ConfigUI
+            ui = ConfigUI()
+            ui.interactive_setup()
+            sys.exit(0)
+        except ImportError:
+            print("❌ 無法載入配置介面 (gemini_config_ui.py)")
+            sys.exit(1)
+        except Exception as e:
+            print(f"❌ 配置過程發生錯誤: {e}")
+            sys.exit(1)
+
+    # 處理模型參數
     if args.model:
         console.print(safe_t('model.cli_override', fallback='[dim]使用 CLI 指定的模型: {model}[/dim]', model=args.model))
         current_model = args.model

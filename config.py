@@ -388,18 +388,20 @@ LANGUAGE_NAMES = {
 }
 
 # Gemini 模型設定
-DEFAULT_MODEL = "gemini-2.5-flash"  # 預設使用的 Gemini 模型
+DEFAULT_MODEL = "gemini-3-pro-preview"  # 預設使用的 Gemini 模型
 
 # 支援的模型列表（用於 gemini_chat.py 中的選單）
 AVAILABLE_MODELS = [
-    "gemini-2.5-pro",           # 最強大，支援思考模式
+    "gemini-3-pro-preview",     # 最新最強 (2025-11-19)
+    "gemini-2.5-pro",           # 強大，支援思考模式
     "gemini-2.5-flash",         # 推薦，快速且智慧
-    "gemini-2.5-flash-lite",      # 最便宜
+    "gemini-2.5-flash-lite",    # 最便宜
     "gemini-2.0-flash-exp",     # 實驗性
 ]
 
 # 各模型上下文窗口大小（tokens）- 官方精確值
 MODEL_CONTEXT_LIMITS = {
+    'gemini-3-pro-preview': 2_097_152,  # 2,097,152 tokens (2^21, 約 200萬)
     'gemini-2.5-pro': 2_097_152,        # 2,097,152 tokens (2^21, 約 200萬)
     'gemini-2.5-flash': 1_048_576,      # 1,048,576 tokens (2^20, 約 100萬)
     'gemini-2.5-flash-lite': 1_048_576,   # 1,048,576 tokens (2^20, 約 100萬)
@@ -534,6 +536,7 @@ for dir_path in MEDIA_SUBDIRS.values():
 
 # 最低快取要求（tokens）
 MIN_CACHE_TOKENS = {
+    'gemini-3-pro-preview': 4096,  # 預設同 Pro 標準
     'gemini-2.5-pro': 4096,        # 官方文檔驗證：最低 4096 tokens
     'gemini-2.5-flash': 1024,      # 官方文檔驗證：最低 1024 tokens
     'gemini-2.5-flash-lite': 1024,   # 同 Flash
@@ -543,6 +546,7 @@ MIN_CACHE_TOKENS = {
 
 # 思考模式支援的模型
 THINKING_MODELS = [
+    'gemini-3-pro-preview',
     'gemini-2.5-pro',
     'gemini-2.5-flash',
     'gemini-2.5-flash-lite',

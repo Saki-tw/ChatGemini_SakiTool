@@ -30,13 +30,23 @@
 - 按鍵響應速度提升約 50%
 
 ### 🎁 新增模型支援
-- 新增 Gemini Pro 3.0 模型支援
+- **新增 Gemini 3.0 Pro Preview 模型支援**（2025-11-18 Google 最新發布）
+  - 模型名稱：`gemini-3-pro-preview`
+  - 思考預算：最高 65,536 tokens（2 倍 Pro 2.5）
+  - 輸出限制：最高 131,072 tokens（128K）
+  - 上下文窗口：1,000,000 tokens（1M）
+  - 推理能力：SOTA 等級，超越 GPT-4 與 Claude
 - 動態模型列表自動獲取最新可用模型
 
 ### 📊 技術細節
-- 修改檔案: `gemini_model_selector.py` (+52 / -24 行)
+- 修改檔案:
+  - `gemini_model_selector.py` (+52 / -24 行) - 滾動功能
+  - `gemini_thinking.py` (+20 行) - Gemini 3 支援
+  - `gemini_model_list.py` (+5 行) - Gemini 3 分類
 - 新增測試: `test_model_selector_scroll.py`
-- 完整修復報告: `Reports/模型選擇器滾動修復報告_20251119.md`
+- 完整報告:
+  - `Reports/模型選擇器滾動修復報告_20251119.md`
+  - `THINKING_MAXTOKEN_分析報告_20251119.md`
 
 ---
 

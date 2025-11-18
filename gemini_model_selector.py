@@ -259,9 +259,10 @@ def get_last_selected_model() -> Optional[str]:
 
 # 主要推薦模型（啟動時顯示）
 RECOMMENDED_MODELS = {
-    '1': ('gemini-2.5-flash', 'Gemini 2.5 Flash（推薦,最快）'),
-    '2': ('gemini-2.5-pro', 'Gemini 2.5 Pro（最強,較貴）'),
-    '3': ('gemini-2.5-flash-lite', 'Gemini 2.5 Flash Lite（輕量版,更便宜）'),
+    '1': ('gemini-3-pro-preview', 'Gemini 3.0 Pro Preview（最新最強）'),
+    '2': ('gemini-2.5-flash', 'Gemini 2.5 Flash（推薦,最快）'),
+    '3': ('gemini-2.5-pro', 'Gemini 2.5 Pro（強大,較貴）'),
+    '4': ('gemini-2.5-flash-lite', 'Gemini 2.5 Flash Lite（輕量版,更便宜）'),
 }
 
 

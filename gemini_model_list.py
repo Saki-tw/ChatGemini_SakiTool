@@ -143,6 +143,7 @@ def categorize_models(models: List[Dict]) -> Dict[str, List[Dict]]:
         分類後的模型字典
     """
     categories = {
+        'gemini_30': [],      # Gemini 3.0 系列 (NEW!)
         'gemini_25': [],      # Gemini 2.5 系列
         'gemini_20': [],      # Gemini 2.0 系列
         'gemini_15': [],      # Gemini 1.5 系列
@@ -154,7 +155,9 @@ def categorize_models(models: List[Dict]) -> Dict[str, List[Dict]]:
     for model in models:
         name = model['name'].lower()
 
-        if '2.5' in name or 'gemini-2-5' in name:
+        if '3.0' in name or 'gemini-3' in name or '3-0' in name:
+            categories['gemini_30'].append(model)
+        elif '2.5' in name or 'gemini-2-5' in name:
             categories['gemini_25'].append(model)
         elif '2.0' in name or 'gemini-2-0' in name:
             categories['gemini_20'].append(model)
@@ -182,6 +185,7 @@ def get_recommended_models(models: List[Dict]) -> List[Dict]:
     """
     # 推薦模型的優先順序
     priority_names = [
+        'gemini-3-pro-preview',      # 最新最強 (2025-11-19)
         'gemini-2.5-flash',
         'gemini-2.5-pro',
         'gemini-2.5-flash-lite',
@@ -215,7 +219,9 @@ def format_model_display(model: Dict, index: int = None) -> str:
     name = model['name']
 
     # 生成友善的顯示名稱
-    if 'flash-lite' in name:
+    if 'gemini-3' in name and 'pro' in name:
+        display = "✨ 3.0 Pro Preview（最新最強）"
+    elif 'flash-lite' in name:
         display = "Flash Lite（輕量版）"
     elif 'flash' in name and '2.5' in name:
         display = "Flash（快速版）"
@@ -263,6 +269,11 @@ def initialize_models(api_key: str) -> bool:
 
 # 預設的後備模型列表（當 API 無法訪問時使用）
 FALLBACK_MODELS = [
+    {
+        'name': 'gemini-3-pro-preview',
+        'display_name': 'Gemini 3.0 Pro Preview',
+        'description': '最新最強的模型',
+    },
     {
         'name': 'gemini-2.5-flash',
         'display_name': 'Gemini 2.5 Flash',

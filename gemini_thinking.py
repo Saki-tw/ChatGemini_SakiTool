@@ -198,14 +198,16 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
     - [max_token:500] 單獨限制輸出長度（可與 think 同時使用）
     - [think:2000] [max_token:500] 可同時使用（分別控制思考與輸出）
 
-    各模型限制（基於 Google 官方文檔,2025-10-29）：
+    各模型限制（基於 Google 官方文檔,2025-11-19 更新）：
 
     Thinking Tokens:
+    - gemini-3-pro-preview: -1 (動態) 或 512-65536 tokens,無法停用 (NEW!)
     - gemini-2.5-pro: -1 (動態) 或 512-32768 tokens,無法停用
     - gemini-2.5-flash: -1 (動態) 或 0-24576 tokens,0=停用
     - gemini-2.5-flash-lite: -1 (動態) 或 512-24576 tokens,0=停用
 
     Max Output Tokens:
+    - gemini-3-pro-preview: 1-131072 tokens (128K, NEW!)
     - gemini-2.5-pro/flash/flash-lite: 1-65536 tokens
     - gemini-2.0-flash: 1-8192 tokens
 
@@ -222,13 +224,20 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
     is_pro = 'pro' in model_name.lower()
     is_lite = '8b' in model_name.lower() or 'lite' in model_name.lower()
     is_2_0 = '2.0' in model_name or '2-0' in model_name
+    is_3_0 = '3.0' in model_name or '3-0' in model_name or 'gemini-3' in model_name.lower()
 
     # ============================================================================
-    # 根據官方文檔設定各模型的硬限制（2025-10-29）
+    # 根據官方文檔設定各模型的硬限制（2025-11-19 更新）
     # ============================================================================
 
     # Thinking Tokens 限制
-    if is_pro:
+    if is_3_0:
+        # Gemini 3 Pro Preview（2025-11-18 發布）
+        # 支援高級推理能力，thinking 預算更大
+        THINK_MAX = 65536    # Gemini 3 顯著提升的思考能力
+        THINK_MIN = 512
+        ALLOW_DISABLE = False
+    elif is_pro:
         THINK_MAX = 32768    # 官方文檔值,API 可能實際限制為 24576
         THINK_MIN = 512      # API 實際驗證值（文檔提到 128 但不穩定）
         ALLOW_DISABLE = False
@@ -242,7 +251,9 @@ def parse_thinking_config(user_input: str, model_name: str = "") -> tuple:
         ALLOW_DISABLE = True
 
     # Max Output Tokens 限制
-    if is_2_0:
+    if is_3_0:
+        OUTPUT_MAX = 131072  # Gemini 3: 128K output tokens (基於 1M context window)
+    elif is_2_0:
         OUTPUT_MAX = 8192    # Gemini 2.0 系列上限
     else:
         OUTPUT_MAX = 65536   # Gemini 2.5 系列上限
@@ -597,8 +608,25 @@ def get_thinking_budget_info(model_name: str) -> dict:
     """
     is_pro = 'pro' in model_name.lower()
     is_lite = '8b' in model_name.lower() or 'lite' in model_name.lower()
+    is_3_0 = '3.0' in model_name or '3-0' in model_name or 'gemini-3' in model_name.lower()
 
-    if is_pro:
+    if is_3_0:
+        return {
+            'min': 512,
+            'max': 65536,
+            'default': -1,
+            'allow_disable': False,
+            'recommended': [
+                (-1, '自動（推薦）', '模型自動決定思考深度'),
+                (2048, '輕量思考', '簡單任務,快速回應'),
+                (8192, '標準思考', '一般複雜度任務'),
+                (16384, '深度思考', '需要仔細推理的任務'),
+                (32768, '極深思考', '高度複雜的邏輯問題'),
+                (65536, '最大思考', '最複雜的推理與規劃任務'),
+            ],
+            'description': 'gemini-3-pro-preview: 最強推理能力,思考預算 65K (2倍 Pro 2.5)'
+        }
+    elif is_pro:
         return {
             'min': 128,
             'max': 32768,
