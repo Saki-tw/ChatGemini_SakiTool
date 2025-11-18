@@ -57,54 +57,92 @@ def _arrow_key_select(models_dict: Dict[str, Tuple[str, str]], console) -> Optio
             key=lambda x: int(x[0]) if x[0].isdigit() else 999
         )
 
-        # 當前選擇的索引
+        # 當前選擇的索引與視窗滾動位置
         selected_index = [0]  # 使用列表以便在閉包中修改
+        scroll_offset = [0]   # 滾動偏移量
+
+        # 計算可視區域高度（預留 5 行給標題和提示）
+        import shutil
+        terminal_height = shutil.get_terminal_size().lines
+        visible_lines = max(10, terminal_height - 5)  # 至少顯示 10 行
 
         def get_formatted_text_list():
-            """生成格式化的選項列表"""
+            """生成格式化的選項列表（支援滾動）"""
             result = []
             result.append(('', '\n'))
             result.append(('class:header', '🔽 使用 ↑↓ 鍵選擇，Enter 確認，Esc 取消\n'))
             result.append(('', '\n'))
 
-            for idx, (key, (model_name, desc)) in enumerate(sorted_items):
+            # 計算顯示範圍
+            start_idx = scroll_offset[0]
+            end_idx = min(len(sorted_items), scroll_offset[0] + visible_lines)
+
+            # 顯示滾動提示
+            if start_idx > 0:
+                result.append(('class:info', f'  ⬆ 向上還有 {start_idx} 個選項\n'))
+
+            # 顯示當前視窗內的選項
+            for idx in range(start_idx, end_idx):
+                key, (model_name, desc) = sorted_items[idx]
                 if idx == selected_index[0]:
                     # 高亮當前選項
                     result.append(('class:selected', f'  ▶ [{key}] {desc.split("（")[0]}\n'))
                 else:
                     result.append(('', f'    [{key}] {desc.split("（")[0]}\n'))
 
+            # 顯示滾動提示
+            if end_idx < len(sorted_items):
+                remaining = len(sorted_items) - end_idx
+                result.append(('class:info', f'  ⬇ 向下還有 {remaining} 個選項\n'))
+
             result.append(('', '\n'))
+            result.append(('class:footer', f'  第 {selected_index[0] + 1}/{len(sorted_items)} 個模型\n'))
             return result
 
         # 建立鍵綁定
         kb = KeyBindings()
 
+        def adjust_scroll():
+            """調整滾動位置以確保當前選項可見"""
+            # 如果當前選項在視窗上方，向上滾動
+            if selected_index[0] < scroll_offset[0]:
+                scroll_offset[0] = selected_index[0]
+            # 如果當前選項在視窗下方，向下滾動
+            elif selected_index[0] >= scroll_offset[0] + visible_lines:
+                scroll_offset[0] = selected_index[0] - visible_lines + 1
+
         @kb.add(Keys.Up)
         def move_up(event):
             if selected_index[0] > 0:
                 selected_index[0] -= 1
+                adjust_scroll()
 
         @kb.add(Keys.Down)
         def move_down(event):
             if selected_index[0] < len(sorted_items) - 1:
                 selected_index[0] += 1
+                adjust_scroll()
 
         @kb.add(Keys.PageUp)
         def page_up(event):
             selected_index[0] = max(0, selected_index[0] - 10)
+            adjust_scroll()
 
         @kb.add(Keys.PageDown)
         def page_down(event):
             selected_index[0] = min(len(sorted_items) - 1, selected_index[0] + 10)
+            adjust_scroll()
 
         @kb.add(Keys.Home)
         def go_home(event):
             selected_index[0] = 0
+            scroll_offset[0] = 0
 
         @kb.add(Keys.End)
         def go_end(event):
             selected_index[0] = len(sorted_items) - 1
+            # 讓最後一個選項顯示在視窗底部
+            scroll_offset[0] = max(0, len(sorted_items) - visible_lines)
 
         @kb.add(Keys.Enter)
         def confirm(event):
@@ -126,6 +164,7 @@ def _arrow_key_select(models_dict: Dict[str, Tuple[str, str]], console) -> Optio
                     for idx, (key, _) in enumerate(sorted_items):
                         if key == number_input[0]:
                             selected_index[0] = idx
+                            adjust_scroll()  # 調整滾動位置
                             number_input[0] = ''  # 重置
                             break
                     # 如果累積的數字超過2位，重置
