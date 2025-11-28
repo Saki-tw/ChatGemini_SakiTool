@@ -62,7 +62,7 @@ class PreflightReport:
         # 統計
         console.print(safe_t('common.message', fallback='[#E8C4F0]總檢查項目：[/#E8C4F0] {checks_count}', checks_count=len(self.checks)))
         console.print(safe_t('common.warning', fallback='[#E8C4F0]警告：[/#E8C4F0] {warnings}', warnings=self.warnings))
-        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：[/red] {self.errors}', errors=self.errors))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：[/dim] {self.errors}', errors=self.errors))
         console.print()
 
         # 詳細結果
@@ -795,9 +795,9 @@ def main():
                             ["pip", "install"] + missing_packages,
                             check=True
                         )
-                        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 套件安裝成功！[/green]\n'))
+                        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 套件安裝成功！[/#B565D8]\n'))
                     except subprocess.CalledProcessError as e:
-                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 安裝失敗：{e}[/red]\n', e=e))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 安裝失敗：{e}[/dim]\n', e=e))
 
             # 2. 設定 API 金鑰
             if api_key_missing:
@@ -939,7 +939,7 @@ def main():
             from rich.prompt import Confirm
             # ✅ M1 修復：合併為單次確認,移除後續的「立即執行」重複確認
             if Confirm.ask("是否使用 Flow Engine 立即生成長影片？", default=True):
-                console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 正在啟動 Flow Engine...[/green]\n'))
+                console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 正在啟動 Flow Engine...[/#B565D8]\n'))
 
                 # 計算分段數量
                 num_segments = (args.duration + 7) // 8  # 向上取整
@@ -959,13 +959,13 @@ def main():
                         check=True,
                         capture_output=False
                     )
-                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ Flow Engine 執行完成！[/green]'))
+                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ Flow Engine 執行完成！[/#B565D8]'))
                     return 0
                 except FileNotFoundError:
-                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ gemini_flow_demo.py 不存在[/red]'))
+                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ gemini_flow_demo.py 不存在[/dim]'))
                     console.print(safe_t('common.message', fallback='[#E8C4F0]請手動執行上述指令[/#E8C4F0]'))
                 except subprocess.CalledProcessError as e:
-                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 執行失敗：{e}[/red]', e=e))
+                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 執行失敗：{e}[/dim]', e=e))
             else:
                 console.print(safe_t('common.message', fallback='\n[#E8C4F0]好的,請調整參數後重試[/#E8C4F0]'))
 
@@ -977,7 +977,7 @@ def main():
         has_error = False
         for result in results:
             if result.passed:
-                console.print(f"[#B565D8]✅ {result.message}[/green]")
+                console.print(f"[#B565D8]✅ {result.message}[/#B565D8]")
             else:
                 has_error = True
                 level_color = {
@@ -1013,7 +1013,7 @@ def main():
 
                 if choice in [1, 2, 3]:
                     selected = examples[choice - 1]
-                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已選擇：[/green] {selected}', selected=selected))
+                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 已選擇：[/#B565D8] {selected}', selected=selected))
                     console.print(safe_t('common.message', fallback='\n[#E8C4F0]重新執行驗證...[/#E8C4F0]\n'))
 
                     # 重新驗證
@@ -1035,9 +1035,9 @@ def main():
 
         for result in results:
             if result.passed:
-                console.print(f"[#B565D8]✅ {result.message}[/green]")
+                console.print(f"[#B565D8]✅ {result.message}[/#B565D8]")
             else:
-                console.print(f"[dim #E8C4F0]❌ {result.message}[/red]")
+                console.print(f"[dim #E8C4F0]❌ {result.message}[/dim]")
                 if result.suggestions:
                     console.print(safe_t('common.message', fallback='   建議：'))
                     for sug in result.suggestions:
@@ -1050,9 +1050,9 @@ def main():
 
         for check in api_checks:
             if check.passed:
-                console.print(f"[#B565D8]✅ {check.message}[/green]")
+                console.print(f"[#B565D8]✅ {check.message}[/#B565D8]")
             else:
-                console.print(f"[dim #E8C4F0]❌ {check.message}[/red]")
+                console.print(f"[dim #E8C4F0]❌ {check.message}[/dim]")
                 if check.suggestions:
                     console.print(safe_t('common.message', fallback='   建議：'))
                     for sug in check.suggestions:

@@ -186,7 +186,7 @@ class SecurityScanner:
                 self.use_gemini_verification = False
             else:
                 genai.configure(api_key=api_key)
-                self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+                self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def _detect_language(self) -> str:
         """偵測檔案語言"""

@@ -743,7 +743,7 @@ MIN_TOKENS = {
     'gemini-2.5-pro': 4096,           # Pro 版本需要更多
     'gemini-2.5-flash': 1024,         # Flash 版本標準
     'gemini-2.5-flash-lite': 1024,      # Flash-8B 版本標準
-    'gemini-2.0-flash-exp': 32768,    # 2.0 實驗版需要較多
+    'gemini-2.5-flash': 32768,    # 2.0 實驗版需要較多
     'gemini-2.0-flash': 32768,        # 2.0 標準版
 }
 
@@ -2894,7 +2894,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             ttl_hours=ttl_hours
                         )
                     except Exception as e:
-                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]建立失敗：{e}[/red]', e=e))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]建立失敗：{e}[/dim]', e=e))
 
                 elif cache_choice == '3':
                     cache_id = Prompt.ask(safe_t("chat.cache.delete_prompt", fallback="輸入要刪除的快取名稱或 ID: "))
@@ -3020,7 +3020,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 console.print(f'  100 次費用：NT$ {cost_twd*100:.2f}')
                                 console.print(f'\n  費率：NT$ {input_price * USD_TO_TWD:.4f} / 1K tokens')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]計算失敗：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]計算失敗：{e}[/dim]', e=e))
                         else:
                             console.print('[#E8C4F0]計價功能未啟用[/#E8C4F0]')
                     else:
@@ -3226,7 +3226,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     os.system(f'open "{file_path}"')
 
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '1' and FLOW_ENGINE_ENABLED:
@@ -3295,7 +3295,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 else:
                                     console.print(safe_t('common.generating', fallback='\n[#E8C4F0]已取消生成[/#E8C4F0]'))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
 
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -3385,7 +3385,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.extract_audio(video_path, format=audio_format)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 音訊已提取：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '8' and AUDIO_PROCESSOR_ENABLED:
@@ -3414,7 +3414,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.merge_audio(video_path, audio_path, replace=replace_mode)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 音訊已合併：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '9' and AUDIO_PROCESSOR_ENABLED:
@@ -3443,7 +3443,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.adjust_volume(file_path, volume)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 音量已調整：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '10' and AUDIO_PROCESSOR_ENABLED:
@@ -3481,7 +3481,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 )
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 背景音樂已添加：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '11' and AUDIO_PROCESSOR_ENABLED:
@@ -3509,7 +3509,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = processor.fade_in_out(file_path, fade_in=fade_in, fade_out=fade_out)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 淡入淡出已完成：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '12' and IMAGEN_GENERATOR_ENABLED:
@@ -3552,7 +3552,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     for path in output_paths:
                                         os.system(f'open "{path}"')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         # ==========================================
@@ -3647,7 +3647,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 影片已裁切：{output_path}[/#B565D8]', output_path=output_path))
                                 console.print('[dim]提示：使用 -c copy 無損裁切,保持原始品質[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '16' and VIDEO_EFFECTS_ENABLED:
@@ -3700,7 +3700,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 濾鏡已套用：{output_path}[/#B565D8]', output_path=output_path))
                                 console.print('[dim]注意：濾鏡需要重新編碼,已使用高品質設定[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '17' and VIDEO_EFFECTS_ENABLED:
@@ -3744,7 +3744,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 速度已調整：{output_path}[/#B565D8]', output_path=output_path))
                                 console.print('[dim]注意：同時調整影片和音訊速度,已使用高品質設定[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '18' and VIDEO_EFFECTS_ENABLED:
@@ -3801,7 +3801,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 浮水印已添加：{output_path}[/#B565D8]', output_path=output_path))
                                 console.print('[dim]注意：添加浮水印需要重新編碼,已使用高品質設定[/dim]')
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '19' and SUBTITLE_GENERATOR_ENABLED:
@@ -3868,7 +3868,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
                                     console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 燒錄完成：{video_with_subs}[/#B565D8]', video_with_subs=video_with_subs))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                                 import traceback
                                 traceback.print_exc()
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
@@ -3894,7 +3894,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 output_path = generator.burn_subtitles(video_path, subtitle_path)
                                 console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 字幕已燒錄：{output_path}[/#B565D8]', output_path=output_path))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                             input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
                         elif media_choice == '21' and VIDEO_ANALYZER_ENABLED:
@@ -3936,7 +3936,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 analyzer.interactive_video_chat(video_file)
 
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
                                 import traceback
                                 traceback.print_exc()
 
@@ -4020,14 +4020,14 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         test_script = Path(__file__).parent / "testTool" / script_name
 
                         if not test_script.exists():
-                            console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：找不到 testTool/{script_name}[/red]', script_name=script_name))
+                            console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：找不到 testTool/{script_name}[/dim]', script_name=script_name))
                         else:
                             try:
                                 subprocess.run([sys.executable, str(test_script)], check=True)
                             except subprocess.CalledProcessError:
                                 console.print(safe_t('common.completed', fallback='[#E8C4F0]測試完成（部分項目未通過）[/#E8C4F0]'))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]執行錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]執行錯誤：{e}[/dim]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4079,7 +4079,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                     console.print(safe_t('common.warning', fallback='\n[#E8C4F0]⚠️  未找到相關對話[/#E8C4F0]'))
                                     console.print(safe_t('common.saving', fallback='[dim]   提示：對話會在 EMBEDDING_AUTO_SAVE_CONVERSATIONS = True 時自動儲存[/dim]'))
                             except Exception as e:
-                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 搜尋錯誤：{e}[/red]', e=e))
+                                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 搜尋錯誤：{e}[/dim]', e=e))
                                 import traceback
                                 traceback.print_exc()
                         else:
@@ -4132,7 +4132,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                             console.print("\n" + "=" * 60)
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 獲取統計失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 獲取統計失敗：{e}[/dim]', e=e))
                             import traceback
                             traceback.print_exc()
 
@@ -4156,7 +4156,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 monitor.print_summary()
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取性能摘要失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取性能摘要失敗：{e}[/dim]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4178,7 +4178,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 monitor.print_bottleneck_report(top_n=10)
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取瓶頸分析失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取瓶頸分析失敗：{e}[/dim]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4208,7 +4208,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                                 console.print(f"[dim]   包含 {summary['total_operations']} 個操作的詳細統計資料[/dim]")
 
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 匯出報告失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 匯出報告失敗：{e}[/dim]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4217,7 +4217,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         try:
                             auto_tool_manager.print_stats(detailed=False)
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取工具統計失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取工具統計失敗：{e}[/dim]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 
@@ -4226,7 +4226,7 @@ def chat(model_name: str, chat_logger, auto_cache_config: dict, codebase_embeddi
                         try:
                             auto_tool_manager.print_stats(detailed=True)
                         except Exception as e:
-                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取工具詳細報告失敗：{e}[/red]', e=e))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 獲取工具詳細報告失敗：{e}[/dim]', e=e))
 
                         input(safe_t("chat.common.press_enter", fallback="按 Enter 繼續..."))
 

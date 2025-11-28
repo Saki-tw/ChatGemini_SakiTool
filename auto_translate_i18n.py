@@ -10,11 +10,11 @@ from utils.api_client import get_gemini_client
 
 def translate_batch(texts, target_lang, source_lang='zh-TW'):
     """批次翻譯"""
-    import google.generativeai as genai
+    from google import genai
     import os
 
     api_key = os.getenv('GOOGLE_API_KEY') or os.getenv('GEMINI_API_KEY')
-    genai.configure(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     lang_names = {
         'en': 'English',
@@ -35,8 +35,10 @@ Texts to translate:
         prompt += f"{i}. {text}\n"
 
     try:
-        model = genai.GenerativeModel('gemini-2.0-flash-exp')
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt
+        )
         translations = response.text.strip().split('\n')
 
         # 清理行號前綴

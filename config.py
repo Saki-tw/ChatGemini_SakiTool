@@ -390,24 +390,22 @@ LANGUAGE_NAMES = {
 # Gemini 模型設定
 DEFAULT_MODEL = "gemini-3-pro-preview"  # 預設使用的 Gemini 模型
 
-# 支援的模型列表（用於 gemini_chat.py 中的選單）
+# 支援的模型列表（用於 gemini_chat.py 中的選單）（2025-11-29 更新）
 AVAILABLE_MODELS = [
-    "gemini-3-pro-preview",     # 最新最強 (2025-11-19)
+    "gemini-3-pro-preview",     # 最新最強 (2025-11-18)
     "gemini-2.5-pro",           # 強大，支援思考模式
     "gemini-2.5-flash",         # 推薦，快速且智慧
-    "gemini-2.5-flash-lite",    # 最便宜
-    "gemini-2.0-flash-exp",     # 實驗性
+    "gemini-2.5-flash-lite",    # 輕量快速
+    "gemini-2.0-flash",         # 穩定版
 ]
 
-# 各模型上下文窗口大小（tokens）- 官方精確值
+# 各模型上下文窗口大小（tokens）- 官方精確值（2025-11-29 更新）
 MODEL_CONTEXT_LIMITS = {
-    'gemini-3-pro-preview': 2_097_152,  # 2,097,152 tokens (2^21, 約 200萬)
-    'gemini-2.5-pro': 2_097_152,        # 2,097,152 tokens (2^21, 約 200萬)
-    'gemini-2.5-flash': 1_048_576,      # 1,048,576 tokens (2^20, 約 100萬)
-    'gemini-2.5-flash-lite': 1_048_576,   # 1,048,576 tokens (2^20, 約 100萬)
-    'gemini-2.0-flash-exp': 1_048_576,  # 1,048,576 tokens (2^20, 約 100萬)
-    'gemini-1.5-pro': 2_097_152,        # 2,097,152 tokens (2^21, 約 200萬)
-    'gemini-1.5-flash': 1_048_576,      # 1,048,576 tokens (2^20, 約 100萬)
+    'gemini-3-pro-preview': 1_048_576,  # 1,048,576 tokens (1M context window)
+    'gemini-2.5-pro': 1_048_576,        # 1,048,576 tokens (1M)
+    'gemini-2.5-flash': 1_048_576,      # 1,048,576 tokens (1M)
+    'gemini-2.5-flash-lite': 1_048_576, # 1,048,576 tokens (1M)
+    'gemini-2.0-flash': 1_048_576,      # 1,048,576 tokens (1M)
 }
 
 # 預設上下文窗口（用於未列出的模型）
@@ -534,14 +532,13 @@ for dir_path in MEDIA_SUBDIRS.values():
 # 進階設定（通常不需修改）
 # ==========================================
 
-# 最低快取要求（tokens）
+# 最低快取要求（tokens）（2025-11-29 更新）
 MIN_CACHE_TOKENS = {
-    'gemini-3-pro-preview': 4096,  # 預設同 Pro 標準
-    'gemini-2.5-pro': 4096,        # 官方文檔驗證：最低 4096 tokens
-    'gemini-2.5-flash': 1024,      # 官方文檔驗證：最低 1024 tokens
-    'gemini-2.5-flash-lite': 1024,   # 同 Flash
-    'gemini-2.0-flash-exp': 32768, # 實測：2.0 系列需要更高
-    'gemini-2.0-flash': 32768,     # 2.0 標準版同 exp
+    'gemini-3-pro-preview': 4096,   # 預設同 Pro 標準
+    'gemini-2.5-pro': 4096,         # 官方文檔驗證：最低 4096 tokens
+    'gemini-2.5-flash': 1024,       # 官方文檔驗證：最低 1024 tokens
+    'gemini-2.5-flash-lite': 1024,  # 同 Flash
+    'gemini-2.0-flash': 32768,      # 2.0 標準版
 }
 
 # 思考模式支援的模型

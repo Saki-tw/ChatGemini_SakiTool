@@ -77,7 +77,7 @@ class ImageAnalyzer:
 
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model_name = model_name
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已載入模型：{model_name}[/green]', model_name=model_name))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已載入模型：{model_name}[/#B565D8]', model_name=model_name))
 
     def _image_to_part(self, image_path: str, use_memory_optimization: bool = True) -> types.Part:
         """
@@ -153,7 +153,7 @@ class ImageAnalyzer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     image_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/#B565D8]\n', image_path=image_path))
                 else:
                     raise FileNotFoundError(f"找不到圖片，請參考上述建議")
             except ImportError:
@@ -252,7 +252,7 @@ class ImageAnalyzer:
             return response.text
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/dim]', e=e))
             raise
 
     def analyze_multiple_images(
@@ -272,7 +272,7 @@ class ImageAnalyzer:
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='   [dim #E8C4F0]✗ {basename} - 載入失敗：{e}[/red]', basename=os.path.basename(path), e=e))
+                console.print(safe_t('error.failed', fallback='   [dim #E8C4F0]✗ {basename} - 載入失敗：{e}[/dim]', basename=os.path.basename(path), e=e))
 
         if not parts:
             # 🎯 一鍵修復：顯示無圖片載入修復建議
@@ -319,7 +319,7 @@ class ImageAnalyzer:
             return response.text
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/dim]', e=e))
             raise
 
     def batch_analyze(
@@ -345,7 +345,7 @@ class ImageAnalyzer:
                     'success': True
                 })
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/dim]', e=e))
                 results.append({
                     'path': path,
                     'filename': os.path.basename(path),
@@ -356,7 +356,7 @@ class ImageAnalyzer:
 
         # 統計
         success_count = sum(1 for r in results if r['success'])
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/green]', success_count=success_count, image_paths_count=len(image_paths)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 批次分析完成：{success_count}/{len(image_paths)} 成功[/#B565D8]', success_count=success_count, image_paths_count=len(image_paths)))
 
         return results
 
@@ -404,7 +404,7 @@ def main():
 
     # 檢查圖片
     if not args.images:
-        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：請提供圖片路徑[/red]'))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：請提供圖片路徑[/dim]'))
         show_examples()
         sys.exit(1)
 
@@ -429,7 +429,7 @@ def main():
             analyzer.analyze_image(args.images[0], task=args.task)
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 執行失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 執行失敗：{e}[/dim]', e=e))
         sys.exit(1)
 
 

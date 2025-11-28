@@ -42,10 +42,10 @@ macOS 및 Linux를 위한 완전 자동 설치. 설치 후 어디서나 `ChatGem
 ## 📦 프로젝트 정보
 
 **프로젝트 이름**: ChatGemini_SakiTool
-**버전**: v1.0.7
+**버전**: v1.0.9
 **작성자**: Saki-tw with Claude Code
 **연락처**: Saki@saki-studio.com.tw
-**최종 업데이트**: 2025-11-02  
+**최종 업데이트**: 2025-11-29  
 
 **API 키 신청**: https://aistudio.google.com/app/apikey
 **월간 무료 할당량**: Gemini 2.5 Pro는 무료 사용 할당량 제공
@@ -53,6 +53,19 @@ macOS 및 Linux를 위한 완전 자동 설치. 설치 후 어디서나 `ChatGem
 ---
 
 ## 🔥 버전 업데이트 기록
+
+### 📅 v1.0.9 (2025-11-29) — API 현대화 및 모델 업데이트
+
+**핵심 업데이트**:
+
+- 🔄 **Google GenAI SDK 마이그레이션**: 레거시 `google-generativeai`에서 최신 `google import genai` SDK로 마이그레이션, Google의 2025-11-30 지원 중단 타임라인 준수
+- 🤖 **Gemini 3 Pro Preview 지원**: Google의 최신 Gemini 3 Pro Preview 모델 지원 추가, 사고 예산 최대 65,536 토큰
+- 🖼️ **Imagen 4 모델 업데이트**: Imagen 4.0(Standard/Ultra/Fast)으로 업데이트, 더 높은 품질의 이미지 생성 제공
+- 🎬 **미디어 모듈 전면 업데이트**: Veo 3.1, Flow Engine, 자막 생성기 등의 모듈을 최신 API로 업데이트
+- 🐛 **Rich UI 포맷 수정**: 100개 이상의 Rich 포맷 태그 불일치 문제 수정, 일관된 터미널 표시 보장
+- 🧹 **프로젝트 정리**: 사용되지 않는 `gemini-2.0-flash-exp` 참조 제거, 백업 파일 및 더 이상 사용되지 않는 모듈 정리
+
+---
 
 ### 📅 v1.0.7 (2025-11-02) — CodeGemini 개발 도구 통합
 

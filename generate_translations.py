@@ -296,19 +296,19 @@ TRANSLATIONS = {
         "ko": "[#E8C4F0]📂 {tasks_count}개의 작업을 로드했습니다[/#E8C4F0]"
     },
     "batch.processor.registered_handler": {
-        "en": "[#B565D8]✓ Registered task handler: {task_type}[/green]",
-        "ja": "[#B565D8]✓ タスクハンドラーを登録しました：{task_type}[/green]",
-        "ko": "[#B565D8]✓ 작업 핸들러를 등록했습니다: {task_type}[/green]"
+        "en": "[#B565D8]✓ Registered task handler: {task_type}[/#B565D8]",
+        "ja": "[#B565D8]✓ タスクハンドラーを登録しました：{task_type}[/#B565D8]",
+        "ko": "[#B565D8]✓ 작업 핸들러를 등록했습니다: {task_type}[/#B565D8]"
     },
     "batch.processor.task_added": {
-        "en": "[#B565D8]✓ Task added: {task_id}[/green]",
-        "ja": "[#B565D8]✓ タスクを追加しました：{task_id}[/green]",
-        "ko": "[#B565D8]✓ 작업이 추가되었습니다: {task_id}[/green]"
+        "en": "[#B565D8]✓ Task added: {task_id}[/#B565D8]",
+        "ja": "[#B565D8]✓ タスクを追加しました：{task_id}[/#B565D8]",
+        "ko": "[#B565D8]✓ 작업이 추가되었습니다: {task_id}[/#B565D8]"
     },
     "batch.processor.tasks_batch_added": {
-        "en": "[#B565D8]✓ Batch added {task_ids_count} tasks[/green]",
-        "ja": "[#B565D8]✓ {task_ids_count} 個のタスクを一括追加しました[/green]",
-        "ko": "[#B565D8]✓ {task_ids_count}개의 작업을 일괄 추가했습니다[/green]"
+        "en": "[#B565D8]✓ Batch added {task_ids_count} tasks[/#B565D8]",
+        "ja": "[#B565D8]✓ {task_ids_count} 個のタスクを一括追加しました[/#B565D8]",
+        "ko": "[#B565D8]✓ {task_ids_count}개의 작업을 일괄 추가했습니다[/#B565D8]"
     },
     "batch.processor.task_started": {
         "en": "\n[#E8C4F0]▶️  Started task: {task_id}[/#E8C4F0]",
@@ -316,19 +316,19 @@ TRANSLATIONS = {
         "ko": "\n[#E8C4F0]▶️  작업을 시작했습니다: {task_id}[/#E8C4F0]"
     },
     "batch.processor.task_completed": {
-        "en": "[#B565D8]✅ Task completed: {task_id}[/green]",
-        "ja": "[#B565D8]✅ タスクが完了しました：{task_id}[/green]",
-        "ko": "[#B565D8]✅ 작업이 완료되었습니다: {task_id}[/green]"
+        "en": "[#B565D8]✅ Task completed: {task_id}[/#B565D8]",
+        "ja": "[#B565D8]✅ タスクが完了しました：{task_id}[/#B565D8]",
+        "ko": "[#B565D8]✅ 작업이 완료되었습니다: {task_id}[/#B565D8]"
     },
     "batch.processor.task_cancelled": {
-        "en": "[#B565D8]✓ Task cancelled: {task_id}[/green]",
-        "ja": "[#B565D8]✓ タスクをキャンセルしました：{task_id}[/green]",
-        "ko": "[#B565D8]✓ 작업이 취소되었습니다: {task_id}[/green]"
+        "en": "[#B565D8]✓ Task cancelled: {task_id}[/#B565D8]",
+        "ja": "[#B565D8]✓ タスクをキャンセルしました：{task_id}[/#B565D8]",
+        "ko": "[#B565D8]✓ 작업이 취소되었습니다: {task_id}[/#B565D8]"
     },
     "batch.processor.completed_tasks_cleared": {
-        "en": "[#B565D8]✓ Cleared {completed_ids_count} completed tasks[/green]",
-        "ja": "[#B565D8]✓ {completed_ids_count} 個の完了したタスクをクリアしました[/green]",
-        "ko": "[#B565D8]✓ {completed_ids_count}개의 완료된 작업을 정리했습니다[/green]"
+        "en": "[#B565D8]✓ Cleared {completed_ids_count} completed tasks[/#B565D8]",
+        "ja": "[#B565D8]✓ {completed_ids_count} 個の完了したタスクをクリアしました[/#B565D8]",
+        "ko": "[#B565D8]✓ {completed_ids_count}개의 완료된 작업을 정리했습니다[/#B565D8]"
     },
     "batch.processor.batch_completed": {
         "en": "\n[bold green]✅ Batch processing completed![/bold green]",
@@ -341,14 +341,14 @@ TRANSLATIONS = {
         "ko": "[#E8C4F0]작업 로드 실패: {e}[/#E8C4F0]"
     },
     "batch.processor.save_tasks_failed": {
-        "en": "[dim #E8C4F0]Failed to save tasks: {e}[/red]",
-        "ja": "[dim #E8C4F0]タスクの保存に失敗しました：{e}[/red]",
-        "ko": "[dim #E8C4F0]작업 저장 실패: {e}[/red]"
+        "en": "[dim #E8C4F0]Failed to save tasks: {e}[/dim]",
+        "ja": "[dim #E8C4F0]タスクの保存に失敗しました：{e}[/dim]",
+        "ko": "[dim #E8C4F0]작업 저장 실패: {e}[/dim]"
     },
     "batch.processor.task_failed": {
-        "en": "[dim #E8C4F0]❌ Task failed: {task_id} - {e}[/red]",
-        "ja": "[dim #E8C4F0]❌ タスクが失敗しました：{task_id} - {e}[/red]",
-        "ko": "[dim #E8C4F0]❌ 작업 실패: {task_id} - {e}[/red]"
+        "en": "[dim #E8C4F0]❌ Task failed: {task_id} - {e}[/dim]",
+        "ja": "[dim #E8C4F0]❌ タスクが失敗しました：{task_id} - {e}[/dim]",
+        "ko": "[dim #E8C4F0]❌ 작업 실패: {task_id} - {e}[/dim]"
     },
     "batch.processor.retrying_task": {
         "en": "[#E8C4F0]🔄 Retrying task ({retry_count}/{max_retries}): {task_id}[/#E8C4F0]",

@@ -43,10 +43,10 @@ Fully automated installation for macOS and Linux. After installation, type `Chat
 ## 📦 Project Information
 
 **Project Name**: ChatGemini_SakiTool
-**Version**: v1.0.7
+**Version**: v1.0.9
 **Author**: Saki-tw with Claude Code
 **Contact**: Saki@saki-studio.com.tw
-**Last Updated**: 2025-11-02  
+**Last Updated**: 2025-11-29  
 
 **Apply for API Key**: https://aistudio.google.com/app/apikey
 **Free Monthly Quota**: Gemini 2.5 Pro provides free usage quota
@@ -56,6 +56,19 @@ Fully automated installation for macOS and Linux. After installation, type `Chat
 ---
 
 ## 🔥 Version History
+
+### 📅 v1.0.9 (2025-11-29) — API Modernization & Model Updates
+
+**Core Updates**:
+
+- 🔄 **Google GenAI SDK Migration**: Migrated from legacy `google-generativeai` to latest `google import genai` SDK, compliant with Google's 2025-11-30 deprecation timeline
+- 🤖 **Gemini 3 Pro Preview Support**: Added support for Google's latest Gemini 3 Pro Preview model, with thinking budget up to 65,536 tokens
+- 🖼️ **Imagen 4 Model Update**: Updated to Imagen 4.0 (Standard/Ultra/Fast), providing higher quality image generation
+- 🎬 **Media Modules Full Update**: Veo 3.1, Flow Engine, subtitle generator, and other modules updated to latest API
+- 🐛 **Rich UI Format Fix**: Fixed 100+ Rich format tag mismatch issues, ensuring consistent terminal display
+- 🧹 **Project Cleanup**: Removed obsolete `gemini-2.0-flash-exp` references, cleaned backup files and deprecated modules
+
+---
 
 ### 📅 v1.0.7 (2025-11-02) — CodeGemini Development Tools Integration
 
@@ -670,8 +683,8 @@ Special thanks to: 曾公益中, 蔡師傅律安.
 
 **Enjoy chatting with Gemini AI!** 🎉
 
-**Last Updated**: 2025-10-24  
-**Version**: v1.0.3  
+**Last Updated**: 2025-11-29
+**Version**: v1.0.9
 **Python Version**: 3.10+  
 
 ---

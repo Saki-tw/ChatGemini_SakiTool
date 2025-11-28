@@ -121,7 +121,7 @@ class ThinkingTranslator:
         except Exception as e:
             self.engine_status['deep_translator'] = safe_t('translator.test_failed', fallback="❌ 測試失敗: {error}", error=str(e))
             logger.warning(safe_t('translator.test_failed', fallback="deep-translator 測試失敗: {error}", error=str(e)))
-            console.print(f"[dim #E8C4F0]{safe_t('translator.load_failed', fallback='❌ 翻譯引擎載入失敗: {error}', error=str(e))}[/red]")
+            console.print(f"[dim #E8C4F0]{safe_t('translator.load_failed', fallback='❌ 翻譯引擎載入失敗: {error}', error=str(e))}[/dim]")
 
         # === 備用：返回原文（始終可用）===
         self.engine_status['fallback'] = safe_t('translator.fallback_ready', fallback="✅ 備用方案")
@@ -286,7 +286,7 @@ class ThinkingTranslator:
         table.add_row("翻譯功能", status_icon)
 
         # 當前引擎
-        table.add_row("當前引擎", f"[#B565D8]{status['current_engine']}[/green]")
+        table.add_row("當前引擎", f"[#B565D8]{status['current_engine']}[/#B565D8]")
 
         # 引擎狀態
         for engine, state in status['engines'].items():
@@ -448,7 +448,7 @@ if __name__ == "__main__":
         # 使用帶進度提示的翻譯
         result = translator.translate_with_progress(test_text)
 
-        console.print(safe_t('common.message', fallback='[#B565D8]翻譯：[/green] {result}', result=result))
+        console.print(safe_t('common.message', fallback='[#B565D8]翻譯：[/#B565D8] {result}', result=result))
         console.print(safe_t('common.message', fallback='[dim]引擎：{translator.current_engine}[/dim]', current_engine=translator.current_engine))
 
     # 測試雙語對照

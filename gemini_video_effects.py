@@ -44,7 +44,7 @@ class VideoEffects:
                 suggest_ffmpeg_not_installed()
             except ImportError:
                 # 降級方案：顯示基本錯誤訊息
-                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg[/red]'))
+                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg[/dim]'))
                 console.print(safe_t('common.message', fallback='[#E8C4F0]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#E8C4F0]'))
 
             raise RuntimeError("ffmpeg 未安裝，請按照上述步驟安裝後重試")
@@ -69,7 +69,7 @@ class VideoEffects:
                 suggest_cannot_get_duration(video_path, e)
             except ImportError:
                 # 降級方案：顯示基本錯誤訊息
-                console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]錯誤：無法獲取影片時長[/red]'))
+                console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]錯誤：無法獲取影片時長[/dim]'))
                 console.print(safe_t('error.failed', fallback='[dim]錯誤詳情：{e}[/dim]', e=e))
 
             raise RuntimeError(f"無法獲取影片時長: {e}")
@@ -102,7 +102,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -160,9 +160,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[#B565D8]✓ 完成[/green]")
+                progress.update(task, description="[#B565D8]✓ 完成[/#B565D8]")
 
-            self.console.print(f"\n[#B565D8]✅ 影片已裁切：{output_path}[/green]")
+            self.console.print(f"\n[#B565D8]✅ 影片已裁切：{output_path}[/#B565D8]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -170,7 +170,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/dim]")
             raise
 
     def apply_filter(
@@ -201,7 +201,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -271,9 +271,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[#B565D8]✓ 完成[/green]")
+                progress.update(task, description="[#B565D8]✓ 完成[/#B565D8]")
 
-            self.console.print(f"\n[#B565D8]✅ 濾鏡已應用：{output_path}[/green]")
+            self.console.print(f"\n[#B565D8]✅ 濾鏡已應用：{output_path}[/#B565D8]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -281,7 +281,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/dim]")
             raise
 
     def apply_multiple_filters(
@@ -354,7 +354,7 @@ class VideoEffects:
         self.console.print(f"\n[#E8C4F0]🎨 批次應用濾鏡效果[/#E8C4F0]")
         self.console.print(f"濾鏡鏈: {' → '.join(filter_names)}")
         self.console.print(f"品質: {quality}")
-        self.console.print(f"\n[#B565D8]✨ 優化：單次編碼應用所有濾鏡（{len(filter_names)}x 提升）[/green]\n")
+        self.console.print(f"\n[#B565D8]✨ 優化：單次編碼應用所有濾鏡（{len(filter_names)}x 提升）[/#B565D8]\n")
 
         try:
             with Progress(
@@ -377,9 +377,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description=f"[#B565D8]✓ 完成 ({len(filter_names)} 個濾鏡)[/green]")
+                progress.update(task, description=f"[#B565D8]✓ 完成 ({len(filter_names)} 個濾鏡)[/#B565D8]")
 
-            self.console.print(f"\n[#B565D8]✅ 所有濾鏡已應用：{output_path}[/green]")
+            self.console.print(f"\n[#B565D8]✅ 所有濾鏡已應用：{output_path}[/#B565D8]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
             self.console.print(f"[dim]提示：單次編碼避免了 {len(filter_names)-1} 次額外的品質損失[/dim]")
@@ -388,7 +388,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/dim]")
             raise
 
     def adjust_speed(
@@ -419,7 +419,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -486,9 +486,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[#B565D8]✓ 完成[/green]")
+                progress.update(task, description="[#B565D8]✓ 完成[/#B565D8]")
 
-            self.console.print(f"\n[#B565D8]✅ 速度已調整：{output_path}[/green]")
+            self.console.print(f"\n[#B565D8]✅ 速度已調整：{output_path}[/#B565D8]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -496,7 +496,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/dim]")
             raise
 
     def add_watermark(
@@ -531,7 +531,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -547,7 +547,7 @@ class VideoEffects:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     watermark_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{watermark_path}[/green]\n', watermark_path=watermark_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{watermark_path}[/#B565D8]\n', watermark_path=watermark_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -626,9 +626,9 @@ class VideoEffects:
                 ]
 
                 subprocess.run(cmd, check=True, capture_output=True)
-                progress.update(task, description="[#B565D8]✓ 完成[/green]")
+                progress.update(task, description="[#B565D8]✓ 完成[/#B565D8]")
 
-            self.console.print(f"\n[#B565D8]✅ 浮水印已添加：{output_path}[/green]")
+            self.console.print(f"\n[#B565D8]✅ 浮水印已添加：{output_path}[/#B565D8]")
             file_size = os.path.getsize(output_path) / (1024 * 1024)
             self.console.print(f"檔案大小：{file_size:.2f} MB")
 
@@ -636,7 +636,7 @@ class VideoEffects:
 
         except subprocess.CalledProcessError as e:
             error_msg = e.stderr.decode() if e.stderr else str(e)
-            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/red]")
+            self.console.print(f"\n[dim #E8C4F0]❌ 處理失敗：{error_msg}[/dim]")
             raise
 
 
@@ -669,7 +669,7 @@ def main():
 
         if command == 'trim':
             if len(sys.argv) < 5:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：trim 需要開始和結束時間[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：trim 需要開始和結束時間[/dim]'))
                 return
             start = float(sys.argv[3])
             end = float(sys.argv[4])
@@ -677,7 +677,7 @@ def main():
 
         elif command == 'filter':
             if len(sys.argv) < 4:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：filter 需要濾鏡名稱[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：filter 需要濾鏡名稱[/dim]'))
                 return
             filter_name = sys.argv[3]
             quality = sys.argv[4] if len(sys.argv) > 4 else 'high'
@@ -685,7 +685,7 @@ def main():
 
         elif command == 'speed':
             if len(sys.argv) < 4:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：speed 需要速度倍數[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：speed 需要速度倍數[/dim]'))
                 return
             speed = float(sys.argv[3])
             quality = sys.argv[4] if len(sys.argv) > 4 else 'high'
@@ -693,7 +693,7 @@ def main():
 
         elif command == 'watermark':
             if len(sys.argv) < 4:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：watermark 需要圖片路徑[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：watermark 需要圖片路徑[/dim]'))
                 return
             watermark = sys.argv[3]
             position = sys.argv[4] if len(sys.argv) > 4 else 'bottom-right'
@@ -701,13 +701,13 @@ def main():
             output = effects.add_watermark(video_path, watermark, position, opacity)
 
         else:
-            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知指令：{command}[/red]', command=command))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知指令：{command}[/dim]', command=command))
             return
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 處理完成：{output}[/green]', output=output))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 處理完成：{output}[/#B565D8]', output=output))
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
         sys.exit(1)
 
 

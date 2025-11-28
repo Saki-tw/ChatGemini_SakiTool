@@ -77,7 +77,7 @@ class VideoSummarizer:
 
     def __init__(
         self,
-        model_name: str = "gemini-2.0-flash-exp",
+        model_name: str = "gemini-2.5-flash",
         use_scene_detection: bool = True
     ):
         """
@@ -115,7 +115,7 @@ class VideoSummarizer:
         # 1. 獲取影片資訊
         info = self.preprocessor.get_video_info(video_path)
         if not info:
-            console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]錯誤：無法獲取影片資訊[/red]'))
+            console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]錯誤：無法獲取影片資訊[/dim]'))
             return None
 
         duration = info['duration']
@@ -172,7 +172,7 @@ class VideoSummarizer:
             confidence=content_overview.get('confidence', 0.8)
         )
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 摘要生成完成！[/green]'))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 摘要生成完成！[/#B565D8]'))
 
         return summary
 
@@ -607,7 +607,7 @@ LONG: [長摘要]
             with open(output_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ JSON 已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ JSON 已保存：{output_file}[/#B565D8]', output_file=output_file))
 
         # TXT 格式
         if format in ['txt', 'all']:
@@ -640,7 +640,7 @@ LONG: [長摘要]
                         f.write(f"     關鍵要點：{', '.join(chapter.key_points)}\n\n")
 
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ TXT 已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ TXT 已保存：{output_file}[/#B565D8]', output_file=output_file))
 
         # Markdown 格式
         if format in ['md', 'all']:
@@ -670,7 +670,7 @@ LONG: [長摘要]
                         f.write(f"**關鍵要點：** {', '.join(chapter.key_points)}  \n\n")
 
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ Markdown 已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ Markdown 已保存：{output_file}[/#B565D8]', output_file=output_file))
 
         # YouTube 描述格式
         if format in ['youtube', 'all']:
@@ -688,7 +688,7 @@ LONG: [長摘要]
                 f.write(f"#{'  #'.join(summary.tags[:10])}\n")
 
             saved_files.append(output_file)
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ YouTube 描述已保存：{output_file}[/green]', output_file=output_file))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ YouTube 描述已保存：{output_file}[/#B565D8]', output_file=output_file))
 
         return str(saved_files[0]) if saved_files else ""
 
@@ -707,7 +707,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Gemini 智能影片摘要')
     parser.add_argument('video', help='影片檔案路徑')
-    parser.add_argument('--model', default='gemini-2.0-flash-exp', help='使用的模型')
+    parser.add_argument('--model', default='gemini-2.5-flash', help='使用的模型')
     parser.add_argument('--chapters', type=int, help='章節數量（預設自動判斷）')
     parser.add_argument('--style', choices=['concise', 'balanced', 'detailed'], default='balanced',
                        help='摘要風格')
@@ -719,7 +719,7 @@ def main():
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{args.video}[/red]', video=args.video))
+        console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{args.video}[/dim]', video=args.video))
         return
 
     # 創建摘要器

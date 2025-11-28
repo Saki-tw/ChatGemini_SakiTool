@@ -7,6 +7,46 @@
 
 ---
 
+## [1.0.9] - 2025-11-29
+
+### 🚀 API 現代化與模型更新
+
+#### 🔄 Google GenAI SDK 遷移
+- 從舊版 `google-generativeai` 遷移至最新 `google import genai` SDK
+- 符合 Google 2025-11-30 SDK 棄用時程
+- 更新 `gemini_model_list.py`、`auto_translate_i18n.py` 等核心模組
+
+#### 🤖 模型更新
+- **Gemini 3 Pro Preview**：新增支援，思考預算最高 65,536 tokens
+- **Gemini 2.5 Flash-Lite**：新增輕量模型選項
+- **Imagen 4.0**：更新至最新版本（標準/Ultra/Fast 三種模式）
+- 移除已棄用的 `gemini-2.0-flash-exp` 模型引用
+
+#### 🎬 影音模組全面更新
+- **gemini_veo_generator.py**：Veo 3.1 模型（標準/Fast/3.0）
+- **gemini_imagen_generator.py**：Imagen 4.0 四種模型選項、UI 修正
+- **gemini_flow_engine.py**：更新至 `gemini-2.5-flash`
+- **gemini_video_summarizer.py**：更新至 `gemini-2.5-flash`
+- **gemini_subtitle_generator.py**：更新至 `gemini-2.5-flash`
+- **gemini_media_viewer.py**：更新至 `gemini-2.5-flash`
+- **CodeGemini 子模組**：更新 4 個生成器/掃描器模組
+
+#### 🐛 Bug 修復
+- **Rich UI 格式修復**：修正 100+ 處 `[#B565D8]...[/green]` 格式標籤不匹配問題
+- **Imagen UI 修正**：模型選擇提示從 `(1-2)` 更正為 `(1-4)`
+
+#### 🧹 專案清理
+- 清理 13 個備份檔案（.backup, .bak）
+- 移除 deprecated 目錄中的過時模組
+- 清理 __pycache__ 快取目錄
+
+### 📊 技術細節
+- 修改檔案: 20+ 個模組
+- 新增模型: Gemini 3 Pro Preview, Gemini 2.5 Flash-Lite, Imagen 4.0
+- 移除模型: gemini-2.0-flash-exp, gemini-1.5-* (從推薦列表)
+
+---
+
 ## [1.0.8] - 2025-11-19
 
 ### 🐛 Bug 修復
@@ -248,4 +288,4 @@
 **專案**: ChatGemini_SakiTool
 **維護者**: Saki-tw with Claude Code
 **聯絡**: Saki@saki-studio.com.tw
-**最後更新**: 2025-11-19
+**最後更新**: 2025-11-29

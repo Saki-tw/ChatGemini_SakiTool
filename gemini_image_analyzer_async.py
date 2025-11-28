@@ -237,7 +237,7 @@ class AsyncImageAnalyzer(ImageAnalyzer):
                 console.print(f"   {i}. {os.path.basename(path)} ({img.size[0]}×{img.size[1]})")
                 parts.append(self._image_to_part(path))
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='   [dim #E8C4F0]✗ {basename} - 載入失敗：{e}[/red]', basename=os.path.basename(path), e=e))
+                console.print(safe_t('error.failed', fallback='   [dim #E8C4F0]✗ {basename} - 載入失敗：{e}[/dim]', basename=os.path.basename(path), e=e))
 
         if not parts:
             raise ValueError("沒有成功載入任何圖片")

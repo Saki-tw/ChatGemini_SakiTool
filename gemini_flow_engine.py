@@ -197,7 +197,7 @@ class FlowEngine:
         try:
             # 調用 Gemini API
             response = self.client.models.generate_content(
-                model='gemini-2.0-flash-exp',
+                model='gemini-2.5-flash',
                 contents=prompt
             )
 
@@ -208,7 +208,7 @@ class FlowEngine:
                 output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
 
                 cost, details = self.pricing.calculate_text_cost(
-                    'gemini-2.0-flash-exp',
+                    'gemini-2.5-flash',
                     input_tokens,
                     output_tokens,
                     thinking_tokens
@@ -341,7 +341,7 @@ class FlowEngine:
             warnings = [r for r in preflight_results if r.level == ValidationLevel.WARNING]
 
             if errors:
-                console.print(safe_t('flow.engine.preflight_failed_message', fallback='[dim #E8C4F0]❌ 飛行前檢查失敗,無法繼續執行：[/red]'))
+                console.print(safe_t('flow.engine.preflight_failed_message', fallback='[dim #E8C4F0]❌ 飛行前檢查失敗,無法繼續執行：[/dim]'))
                 for err in errors:
                     console.print(f"  ❌ {err.message}")
                     if err.suggestions:
@@ -740,7 +740,7 @@ def main():
         console.print(f"   {output}")
 
     except Exception as e:
-        console.print(safe_t('flow.engine.error_message', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('flow.engine.error_message', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

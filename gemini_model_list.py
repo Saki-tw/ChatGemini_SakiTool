@@ -8,7 +8,7 @@ import json
 import os
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
-import google.generativeai as genai
+from google import genai
 
 
 # 快取檔案路徑
@@ -30,25 +30,25 @@ def get_api_models(api_key: str) -> List[Dict]:
         模型資訊列表
     """
     try:
-        genai.configure(api_key=api_key)
-        models = genai.list_models()
+        # 使用新版統一 SDK
+        client = genai.Client(api_key=api_key)
+        models = client.models.list()
 
         # 篩選出支援對話生成的模型
-        generation_models = [
-            m for m in models
-            if 'generateContent' in m.supported_generation_methods
-        ]
-
-        # 轉換為可序列化的格式
         model_list = []
-        for model in generation_models:
-            model_info = {
-                'name': model.name.replace('models/', ''),
-                'display_name': model.display_name if hasattr(model, 'display_name') else model.name,
-                'description': model.description if hasattr(model, 'description') else '',
-                'supported_methods': model.supported_generation_methods,
-            }
-            model_list.append(model_info)
+        for model in models:
+            # 新版 SDK 使用不同的屬性名稱
+            model_name = model.name.replace('models/', '') if hasattr(model, 'name') else str(model)
+            supported_methods = getattr(model, 'supported_generation_methods', [])
+
+            if 'generateContent' in supported_methods:
+                model_info = {
+                    'name': model_name,
+                    'display_name': getattr(model, 'display_name', model_name),
+                    'description': getattr(model, 'description', ''),
+                    'supported_methods': supported_methods,
+                }
+                model_list.append(model_info)
 
         return model_list
 
@@ -183,14 +183,13 @@ def get_recommended_models(models: List[Dict]) -> List[Dict]:
     Returns:
         推薦模型列表（3-5 個）
     """
-    # 推薦模型的優先順序
+    # 推薦模型的優先順序（2025-11-29 更新）
     priority_names = [
-        'gemini-3-pro-preview',      # 最新最強 (2025-11-19)
-        'gemini-2.5-flash',
-        'gemini-2.5-pro',
-        'gemini-2.5-flash-lite',
-        'gemini-2.0-flash',
-        'gemini-2.0-flash-exp',
+        'gemini-3-pro-preview',      # 最新最強 (2025-11-18)
+        'gemini-2.5-flash',          # 性價比最高
+        'gemini-2.5-pro',            # 最強推理
+        'gemini-2.5-flash-lite',     # 輕量快速
+        'gemini-2.0-flash',          # 穩定版
     ]
 
     recommended = []

@@ -103,8 +103,8 @@ class MemoryPoolManager:
             f"""[bold #E8C4F0]記憶體使用報告[/bold #E8C4F0]
 
 當前使用: [#E8C4F0]{report['current_mb']} MB[/#E8C4F0]
-峰值使用: [dim #E8C4F0]{report['peak_mb']} MB[/red]
-起始使用: [#B565D8]{report['start_mb']} MB[/green]
+峰值使用: [dim #E8C4F0]{report['peak_mb']} MB[/dim]
+起始使用: [#B565D8]{report['start_mb']} MB[/#B565D8]
 增量使用: [#E8C4F0]{report['delta_mb']} MB[/#E8C4F0]
 使用率: [{'red' if report['usage_percent'] > 80 else 'green'}]{report['usage_percent']}%[/]
 記憶體限制: {report['max_limit_mb']} MB""",
@@ -282,7 +282,7 @@ def load_image_chunked(
             return image_bytes
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 圖片載入失敗: {e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 圖片載入失敗: {e}[/dim]', e=e))
         raise
 
 
@@ -313,7 +313,7 @@ def get_video_duration(video_path: str) -> float:
         return float(result.stdout.strip())
 
     except Exception as e:
-        console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]❌ 無法取得影片時長: {e}[/red]', e=e))
+        console.print(safe_t('error.cannot_process', fallback='[dim #E8C4F0]❌ 無法取得影片時長: {e}[/dim]', e=e))
         return 0.0
 
 
@@ -408,11 +408,11 @@ def process_video_chunked(
             if temp_dir.exists():
                 temp_dir.rmdir()
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 影片處理完成: {output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 影片處理完成: {output_path}[/#B565D8]', output_path=output_path))
         return True
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 影片處理失敗: {e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 影片處理失敗: {e}[/dim]', e=e))
         return False
 
 
@@ -533,7 +533,7 @@ class ChunkedUploader:
 
             # 如果已完成,直接返回
             if progress.get("completed"):
-                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 檔案已上傳完成（使用快取）[/green]'))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 檔案已上傳完成（使用快取）[/#B565D8]'))
                 return True
 
             uploaded_chunks = set(progress["uploaded_chunks"])
@@ -570,7 +570,7 @@ class ChunkedUploader:
                         success = upload_func(chunk_data, chunk_idx, total_chunks)
 
                         if not success:
-                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ Chunk {chunk_idx} 上傳失敗[/red]', chunk_idx=chunk_idx))
+                            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ Chunk {chunk_idx} 上傳失敗[/dim]', chunk_idx=chunk_idx))
                             return False
 
                         # 更新進度
@@ -588,11 +588,11 @@ class ChunkedUploader:
             progress["completed"] = True
             self._save_progress(file_path, progress)
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✅ 檔案上傳完成: {file_path}[/green]', file_path=file_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✅ 檔案上傳完成: {file_path}[/#B565D8]', file_path=file_path))
             return True
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 上傳失敗: {e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 上傳失敗: {e}[/dim]', e=e))
             return False
 
 
@@ -680,7 +680,7 @@ class ParallelProcessor:
         success_count = sum(1 for r in results if r["status"] == "success")
         error_count = len(results) - success_count
 
-        console.print(safe_t('error.failed', fallback='\n[#B565D8]✅ 成功: {success_count}[/green] | [dim #E8C4F0]❌ 失敗: {error_count}[/red]', success_count=success_count, error_count=error_count))
+        console.print(safe_t('error.failed', fallback='\n[#B565D8]✅ 成功: {success_count}[/#B565D8] | [dim #E8C4F0]❌ 失敗: {error_count}[/dim]', success_count=success_count, error_count=error_count))
 
         return results
 

@@ -49,7 +49,7 @@ class SceneDetector:
 
     def __init__(
         self,
-        model_name: str = "gemini-2.0-flash-exp",
+        model_name: str = "gemini-2.5-flash",
         output_dir: Optional[str] = None
     ):
         """
@@ -106,7 +106,7 @@ class SceneDetector:
         # 修改 extract_keyframes 為支持更多幀數
         keyframes = self._extract_uniform_frames(video_path, num_keyframes, duration)
 
-        console.print(safe_t('media.video.frames_extracted', fallback='[#B565D8]✓ 已提取 {count} 個關鍵幀[/green]\n', count=len(keyframes)))
+        console.print(safe_t('media.video.frames_extracted', fallback='[#B565D8]✓ 已提取 {count} 個關鍵幀[/#B565D8]\n', count=len(keyframes)))
 
         # 2. 分析每個幀的內容
         console.print(safe_t('media.video.analyzing_frames', fallback='[#E8C4F0]🤖 使用 Gemini Vision 分析關鍵幀...[/#E8C4F0]\n'))
@@ -144,7 +144,7 @@ class SceneDetector:
             similarity_threshold
         )
 
-        console.print(safe_t('media.video.scenes_detected', fallback='[#B565D8]✓ 檢測到 {count} 個場景[/green]\n', count=len(scenes)))
+        console.print(safe_t('media.video.scenes_detected', fallback='[#B565D8]✓ 檢測到 {count} 個場景[/#B565D8]\n', count=len(scenes)))
 
         # 4. 顯示成本
         if PRICING_ENABLED and show_cost and global_pricing_calculator:
@@ -494,7 +494,7 @@ class SceneDetector:
                         f.write(f"關鍵元素：{', '.join(scene.key_elements)}\n")
                     f.write(f"\n")
 
-        console.print(safe_t('media.video.scene_index_saved', fallback='[#B565D8]✓ 場景索引已保存：{file}[/green]', file=output_file))
+        console.print(safe_t('media.video.scene_index_saved', fallback='[#B565D8]✓ 場景索引已保存：{file}[/#B565D8]', file=output_file))
         return output_file
 
     def _format_time(self, seconds: float) -> str:
@@ -514,14 +514,14 @@ def main():
     parser.add_argument('video', help='影片檔案路徑')
     parser.add_argument('--frames', type=int, default=30, help='提取關鍵幀數量（預設 30）')
     parser.add_argument('--threshold', type=float, default=0.7, help='相似度閾值（預設 0.7）')
-    parser.add_argument('--model', default='gemini-2.0-flash-exp', help='使用的模型')
+    parser.add_argument('--model', default='gemini-2.5-flash', help='使用的模型')
     parser.add_argument('--output', choices=['json', 'txt', 'both'], default='both', help='輸出格式')
 
     args = parser.parse_args()
 
     # 檢查檔案
     if not os.path.isfile(args.video):
-        console.print(safe_t('error.video_not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{path}[/red]', path=args.video))
+        console.print(safe_t('error.video_not_found', fallback='[dim #E8C4F0]錯誤：找不到影片檔案：{path}[/dim]', path=args.video))
         return
 
     # 創建檢測器

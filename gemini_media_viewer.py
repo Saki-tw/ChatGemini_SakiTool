@@ -93,7 +93,7 @@ class MediaViewer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     image_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/#B565D8]\n', image_path=image_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -146,7 +146,7 @@ class MediaViewer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             except ImportError:
@@ -250,7 +250,7 @@ class MediaViewer:
                 self.console.print(f"\n[#E8C4F0]⚠ 警告：{info['error']}[/#E8C4F0]")
 
         except Exception as e:
-            self.console.print(f"[dim #E8C4F0]錯誤：{e}[/red]")
+            self.console.print(f"[dim #E8C4F0]錯誤：{e}[/dim]")
 
     def display_video_info(self, video_path: str):
         """顯示影片資訊"""
@@ -299,7 +299,7 @@ class MediaViewer:
 
             # API 限制檢查
             if info['size_mb'] > 2000:
-                self.console.print(f"\n[dim #E8C4F0]⚠ 警告：檔案大小超過 Gemini API 限制（2GB）[/red]")
+                self.console.print(f"\n[dim #E8C4F0]⚠ 警告：檔案大小超過 Gemini API 限制（2GB）[/dim]")
             elif info['size_mb'] > 1900:
                 self.console.print(f"\n[#E8C4F0]⚠ 提示：檔案大小接近 API 限制，建議壓縮[/#E8C4F0]")
 
@@ -307,7 +307,7 @@ class MediaViewer:
                 self.console.print(f"\n[#E8C4F0]⚠ 警告：{info['error']}[/#E8C4F0]")
 
         except Exception as e:
-            self.console.print(f"[dim #E8C4F0]錯誤：{e}[/red]")
+            self.console.print(f"[dim #E8C4F0]錯誤：{e}[/dim]")
 
     def analyze_with_ai(self, file_path: str, custom_prompt: Optional[str] = None):
         """
@@ -344,7 +344,7 @@ class MediaViewer:
 
             # 生成分析
             response = self.client.models.generate_content(
-                model='gemini-2.0-flash-exp',
+                model='gemini-2.5-flash',
                 contents=[uploaded_file, prompt]
             )
 
@@ -355,7 +355,7 @@ class MediaViewer:
                 output_tokens = getattr(response.usage_metadata, 'candidates_tokens', 0)
 
                 cost, details = global_pricing_calculator.calculate_text_cost(
-                    'gemini-2.0-flash-exp',
+                    'gemini-2.5-flash',
                     input_tokens,
                     output_tokens,
                     thinking_tokens
@@ -375,7 +375,7 @@ class MediaViewer:
             ))
 
         except Exception as e:
-            self.console.print(f"[dim #E8C4F0]AI 分析失敗：{e}[/red]")
+            self.console.print(f"[dim #E8C4F0]AI 分析失敗：{e}[/dim]")
 
     def view_file(self, file_path: str, analyze: bool = False, custom_prompt: Optional[str] = None):
         """
@@ -387,7 +387,7 @@ class MediaViewer:
             custom_prompt: 自訂分析提示
         """
         if not os.path.isfile(file_path):
-            self.console.print(f"[dim #E8C4F0]檔案不存在：{file_path}[/red]")
+            self.console.print(f"[dim #E8C4F0]檔案不存在：{file_path}[/dim]")
             return
 
         file_type = self.get_file_type(file_path)
@@ -418,11 +418,11 @@ def interactive_mode():
         file_path = console.input("\n[#E8C4F0]請輸入檔案路徑（或輸入 'exit' 退出）：[/#E8C4F0]\n").strip()
 
         if not file_path or file_path.lower() in ['exit', 'quit', '退出']:
-            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/green]'))
+            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/#B565D8]'))
             break
 
         if not os.path.isfile(file_path):
-            console.print(safe_t('common.message', fallback='[dim #E8C4F0]檔案不存在[/red]'))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]檔案不存在[/dim]'))
             continue
 
         # 顯示資訊

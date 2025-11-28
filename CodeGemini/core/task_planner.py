@@ -116,7 +116,7 @@ class TaskPlanner:
             raise RuntimeError(safe_t('codegemini.planner.api_key_required', fallback='請設置 GEMINI_API_KEY 環境變數'))
 
         self.client = genai.Client(api_key=self.api_key)
-        self.model = 'gemini-2.0-flash-exp'  # 使用最新的 Flash 模型
+        self.model = 'gemini-2.5-flash'  # 使用推薦的 Flash 模型
 
         # 初始化計價器
         self.pricing = get_pricing_calculator(silent=True)

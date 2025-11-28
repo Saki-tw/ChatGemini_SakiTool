@@ -118,7 +118,7 @@ class CacheManager:
                 config=types.CreateCachedContentConfig(**config_params)
             )
 
-            console.print(f"[#B565D8]{safe_t('cache.created_success', fallback='✓ 快取已建立')}[/green]")
+            console.print(f"[#B565D8]{safe_t('cache.created_success', fallback='✓ 快取已建立')}[/#B565D8]")
             console.print(f"   {safe_t('cache.cache_name_info', fallback='快取名稱:{name}', name=cache.name)}")
             console.print(f"   {safe_t('cache.expire_time_info', fallback='過期時間:{time}', time=cache.expire_time)}")
 
@@ -132,7 +132,7 @@ class CacheManager:
             return cache
 
         except Exception as e:
-            console.print(f"[dim #E8C4F0]{safe_t('cache.create_failed', fallback='✗ 建立快取失敗:{error}', error=str(e))}[/red]")
+            console.print(f"[dim #E8C4F0]{safe_t('cache.create_failed', fallback='✗ 建立快取失敗:{error}', error=str(e))}[/dim]")
 
             # 檢查常見錯誤
             error_str = str(e).lower()
@@ -239,7 +239,7 @@ class CacheManager:
             return response.text
 
         except Exception as e:
-            console.print(f"[dim #E8C4F0]{safe_t('cache.query_failed', fallback='✗ 查詢失敗:{error}', error=str(e))}[/red]")
+            console.print(f"[dim #E8C4F0]{safe_t('cache.query_failed', fallback='✗ 查詢失敗:{error}', error=str(e))}[/dim]")
             raise
 
     def _find_cache_by_name(self, name: str) -> Optional[Any]:
@@ -250,7 +250,7 @@ class CacheManager:
                 if name in cache.name or (hasattr(cache, 'display_name') and cache.display_name == name):
                     return cache
         except Exception as e:
-            console.print(f"[dim #E8C4F0]列出快取失敗:{e}[/red]")
+            console.print(f"[dim #E8C4F0]列出快取失敗:{e}[/dim]")
         return None
 
     def list_caches(self) -> List[Any]:
@@ -280,7 +280,7 @@ class CacheManager:
                 expire_time = cache.expire_time
                 is_expired = expire_time < now if expire_time else False
 
-                status = f"[dim #E8C4F0]{safe_t('cache.status_expired', fallback='已過期')}[/red]" if is_expired else f"[#B565D8]{safe_t('cache.status_valid', fallback='有效')}[/green]"
+                status = f"[dim #E8C4F0]{safe_t('cache.status_expired', fallback='已過期')}[/dim]" if is_expired else f"[#B565D8]{safe_t('cache.status_valid', fallback='有效')}[/#B565D8]"
 
                 table.add_row(
                     display_name,
@@ -296,7 +296,7 @@ class CacheManager:
             return caches
 
         except Exception as e:
-            console.print(f"[dim #E8C4F0]{safe_t('cache.list_failed', fallback='✗ 列出快取失敗:{error}', error=str(e))}[/red]")
+            console.print(f"[dim #E8C4F0]{safe_t('cache.list_failed', fallback='✗ 列出快取失敗:{error}', error=str(e))}[/dim]")
             return []
 
     def delete_cache(self, cache_name_or_key: str) -> bool:
@@ -321,7 +321,7 @@ class CacheManager:
                     cache_name = f"cachedContents/{cache_name}"
 
             client.caches.delete(name=cache_name)
-            console.print(f"[#B565D8]✓ 已刪除快取:{cache_name_or_key}[/green]")
+            console.print(f"[#B565D8]✓ 已刪除快取:{cache_name_or_key}[/#B565D8]")
 
             # 從 active_caches 移除
             if cache_name_or_key in self.active_caches:
@@ -330,7 +330,7 @@ class CacheManager:
             return True
 
         except Exception as e:
-            console.print(f"[dim #E8C4F0]✗ 刪除快取失敗:{e}[/red]")
+            console.print(f"[dim #E8C4F0]✗ 刪除快取失敗:{e}[/dim]")
             return False
 
     def calculate_savings(
@@ -386,7 +386,7 @@ class CacheManager:
 [#E8C4F0]查詢次數:[/#E8C4F0] {result['query_count']}
 
 [#E8C4F0]不使用快取成本:[/#E8C4F0] ${result['without_cache']:.6f}
-[#B565D8]使用快取成本:[/green] ${result['with_cache']:.6f}
+[#B565D8]使用快取成本:[/#B565D8] ${result['with_cache']:.6f}
 [bold green]節省:[/bold green] ${result['savings']:.6f} ({result['discount_percent']}% 折扣)
 
 [dim]約合台幣節省:NT${result['savings'] * USD_TO_TWD:.2f}[/dim]
@@ -417,7 +417,7 @@ def main():
 
     if args.command == 'create':
         if not args.content:
-            console.print("[dim #E8C4F0]錯誤:請提供 --content[/red]")
+            console.print("[dim #E8C4F0]錯誤:請提供 --content[/dim]")
             sys.exit(1)
 
         # 檢查是否為檔案
@@ -438,19 +438,19 @@ def main():
 
     elif args.command == 'delete':
         if not args.cache:
-            console.print("[dim #E8C4F0]錯誤:請提供 --cache[/red]")
+            console.print("[dim #E8C4F0]錯誤:請提供 --cache[/dim]")
             sys.exit(1)
         manager.delete_cache(args.cache)
 
     elif args.command == 'query':
         if not args.cache or not args.question:
-            console.print("[dim #E8C4F0]錯誤:請提供 --cache 和 --question[/red]")
+            console.print("[dim #E8C4F0]錯誤:請提供 --cache 和 --question[/dim]")
             sys.exit(1)
         manager.query_with_cache(args.cache, args.question)
 
     elif args.command == 'calculate':
         if not args.tokens:
-            console.print("[dim #E8C4F0]錯誤:請提供 --tokens[/red]")
+            console.print("[dim #E8C4F0]錯誤:請提供 --tokens[/dim]")
             sys.exit(1)
         manager.show_savings_report(
             model=args.model,

@@ -192,7 +192,7 @@ class SubtitleGenerator:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
@@ -231,7 +231,7 @@ class SubtitleGenerator:
         if os.path.exists(audio_path):
             os.remove(audio_path)
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 字幕已生成：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 字幕已生成：{output_path}[/#B565D8]', output_path=output_path))
         return output_path
 
     def _extract_audio(self, video_path: str) -> str:
@@ -271,7 +271,7 @@ class SubtitleGenerator:
                     stderr=subprocess.PIPE,
                     check=True
                 )
-                console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音訊已提取[/green]'))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音訊已提取[/#B565D8]'))
                 return audio_path
             except subprocess.CalledProcessError as e:
                 stderr = e.stderr.decode() if isinstance(e.stderr, bytes) else str(e.stderr)
@@ -363,7 +363,7 @@ ffmpeg 錯誤碼：{e.returncode}
             ) as progress:
                 task = progress.add_task("上傳音訊...", total=None)
                 uploaded_file = self.client.files.upload(path=audio_path)
-                progress.update(task, completed=100, description="[#B565D8]✓ 上傳完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 上傳完成[/#B565D8]")
 
         # 顯示成本警告
         console.print(safe_t('common.message', fallback='[dim]📁 檔案已上傳: {uploaded_file.name}[/dim]', name=uploaded_file.name))
@@ -413,7 +413,7 @@ ffmpeg 錯誤碼：{e.returncode}
             task = progress.add_task("辨識中...", total=None)
 
             response = self.client.models.generate_content(
-                model="gemini-2.0-flash-exp",
+                model="gemini-2.5-flash",
                 contents=[
                     types.Content(
                         role="user",
@@ -428,7 +428,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 ]
             )
 
-            progress.update(task, completed=100, description="[#B565D8]✓ 辨識完成[/green]")
+            progress.update(task, completed=100, description="[#B565D8]✓ 辨識完成[/#B565D8]")
 
         # 顯示成本（在解析結果之前）
         if hasattr(response, 'usage_metadata'):
@@ -439,14 +439,14 @@ ffmpeg 錯誤碼：{e.returncode}
             if PRICING_ENABLED and self.pricing_calculator and show_cost and input_tokens > 0:
                 try:
                     cost, details = self.pricing_calculator.calculate_text_cost(
-                        "gemini-2.0-flash-exp",
+                        "gemini-2.5-flash",
                         input_tokens,
                         output_tokens,
                         thinking_tokens
                     )
                     console.print(safe_t('common.message', fallback='[dim]💰 語音辨識成本: NT${cost_twd:.2f} (音訊+提示: {input_tokens:,} tokens, 回應: {output_tokens:,} tokens) | 累計: NT${total_cost_twd:.2f} (${total_cost_usd:.6f})[/dim]', cost_twd=cost * USD_TO_TWD, input_tokens=input_tokens, output_tokens=output_tokens, total_cost_twd=self.pricing_calculator.total_cost * USD_TO_TWD, total_cost_usd=self.pricing_calculator.total_cost))
                 except (KeyError, AttributeError, TypeError) as e:
-                    logger.warning(f"計價顯示失敗，模型: gemini-2.0-flash-exp, 輸入: {input_tokens}, 輸出: {output_tokens}, 錯誤: {e}")
+                    logger.warning(f"計價顯示失敗，模型: gemini-2.5-flash, 輸入: {input_tokens}, 輸出: {output_tokens}, 錯誤: {e}")
 
         # 解析結果
         result_text = response.text.strip()
@@ -471,7 +471,7 @@ ffmpeg 錯誤碼：{e.returncode}
                     text=seg["text"].strip()
                 ))
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 共識別 {len(segments)} 個片段[/green]', segments_count=len(segments)))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 共識別 {len(segments)} 個片段[/#B565D8]', segments_count=len(segments)))
 
             # 刪除上傳的檔案
             self.client.files.delete(name=uploaded_file.name)
@@ -503,7 +503,7 @@ ffmpeg 錯誤碼：{e.returncode}
                                 text=seg.get("text", "").strip()
                             ))
 
-                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/green]', segments_count=len(segments)))
+                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 使用修復後的 JSON 成功解析 {len(segments)} 個字幕片段[/#B565D8]', segments_count=len(segments)))
 
                         # 刪除上傳的檔案
                         if 'uploaded_file' in locals():
@@ -511,11 +511,11 @@ ffmpeg 錯誤碼：{e.returncode}
 
                         return segments
                     except Exception as parse_error:
-                        console.print(safe_t('common.message', fallback='[dim #E8C4F0]✗ 修復後的 JSON 仍無法解析：{parse_error}[/red]', parse_error=parse_error))
+                        console.print(safe_t('common.message', fallback='[dim #E8C4F0]✗ 修復後的 JSON 仍無法解析：{parse_error}[/dim]', parse_error=parse_error))
 
             except ImportError:
                 # 降級到舊版錯誤顯示
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]JSON 解析錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]JSON 解析錯誤：{e}[/dim]', e=e))
                 console.print(safe_t('common.message', fallback='[#E8C4F0]原始回應：{result_text}[/#E8C4F0]', result_text=result_text))
 
             raise RuntimeError("語音辨識結果解析失敗，請參考上述修復建議")
@@ -550,7 +550,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 segment.translation = translated
                 progress.advance(task)
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 翻譯完成[/green]'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 翻譯完成[/#B565D8]'))
         return segments
 
     def _write_subtitle_file(
@@ -576,7 +576,7 @@ ffmpeg 錯誤碼：{e.returncode}
 
             raise ValueError(f"不支援的字幕格式：{format}，請參考上述支援格式")
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案已生成[/green]'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案已生成[/#B565D8]'))
 
     def _write_srt(self, segments: List[SubtitleSegment], output_path: str):
         """生成 SRT 格式字幕"""
@@ -665,7 +665,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
@@ -680,7 +680,7 @@ ffmpeg 錯誤碼：{e.returncode}
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     subtitle_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{subtitle_path}[/green]\n', subtitle_path=subtitle_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{subtitle_path}[/#B565D8]\n', subtitle_path=subtitle_path))
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
             else:
@@ -731,9 +731,9 @@ ffmpeg 錯誤碼：{e.returncode}
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/#B565D8]")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 字幕已燒錄：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 字幕已燒錄：{output_path}[/#B565D8]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -833,15 +833,15 @@ def main():
             target_language=target_lang
         )
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 字幕檔案：{subtitle_path}[/green]', subtitle_path=subtitle_path))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 字幕檔案：{subtitle_path}[/#B565D8]', subtitle_path=subtitle_path))
 
         # 燒錄字幕（如果需要）
         if burn:
             video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 燒錄影片：{video_with_subs}[/green]', video_with_subs=video_with_subs))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 燒錄影片：{video_with_subs}[/#B565D8]', video_with_subs=video_with_subs))
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

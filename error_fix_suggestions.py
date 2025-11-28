@@ -168,7 +168,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
         }
     )
 
-    console.print(f"\n[dim #E8C4F0]✗ 找不到檔案：{file_path}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 找不到檔案：{file_path}[/dim]\n")
     console.print(Markdown("**💡 解決方案：**\n"))
 
     # 嘗試找相似檔案
@@ -333,7 +333,7 @@ def suggest_file_not_found(file_path: str, auto_fix: bool = True) -> Optional[st
             except subprocess.TimeoutExpired:
                 console.print("[#E8C4F0]搜尋超時[/#E8C4F0]")
             except Exception as e:
-                console.print(f"[dim #E8C4F0]搜尋失敗：{e}[/red]")
+                console.print(f"[dim #E8C4F0]搜尋失敗：{e}[/dim]")
 
         console.print()
 
@@ -379,7 +379,7 @@ def suggest_ffmpeg_install() -> None:
         }
     )
 
-    console.print("\n[dim #E8C4F0]✗ ffmpeg 未安裝[/red]\n")
+    console.print("\n[dim #E8C4F0]✗ ffmpeg 未安裝[/dim]\n")
     console.print("[#E8C4F0]💡 一鍵修復方案：[/#E8C4F0]\n")
 
     # macOS
@@ -557,7 +557,7 @@ def suggest_api_key_setup() -> None:
     )
 
     # 錯誤標題
-    console.print("\n[dim #E8C4F0]✗ Gemini API 金鑰未設定[/red]\n")
+    console.print("\n[dim #E8C4F0]✗ Gemini API 金鑰未設定[/dim]\n")
     console.print("[#E8C4F0]💡 設定方式：[/#E8C4F0]\n")
 
     # ==================== 方法 1：臨時環境變數 ====================
@@ -696,7 +696,7 @@ def suggest_missing_module(module_name: str, install_command: Optional[str] = No
         }
     )
 
-    console.print(f"\n[dim #E8C4F0]✗ Python 模組 '{module_name}' 未安裝[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ Python 模組 '{module_name}' 未安裝[/dim]\n")
     console.print("[#E8C4F0]💡 一鍵修復方案：[/#E8C4F0]\n")
 
     if install_command is None:
@@ -824,7 +824,7 @@ def suggest_file_corrupted(file_path: str, ffprobe_error: str = "") -> None:
         file_path: 損壞的檔案路徑
         ffprobe_error: ffprobe 錯誤訊息
     """
-    console.print(f"\n[dim #E8C4F0]✗ 檔案格式錯誤或損壞：{file_path}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 檔案格式錯誤或損壞：{file_path}[/dim]\n")
 
     # 顯示錯誤詳細資訊
     if ffprobe_error:
@@ -1001,7 +1001,7 @@ def suggest_json_parse_failed(
     Returns:
         修復後的 JSON 文字（如果自動修復成功），否則返回 None
     """
-    console.print(f"\n[dim #E8C4F0]✗ {context}結果解析失敗[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ {context}結果解析失敗[/dim]\n")
 
     # 顯示錯誤訊息
     console.print(f"[#E8C4F0]JSON 解析錯誤：{error_message}[/#E8C4F0]\n")
@@ -1263,12 +1263,12 @@ def suggest_invalid_watermark_params(
     has_position_error = False
 
     if opacity is not None and (opacity < 0.0 or opacity > 1.0):
-        console.print(f"[dim #E8C4F0]問題 1: 不透明度 {opacity} 超出範圍[/red]")
+        console.print(f"[dim #E8C4F0]問題 1: 不透明度 {opacity} 超出範圍[/dim]")
         has_opacity_error = True
 
     if position is not None and supported_positions is not None:
         if position not in supported_positions:
-            console.print(f"[dim #E8C4F0]問題 2: 不支援的位置 {position}[/red]")
+            console.print(f"[dim #E8C4F0]問題 2: 不支援的位置 {position}[/dim]")
             has_position_error = True
 
     console.print("\n[bold #E8C4F0]💡 正確參數設定：[/bold #E8C4F0]\n")
@@ -1396,7 +1396,7 @@ def suggest_video_transcode_failed(
     error_preview = stderr[:300] if len(stderr) > 300 else stderr
     if len(stderr) > 300:
         error_preview += "\n... (錯誤訊息已截斷)"
-    console.print(f"[dim #E8C4F0]{error_preview}[/red]\n")
+    console.print(f"[dim #E8C4F0]{error_preview}[/dim]\n")
 
     console.print("[bold #E8C4F0]💡 診斷與解決：[/bold #E8C4F0]\n")
 
@@ -1544,7 +1544,7 @@ def suggest_video_upload_failed(
         error_message: 錯誤訊息
         uploaded_bytes: 已上傳的位元組數（可選）
     """
-    console.print(f"\n[dim #E8C4F0]✗ 影片上傳失敗：{error_message}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 影片上傳失敗：{error_message}[/dim]\n")
 
     # ==================== 檔案資訊 ====================
     if os.path.isfile(file_path):
@@ -1707,7 +1707,7 @@ def suggest_empty_file(file_path: str) -> None:
     Args:
         file_path: 空檔案路徑
     """
-    console.print(f"\n[dim #E8C4F0]✗ 檔案為空（0 bytes）：{file_path}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 檔案為空（0 bytes）：{file_path}[/dim]\n")
 
     # ==================== 檔案資訊 ====================
     if os.path.exists(file_path):
@@ -1828,7 +1828,7 @@ def suggest_image_load_failed(file_path: str, error: Exception) -> None:
         file_path: 圖片檔案路徑
         error: 載入錯誤的異常物件
     """
-    console.print(f"\n[dim #E8C4F0]✗ 無法載入圖片：{str(error)}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 無法載入圖片：{str(error)}[/dim]\n")
 
     # 檔案資訊
     size_mb = 0
@@ -1987,10 +1987,10 @@ def suggest_cannot_get_duration(file_path: str, error: Exception = None) -> None
         error: 可選的錯誤物件，用於顯示詳細錯誤資訊
     """
     if error:
-        console.print(f"\n[dim #E8C4F0]✗ 無法獲取檔案時長：{file_path}[/red]")
+        console.print(f"\n[dim #E8C4F0]✗ 無法獲取檔案時長：{file_path}[/dim]")
         console.print(f"[dim]錯誤詳情：{error}[/dim]\n")
     else:
-        console.print(f"\n[dim #E8C4F0]✗ 無法獲取檔案時長：{file_path}[/red]\n")
+        console.print(f"\n[dim #E8C4F0]✗ 無法獲取檔案時長：{file_path}[/dim]\n")
     console.print("[#E8C4F0]💡 診斷與解決方案：[/#E8C4F0]\n")
 
     # ==================== 步驟 1：手動檢查 ====================
@@ -2129,7 +2129,7 @@ def suggest_unsupported_subtitle_format(requested_format: str) -> None:
         requested_format.upper()
     )
 
-    console.print(f"\n[dim #E8C4F0]✗ 不支援的字幕格式：{requested_format}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 不支援的字幕格式：{requested_format}[/dim]\n")
     console.print(f"您請求的格式：{format_full_name}\n")
 
     console.print("[#E8C4F0]💡 支援的字幕格式：[/#E8C4F0]\n")
@@ -2402,7 +2402,7 @@ def suggest_unsupported_filter(filter_name: str, supported_filters: dict) -> Non
         filter_name: 使用者請求的濾鏡名稱
         supported_filters: 支援的濾鏡字典 {name: ffmpeg_filter_string}
     """
-    console.print(f"\n[dim #E8C4F0]✗ 不支援的濾鏡：{filter_name}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 不支援的濾鏡：{filter_name}[/dim]\n")
 
     # 濾鏡的中文名稱和詳細說明
     filter_descriptions = {
@@ -2545,7 +2545,7 @@ def suggest_missing_stream(file_path: str, stream_type: str = "audio") -> None:
     """
     stream_name = safe_t("error_handler.error_fix_suggestions.msg_0018", fallback="音訊") if stream_type == "audio" else "視訊"
     
-    console.print(f"\n[dim #E8C4F0]✗ 影片檔案不包含有效{stream_name}串流：{file_path}[/red]\n")
+    console.print(f"\n[dim #E8C4F0]✗ 影片檔案不包含有效{stream_name}串流：{file_path}[/dim]\n")
 
     console.print("[#E8C4F0]💡 診斷與解決方案：[/#E8C4F0]\n")
 
@@ -3034,7 +3034,7 @@ def suggest_no_video_stream(file_path: str) -> None:
         file_path: 檔案路徑
     """
     console.print(f"\n[bold red]❌ 錯誤：找不到影片串流[/bold red]")
-    console.print(f"[dim #E8C4F0]檔案：{file_path}[/red]\n")
+    console.print(f"[dim #E8C4F0]檔案：{file_path}[/dim]\n")
 
     console.print("[#E8C4F0]🔍 診斷資訊：[/#E8C4F0]")
 
@@ -3107,8 +3107,8 @@ def suggest_ffprobe_failed(file_path: str, error: Exception) -> None:
         error: 錯誤異常
     """
     console.print(f"\n[bold red]❌ 錯誤：ffprobe 執行失敗[/bold red]")
-    console.print(f"[dim #E8C4F0]檔案：{file_path}[/red]")
-    console.print(f"[dim #E8C4F0]錯誤：{error}[/red]\n")
+    console.print(f"[dim #E8C4F0]檔案：{file_path}[/dim]")
+    console.print(f"[dim #E8C4F0]錯誤：{error}[/dim]\n")
 
     console.print("[#E8C4F0]🔍 診斷資訊：[/#E8C4F0]")
 
@@ -3188,8 +3188,8 @@ def suggest_video_processing_failed(file_path: str, error: Exception) -> None:
         error: 錯誤異常
     """
     console.print(f"\n[bold red]❌ 錯誤：影片處理失敗[/bold red]")
-    console.print(f"[dim #E8C4F0]檔案：{file_path}[/red]")
-    console.print(f"[dim #E8C4F0]錯誤：{error}[/red]\n")
+    console.print(f"[dim #E8C4F0]檔案：{file_path}[/dim]")
+    console.print(f"[dim #E8C4F0]錯誤：{error}[/dim]\n")
 
     error_msg = str(error).lower()
 
@@ -3422,7 +3422,7 @@ class ErrorLogger:
                 os.remove(self.log_file)
             console.print(f"[#E8C4F0]✓ 已清除日誌：{self.log_file}[/green]")
         except Exception as e:
-            console.print(f"[dim #E8C4F0]✗ 無法清除日誌：{e}[/red]")
+            console.print(f"[dim #E8C4F0]✗ 無法清除日誌：{e}[/dim]")
 
     def export_report(self, output_file: str = "error_report.json") -> None:
         """
@@ -3444,7 +3444,7 @@ class ErrorLogger:
                 json.dump(report, f, ensure_ascii=False, indent=2)
             console.print(f"[#E8C4F0]✓ 報告已匯出：{output_file}[/green]")
         except Exception as e:
-            console.print(f"[dim #E8C4F0]✗ 無法匯出報告：{e}[/red]")
+            console.print(f"[dim #E8C4F0]✗ 無法匯出報告：{e}[/dim]")
 
 
 # ========================================

@@ -652,7 +652,7 @@ class ErrorDiagnostics:
             solutions: 解決方案列表
         """
         # 顯示錯誤訊息
-        console.print(f"\n[dim #E8C4F0]✗ {error_message}[/red]\n")
+        console.print(f"\n[dim #E8C4F0]✗ {error_message}[/dim]\n")
 
         if not solutions:
             console.print("[dim]無可用的自動解決方案[/dim]")
@@ -668,7 +668,7 @@ class ErrorDiagnostics:
             # 解決方案標題
             if solution.auto_fixable:
                 icon = "🔧"
-                auto_tag = " [#B565D8](可自動修復)[/green]"
+                auto_tag = " [#B565D8](可自動修復)[/#B565D8]"
             elif solution.command:
                 icon = "⚡"
                 auto_tag = " [#E8C4F0](一鍵執行)[/#E8C4F0]"
@@ -681,7 +681,7 @@ class ErrorDiagnostics:
 
             # 顯示指令
             if solution.command:
-                console.print(f"   [#B565D8]執行指令：[/green]")
+                console.print(f"   [#B565D8]執行指令：[/#B565D8]")
                 console.print(Panel(
                     solution.command,
                     border_style="green",
@@ -710,7 +710,7 @@ class ErrorDiagnostics:
                     try:
                         result = solution.fix_function()
                         if result:
-                            console.print(f"\n[#B565D8]✅ 修復完成！[/green]")
+                            console.print(f"\n[#B565D8]✅ 修復完成！[/#B565D8]")
                             if isinstance(result, list):
                                 console.print(f"   已修改 {len(result)} 個檔案：")
                                 for file in result[:5]:  # 只顯示前 5 個

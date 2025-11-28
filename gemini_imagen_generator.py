@@ -29,13 +29,15 @@ client = get_gemini_client()
 # 初始化計價器
 global_pricing_calculator = get_pricing_calculator(silent=True)
 
-# 支援的模型
+# 支援的模型（2025-11-29 更新）
 MODELS = {
-    '1': ('imagen-3.0-generate-001', 'Imagen 3 - 最高品質'),
-    '2': ('imagen-3.0-fast-generate-001', 'Imagen 3 Fast - 快速生成'),
+    '1': ('imagen-4.0-generate-001', 'Imagen 4 - 最新標準版'),
+    '2': ('imagen-4.0-ultra-generate-001', 'Imagen 4 Ultra - 最高品質'),
+    '3': ('imagen-4.0-fast-generate-001', 'Imagen 4 Fast - 快速生成 (最便宜)'),
+    '4': ('imagen-3.0-generate-001', 'Imagen 3 - 舊版穩定'),
 }
 
-DEFAULT_MODEL = 'imagen-3.0-generate-001'
+DEFAULT_MODEL = 'imagen-4.0-generate-001'
 # 使用統一輸出目錄配置
 from utils.path_manager import get_image_dir
 OUTPUT_DIR = str(get_image_dir('imagen'))
@@ -47,7 +49,7 @@ def select_model() -> str:
     for key, (model_name, description) in MODELS.items():
         console.print(f"  {key}. {description}")
 
-    choice = console.input("\n請選擇 (1-2, 預設=1): ").strip() or '1'
+    choice = console.input("\n請選擇 (1-4, 預設=1): ").strip() or '1'
 
     if choice in MODELS:
         return MODELS[choice][0]
@@ -144,7 +146,7 @@ def generate_image(
                 config=config
             )
 
-            progress.update(task, description="[#B565D8]✓ 生成完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 生成完成[/#B565D8]")
 
         # 確保輸出目錄存在
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -185,7 +187,7 @@ def generate_image(
         return output_paths
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 生成失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 生成失敗：{e}[/dim]', e=e))
         raise
 
 
@@ -288,7 +290,7 @@ def generate_images_batch(
                     results[prompt] = output_paths
                     progress.update(task, advance=1)
                 except Exception as e:
-                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ Prompt "{prompt_short}..." 生成失敗：{e}[/red]', prompt_short=prompt[:30], e=e))
+                    console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ Prompt "{prompt_short}..." 生成失敗：{e}[/dim]', prompt_short=prompt[:30], e=e))
                     results[prompt] = []
                     progress.update(task, advance=1)
 
@@ -376,7 +378,7 @@ def edit_image(
             if alternative_path and os.path.isfile(alternative_path):
                 # 用戶選擇了替代檔案，使用新路徑
                 image_path = alternative_path
-                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/#B565D8]\n', image_path=image_path))
             else:
                 raise FileNotFoundError(f"找不到檔案，請參考上述建議")
         except ImportError:
@@ -416,7 +418,7 @@ def edit_image(
                 image=uploaded_image,
             )
 
-            progress.update(task, description="[#B565D8]✓ 編輯完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 編輯完成[/#B565D8]")
 
         # 保存編輯後的圖片
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -428,7 +430,7 @@ def edit_image(
         with open(output_path, 'wb') as f:
             f.write(image_data)
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 圖片已儲存：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 圖片已儲存：{output_path}[/#B565D8]', output_path=output_path))
 
         file_size = os.path.getsize(output_path) / (1024 * 1024)
         console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 圖片資訊：[/#E8C4F0]'))
@@ -437,7 +439,7 @@ def edit_image(
         return output_path
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 編輯失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 編輯失敗：{e}[/dim]', e=e))
         raise
 
 
@@ -503,7 +505,7 @@ def upscale_image(
             if alternative_path and os.path.isfile(alternative_path):
                 # 用戶選擇了替代檔案，使用新路徑
                 image_path = alternative_path
-                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/green]\n', image_path=image_path))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{image_path}[/#B565D8]\n', image_path=image_path))
             else:
                 raise FileNotFoundError(f"找不到檔案，請參考上述建議")
         except ImportError:
@@ -541,7 +543,7 @@ def upscale_image(
                 image=uploaded_image,
             )
 
-            progress.update(task, description="[#B565D8]✓ 放大完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 放大完成[/#B565D8]")
 
         # 保存放大後的圖片
         os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -553,7 +555,7 @@ def upscale_image(
         with open(output_path, 'wb') as f:
             f.write(image_data)
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 圖片已儲存：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 圖片已儲存：{output_path}[/#B565D8]', output_path=output_path))
 
         file_size = os.path.getsize(output_path) / (1024 * 1024)
         console.print(safe_t('common.message', fallback='\n[#E8C4F0]📊 圖片資訊：[/#E8C4F0]'))
@@ -562,7 +564,7 @@ def upscale_image(
         return output_path
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 放大失敗：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 放大失敗：{e}[/dim]', e=e))
         raise
 
 
@@ -585,7 +587,7 @@ def interactive_mode():
         choice = console.input("請選擇: ").strip()
 
         if choice == '0':
-            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/green]'))
+            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/#B565D8]'))
             break
 
         elif choice == '1':
@@ -632,7 +634,7 @@ def interactive_mode():
                         os.system(f'open "{path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
 
         elif choice == '2':
             # 批次生成圖片（並行處理）
@@ -680,7 +682,7 @@ def interactive_mode():
                     if paths:
                         console.print(safe_t('common.message', fallback='  [{i}] {prompt[:50]}... → {len(paths)} 張圖片', i=i, prompt_short=prompt[:50], paths_count=len(paths)))
                     else:
-                        console.print(safe_t('error.failed', fallback='  [{i}] {prompt[:50]}... → [dim #E8C4F0]失敗[/red]', i=i, prompt_short=prompt[:50]))
+                        console.print(safe_t('error.failed', fallback='  [{i}] {prompt[:50]}... → [dim #E8C4F0]失敗[/dim]', i=i, prompt_short=prompt[:50]))
 
                 # 詢問是否開啟圖片
                 open_img = console.input("\n[#E8C4F0]要開啟所有圖片嗎？(y/N): [/#E8C4F0]").strip().lower()
@@ -690,7 +692,7 @@ def interactive_mode():
                             os.system(f'open "{path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
 
         elif choice == '3':
             # 編輯圖片
@@ -721,7 +723,7 @@ def interactive_mode():
                     os.system(f'open "{output_path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
 
         elif choice == '4':
             # 放大圖片
@@ -744,7 +746,7 @@ def interactive_mode():
                     os.system(f'open "{output_path}"')
 
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
 
         else:
             console.print(safe_t('common.message', fallback='\n[#E8C4F0]無效選項[/#E8C4F0]'))
@@ -774,7 +776,7 @@ def main():
                 os.system(f'open "{path}"')
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
             sys.exit(1)
 
 

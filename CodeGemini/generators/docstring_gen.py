@@ -214,7 +214,7 @@ class DocstringGenerator:
                 pass
 
         # 初始化模型
-        self.model = genai.GenerativeModel('gemini-2.0-flash-exp')
+        self.model = genai.GenerativeModel('gemini-2.5-flash')
 
     def generate(self, func_sig: FunctionSignature) -> str:
         """

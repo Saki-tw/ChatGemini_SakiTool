@@ -78,7 +78,7 @@ class AudioProcessor:
                         details={"command": "ffmpeg -version", "error": str(e)}
                     )
             else:
-                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg[/red]'))
+                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg[/dim]'))
                 console.print(safe_t('common.message', fallback='[#E8C4F0]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#E8C4F0]'))
 
             raise RuntimeError("ffmpeg 未安裝或無法執行，請參考上述建議")
@@ -141,9 +141,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#B565D8]✓ 提取完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 提取完成[/#B565D8]")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音訊已提取：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音訊已提取：{output_path}[/#B565D8]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -232,9 +232,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#B565D8]✓ 合併完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 合併完成[/#B565D8]")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已合併：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已合併：{output_path}[/#B565D8]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -317,9 +317,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/#B565D8]")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音量已調整：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 音量已調整：{output_path}[/#B565D8]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -412,9 +412,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/#B565D8]")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 背景音樂已添加：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 背景音樂已添加：{output_path}[/#B565D8]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -515,9 +515,9 @@ class AudioProcessor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/green]")
+                progress.update(task, completed=100, description="[#B565D8]✓ 處理完成[/#B565D8]")
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 淡入淡出已添加：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 淡入淡出已添加：{output_path}[/#B565D8]', output_path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -599,7 +599,7 @@ class AudioProcessor:
             if ERROR_FIX_ENABLED:
                 alternative = suggest_video_file_not_found(file_path, auto_fix=True)
                 if alternative and os.path.isfile(alternative):
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{alternative}[/green]\n', alternative=alternative))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{alternative}[/#B565D8]\n', alternative=alternative))
                     file_path = alternative
                 else:
                     raise FileNotFoundError(f"找不到檔案，請參考上述建議")
@@ -839,15 +839,15 @@ ffmpeg 錯誤碼：{error.returncode}
                     try:
                         output_path = future.result()
                         results.append((video_path, output_path))
-                        progress.update(task, advance=1, description=f"[#B565D8]✓[/green] {os.path.basename(video_path)}")
+                        progress.update(task, advance=1, description=f"[#B565D8]✓[/#B565D8] {os.path.basename(video_path)}")
                     except Exception as e:
                         failed.append((video_path, str(e)))
-                        progress.update(task, advance=1, description=f"[dim #E8C4F0]✗[/red] {os.path.basename(video_path)}")
+                        progress.update(task, advance=1, description=f"[dim #E8C4F0]✗[/dim] {os.path.basename(video_path)}")
 
         # 顯示結果
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 成功：{len(results)} 個檔案[/green]', results_count=len(results)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 成功：{len(results)} 個檔案[/#B565D8]', results_count=len(results)))
         if failed:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 失敗：{len(failed)} 個檔案[/red]', failed_count=len(failed)))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 失敗：{len(failed)} 個檔案[/dim]', failed_count=len(failed)))
             for path, error in failed:
                 console.print(f"  [dim]- {os.path.basename(path)}: {error[:100]}[/dim]")
 
@@ -902,15 +902,15 @@ ffmpeg 錯誤碼：{error.returncode}
                     try:
                         output_path = future.result()
                         results.append((file_path, output_path))
-                        progress.update(task, advance=1, description=f"[#B565D8]✓[/green] {os.path.basename(file_path)}")
+                        progress.update(task, advance=1, description=f"[#B565D8]✓[/#B565D8] {os.path.basename(file_path)}")
                     except Exception as e:
                         failed.append((file_path, str(e)))
-                        progress.update(task, advance=1, description=f"[dim #E8C4F0]✗[/red] {os.path.basename(file_path)}")
+                        progress.update(task, advance=1, description=f"[dim #E8C4F0]✗[/dim] {os.path.basename(file_path)}")
 
         # 顯示結果
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 成功：{len(results)} 個檔案[/green]', results_count=len(results)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 成功：{len(results)} 個檔案[/#B565D8]', results_count=len(results)))
         if failed:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 失敗：{len(failed)} 個檔案[/red]', failed_count=len(failed)))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 失敗：{len(failed)} 個檔案[/dim]', failed_count=len(failed)))
 
         return results
 
@@ -981,7 +981,7 @@ ffmpeg 錯誤碼：{error.returncode}
                     chunk_files.append(chunk_file)
                     progress.update(task, advance=1)
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 分塊完成：{len(chunk_files)} 個塊[/green]', chunk_files_count=len(chunk_files)))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 分塊完成：{len(chunk_files)} 個塊[/#B565D8]', chunk_files_count=len(chunk_files)))
 
             # 如果提供了處理函數，對每塊執行處理
             if operation:
@@ -1001,7 +1001,7 @@ ffmpeg 錯誤碼：{error.returncode}
                         progress.update(task, advance=1)
 
                 chunk_files = processed_chunks
-                console.print(safe_t('common.completed', fallback='[#B565D8]✓ 處理完成[/green]'))
+                console.print(safe_t('common.completed', fallback='[#B565D8]✓ 處理完成[/#B565D8]'))
 
             # 合併所有塊
             console.print(safe_t('common.message', fallback='\n[#E8C4F0]合併中...[/#E8C4F0]'))
@@ -1026,7 +1026,7 @@ ffmpeg 錯誤碼：{error.returncode}
             ]
 
             subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 合併完成：{output_path}[/green]', output_path=output_path))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 合併完成：{output_path}[/#B565D8]', output_path=output_path))
 
             return output_path
 
@@ -1061,29 +1061,29 @@ def main():
     try:
         if command == "extract":
             if len(sys.argv) < 3:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供影片路徑[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供影片路徑[/dim]'))
                 sys.exit(1)
             output = processor.extract_audio(sys.argv[2])
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/#B565D8]', output=output))
 
         elif command == "merge":
             if len(sys.argv) < 4:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供影片路徑和音訊路徑[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供影片路徑和音訊路徑[/dim]'))
                 sys.exit(1)
             output = processor.merge_audio(sys.argv[2], sys.argv[3])
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/#B565D8]', output=output))
 
         elif command == "volume":
             if len(sys.argv) < 4:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供檔案路徑和音量倍數[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供檔案路徑和音量倍數[/dim]'))
                 sys.exit(1)
             volume = float(sys.argv[3])
             output = processor.adjust_volume(sys.argv[2], volume)
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/#B565D8]', output=output))
 
         elif command == "bgm":
             if len(sys.argv) < 4:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供影片路徑和音樂路徑[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供影片路徑和音樂路徑[/dim]'))
                 sys.exit(1)
             music_volume = float(sys.argv[4]) if len(sys.argv) > 4 else 0.3
             output = processor.add_background_music(
@@ -1091,11 +1091,11 @@ def main():
                 sys.argv[3],
                 music_volume=music_volume
             )
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/#B565D8]', output=output))
 
         elif command == "fade":
             if len(sys.argv) < 3:
-                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供檔案路徑[/red]'))
+                console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：需要提供檔案路徑[/dim]'))
                 sys.exit(1)
             fade_in = float(sys.argv[3]) if len(sys.argv) > 3 else 2.0
             fade_out = float(sys.argv[4]) if len(sys.argv) > 4 else 2.0
@@ -1104,14 +1104,14 @@ def main():
                 fade_in=fade_in,
                 fade_out=fade_out
             )
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 完成：{output}[/#B565D8]', output=output))
 
         else:
-            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知命令：{command}[/red]', command=command))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知命令：{command}[/dim]', command=command))
             sys.exit(1)
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
         import traceback
         traceback.print_exc()
         sys.exit(1)

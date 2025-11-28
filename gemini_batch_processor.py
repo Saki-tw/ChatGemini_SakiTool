@@ -130,7 +130,7 @@ class BatchProcessor:
             with open(tasks_file, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]保存任務失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]保存任務失敗：{e}[/dim]', e=e))
 
     def register_handler(self, task_type: str, handler: Callable):
         """
@@ -141,7 +141,7 @@ class BatchProcessor:
             handler: 處理函數,接收參數並返回結果
         """
         self.task_handlers[task_type] = handler
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 註冊任務處理器：{task_type}[/green]', task_type=task_type))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 註冊任務處理器：{task_type}[/#B565D8]', task_type=task_type))
 
     def add_task(
         self,
@@ -175,7 +175,7 @@ class BatchProcessor:
         self.tasks[task_id] = task
         self._save_tasks()
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已添加任務：{task_id}[/green]', task_id=task_id))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已添加任務：{task_id}[/#B565D8]', task_id=task_id))
         return task_id
 
     def add_tasks_batch(
@@ -200,7 +200,7 @@ class BatchProcessor:
             )
             task_ids.append(task_id)
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已批次添加 {len(task_ids)} 個任務[/green]', task_ids_count=len(task_ids)))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已批次添加 {len(task_ids)} 個任務[/#B565D8]', task_ids_count=len(task_ids)))
         return task_ids
 
     def _execute_task(self, task: BatchTask):
@@ -224,10 +224,10 @@ class BatchProcessor:
             task.completed_at = datetime.now().isoformat()
             task.result = result if isinstance(result, dict) else {'output': str(result)}
 
-            console.print(safe_t('common.completed', fallback='[#B565D8]✅ 任務完成：{task.task_id}[/green]', task_id=task.task_id))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✅ 任務完成：{task.task_id}[/#B565D8]', task_id=task.task_id))
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 任務失敗：{task.task_id} - {e}[/red]', task_id=task.task_id, e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ 任務失敗：{task.task_id} - {e}[/dim]', task_id=task.task_id, e=e))
 
             # 重試邏輯
             if task.retry_count < task.max_retries:
@@ -324,7 +324,7 @@ class BatchProcessor:
         """
         task = self.tasks.get(task_id)
         if not task:
-            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未找到任務：{task_id}[/red]', task_id=task_id))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未找到任務：{task_id}[/dim]', task_id=task_id))
             return False
 
         if task.status == TaskStatus.RUNNING:
@@ -335,7 +335,7 @@ class BatchProcessor:
         task.completed_at = datetime.now().isoformat()
         self._save_tasks()
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已取消任務：{task_id}[/green]', task_id=task_id))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已取消任務：{task_id}[/#B565D8]', task_id=task_id))
         return True
 
     def get_task(self, task_id: str) -> Optional[BatchTask]:
@@ -444,7 +444,7 @@ class BatchProcessor:
             del self.tasks[task_id]
 
         self._save_tasks()
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已清理 {len(completed_ids)} 個已完成的任務[/green]', completed_ids_count=len(completed_ids)))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已清理 {len(completed_ids)} 個已完成的任務[/#B565D8]', completed_ids_count=len(completed_ids)))
 
 
 # ==================== 使用範例（僅供參考）====================

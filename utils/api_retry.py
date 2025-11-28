@@ -274,7 +274,7 @@ def api_retry(
                         success_rate = ((attempt - retry_stats['failures']) / attempt) * 100
 
                         console.print(
-                            f"\n[#B565D8]✓ {operation_name}成功（第 {attempt} 次嘗試）[/green]"
+                            f"\n[#B565D8]✓ {operation_name}成功（第 {attempt} 次嘗試）[/#B565D8]"
                         )
                         console.print(
                             f"   [dim]耗時：{total_time:.1f} 秒（含重試）[/dim]"

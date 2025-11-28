@@ -99,7 +99,7 @@ class VideoAnalyzer:
 
     def __init__(self, model_name: str = DEFAULT_MODEL):
         self.model_name = model_name
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已載入模型：{model_name}[/green]', model_name=model_name))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 已載入模型：{model_name}[/#B565D8]', model_name=model_name))
 
     def upload_video(self, video_path: str, display_name: Optional[str] = None) -> types.File:
         """
@@ -121,7 +121,7 @@ class VideoAnalyzer:
                 if alternative_path and os.path.isfile(alternative_path):
                     # 用戶選擇了替代檔案，使用新路徑
                     video_path = alternative_path
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/green]\n', video_path=video_path))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✅ 已切換至：{video_path}[/#B565D8]\n', video_path=video_path))
                 else:
                     raise FileNotFoundError(f"找不到影片檔案，請參考上述建議")
             except ImportError:
@@ -152,10 +152,10 @@ class VideoAnalyzer:
         try:
             for existing_file in client.files.list():
                 if existing_file.display_name == display_name:
-                    console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案已存在：{existing_file.name}[/green]', name=existing_file.name))
+                    console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案已存在：{existing_file.name}[/#B565D8]', name=existing_file.name))
                     # 檢查狀態
                     if existing_file.state.name == "ACTIVE":
-                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已就緒，可以開始分析[/green]'))
+                        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已就緒，可以開始分析[/#B565D8]'))
                         return existing_file
                     elif existing_file.state.name == "PROCESSING":
                         console.print(safe_t('common.completed', fallback='[#E8C4F0]⏳ 檔案正在處理中，等待完成...[/#E8C4F0]'))
@@ -190,9 +190,9 @@ class VideoAnalyzer:
                             display_name=display_name
                         )
                     )
-                    progress.update(task, description="[#B565D8]✓ 上傳完成[/green]")
+                    progress.update(task, description="[#B565D8]✓ 上傳完成[/#B565D8]")
                 except Exception as e:
-                    progress.update(task, description="[dim #E8C4F0]✗ 上傳失敗[/red]")
+                    progress.update(task, description="[dim #E8C4F0]✗ 上傳失敗[/dim]")
 
                     # 顯示詳細的錯誤修復建議
                     try:
@@ -203,7 +203,7 @@ class VideoAnalyzer:
 
                     raise Exception(f"上傳失敗：{e}，請參考上述解決方案")
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案名稱：{video_file.name}[/green]', name=video_file.name))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案名稱：{video_file.name}[/#B565D8]', name=video_file.name))
 
         # 顯示成本警告
         console.print(safe_t('common.analyzing', fallback='[dim]ℹ️  注意:使用此檔案進行分析時會產生 API 成本[/dim]'))
@@ -241,9 +241,9 @@ class VideoAnalyzer:
 
                 raise ValueError(f"影片處理失敗：{video_file.state.name}")
 
-            progress.update(task, description="[#B565D8]✓ 處理完成[/green]")
+            progress.update(task, description="[#B565D8]✓ 處理完成[/#B565D8]")
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已就緒，可以開始分析[/green]'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已就緒，可以開始分析[/#B565D8]'))
         return video_file
 
     @with_retry("影片分析", max_retries=3)
@@ -316,7 +316,7 @@ class VideoAnalyzer:
             return response.text
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分析失敗：{e}[/dim]', e=e))
             raise
 
     def interactive_video_chat(self, video_file: types.File):
@@ -346,7 +346,7 @@ class VideoAnalyzer:
                     continue
 
                 if user_input.lower() in ['exit', 'quit', '退出']:
-                    console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/green]'))
+                    console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/#B565D8]'))
                     break
 
                 if user_input.lower() == 'info':
@@ -400,10 +400,10 @@ class VideoAnalyzer:
                             logger.warning(f"計價顯示失敗 (模型: {self.model_name}, tokens: {input_tokens}): {e}")
 
             except KeyboardInterrupt:
-                console.print(safe_t('common.message', fallback='\n\n[#B565D8]再見！[/green]'))
+                console.print(safe_t('common.message', fallback='\n\n[#B565D8]再見！[/#B565D8]'))
                 break
             except Exception as e:
-                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]\n', e=e))
+                console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]\n', e=e))
 
     def list_uploaded_videos(self):
         """列出所有已上傳的影片檔案"""
@@ -421,14 +421,14 @@ class VideoAnalyzer:
                 return
 
             for i, f in enumerate(video_files, 1):
-                console.print(f"{i}. [#B565D8]{f.display_name}[/green]")
+                console.print(f"{i}. [#B565D8]{f.display_name}[/#B565D8]")
                 console.print(safe_t('common.message', fallback='   名稱: {name}', name=f.name))
                 console.print(safe_t('common.message', fallback='   狀態: {state_name}', state_name=f.state.name))
                 console.print(safe_t('common.message', fallback='   建立時間: {create_time}', create_time=f.create_time))
                 console.print()
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 列出檔案失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 列出檔案失敗：{e}[/dim]', e=e))
 
 
 def show_usage():
@@ -491,7 +491,7 @@ def main():
             analyzer.interactive_video_chat(video_file)
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
         import traceback
         console.print(f"[dim]{traceback.format_exc()}[/dim]")
         sys.exit(1)

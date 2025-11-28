@@ -622,4 +622,4 @@ if __name__ == "__main__":
     console.print(safe_t('common.message', fallback='[bold]統計資訊:[/bold]'))
     console.print(auto_tool_manager.get_stats())
 
-    console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 測試完成[/green]\n'))
+    console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 測試完成[/#B565D8]\n'))

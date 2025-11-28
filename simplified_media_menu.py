@@ -113,12 +113,12 @@ def handle_flow_video_generation(PRICING_ENABLED, global_pricing_calculator, Flo
         )
 
         if video_path:
-            console.print(f"\n[#B565D8]✅ 影片生成完成！[/green]")
+            console.print(f"\n[#B565D8]✅ 影片生成完成！[/#B565D8]")
             console.print(f"儲存路徑：{video_path}")
         else:
             console.print("\n[#E8C4F0]已取消生成[/#E8C4F0]")
     except Exception as e:
-        console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+        console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     safe_input("\n按 Enter 繼續...")
 
@@ -177,14 +177,14 @@ def handle_imagen_creation(PRICING_ENABLED, generate_image, edit_image, upscale_
                 aspect_ratio=aspect_ratio,
                 show_cost=PRICING_ENABLED
             )
-            console.print(f"\n[#B565D8]✅ 圖片已生成：{len(output_paths)} 張[/green]")
+            console.print(f"\n[#B565D8]✅ 圖片已生成：{len(output_paths)} 張[/#B565D8]")
 
             open_img = safe_input("\n要開啟圖片嗎？(y/N): ").strip().lower()
             if open_img == 'y':
                 for path in output_paths:
                     os.system(f'open "{path}"')
         except Exception as e:
-            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif img_choice == '2':
         # 編輯圖片
@@ -206,13 +206,13 @@ def handle_imagen_creation(PRICING_ENABLED, generate_image, edit_image, upscale_
                 prompt=prompt,
                 show_cost=PRICING_ENABLED
             )
-            console.print(f"\n[#B565D8]✅ 圖片已編輯：{output_path}[/green]")
+            console.print(f"\n[#B565D8]✅ 圖片已編輯：{output_path}[/#B565D8]")
 
             open_img = safe_input("\n要開啟圖片嗎？(y/N): ").strip().lower()
             if open_img == 'y':
                 os.system(f'open "{output_path}"')
         except Exception as e:
-            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif img_choice == '3':
         # 放大圖片
@@ -227,13 +227,13 @@ def handle_imagen_creation(PRICING_ENABLED, generate_image, edit_image, upscale_
                 image_path=image_path,
                 show_cost=PRICING_ENABLED
             )
-            console.print(f"\n[#B565D8]✅ 圖片已放大：{output_path}[/green]")
+            console.print(f"\n[#B565D8]✅ 圖片已放大：{output_path}[/#B565D8]")
 
             open_img = safe_input("\n要開啟圖片嗎？(y/N): ").strip().lower()
             if open_img == 'y':
                 os.system(f'open "{output_path}"')
         except Exception as e:
-            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     safe_input("\n按 Enter 繼續...")
 
@@ -270,10 +270,10 @@ def handle_video_toolbox(VIDEO_EFFECTS_ENABLED, SUBTITLE_GENERATOR_ENABLED, VIDE
 
             effects = VideoEffects()
             output_path = effects.trim_video(video_path, start_time=start_time, end_time=end_time)
-            console.print(f"\n[#B565D8]✅ 影片已裁切：{output_path}[/green]")
+            console.print(f"\n[#B565D8]✅ 影片已裁切：{output_path}[/#B565D8]")
             console.print("[dim]提示：使用 -c copy 無損裁切，保持原始品質[/dim]")
         except Exception as e:
-            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif tool_choice == '2':
         # 特效子選單
@@ -317,9 +317,9 @@ def handle_video_toolbox(VIDEO_EFFECTS_ENABLED, SUBTITLE_GENERATOR_ENABLED, VIDE
                 try:
                     effects = VideoEffects()
                     output_path = effects.apply_filter(video_path, filter_name=filter_name, quality='medium')
-                    console.print(f"\n[#B565D8]✅ 濾鏡已套用：{output_path}[/green]")
+                    console.print(f"\n[#B565D8]✅ 濾鏡已套用：{output_path}[/#B565D8]")
                 except Exception as e:
-                    console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+                    console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
         elif effect_choice == '2' and VIDEO_EFFECTS_ENABLED:
             # 速度調整
@@ -340,13 +340,13 @@ def handle_video_toolbox(VIDEO_EFFECTS_ENABLED, SUBTITLE_GENERATOR_ENABLED, VIDE
                 if speed_factor > 0:
                     effects = VideoEffects()
                     output_path = effects.adjust_speed(video_path, speed_factor=speed_factor, quality='medium')
-                    console.print(f"\n[#B565D8]✅ 速度已調整：{output_path}[/green]")
+                    console.print(f"\n[#B565D8]✅ 速度已調整：{output_path}[/#B565D8]")
                 else:
                     console.print("[#E8C4F0]速度必須大於0[/#E8C4F0]")
             except ValueError:
                 console.print("[#E8C4F0]無效的數值[/#E8C4F0]")
             except Exception as e:
-                console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+                console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif tool_choice == '4' and SUBTITLE_GENERATOR_ENABLED:
         # 字幕處理
@@ -378,14 +378,14 @@ def handle_video_toolbox(VIDEO_EFFECTS_ENABLED, SUBTITLE_GENERATOR_ENABLED, VIDE
                     target_language=target_lang,
                     show_cost=False
                 )
-                console.print(f"\n[#B565D8]✅ 字幕已生成：{subtitle_path}[/green]")
+                console.print(f"\n[#B565D8]✅ 字幕已生成：{subtitle_path}[/#B565D8]")
 
                 burn_choice = safe_input("\n要將字幕燒錄到影片嗎？(y/N): ").strip().lower()
                 if burn_choice == 'y':
                     video_with_subs = generator.burn_subtitles(video_path, subtitle_path)
-                    console.print(f"\n[#B565D8]✅ 燒錄完成：{video_with_subs}[/green]")
+                    console.print(f"\n[#B565D8]✅ 燒錄完成：{video_with_subs}[/#B565D8]")
             except Exception as e:
-                console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+                console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif tool_choice == '5':
         # 影片資訊查詢
@@ -428,9 +428,9 @@ def handle_audio_toolbox(AUDIO_PROCESSOR_ENABLED, AudioProcessor):
         try:
             processor = AudioProcessor()
             output_path = processor.extract_audio(video_path, format=audio_format)
-            console.print(f"\n[#B565D8]✅ 音訊已提取：{output_path}[/green]")
+            console.print(f"\n[#B565D8]✅ 音訊已提取：{output_path}[/#B565D8]")
         except Exception as e:
-            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif audio_choice == '3':
         # 音量調整
@@ -446,13 +446,13 @@ def handle_audio_toolbox(AUDIO_PROCESSOR_ENABLED, AudioProcessor):
             if volume > 0:
                 processor = AudioProcessor()
                 output_path = processor.adjust_volume(file_path, volume)
-                console.print(f"\n[#B565D8]✅ 音量已調整：{output_path}[/green]")
+                console.print(f"\n[#B565D8]✅ 音量已調整：{output_path}[/#B565D8]")
             else:
                 console.print("[#E8C4F0]音量必須大於0[/#E8C4F0]")
         except ValueError:
             console.print("[#E8C4F0]無效的數值[/#E8C4F0]")
         except Exception as e:
-            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+            console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     elif audio_choice == '4':
         # 添加背景音樂
@@ -467,9 +467,9 @@ def handle_audio_toolbox(AUDIO_PROCESSOR_ENABLED, AudioProcessor):
                     music_volume=0.3,
                     fade_duration=2.0
                 )
-                console.print(f"\n[#B565D8]✅ 背景音樂已添加：{output_path}[/green]")
+                console.print(f"\n[#B565D8]✅ 背景音樂已添加：{output_path}[/#B565D8]")
             except Exception as e:
-                console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+                console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
         else:
             console.print("[#E8C4F0]檔案不存在[/#E8C4F0]")
 
@@ -503,7 +503,7 @@ def handle_media_analyzer(MEDIA_VIEWER_ENABLED, MediaViewer):
             os.system(f'open "{file_path}"')
 
     except Exception as e:
-        console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+        console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     safe_input("\n按 Enter 繼續...")
 
@@ -549,13 +549,13 @@ def handle_ai_video_analysis_complete(
             console.print("\n[#E8C4F0]▶ 執行影片摘要...[/#E8C4F0]")
             console.print("[dim]使用工具：gemini_video_summarizer.py[/dim]")
 
-        console.print("\n[#B565D8]✅ 分析完成[/green]")
+        console.print("\n[#B565D8]✅ 分析完成[/#B565D8]")
         console.print("\n[dim]提示：以上工具可獨立使用，執行：")
         console.print("  python gemini_scene_detector.py <影片> --frames 30")
         console.print("  python gemini_clip_advisor.py <影片>")
         console.print("  python gemini_video_summarizer.py <影片>[/dim]")
 
     except Exception as e:
-        console.print(f"\n[dim #E8C4F0]錯誤：{e}[/red]")
+        console.print(f"\n[dim #E8C4F0]錯誤：{e}[/dim]")
 
     safe_input("\n按 Enter 繼續...")

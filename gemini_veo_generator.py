@@ -169,7 +169,7 @@ def generate_video(
         warnings = [r for r in validation_results if r.level == ValidationLevel.WARNING]
 
         if errors:
-            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 參數驗證失敗：[/red]'))
+            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 參數驗證失敗：[/dim]'))
 
             # 檢查是否為時長超過限制
             duration_error = None
@@ -191,7 +191,7 @@ def generate_video(
 
                 from rich.prompt import Confirm
                 if Confirm.ask("是否切換到 Flow Engine？", default=True):
-                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 正在切換到 Flow Engine...[/green]\n'))
+                    console.print(safe_t('common.completed', fallback='\n[#B565D8]✅ 正在切換到 Flow Engine...[/#B565D8]\n'))
 
                     # 導入 Flow Engine
                     try:
@@ -222,7 +222,7 @@ def generate_video(
                         return final_video
 
                     except ImportError:
-                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ Flow Engine 模組不存在[/red]'))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]❌ Flow Engine 模組不存在[/dim]'))
                         console.print(safe_t('common.message', fallback='[#E8C4F0]請確認 gemini_flow_engine.py 存在[/#E8C4F0]'))
                         raise ValueError("無法使用 Flow Engine")
                 else:
@@ -235,7 +235,7 @@ def generate_video(
             for warn in warnings:
                 console.print(f"  ⚠️  {warn.message}")
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 參數驗證通過[/green]\n'))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✅ 參數驗證通過[/#B565D8]\n'))
 
     # 準備配置
     config_params = {
@@ -322,7 +322,7 @@ def generate_video(
                 estimated_progress = min(95, poll_count * 5)
                 progress.update(task, completed=estimated_progress)
 
-            progress.update(task, completed=100, description="[#B565D8]✓ 生成完成[/green]")
+            progress.update(task, completed=100, description="[#B565D8]✓ 生成完成[/#B565D8]")
 
         # 獲取生成的影片
         if not operation.result or not operation.result.generated_videos:
@@ -355,7 +355,7 @@ def generate_video(
             video_data = client.files.download(file=generated_video.video)
             f.write(video_data)
 
-        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已儲存：{output_path}[/green]', output_path=output_path))
+        console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片已儲存：{output_path}[/#B565D8]', output_path=output_path))
 
         # 顯示影片資訊
         file_size = os.path.getsize(output_path) / (1024 * 1024)
@@ -406,7 +406,7 @@ def generate_video(
                 )
         else:
             # 基本錯誤處理
-            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 生成失敗：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]❌ 生成失敗：{e}[/dim]', e=e))
 
         raise
 
@@ -420,7 +420,7 @@ def interactive_mode():
     if PREPROCESSOR_AVAILABLE:
         try:
             preprocessor = VideoPreprocessor()
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片預處理功能已啟用[/green]'))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 影片預處理功能已啟用[/#B565D8]'))
         except Exception as e:
             console.print(safe_t('error.failed', fallback='[#E8C4F0]⚠ 預處理功能初始化失敗：{e}[/#E8C4F0]', e=e))
 
@@ -434,7 +434,7 @@ def interactive_mode():
         prompt = console.input("\n[#E8C4F0]請描述您想生成的影片（或輸入 'exit' 退出）：[/#E8C4F0]\n").strip()
 
         if not prompt or prompt.lower() in ['exit', 'quit', '退出']:
-            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/green]'))
+            console.print(safe_t('common.message', fallback='\n[#B565D8]再見！[/#B565D8]'))
             break
 
         # 負面提示（可選）
@@ -502,7 +502,7 @@ def interactive_mode():
                 break
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
             continue_gen = console.input("\n[#E8C4F0]繼續嘗試？(Y/n): [/#E8C4F0]").strip().lower()
             if continue_gen == 'n':
                 break
@@ -531,7 +531,7 @@ def main():
             os.system(f'open "{output_path}"')
 
         except Exception as e:
-            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+            console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
             sys.exit(1)
 
 

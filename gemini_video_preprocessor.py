@@ -87,7 +87,7 @@ class VideoPreprocessor:
                     )
             else:
                 # 降級方案：顯示基本錯誤訊息
-                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg 或 ffprobe[/red]'))
+                console.print(safe_t('error.not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg 或 ffprobe[/dim]'))
                 console.print(safe_t('common.message', fallback='[#E8C4F0]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#E8C4F0]'))
 
             raise RuntimeError(safe_t("video_preprocessor.msg_9300_ffmpeg_未安裝_請按照上述步驟安裝", fallback="ffmpeg 未安裝,請按照上述步驟安裝後重試"))
@@ -249,11 +249,11 @@ class VideoPreprocessor:
 
         # 檢查是否符合大小要求
         if current_size_mb <= target_size_mb:
-            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/green]', current_size_mb=current_size_mb, target_size_mb=target_size_mb))
+            console.print(safe_t('common.completed', fallback='[#B565D8]✓ 檔案大小符合要求（{current_size_mb:.2f} MB ≤ {target_size_mb} MB）[/#B565D8]', current_size_mb=current_size_mb, target_size_mb=target_size_mb))
             return video_path
 
         # 檔案過大,拒絕處理
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 錯誤：影片檔案過大[/red]'))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]✗ 錯誤：影片檔案過大[/dim]'))
         console.print(safe_t('common.message', fallback='  當前大小：{current_size_mb:.2f} MB', current_size_mb=current_size_mb))
         console.print(safe_t('common.message', fallback='  限制大小：{target_size_mb} MB', target_size_mb=target_size_mb))
         console.print(safe_t('common.message', fallback='\n[#E8C4F0]建議解決方案：[/#E8C4F0]'))
@@ -343,7 +343,7 @@ class VideoPreprocessor:
             except subprocess.CalledProcessError as e:
                 console.print(safe_t('error.failed', fallback='  ✗ 提取幀 {i+1} 失敗：{e}', frame_num=i+1, e=e))
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已提取 {len(frame_paths)} 幀[/green]', frame_paths_count=len(frame_paths)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已提取 {len(frame_paths)} 幀[/#B565D8]', frame_paths_count=len(frame_paths)))
         for path in frame_paths:
             console.print(f"  - {path}")
 
@@ -448,16 +448,16 @@ class VideoPreprocessor:
                     progress.update(task, advance=1)
                 except subprocess.CalledProcessError as e:
                     stderr = e.stderr.decode('utf-8') if e.stderr else str(e)
-                    console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分割片段 {i+1} 失敗[/red]', frame_num=i+1))
+                    console.print(safe_t('error.failed', fallback='[dim #E8C4F0]✗ 分割片段 {i+1} 失敗[/dim]', frame_num=i+1))
 
                     # 顯示轉碼失敗修復建議
                     try:
                         from error_fix_suggestions import suggest_video_transcode_failed
                         suggest_video_transcode_failed(video_path, output_path, stderr)
                     except ImportError:
-                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：{stderr[:200]}[/red]', stderr_short=stderr[:200]))
+                        console.print(safe_t('error.failed', fallback='[dim #E8C4F0]錯誤：{stderr_short}[/dim]', stderr_short=stderr[:200]))
 
-        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已分割為 {len(segment_paths)} 個片段[/green]', segment_paths_count=len(segment_paths)))
+        console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已分割為 {len(segment_paths)} 個片段[/#B565D8]', segment_paths_count=len(segment_paths)))
         for i, path in enumerate(segment_paths, 1):
             segment_info = self.get_video_info(path)
             console.print(f"  {i}. {os.path.basename(path)} ({segment_info['duration']:.2f}s)")
@@ -493,22 +493,22 @@ def main():
 
         elif command == "compress":
             output = preprocessor.compress_for_api(video_path)
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 壓縮完成：{output}[/green]', output=output))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 壓縮完成：{output}[/#B565D8]', output=output))
 
         elif command == "keyframes":
             frames = preprocessor.extract_keyframes(video_path)
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已提取 {len(frames)} 幀[/green]', frames_count=len(frames)))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已提取 {len(frames)} 幀[/#B565D8]', frames_count=len(frames)))
 
         elif command == "split":
             segments = preprocessor.split_by_duration(video_path)
-            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已分割為 {len(segments)} 個片段[/green]', segments_count=len(segments)))
+            console.print(safe_t('common.completed', fallback='\n[#B565D8]✓ 已分割為 {len(segments)} 個片段[/#B565D8]', segments_count=len(segments)))
 
         else:
-            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知命令：{command}[/red]', command=command))
+            console.print(safe_t('common.message', fallback='[dim #E8C4F0]未知命令：{command}[/dim]', command=command))
             sys.exit(1)
 
     except Exception as e:
-        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/red]', e=e))
+        console.print(safe_t('error.failed', fallback='\n[dim #E8C4F0]錯誤：{e}[/dim]', e=e))
         sys.exit(1)
 
 

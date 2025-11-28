@@ -32,12 +32,12 @@ except ImportError:
 # 檢查 Codebase Embedding 可用性（預設為 False）
 CODEBASE_EMBEDDING_ENABLED = False
 
-# 從 gemini_chat.py 導入必要的常量
+# 從 gemini_chat.py 導入必要的常量（2025-11-29 更新）
 RECOMMENDED_MODELS = {
-    "1": ("gemini-2.5-pro", "最強大模型,適合複雜任務"),
-    "2": ("gemini-2.5-flash", "推薦：平衡速度與品質"),
-    "3": ("gemini-2.5-flash-lite", "最快速,適合簡單任務"),
-    "4": ("gemini-2.0-flash-exp", "實驗版本,免費但不穩定"),
+    "1": ("gemini-3-pro-preview", "最新最強,高級推理能力"),
+    "2": ("gemini-2.5-pro", "最強推理,適合複雜任務"),
+    "3": ("gemini-2.5-flash", "推薦：平衡速度與品質"),
+    "4": ("gemini-2.5-flash-lite", "輕量快速,適合簡單任務"),
 }
 
 # ==========================================
@@ -90,7 +90,7 @@ class ConfigUI:
         self.console.print("[dim]包含：模組啟用/停用、匯率、快取門檻等參數[/dim]\n")
 
         customize = self.console.input(
-            "[bold #E8C4F0]是否需要調整進階設定？[/bold #E8C4F0] y/[#B565D8]N[/green] [dim](直接按 Enter 使用最佳預設值)[/dim]: "
+            "[bold #E8C4F0]是否需要調整進階設定？[/bold #E8C4F0] y/[#B565D8]N[/#B565D8] [dim](直接按 Enter 使用最佳預設值)[/dim]: "
         ).strip().lower()
 
         if customize in ['y', 'yes', '是', '1']:
@@ -99,7 +99,7 @@ class ConfigUI:
             config_dict.update(self._prompt_advanced_settings())
         else:
             # 使用者跳過,使用最佳預設值
-            self.console.print("[#B565D8]✓ 使用最佳預設值[/green]\n")
+            self.console.print("[#B565D8]✓ 使用最佳預設值[/#B565D8]\n")
             config_dict['MODULES'] = self._get_default_modules()
             config_dict.update(self._get_default_advanced_settings())
 
@@ -168,10 +168,10 @@ class ConfigUI:
 
             if choice in RECOMMENDED_MODELS:
                 model_name, description = RECOMMENDED_MODELS[choice]
-                self.console.print(f"[#B565D8]✓ 已選擇: {model_name}[/green]")
+                self.console.print(f"[#B565D8]✓ 已選擇: {model_name}[/#B565D8]")
                 return model_name
             else:
-                self.console.print("[dim #E8C4F0]❌ 無效的選項,請輸入 1-4[/red]")
+                self.console.print("[dim #E8C4F0]❌ 無效的選項,請輸入 1-4[/dim]")
 
     def _prompt_module_toggles(self) -> Dict:
         """
@@ -199,7 +199,7 @@ class ConfigUI:
         ]
 
         for module_name, description, default in module_options:
-            default_text = "[#B565D8]Y[/green]/n" if default else "y/[dim #E8C4F0]N[/red]"
+            default_text = "[#B565D8]Y[/#B565D8]/n" if default else "y/[dim #E8C4F0]N[/dim]"
             user_input = self.console.input(
                 f"  {description} [{default_text}]: "
             ).strip().lower()
@@ -253,11 +253,11 @@ class ConfigUI:
 
         # 啟動時翻譯
         trans_input = self.console.input(
-            "  🌐 啟動時啟用翻譯功能 [#B565D8]Y[/green]/n: "
+            "  🌐 啟動時啟用翻譯功能 [#B565D8]Y[/#B565D8]/n: "
         ).strip().lower()
         config['TRANSLATION_ON_STARTUP'] = trans_input not in ['n', 'no', '否', '0']
 
-        self.console.print("\n[#B565D8]✓ 進階設定完成[/green]")
+        self.console.print("\n[#B565D8]✓ 進階設定完成[/#B565D8]")
 
         return config
 
@@ -380,12 +380,12 @@ EMBEDDING_VECTOR_DB_PATH = "./codebase_vectors"
             self.console.print("[#E8C4F0]⚠️  將使用預設配置繼續執行[/#E8C4F0]\n")
 
 # 各模型的最低快取門檻要求（tokens）
-# 根據 Gemini API Context Caching 規範
+# 根據 Gemini API Context Caching 規範（2025-11-29 更新）
 MIN_TOKENS = {
+    'gemini-3-pro-preview': 4096,     # 3.0 Pro 版本
     'gemini-2.5-pro': 4096,           # Pro 版本需要更多
     'gemini-2.5-flash': 1024,         # Flash 版本標準
-    'gemini-2.5-flash-lite': 1024,      # Flash-8B 版本標準
-    'gemini-2.0-flash-exp': 32768,    # 2.0 實驗版需要較多
+    'gemini-2.5-flash-lite': 1024,    # Flash-Lite 版本標準
     'gemini-2.0-flash': 32768,        # 2.0 標準版
 }
 

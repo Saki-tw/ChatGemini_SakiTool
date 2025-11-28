@@ -507,7 +507,7 @@ class PerformanceMonitor:
             json.dump(report, f, ensure_ascii=False, indent=2)
 
         if RICH_AVAILABLE and console:
-            console.print(f"[#B565D8]✓ 性能報告已匯出：{output_path}[/green]")
+            console.print(f"[#B565D8]✓ 性能報告已匯出：{output_path}[/#B565D8]")
         else:
             print(f"✓ 性能報告已匯出：{output_path}")
 

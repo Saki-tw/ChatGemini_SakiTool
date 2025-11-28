@@ -1101,11 +1101,7 @@ class PricingDisplay:
             'input': 0.03125,
             'output': 0.125,
         },
-        'gemini-2.0-flash-exp': {
-            'input': 0.10,
-            'output': 0.40,
-        },
-        'gemini-2.0-flash-thinking-exp': {
+        'gemini-2.0-flash': {
             'input': 0.10,
             'output': 0.40,
         },
@@ -1913,47 +1909,47 @@ class AutoModelSelector:
         logger.info(safe_t("codegemini.auto_model.initialized", fallback="AutoModelSelector 已初始化（策略: {strategy}）").format(strategy=strategy))
 
     def _init_models(self) -> Dict[str, ModelProfile]:
-        """初始化模型資料"""
+        """初始化模型資料（2025-11-29 更新）"""
         return {
-            "gemini-2.0-flash-exp": ModelProfile(
-                name="gemini-2.0-flash-exp",
-                cost_per_1m_input=0.10,
-                cost_per_1m_output=0.40,
-                speed="fast",
+            "gemini-3-pro-preview": ModelProfile(
+                name="gemini-3-pro-preview",
+                cost_per_1m_input=1.25,
+                cost_per_1m_output=5.00,
+                speed="medium",
                 context_window=1000000,
-                strengths=["code", "speed", "general"]
+                strengths=["reasoning", "agentic", "code", "multimodal"]
             ),
             "gemini-2.5-flash": ModelProfile(
                 name="gemini-2.5-flash",
-                cost_per_1m_input=0.15625,
-                cost_per_1m_output=0.625,
+                cost_per_1m_input=0.30,
+                cost_per_1m_output=2.50,
                 speed="fast",
                 context_window=1000000,
-                strengths=["code", "reasoning", "general"]
+                strengths=["code", "reasoning", "general", "thinking"]
             ),
             "gemini-2.5-pro": ModelProfile(
                 name="gemini-2.5-pro",
                 cost_per_1m_input=1.25,  # ≤200K tokens
-                cost_per_1m_output=5.00,
+                cost_per_1m_output=10.00,
                 speed="medium",
-                context_window=2000000,
-                strengths=["reasoning", "complex", "quality"]
+                context_window=1000000,
+                strengths=["reasoning", "complex", "quality", "thinking"]
             ),
-            "gemini-1.5-flash": ModelProfile(
-                name="gemini-1.5-flash",
-                cost_per_1m_input=0.075,
-                cost_per_1m_output=0.30,
+            "gemini-2.5-flash-lite": ModelProfile(
+                name="gemini-2.5-flash-lite",
+                cost_per_1m_input=0.10,
+                cost_per_1m_output=0.40,
                 speed="fast",
                 context_window=1000000,
-                strengths=["speed", "general"]
+                strengths=["speed", "efficiency", "high-throughput"]
             ),
-            "gemini-1.5-pro": ModelProfile(
-                name="gemini-1.5-pro",
-                cost_per_1m_input=1.25,
-                cost_per_1m_output=5.00,
-                speed="slow",
-                context_window=2000000,
-                strengths=["quality", "reasoning"]
+            "gemini-2.0-flash": ModelProfile(
+                name="gemini-2.0-flash",
+                cost_per_1m_input=0.10,
+                cost_per_1m_output=0.40,
+                speed="fast",
+                context_window=1000000,
+                strengths=["speed", "stable"]
             ),
         }
 
@@ -1980,40 +1976,41 @@ class AutoModelSelector:
         """成本優先策略"""
         # 總是選最便宜的模型
         if task_type in ["simple", "chat"]:
-            return "gemini-1.5-flash"
+            return "gemini-2.5-flash-lite"
         elif task_type == "code":
-            return "gemini-2.0-flash-exp"
+            return "gemini-2.5-flash"
         else:
             return "gemini-2.5-flash"
 
     def _select_by_speed(self, task_type: str) -> str:
         """速度優先策略"""
         # 選擇 fast 模型
-        if task_type == "code":
-            return "gemini-2.0-flash-exp"
+        if task_type in ["simple", "chat"]:
+            return "gemini-2.5-flash-lite"
         else:
             return "gemini-2.5-flash"
 
     def _select_by_quality(self, task_type: str) -> str:
         """品質優先策略"""
-        # 複雜任務用 Pro，簡單任務用 Flash
-        if task_type in ["reasoning", "complex"]:
-            return "gemini-2.5-pro"
+        # 複雜任務用 Pro/3.0，簡單任務用 Flash
+        if task_type in ["reasoning", "complex", "agentic"]:
+            return "gemini-3-pro-preview"
         elif task_type == "code":
             return "gemini-2.5-flash"
         else:
             return "gemini-2.5-flash"
 
     def _select_balanced(self, task_type: str, estimated_tokens: Optional[int]) -> str:
-        """平衡策略"""
+        """平衡策略（2025-11-29 更新）"""
         # 根據任務類型平衡選擇
         task_mapping = {
-            "simple": "gemini-1.5-flash",      # 簡單任務用最便宜的
-            "chat": "gemini-2.0-flash-exp",    # 聊天用 2.0 Flash
-            "code": "gemini-2.5-flash",        # 程式碼用 2.5 Flash
-            "reasoning": "gemini-2.5-flash",   # 推理用 2.5 Flash（平衡）
-            "complex": "gemini-2.5-pro",       # 複雜任務用 Pro
-            "creative": "gemini-2.5-flash",    # 創意任務用 2.5 Flash
+            "simple": "gemini-2.5-flash-lite",  # 簡單任務用最便宜的
+            "chat": "gemini-2.5-flash",         # 聊天用 2.5 Flash
+            "code": "gemini-2.5-flash",         # 程式碼用 2.5 Flash
+            "reasoning": "gemini-2.5-flash",    # 推理用 2.5 Flash（平衡）
+            "complex": "gemini-2.5-pro",        # 複雜任務用 Pro
+            "agentic": "gemini-3-pro-preview",  # 代理任務用 3.0
+            "creative": "gemini-2.5-flash",     # 創意任務用 2.5 Flash
         }
 
         return task_mapping.get(task_type, "gemini-2.5-flash")

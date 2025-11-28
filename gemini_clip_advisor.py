@@ -54,7 +54,7 @@ class ClipAdvisor:
 
     def __init__(
         self,
-        model_name: str = "gemini-2.0-flash-exp",
+        model_name: str = "gemini-2.5-flash",
         use_scene_detection: bool = True
     ):
         """
@@ -748,7 +748,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Gemini AI 剪輯建議')
     parser.add_argument('video', help='影片檔案路徑')
-    parser.add_argument('--model', default='gemini-2.0-flash-exp', help='使用的模型')
+    parser.add_argument('--model', default='gemini-2.5-flash', help='使用的模型')
     parser.add_argument('--num', type=int, default=10, help='建議數量（預設 10）')
     parser.add_argument('--target-duration', type=float, help='目標總長度（秒）')
     parser.add_argument('--types', nargs='+', choices=['highlight', 'key_moment', 'transition', 'intro', 'outro'],

@@ -45,7 +45,7 @@ class VideoCompositor:
                 check=True
             )
         except (subprocess.CalledProcessError, FileNotFoundError):
-            console.print(safe_t('video.compositor.ffmpeg_not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg[/red]'))
+            console.print(safe_t('video.compositor.ffmpeg_not_found', fallback='[dim #E8C4F0]錯誤：未找到 ffmpeg[/dim]'))
             console.print(safe_t('video.compositor.install_ffmpeg', fallback='[#E8C4F0]請安裝 ffmpeg：brew install ffmpeg (macOS)[/#E8C4F0]'))
             raise RuntimeError(safe_t('video.compositor.ffmpeg_not_installed', fallback='ffmpeg 未安裝'))
 
@@ -93,7 +93,7 @@ class VideoCompositor:
 
         # 禁止有損過渡效果
         if transition != "none":
-            console.print(safe_t('video.compositor.transition_disabled', fallback='\n[dim #E8C4F0]✗ 錯誤：過渡效果已禁用[/red]'))
+            console.print(safe_t('video.compositor.transition_disabled', fallback='\n[dim #E8C4F0]✗ 錯誤：過渡效果已禁用[/dim]'))
             console.print(safe_t('video.compositor.no_lossy_encoding', fallback='  系統禁止有損編碼以保持影片品質'))
             console.print(safe_t('video.compositor.transition_quality_loss', fallback='  過渡效果需要重新編碼影片,會造成品質損失'))
             raise ValueError(
@@ -143,9 +143,9 @@ class VideoCompositor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description=safe_t('video.compositor.merge_complete', fallback='[#B565D8]✓ 合併完成[/green]'))
+                progress.update(task, completed=100, description=safe_t('video.compositor.merge_complete', fallback='[#B565D8]✓ 合併完成[/#B565D8]'))
 
-            console.print(safe_t('video.compositor.video_merged', fallback='[#B565D8]✓ 影片已合併：{path}[/green]', path=output_path))
+            console.print(safe_t('video.compositor.video_merged', fallback='[#B565D8]✓ 影片已合併：{path}[/#B565D8]', path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -230,9 +230,9 @@ class VideoCompositor:
                     check=True
                 )
 
-                progress.update(task, completed=100, description=safe_t('video.compositor.processing_complete', fallback='[#B565D8]✓ 處理完成[/green]'))
+                progress.update(task, completed=100, description=safe_t('video.compositor.processing_complete', fallback='[#B565D8]✓ 處理完成[/#B565D8]'))
 
-            console.print(safe_t('video.compositor.merged_with_transition', fallback='[#B565D8]✓ 影片已合併（含過渡效果）：{path}[/green]', path=output_path))
+            console.print(safe_t('video.compositor.merged_with_transition', fallback='[#B565D8]✓ 影片已合併（含過渡效果）：{path}[/#B565D8]', path=output_path))
             return output_path
 
         except subprocess.CalledProcessError as e:
@@ -359,7 +359,7 @@ class VideoCompositor:
         Raises:
             RuntimeError: 功能已禁用
         """
-        console.print(safe_t('video.compositor.transitions_disabled', fallback='\n[dim #E8C4F0]✗ 錯誤：過渡效果功能已禁用[/red]'))
+        console.print(safe_t('video.compositor.transitions_disabled', fallback='\n[dim #E8C4F0]✗ 錯誤：過渡效果功能已禁用[/dim]'))
         console.print(safe_t('video.compositor.transitions_need_encoding', fallback='  過渡效果需要重新編碼影片（libx264）,會造成品質損失'))
         console.print(safe_t('video.compositor.no_lossy_policy', fallback='  系統禁止有損編碼以保持影片原始品質'))
 
@@ -387,11 +387,11 @@ def main():
         if command == "concat":
             video_paths = sys.argv[2:]
             output = compositor.concat_segments(video_paths)
-            console.print(safe_t('video.compositor.concat_done', fallback='\n[#B565D8]✓ 合併完成：{output}[/green]', output=output))
+            console.print(safe_t('video.compositor.concat_done', fallback='\n[#B565D8]✓ 合併完成：{output}[/#B565D8]', output=output))
 
         elif command == "replace":
             if len(sys.argv) < 5:
-                console.print(safe_t('video.compositor.replace_needs_args', fallback='[dim #E8C4F0]錯誤：replace 需要 3 個參數[/red]'))
+                console.print(safe_t('video.compositor.replace_needs_args', fallback='[dim #E8C4F0]錯誤：replace 需要 3 個參數[/dim]'))
                 sys.exit(1)
 
             base_video = sys.argv[2]
@@ -399,14 +399,14 @@ def main():
             start_time = float(sys.argv[4])
 
             output = compositor.replace_segment(base_video, new_segment, start_time)
-            console.print(safe_t('video.compositor.replace_done', fallback='\n[#B565D8]✓ 替換完成：{output}[/green]', output=output))
+            console.print(safe_t('video.compositor.replace_done', fallback='\n[#B565D8]✓ 替換完成：{output}[/#B565D8]', output=output))
 
         else:
-            console.print(safe_t('video.compositor.unknown_command', fallback='[dim #E8C4F0]未知命令：{command}[/red]', command=command))
+            console.print(safe_t('video.compositor.unknown_command', fallback='[dim #E8C4F0]未知命令：{command}[/dim]', command=command))
             sys.exit(1)
 
     except Exception as e:
-        console.print(safe_t('common.error', fallback='\n[dim #E8C4F0]錯誤：{error}[/red]', error=str(e)))
+        console.print(safe_t('common.error', fallback='\n[dim #E8C4F0]錯誤：{error}[/dim]', error=str(e)))
         import traceback
         traceback.print_exc()
         sys.exit(1)

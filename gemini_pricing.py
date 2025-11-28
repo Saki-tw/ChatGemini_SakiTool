@@ -56,32 +56,15 @@ PRICING_TABLE: Dict[str, Dict[str, float]] = {
         'input': 0.000075,          # $0.075 / 1M tokens
         'output': 0.0003,           # $0.30 / 1M tokens
     },
-    'gemini-2.0-flash-thinking-exp': {
-        'input': 0.0001,            # $0.10 / 1M tokens
-        'output': 0.0004,           # $0.40 / 1M tokens
-    },
-    'gemini-2.0-flash-exp': {
-        'input': 0.0,               # 實驗版免費
-        'output': 0.0,
-    },
 
-    # Gemini 1.5 系列（向後相容）
-    'gemini-1.5-pro': {
-        'input_low': 0.00125,       # ≤128K tokens
-        'output_low': 0.005,
-        'input_high': 0.0025,       # >128K tokens
-        'output_high': 0.015,
-        'threshold': 128000,
+    # Gemini 3.0 系列（2025-11-18 發布）
+    'gemini-3-pro-preview': {
+        'input_low': 0.00125,       # ≤200K tokens - $1.25/百萬
+        'output_low': 0.005,        # ≤200K tokens - $5/百萬
+        'input_high': 0.0025,       # >200K tokens - $2.50/百萬
+        'output_high': 0.01,        # >200K tokens - $10/百萬
+        'threshold': 200000,
     },
-    'gemini-1.5-flash': {
-        'input_low': 0.000075,      # ≤128K tokens - $0.075/1M (2024降價後)
-        'output_low': 0.0003,       # ≤128K tokens - $0.30/1M
-        'input_high': 0.00015,      # >128K tokens - $0.15/1M
-        'output_high': 0.0006,      # >128K tokens - $0.60/1M
-        'threshold': 128000,
-    },
-    # 注意：API 中沒有 gemini-1.5-flash-8b 或 gemini-1.5-flash-lite
-    # 1.5 系列只有 gemini-1.5-flash 和 gemini-1.5-pro
 
     # 嵌入模型
     'gemini-embedding-001': {
@@ -96,12 +79,6 @@ PRICING_TABLE: Dict[str, Dict[str, float]] = {
     },
     'gemma-3n': {
         'input': 0.0,
-        'output': 0.0,
-    },
-
-    # 實驗版模型
-    'gemini-exp-1206': {
-        'input': 0.0,               # 實驗版免費
         'output': 0.0,
     },
 
@@ -842,7 +819,7 @@ class PricingCalculator:
         self,
         target_duration: int,
         segment_duration: int = 8,
-        planning_model: str = 'gemini-2.0-flash-exp',
+        planning_model: str = 'gemini-2.5-flash',
         veo_model: str = 'veo-3.1-generate-preview',
         estimated_planning_tokens: int = 2000
     ) -> Tuple[float, Dict]:
@@ -856,7 +833,7 @@ class PricingCalculator:
         Args:
             target_duration: 目標影片時長（秒）
             segment_duration: 每段時長（秒）,預設 8 秒
-            planning_model: 計畫生成模型,預設 gemini-2.0-flash-exp
+            planning_model: 計畫生成模型,預設 gemini-2.5-flash
             veo_model: Veo 模型名稱
             estimated_planning_tokens: 估算的計畫生成 token 數（輸入+輸出）
 
@@ -944,7 +921,7 @@ class PricingCalculator:
         actual_duration = num_segments * segment_duration
 
         # Gemini 計畫成本（估算）
-        planning_pricing = self.get_model_pricing('gemini-2.0-flash-exp')
+        planning_pricing = self.get_model_pricing('gemini-2.5-flash')
         planning_cost = (2000 / 1000) * planning_pricing.get('input', 0.0001)
 
         # Veo 生成成本
