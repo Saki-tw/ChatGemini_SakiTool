@@ -1,6 +1,8 @@
 # ChatGemini
 **省錢 90%！輕量向量資料庫！MCP 整合！一鍵安裝的完整 Gemini AI 工具套件**
 
+🌐 **Github Pages**：https://saki-tw.github.io/ChatGemini_SakiTool/
+
 ![1.0.0 時截圖](docs/IMG_0947.png)
 ![1.0.0 時截圖](docs/IMG_0948.png)
 ![1.0.0 時截圖](docs/IMG_0950.png)

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="02iyrJHUIUAb9wY6LY4iVchsJ3M2wM3uN5xwbXCyqx0" />
+    <title>ChatGemini - 省錢 90%！輕量向量資料庫！MCP 整合！一鍵安裝的完整 Gemini AI 工具套件</title>
+    <meta name="description" content="ChatGemini_SakiTool - 省錢 90% 的 Gemini AI 工具套件，支援智能快取、FAISS 向量資料庫、MCP 整合、多語言介面。一行安裝，完全自動化。">
+    <meta name="keywords" content="Gemini, AI, ChatGemini, 向量資料庫, FAISS, MCP, 快取, 省錢, Python, 繁體中文">
+    <style>
+        :root {
+            --purple: #c6a4cf;
+            --blue: #89c3eb;
+            --bg: #faf8fb;
+            --text: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft JhengHei", sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 0;
+            border-bottom: 3px solid var(--purple);
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--purple);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: var(--blue);
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .badges {
+            margin-top: 20px;
+        }
+
+        .badges img {
+            margin: 0 5px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        h2 {
+            color: var(--purple);
+            border-bottom: 2px solid var(--purple);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .feature-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .feature h3 {
+            color: var(--purple);
+            margin-bottom: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: var(--purple);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #b794c0;
+        }
+
+        .btn-secondary {
+            background: var(--blue);
+        }
+
+        .btn-secondary:hover {
+            background: #7ab3db;
+        }
+
+        .cta {
+            text-align: center;
+            padding: 40px 0;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+
+        code {
+            font-family: "Consolas", "Monaco", monospace;
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .screenshot-grid img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            border-top: 1px solid #eee;
+            margin-top: 40px;
+        }
+
+        footer a {
+            color: var(--purple);
+            text-decoration: none;
+        }
+
+        .lang-links {
+            margin-top: 15px;
+        }
+
+        .lang-links a {
+            margin: 0 10px;
+            color: var(--blue);
+            text-decoration: none;
+        }
+
+        .lang-links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ChatGemini</h1>
+            <p class="subtitle">省錢 90%！輕量向量資料庫！MCP 整合！一鍵安裝的完整 Gemini AI 工具套件</p>
+            <div class="badges">
+                <img src="https://img.shields.io/badge/Version-v1.0.9-blue.svg" alt="Version">
+                <img src="https://img.shields.io/badge/Python-3.10+-3776AB.svg" alt="Python">
+                <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
+                <img src="https://img.shields.io/badge/Maintained%20by-Saki%20Studio-c6a4cf" alt="Saki Studio">
+            </div>
+            <div class="lang-links">
+                <a href="https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_EN.md">English</a>
+                <a href="https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_JA.md">日本語</a>
+                <a href="https://github.com/Saki-tw/ChatGemini_SakiTool/blob/main/README_KO.md">한국어</a>
+            </div>
+        </header>
+
+        <div class="section">
+            <h2>專案簡介</h2>
+            <p>這個專案最初是為了<strong>節省 Gemini API 費用</strong>而開發的工具。在使用過程中不斷最佳化，加入了自動快取、向量資料庫、智能觸發等功能，最終變成一個功能完整、好用的 AI 工具套件。</p>
+            <blockquote style="border-left: 3px solid var(--purple); padding-left: 15px; margin: 15px 0; color: #666;">
+                「我只是想省點 API 費用，沒想到順手做了一個完整的工具套件」<br>
+                — Saki-Tw (Saki@saki-studio.com.tw with Claude)
+            </blockquote>
+        </div>
+
+        <div class="section">
+            <h2>核心優勢</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">💰</div>
+                    <h3>智能快取系統</h3>
+                    <p>Flash 模型省 90%、Pro 模型省 75%</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🗄️</div>
+                    <h3>輕量向量資料庫</h3>
+                    <p>FAISS 索引，O(log n) 查詢</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🌍</div>
+                    <h3>多語言介面</h3>
+                    <p>繁中、英、日、韓四語切換</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🔌</div>
+                    <h3>MCP 智慧整合</h3>
+                    <p>7 種工具自動偵測啟用</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎬</div>
+                    <h3>影音處理</h3>
+                    <p>Veo 3.1 / Imagen 4 / Flow Engine</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">⚡</div>
+                    <h3>一行安裝</h3>
+                    <p>全自動，零配置</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>一鍵安裝</h2>
+            <pre><code>git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_SakiTool && sh INSTALL.sh --auto</code></pre>
+            <p>安裝完成後，在任意位置輸入 <code>ChatGemini</code> 即可啟動。</p>
+        </div>
+
+        <div class="section">
+            <h2>功能特色</h2>
+            <ul>
+                <li><strong>對話功能</strong>：串流輸出、200 萬 tokens 上下文、多輪對話記憶</li>
+                <li><strong>思考模式</strong>：<code>[think:auto]</code> 自動判斷、<code>[think:數字]</code> 指定預算、<code>[no-think]</code> 快速回應</li>
+                <li><strong>檔案處理</strong>：支援 30+ 文字格式、圖片/影片/PDF 上傳</li>
+                <li><strong>CodeGemini</strong>：程式碼分析、測試生成、安全掃描</li>
+                <li><strong>影片生成</strong>：Veo 3.1 引擎、8 秒 1080p 高畫質</li>
+                <li><strong>圖像生成</strong>：Imagen 4 模型、文字轉圖片</li>
+            </ul>
+        </div>
+
+        <div class="cta">
+            <a href="https://github.com/Saki-tw/ChatGemini_SakiTool/tree/main" class="btn">查看原始碼</a>
+            <a href="https://github.com/Saki-tw/ChatGemini_SakiTool/releases" class="btn btn-secondary">下載 Releases</a>
+        </div>
+
+        <div class="section">
+            <h2>截圖預覽</h2>
+            <div class="screenshot-grid">
+                <img src="IMG_0947.png" alt="ChatGemini 截圖 1">
+                <img src="IMG_0948.png" alt="ChatGemini 截圖 2">
+                <img src="IMG_0950.png" alt="ChatGemini 截圖 3">
+                <img src="IMG_0954.png" alt="ChatGemini 截圖 4">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>支援的模型</h2>
+            <ul>
+                <li><strong>Gemini 2.5 Pro</strong> - 最強大（思考模式）</li>
+                <li><strong>Gemini 2.5 Flash</strong> - 快速且智慧（推薦）</li>
+                <li><strong>Gemini 2.5 Flash-8B</strong> - 最便宜</li>
+                <li><strong>Gemini 2.0 Flash</strong> - 快速版</li>
+            </ul>
+        </div>
+
+        <footer>
+            <p>© 2025 <a href="https://saki-studio.com.tw">Saki Studio</a></p>
+            <p>MIT License | <a href="https://github.com/Saki-tw/ChatGemini_SakiTool/tree/main">GitHub Repository</a></p>
+        </footer>
+    </div>
+</body>
+</html>
