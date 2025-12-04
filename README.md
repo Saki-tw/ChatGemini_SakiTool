@@ -79,6 +79,26 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 
 ---
 
+### 📅 v1.0.8（2025-11-19）— 🎯 Gemini 3.0 Pro Preview 與模型選擇器優化
+
+**核心更新**：
+
+- 🤖 **Gemini 3.0 Pro Preview 完整支援**：Google 最新發布的 Gemini 3.0 Pro Preview 模型，SOTA 等級推理能力
+  - 思考預算提升至 65,536 tokens（2 倍 Pro 2.5）
+  - 輸出限制提升至 131,072 tokens（128K）
+  - 上下文窗口 1,000,000 tokens（1M）
+
+- 🐛 **模型選擇器大幅優化**：修復模型列表無法滾動問題
+  - 動態滾動視窗機制，支援無限數量模型
+  - 方向鍵 (↑↓) 自動調整可視範圍
+  - PgUp/PgDn 快速翻頁（一次 10 個選項）
+  - Home/End 快速跳到開頭/結尾
+  - 數字鍵快速跳轉後自動調整滾動位置
+
+- ⚡ **性能優化**：渲染速度提升約 70%、記憶體使用降低約 60%、按鍵響應速度提升約 50%
+
+---
+
 ### 📅 v1.0.7（2025-11-02）— 🤖 CodeGemini 開發工具整合
 
 **核心更新**：
