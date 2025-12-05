@@ -505,10 +505,11 @@ ChatGemini
 
 ### 推薦模型（互動模式選單）
 
-1. **Gemini 2.5 Pro** - 最強大（思考模式）
-2. **Gemini 2.5 Flash** - 快速且智慧（推薦）
-3. **Gemini 2.5 Flash-8B** - 最便宜
-4. **Gemini 2.0 Flash** - 快速版
+1. **Gemini 3.0 Pro** - 最新旗艦（思考預算 65,536 tokens、輸出 128K）
+2. **Gemini 2.5 Pro** - 強大穩定（思考模式）
+3. **Gemini 2.5 Flash** - 快速且智慧（推薦）
+4. **Gemini 2.5 Flash-8B** - 最便宜
+5. **Gemini 2.0 Flash** - 快速版
 
 您也可以：
 - 在互動模式中輸入 `model` 切換模型
@@ -733,6 +734,14 @@ A: 在對話中輸入 `help`，會顯示 6 大主題選單：
 唯一要求是保留原始授權聲明和版權聲明。
 
 唯二致謝：曾公益中、蔡師傅律安。
+
+---
+
+## 供養 / Support
+
+如果這個工具幫到你，可以請我活下去：
+
+👉 [Touch me if you had desolation](https://saki-tw.github.io/-Touch-me-if-you-had-desolation/)
 
 ---
 
