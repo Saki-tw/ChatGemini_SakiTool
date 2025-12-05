@@ -617,10 +617,11 @@ python gemini_veo_generator.py "A golden retriever playing in a sunny garden"
 
 ### Recommended Models (Interactive menu)
 
-1. **Gemini 2.5 Pro** - Most powerful (thinking mode)
-2. **Gemini 2.5 Flash** - Fast and smart (recommended)
-3. **Gemini 2.5 Flash-8B** - Cheapest
-4. **Gemini 2.0 Flash** - Fast version
+1. **Gemini 3.0 Pro** - Latest flagship (thinking budget 65,536 tokens, output 128K)
+2. **Gemini 2.5 Pro** - Powerful and stable (thinking mode)
+3. **Gemini 2.5 Flash** - Fast and smart (recommended)
+4. **Gemini 2.5 Flash-8B** - Cheapest
+5. **Gemini 2.0 Flash** - Fast version
 
 You can also:
 - Type `model` in interactive mode to switch models
@@ -668,6 +669,16 @@ Break-even: Start saving after 1 query
 This project is licensed under the **MIT License**.
 
 For detailed license terms, see the [LICENSE](LICENSE) file.
+
+---
+
+## Support
+
+If this tool helped you, you can help me survive:
+
+👉 [Touch me if you had desolation](https://saki-tw.github.io/-Touch-me-if-you-had-desolation/)
+
+---
 
 In short, you are free to:
 - ✅ Use this project

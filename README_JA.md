@@ -259,4 +259,12 @@ git clone https://github.com/Saki-tw/ChatGemini_SakiTool.git && cd ChatGemini_Sa
 
 ---
 
+## 供養 / Support
+
+このツールがお役に立てましたら、生き延びる手助けをしていただけると嬉しいです：
+
+👉 [Touch me if you had desolation](https://saki-tw.github.io/-Touch-me-if-you-had-desolation/)
+
+---
+
 **Gemini AIとの対話をお楽しみください！** 🎉
