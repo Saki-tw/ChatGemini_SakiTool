@@ -1,0 +1,12 @@
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/mime_guess-cbaff3fc8699d3de.d: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs /Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/build/mime_guess-166d2c53cd5de513/out/mime_types_generated.rs
+
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/libmime_guess-cbaff3fc8699d3de.rlib: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs /Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/build/mime_guess-166d2c53cd5de513/out/mime_types_generated.rs
+
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/libmime_guess-cbaff3fc8699d3de.rmeta: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs /Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/build/mime_guess-166d2c53cd5de513/out/mime_types_generated.rs
+
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/lib.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/impl_bin_search.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/mime_guess-2.0.5/src/mime_types.rs:
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/build/mime_guess-166d2c53cd5de513/out/mime_types_generated.rs:
+
+# env-dep:MIME_TYPES_GENERATED_PATH=/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/build/mime_guess-166d2c53cd5de513/out/mime_types_generated.rs

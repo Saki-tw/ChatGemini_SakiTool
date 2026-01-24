@@ -1,0 +1,11 @@
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/normpath-9a91336185a38f0b.d: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/base.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/cmp.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/error.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/common/mod.rs
+
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/libnormpath-9a91336185a38f0b.rlib: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/base.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/cmp.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/error.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/common/mod.rs
+
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/libnormpath-9a91336185a38f0b.rmeta: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/base.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/cmp.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/error.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/common/mod.rs
+
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/lib.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/base.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/cmp.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/error.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/normpath-1.5.0/src/common/mod.rs:

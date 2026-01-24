@@ -1,0 +1,11 @@
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/json5-0acef7e0227b31a2.d: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/de.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/error.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/ser.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/json5.pest
+
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/libjson5-0acef7e0227b31a2.rlib: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/de.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/error.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/ser.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/json5.pest
+
+/Users/hc1034/Saki_Studio/Claude/ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust/target/debug/deps/libjson5-0acef7e0227b31a2.rmeta: /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/lib.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/de.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/error.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/ser.rs /Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/json5.pest
+
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/lib.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/de.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/error.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/ser.rs:
+/Users/hc1034/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/json5-0.4.1/src/json5.pest:
