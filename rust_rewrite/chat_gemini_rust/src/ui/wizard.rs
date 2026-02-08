@@ -11,10 +11,11 @@ pub fn run_onboarding() -> Result<Settings> {
     println!("\n偵測不到有效的認證憑證。請選擇連接方式：\n");
     
     println!("1. {} (推薦個人使用)", "輸入 Gemini API Key".cyan().bold());
-    println!("2. {} (需要 client_secret.json)", "Google 帳號登入 (OAuth)".yellow().bold());
-    println!("3. 離開\n");
+    println!("2. {} (需要 client_secret.json)", "Google 帳號登入 (Standard OAuth)".yellow().bold());
+    println!("3. {} (SSH/Headless Server)", "Google Device Flow".blue().bold());
+    println!("4. 離開\n");
 
-    print!("請選擇 [1-3]: ");
+    print!("請選擇 [1-4]: ");
     io::stdout().flush()?;
 
     let mut input = String::new();
@@ -23,7 +24,8 @@ pub fn run_onboarding() -> Result<Settings> {
 
     match choice {
         "1" => setup_api_key(),
-        "2" => setup_oauth(),
+        "2" => setup_oauth("installed"),
+        "3" => setup_oauth("device"),
         _ => Err(anyhow::anyhow!("操作已取消")),
     }
 }
@@ -53,16 +55,14 @@ fn setup_api_key() -> Result<Settings> {
     }
 
     // Reload settings by setting env var temporarily
-    // Safety: Only safe if single threaded. At startup main thread, it is.
     unsafe {
         std::env::set_var("GEMINI_API_KEY", &key);
     }
     
-    // Reload settings
     Settings::new().map_err(|e| anyhow::anyhow!(e))
 }
 
-fn setup_oauth() -> Result<Settings> {
+fn setup_oauth(flow_type: &str) -> Result<Settings> {
     println!("\n請輸入 'client_secret.json' 的路徑 (預設為 ./client_secret.json):");
     print!("路徑: ");
     io::stdout().flush()?;
@@ -84,13 +84,14 @@ fn setup_oauth() -> Result<Settings> {
     io::stdin().read_line(&mut save)?;
     
     if save.trim().eq_ignore_ascii_case("y") {
-        let content = format!("GEMINI_OAUTH_SECRET_FILE={}\nGEMINI_MODEL=gemini-2.0-flash\nGEMINI_LANG=zh-TW\n", path);
+        let content = format!("GEMINI_OAUTH_SECRET_FILE={}\nGEMINI_AUTH_FLOW={}\nGEMINI_MODEL=gemini-2.0-flash\nGEMINI_LANG=zh-TW\n", path, flow_type);
         fs::write(".env", content)?;
         println!("{}", "設定已儲存至 .env".green());
     }
 
     unsafe {
         std::env::set_var("GEMINI_OAUTH_SECRET_FILE", &path);
+        std::env::set_var("GEMINI_OAUTH_FLOW_TYPE", flow_type);
     }
     Settings::new().map_err(|e| anyhow::anyhow!(e))
 }

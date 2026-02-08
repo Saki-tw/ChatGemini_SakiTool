@@ -1,30 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(tag = "method", content = "params")]
-pub enum JsonRpcMessage {
-    #[serde(rename = "initialize")]
-    Initialize { 
-        protocol_version: String,
-        capabilities: Value,
-        client_info: ClientInfo,
-    },
-    #[serde(rename = "tools/list")]
-    ListTools { }, // params is empty or optional
-    #[serde(rename = "tools/call")]
-    CallTool { 
-        name: String,
-        arguments: Value,
-    },
-}
-
-// Custom serializer for JsonRpcMessage to match JSON-RPC 2.0 strictly
-// "method": "...", "params": {...}, "id": ...
-// The default enum serialization might be tricky. Let's use a struct wrapper or manual serialization.
-// Actually, `serde(tag="method")` puts method inside. But JSON-RPC has ID at top level.
-// Let's redefine for simplicity.
-
 #[derive(Debug, Serialize)]
 pub struct JsonRpcRequest {
     pub jsonrpc: String,
@@ -85,7 +61,39 @@ pub struct Tool {
     pub input_schema: Value,
 }
 
-// Override Message enum to use Request struct in Client
-impl JsonRpcMessage {
-    // Redefinition as helper, but we use JsonRpcRequest for wire
+// --- Resources ---
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ListResourcesResult {
+    pub resources: Vec<Resource>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Resource {
+    pub uri: String,
+    pub name: String,
+    pub description: Option<String>,
+    pub mime_type: Option<String>,
+}
+
+// --- Prompts ---
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ListPromptsResult {
+    pub prompts: Vec<Prompt>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Prompt {
+    pub name: String,
+    pub description: Option<String>,
+    pub arguments: Option<Vec<PromptArgument>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PromptArgument {
+    pub name: String,
+    pub description: Option<String>,
+    pub required: Option<bool>,
 }

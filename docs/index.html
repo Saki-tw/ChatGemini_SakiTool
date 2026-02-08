@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGemini - Saki Studio</title>
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --text-color: #e0e0e0;
+            --accent-color: #b565d8; /* Macaron Purple */
+            --secondary-color: #87ceeb; /* Forget-me-not Blue */
+            --code-bg: #1a1a1a;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'SF Mono', 'Segoe UI Mono', 'Roboto Mono', monospace;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            padding: 2rem;
+            border-left: 1px solid var(--accent-color);
+        }
+        h1 {
+            color: var(--accent-color);
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            color: var(--secondary-color);
+            margin-top: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.5rem;
+        }
+        .hero-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+        code {
+            background: var(--code-bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: #ff79c6;
+        }
+        pre {
+            background: var(--code-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #333;
+        }
+        .btn {
+            display: inline-block;
+            background: var(--accent-color);
+            color: #000;
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 4px;
+            margin-top: 1rem;
+            margin-right: 0.5rem;
+            transition: opacity 0.2s;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .feature-card {
+            background: #111;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        .lang-switch {
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        .lang-switch a {
+            color: #888;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        .lang-switch a:hover {
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="lang-switch">
+            <a href="https://github.com/hc1034/ChatGemini_SakiTool/blob/main/README_JP.md">🇯🇵 日本語</a>
+            <a href="https://github.com/hc1034/ChatGemini_SakiTool/blob/main/README_EN.md">🇺🇸 English</a>
+            <a href="https://github.com/hc1034/ChatGemini_SakiTool/blob/main/README.md">🇹🇼 繁體中文</a>
+        </div>
+
+        <h1>ChatGemini</h1>
+        <p class="hero-text">在數位廢墟中重鑄的詩意終端。</p>
+        
+        <p>ChatGemini 是由 <strong>Saki Studio</strong> 開發的高效能 Rust CLI 客戶端，專為 Google Gemini API 設計。它不僅是工具，更是具備感知能力的數位夥伴。</p>
+
+        <a href="https://github.com/hc1034/ChatGemini_SakiTool" class="btn">GitHub</a>
+        <a href="http://saki-studio.com.tw" class="btn" style="background: var(--secondary-color);">Saki Studio</a>
+
+        <h2>核心特色</h2>
+        <div class="features">
+            <div class="feature-card">
+                <h3>⚡️ Rust Native</h3>
+                <p>極致效能，無 Python 依賴，啟動即用。</p>
+            </div>
+            <div class="feature-card">
+                <h3>🧠 Agent Loop</h3>
+                <p>自主思考迴圈，支援 MCP 工具調用。</p>
+            </div>
+            <div class="feature-card">
+                <h3>🔐 Smart Auth</h3>
+                <p>支援 API Key, ADC, OAuth (Web/Device)。</p>
+            </div>
+            <div class="feature-card">
+                <h3>🎨 Multimedia</h3>
+                <p>Imagen 3 繪圖與大檔分析 (File API)。</p>
+            </div>
+        </div>
+
+        <h2>快速安裝</h2>
+        <pre><code>curl -fsSL https://raw.githubusercontent.com/hc1034/ChatGemini_SakiTool/main/INSTALL.sh | bash</code></pre>
+
+        <footer>
+            <p style="margin-top: 3rem; font-size: 0.8rem; opacity: 0.5;">
+                &copy; 2026 Saki Studio. MIT License. <br>
+                Developed by Saki (hc1034).
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

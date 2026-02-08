@@ -1,4 +1,4 @@
-use yup_oauth2::{ApplicationDefaultCredentialsAuthenticator, InstalledFlowAuthenticator, InstalledFlowReturnMethod};
+use yup_oauth2::{ApplicationDefaultCredentialsAuthenticator, InstalledFlowAuthenticator, InstalledFlowReturnMethod, DeviceFlowAuthenticator};
 use yup_oauth2::authenticator::Authenticator;
 use yup_oauth2::authenticator::ApplicationDefaultCredentialsTypes;
 use hyper_rustls::HttpsConnector;
@@ -45,7 +45,7 @@ impl GoogleAuth {
              return Ok(Self { method: AuthMethod::OAuth(Arc::new(auth)) });
         }
 
-        // 3. Try Interactive Flow (OAuth 2.0 Client ID)
+        // 3. OAuth 2.0 (Installed or Device Flow)
         println!("{}", "未檢測到 ADC，正在檢查 OAuth Client 配置...".yellow());
 
         let app_secret = if let Some(path) = &settings.oauth_secret_file {
@@ -66,26 +66,37 @@ impl GoogleAuth {
             return Err(anyhow::anyhow!("認證失敗：未提供 API Key，未檢測到 ADC，且未提供 OAuth Client Secret。\n請參閱 README 設定 'GEMINI_API_KEY' 或 'client_secret.json'。"));
         };
 
-        println!("{}", "啟動瀏覽器互動登入流程...".blue());
-        let auth = InstalledFlowAuthenticator::builder(
-            app_secret,
-            InstalledFlowReturnMethod::HTTPRedirect,
-        )
-        .persist_tokens_to_disk("token_cache.json")
-        .build()
-        .await?;
+        if settings.oauth_flow_type == "device" {
+            println!("{}", "啟動 Device Flow (Headless/SSH)...".blue());
+            println!("{}", "請注意：請按照螢幕指示，在任何裝置的瀏覽器中輸入代碼。".yellow());
+            
+            let auth = DeviceFlowAuthenticator::builder(app_secret)
+                .persist_tokens_to_disk("token_cache.json")
+                .build()
+                .await?;
+                
+            println!("{}", "Device Flow 初始化完成。".green());
+            return Ok(Self { method: AuthMethod::OAuth(Arc::new(auth)) });
+        } else {
+            println!("{}", "啟動瀏覽器互動登入流程 (Installed Flow)...".blue());
+            let auth = InstalledFlowAuthenticator::builder(
+                app_secret,
+                InstalledFlowReturnMethod::HTTPRedirect,
+            )
+            .persist_tokens_to_disk("token_cache.json")
+            .build()
+            .await?;
 
-        println!("{}", "OAuth 初始化完成。請在瀏覽器中完成登入。".green());
-        Ok(Self { method: AuthMethod::OAuth(Arc::new(auth)) })
+            println!("{}", "OAuth 初始化完成。請在瀏覽器中完成登入。".green());
+            return Ok(Self { method: AuthMethod::OAuth(Arc::new(auth)) });
+        }
     }
 
     pub async fn get_token(&self) -> Result<Option<String>> {
         match &self.method {
             AuthMethod::ApiKey(_) => Ok(None),
             AuthMethod::OAuth(auth) => {
-                let token = auth.token(&[SCOPE]).await;
-                
-                let token = match token {
+                let token: yup_oauth2::AccessToken = match auth.token(&[SCOPE]).await {
                     Ok(t) => t,
                     Err(_) => auth.token(&[CLOUD_PLATFORM_SCOPE]).await.context("無法獲取 OAuth Token")?,
                 };

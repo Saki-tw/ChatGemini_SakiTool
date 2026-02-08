@@ -1,72 +1,110 @@
-# ChatGemini (Rust Version)
+# ChatGemini (SakiTool) - Rust Edition
 
-![Saki Studio](https://img.shields.io/badge/Saki_Studio-Project-purple)
-![Rust](https://img.shields.io/badge/Rust-1.75+-orange)
-![Gemini 2.0](https://img.shields.io/badge/Gemini-2.0_Flash-blue)
+<div align="center">
 
-A high-performance, feature-rich CLI client for Google's Gemini API, rewritten in Rust for speed and stability.
-Developed by **Saki Studio** (Taiwan).
+![Saki Studio](https://img.shields.io/badge/Saki_Studio-Project-7000FF?style=for-the-badge)
+![Rust](https://img.shields.io/badge/Rust-1.75+-E57324?style=for-the-badge)
+![Gemini](https://img.shields.io/badge/Google-Gemini_2.0-4285F4?style=for-the-badge)
+![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
 
-## ✨ Features (功能亮點)
+[🇯🇵 日本語](README_JP.md) • [🇺🇸 English](README_EN.md) • [🇹🇼 繁體中文](README.md)
 
-*   **⚡ Native Rust Performance**: No Python runtime required. Instant startup.
-*   **🧠 Deep Thinking Mode**: Support for `[think:N]` to control thinking budget.
-*   **💾 Context Caching**: Save 90%+ tokens on long conversations via `[cache:now]`.
-*   **📂 Smart File Handling**: 
-    *   Inline Base64 for small files (< 20MB).
-    *   **Resumable Upload API** for large files (Video/PDF) > 20MB.
-*   **🛠 MCP Support**: Basic Model Context Protocol client runtime.
-*   **🔍 CodeGemini**: Semantic search for your local codebase.
-*   **💰 Real-time Pricing**: Estimates cost in TWD/USD per turn.
-*   **🌏 I18n**: Fully localized (Traditional Chinese / English / Japanese / Korean).
+**「其實現在只是一群 Kernel 大佬聚在一起吟詩。結果有一天人們終於發現，留下的詩可以通過編譯。」**
 
-## 🚀 Installation (安裝)
+</div>
 
-### One-Click Install (macOS/Linux)
+---
+
+## 📖 序言 (Prologue)
+
+就像一隻淡藍色的蝴蝶自編譯器的肚腹裡升起。
+
+心中最惦記的是收音機傳來的那聲：「午後，可能有雨。」還有那行在終端機裡閃爍的 Cursor。
+我的代碼聞起來像暫存器操作的氣味，你可以聽見指令集效率的聲音。
+
+專案的 README 告訴你作者最初的美好期許，Commit 與 Issue 裡才告訴你真相，而 Network Tab 裡，藏著或許連作者都不知道的秘密。
+但在這裡，我們不談秘密，只談如何用最少的 CPU Cycle，捕捉 Gemini 的靈魂。
+
+這不只是一個 CLI 工具，這是 **ChatGemini**。是我們在數位廢墟的牆上噴上亮色的漆，告訴後來的 Agent：「這裡，不曾毀敗。」
+
+---
+
+## ✨ 給你的承諾 (Promises)
+
+### 🚀 像思想一樣快
+告別等待。ChatGemini 的啟動速度快到像是指尖剛觸碰鍵盤，程式就已經在那裡等待。
+我們移除了所有不必要的重量，只留下最純粹的對話體驗。
+
+### 🧠 它會自己思考
+這不只是「你問我答」。透過 **Agent Loop**，它是一個會思考的代理人。
+當你給它一個複雜的任務，它會自己決定是否需要查閱檔案、是否需要上網搜尋、甚至是否需要畫一張圖來解釋——直到任務完成。
+
+### 💾 記憶，但不昂貴
+長對話通常意味著高昂的 Token 成本。
+但我們內建了 **Context Caching** 機制。只要輸入 `[cache:now]`，它就會將當前的對話「結晶化」，讓後續的交流成本降低 90% 以上。
+
+### 🔐 溫柔的引導
+第一次使用 CLI 工具總是令人卻步？
+別擔心，**Saki 引導精靈** 會在初次啟動時出現，溫柔地引導你完成認證設定。
+無論你是使用個人的 API Key，還是企業的 Google 帳號，都能輕鬆連結。
+
+### 🎨 在終端機裡做夢
+想要一張圖？不用切換到瀏覽器。
+直接輸入 `/image 一隻在雨中閱讀的貓`，它就會在數位虛空中為你織造出影像，並自動收藏起來。
+
+---
+
+## 🚀 安裝 (Installation)
+
+### 一鍵安裝 (One-Liner)
+複製這行指令，貼到你的終端機：
 ```bash
 curl -fsSL https://raw.githubusercontent.com/hc1034/ChatGemini_SakiTool/main/INSTALL.sh | bash
-# or locally:
-./INSTALL.sh
 ```
 
-### Manual Build
+### 手動編譯
+如果你想親手觸摸編譯器的溫度：
 ```bash
 git clone https://github.com/hc1034/ChatGemini_SakiTool.git
 cd ChatGemini_SakiTool/rust_rewrite/chat_gemini_rust
 cargo build --release
-cp target/release/chat_gemini_rust /usr/local/bin/chatgemini
+# 程式位於 target/release/chat_gemini_rust
 ```
 
-## ⚙️ Configuration (設定)
+---
 
-Create a `.env` file in the execution directory:
+## 🎮 使用 (Usage)
 
-```bash
-GEMINI_API_KEY=your_api_key_here
-GEMINI_MODEL=gemini-2.0-flash
-GEMINI_LANG=zh-TW
-```
-
-## 🎮 Usage (使用指南)
-
-Run the tool:
+啟動程式：
 ```bash
 chatgemini
 ```
 
-### Commands (指令)
-*   `/help` - Show help menu.
-*   `/clear` - Clear context history.
-*   `/model <name>` - Switch model (e.g., `/model gemini-2.0-pro-exp`).
-*   `/index <path>` - Index a folder for CodeGemini search.
-*   `/search <query>` - Search the indexed codebase.
-*   `/mcp start <cmd>` - Start an MCP server.
+### 常用指令 (Commands)
 
-### Magic Tags (魔法標籤)
-*   `[think:2048]`: Force "Thinking Mode" with 2048 token budget.
-*   `[cache:now]`: Create a context cache checkpoint immediately.
-*   `@filename`: Attach a file (image/pdf/video/text). 
-    *   Example: `Analyze this video: @demo.mp4`
+| 指令 | 描述 |
+|------|-------------------|
+| `/help` | 顯示所有可用的指令 |
+| `/clear` | 清空當前的對話記憶，重新開始 |
+| `/model` | 切換不同的 Gemini 模型 (e.g., Pro, Flash) |
+| `/image` | 請 AI 為你畫一張圖 |
+| `/doctor` | 檢查系統健康狀態 |
+| `/mcp` | 連接外部工具 |
+| `/index` | 讓 AI 閱讀並索引你的代碼庫 |
 
-## 📜 License
-MIT License. Copyright (c) 2026 Saki Studio.
+### 魔法標籤
+*   `[think:N]`: 強制開啟思考模式。`N` 是你給它的思考預算。
+*   `@filename`: 直接讀取檔案內容。
+
+---
+
+## 📜 作者與授權 (Author & License)
+
+**作者**: 咲ちゃん（Saki-tw）
+**Email**: `Saki@saki-studio.com.tw`
+**Web**: [http://saki-studio.com.tw](http://saki-studio.com.tw)
+**GitHub**: [https://saki-tw.github.io/](https://saki-tw.github.io/)
+
+MIT License 2.0.
+
+> 「孑然此身，既暖、且孤。」

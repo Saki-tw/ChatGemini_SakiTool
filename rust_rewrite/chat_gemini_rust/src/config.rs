@@ -17,7 +17,10 @@ pub struct Settings {
     // OAuth 2.0 Configuration
     pub oauth_client_id: Option<String>,
     pub oauth_client_secret: Option<String>,
-    pub oauth_secret_file: Option<String>, // Path to client_secret.json
+    pub oauth_secret_file: Option<String>,
+    
+    // Auth Flow Type: "installed" (default) or "device"
+    pub oauth_flow_type: String, 
     
     #[serde(default)]
     pub mcp: McpConfig,
@@ -47,6 +50,7 @@ impl Settings {
             .set_default("oauth_client_id", None::<String>)?
             .set_default("oauth_client_secret", None::<String>)?
             .set_default("oauth_secret_file", None::<String>)?
+            .set_default("oauth_flow_type", "installed")?
             
             .add_source(File::with_name("config").required(false))
             .add_source(Environment::with_prefix("GEMINI").separator("_"));

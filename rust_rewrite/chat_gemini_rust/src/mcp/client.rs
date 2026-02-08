@@ -37,7 +37,6 @@ impl McpClient {
         self.send_request("initialize", Some(serde_json::to_value(params)?))?;
         let _resp = self.read_response()?; 
         
-        // MCP requires a notification after init
         self.send_notification("notifications/initialized", None)?;
         
         Ok(())
@@ -73,6 +72,28 @@ impl McpClient {
         }
     }
 
+    pub fn list_resources(&mut self) -> Result<ListResourcesResult> {
+        self.send_request("resources/list", None)?;
+        let resp = self.read_response()?;
+        if let Some(res) = resp.result {
+            let resources: ListResourcesResult = serde_json::from_value(res)?;
+            Ok(resources)
+        } else {
+            Err(anyhow::anyhow!("No result in list_resources response"))
+        }
+    }
+
+    pub fn list_prompts(&mut self) -> Result<ListPromptsResult> {
+        self.send_request("prompts/list", None)?;
+        let resp = self.read_response()?;
+        if let Some(res) = resp.result {
+            let prompts: ListPromptsResult = serde_json::from_value(res)?;
+            Ok(prompts)
+        } else {
+            Err(anyhow::anyhow!("No result in list_prompts response"))
+        }
+    }
+
     fn send_request(&mut self, method: &str, params: Option<Value>) -> Result<()> {
         let id = self.next_id;
         self.next_id += 1;
@@ -92,9 +113,6 @@ impl McpClient {
     }
 
     fn send_notification(&mut self, method: &str, params: Option<Value>) -> Result<()> {
-        // Notification implies no ID (or null ID in some specs, but usually just omitted)
-        // We'll treat it as request but ignore ID for now or implement struct
-        // Basic JSON-RPC 2.0 notification: no id.
         #[derive(serde::Serialize)]
         struct Notification {
             jsonrpc: String,
@@ -126,8 +144,6 @@ impl McpClient {
             return Err(anyhow::anyhow!("MCP Server closed connection unexpectedly"));
         }
 
-        // dbg!(&line); // Debug
-        
         let response: JsonRpcResponse = serde_json::from_str(&line)
             .context(format!("Failed to parse MCP response: {}", line))?;
         Ok(response)

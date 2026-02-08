@@ -243,6 +243,7 @@ dependencies = [
  "hyper",
  "hyper-rustls",
  "hyper-util",
+ "ignore",
  "mime_guess",
  "reedline",
  "regex",

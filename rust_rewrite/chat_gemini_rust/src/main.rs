@@ -32,7 +32,7 @@ use codegemini::store::SimpleVectorStore;
 use codegemini::embeddings::EmbeddingGenerator;
 use ui::prompt::Repl;
 use ui::theme::create_skin;
-use ui::wizard; // Added
+use ui::wizard;
 use mcp::client::McpClient;
 use mcp::mapper::map_mcp_tools_to_gemini;
 
@@ -50,17 +50,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // 設定語言
     rust_i18n::set_locale(&settings.language);
 
-    // Initialize Auth with Wizard Fallback
+    // Initialize Auth
     let auth = match GoogleAuth::new(&settings).await {
         Ok(a) => Arc::new(a),
         Err(_) => {
-            // Auth failed (no API Key, no ADC, no Client Secret)
-            // Enter Wizard
             println!("{}", "未偵測到有效憑證，進入引導模式...".yellow());
             match wizard::run_onboarding() {
                 Ok(new_settings) => {
                     settings = new_settings;
-                    // Retry Auth
                     match GoogleAuth::new(&settings).await {
                         Ok(a) => Arc::new(a),
                         Err(e) => {
@@ -86,6 +83,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     // 初始化 CodeGemini 組件
     let mut vector_store = SimpleVectorStore::new();
+    // Load persisted index if exists
+    if let Ok(store) = SimpleVectorStore::load("codegemini_index.json") {
+        vector_store = store;
+        println!("Loaded CodeGemini index ({} docs).", vector_store.count());
+    }
+
     let embedding_generator = EmbeddingGenerator::new(&client);
 
     // 初始化 Context Caching
@@ -228,9 +231,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 session.add_user_message(&parsed.text);
 
                 // --- Agent Loop ---
-                // 重複執行直到沒有 Function Call
                 loop {
-                    // 1. 準備工具
                     let mut gemini_tools = Vec::new();
                     for (name, client) in mcp_clients.iter_mut() {
                          if let Ok(mcp_list) = client.list_tools() {
@@ -239,7 +240,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                     let tools_option = if gemini_tools.is_empty() { None } else { Some(gemini_tools) };
 
-                    // 2. 準備請求
                     let (request_contents, request_model) = if let Some(ref cache_name) = active_cache_name {
                         (vec![Content {
                             role: "user".to_string(),
@@ -250,7 +250,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         (full_contents, settings.model_name.clone())
                     };
                     
-                    // Thinking Config
                     let thinking_config = if let Some(budget) = parsed.thinking_budget {
                          if budget == 0 { None } else if budget == -1 { Some(ThinkingConfig { include_thoughts: true, thinking_budget_token_count: None }) } 
                          else { Some(ThinkingConfig { include_thoughts: true, thinking_budget_token_count: Some(budget as u32) }) }
@@ -283,7 +282,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     let mut function_calls: Vec<FunctionCall> = Vec::new();
                     let mut usage_meta = None;
 
-                    // 3. 呼叫 Gemini
                     match client.stream_generate_content(&request_model, &request).await {
                         Ok(mut stream) => {
                             while let Some(chunk_result) = stream.next().await {
@@ -328,7 +326,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                     println!();
 
-                    // 4. 處理 Function Call
                     if !function_calls.is_empty() {
                         let mut parts = Vec::new();
                         if !full_response_text.is_empty() {
